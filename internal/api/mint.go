@@ -24,7 +24,7 @@ type MintRequest struct {
 }
 
 // Mint godoc
-// @Summary      Mint tokens
+// @Summary      Mint tokens (DEVNET ONLY)
 // @Description  mint test tokens to a desired associated token account, or passed in token account
 // @Tags         mint
 // @Accept       json

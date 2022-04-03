@@ -55,7 +55,9 @@ func listenAndServe(
 	r.Use(loggingMiddleware())
 	r.GET("/", api.Ping)
 	r.GET("/ping", api.Ping)
-	r.GET("/mint", api.Mint)
+	if !configs.IsProd(config.Environment) {
+		r.GET("/mint", api.Mint)
+	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),

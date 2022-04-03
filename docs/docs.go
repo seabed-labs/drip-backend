@@ -54,7 +54,7 @@ const docTemplate = `{
                 "tags": [
                     "mint"
                 ],
-                "summary": "Mint tokens",
+                "summary": "Mint tokens (DEVNET ONLY)",
                 "parameters": [
                     {
                         "type": "string",
