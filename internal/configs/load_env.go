@@ -13,6 +13,11 @@ const PROJECT_DIR = "drip-backend"
 
 // LoadEnv loads env vars from .env at root of repo
 func GetProjectRoot() string {
+	rootOverride := os.Getenv(string(PROJECT_ROOT_OVERRIDE))
+	if rootOverride != "" {
+		log.WithField("override", rootOverride).Infof("override project root")
+		return rootOverride
+	}
 	re := regexp.MustCompile(`^(.*` + PROJECT_DIR + `)`)
 	cwd, _ := os.Getwd()
 	rootPath := re.Find([]byte(cwd))

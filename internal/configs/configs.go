@@ -26,7 +26,8 @@ const (
 type EnvVar string
 
 const (
-	ENV EnvVar = "ENV"
+	ENV                   EnvVar = "ENV"
+	PROJECT_ROOT_OVERRIDE EnvVar = "PROJECT_ROOT_OVERRIDE"
 )
 
 func NewConfig() (*Config, error) {
