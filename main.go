@@ -11,10 +11,6 @@ import (
 	"go.uber.org/fx"
 )
 
-func init() {
-	log.SetFormatter(&log.JSONFormatter{})
-}
-
 func main() {
 	fxApp := fx.New(
 		fx.Provide(
@@ -23,7 +19,7 @@ func main() {
 			api.NewHandler,
 		),
 		fx.Invoke(
-			func() { log.SetFormatter(&log.JSONFormatter{}) },
+			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			http.Run,
 		),
 		fx.NopLogger,

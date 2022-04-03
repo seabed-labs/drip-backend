@@ -1,0 +1,142 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Drip backend service.",
+        "title": "Drip Backend",
+        "contact": {
+            "name": "Dcaf Mocha",
+            "email": "dcafmocha@protonmail.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "paths": {
+        "/": {
+            "get": {
+                "description": "do ping",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.PingResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/mint": {
+            "get": {
+                "description": "mint test tokens to a desired associated token account, or passed in token account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mint"
+                ],
+                "summary": "Mint tokens",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Mint base58 pubkey.",
+                        "name": "mint",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Amount to be minted in base amount.",
+                        "name": "amount",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination wallet. If specificed, the associated token account will be used. If it does not exist, one will be created. One of destinationAccount or destinationWallet MUST be specified.",
+                        "name": "destinationWallet",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination token account. Must be initialized prior to calling. One of destinationAccount or destinationWallet MUST be specified.",
+                        "name": "destinationAccount",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.MintResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.MintResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.MintResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "description": "do ping",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.PingResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.MintResponse": {
+            "type": "object",
+            "properties": {
+                "Error": {
+                    "type": "string",
+                    "example": "failed to MintTo"
+                },
+                "txHash": {
+                    "type": "string",
+                    "example": "xAhK1NKqS2TbxNmWhGz7eEW5R1diJXydj2WL9N93xEP3uvqLCndPEcVLxfu5m9owuYgHaBWRVpXQDEpeNUTPQhB"
+                }
+            }
+        },
+        "api.PingResponse": {
+            "type": "object"
+        }
+    }
+}

@@ -1,13 +1,27 @@
 package api
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
+type PingResponse struct {
+	Message string `json:"message" example:"pong"`
+}
+
+// Ping godoc
+// @Summary  Health Check
+// @Schemes
+// @Description  do ping
+// @Tags         info
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  api.PingResponse
+// @Router       / [get]
+// @Router       /ping [get]
 func (h Handler) Ping(
-	w http.ResponseWriter,
-	r *http.Request,
+	c *gin.Context,
 ) {
-	json.NewEncoder(w).Encode("pong")
+	c.JSON(200, PingResponse{
+		Message: "pong",
+	})
 }
