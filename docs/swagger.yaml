@@ -2,13 +2,15 @@ definitions:
   api.MintResponse:
     properties:
       Error:
-        example: failed to MintTo
         type: string
       txHash:
-        example: xAhK1NKqS2TbxNmWhGz7eEW5R1diJXydj2WL9N93xEP3uvqLCndPEcVLxfu5m9owuYgHaBWRVpXQDEpeNUTPQhB
         type: string
     type: object
   api.PingResponse:
+    properties:
+      message:
+        example: pong
+        type: string
     type: object
 host: localhost:8080
 info:

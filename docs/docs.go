@@ -134,17 +134,21 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "Error": {
-                    "type": "string",
-                    "example": "failed to MintTo"
+                    "type": "string"
                 },
                 "txHash": {
-                    "type": "string",
-                    "example": "xAhK1NKqS2TbxNmWhGz7eEW5R1diJXydj2WL9N93xEP3uvqLCndPEcVLxfu5m9owuYgHaBWRVpXQDEpeNUTPQhB"
+                    "type": "string"
                 }
             }
         },
         "api.PingResponse": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "pong"
+                }
+            }
         }
     }
 }`
