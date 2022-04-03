@@ -1,5 +1,6 @@
 module github.com/dcaf-protocol/drip
 
+// +heroku goVersion go1.17
 go 1.17
 
 require go.elastic.co/apm v1.15.0
