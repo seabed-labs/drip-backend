@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Environment Environment `yaml:"environment" env:"ENV"`
 	Wallet      string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
-	Port        int         `yaml:"port"        env:"DRIP_BACKEND_PORT"`
+	Port        int         `yaml:"port"        env:"PORT"`
 }
 
 type Environment string
