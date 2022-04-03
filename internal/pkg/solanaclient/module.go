@@ -7,6 +7,7 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/gagliardetto/solana-go"
+	associatedtokenaccount "github.com/gagliardetto/solana-go/programs/associated-token-account"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/mr-tron/base58"
@@ -62,18 +63,44 @@ func NewSolanaClient(
 	return &solanaClient, nil
 }
 
-func (s *Solana) MintTo(
-	ctx context.Context, mint string, destination string,
+func (s *Solana) MintToAccount(
+	ctx context.Context, mint, destinationAccount string, amount uint64, instructions ...solana.Instruction,
 ) (string, error) {
 	txBuilder := token.NewMintToInstructionBuilder()
 	txBuilder.SetAuthorityAccount(s.Wallet.PublicKey())
-	txBuilder.SetDestinationAccount(solana.MustPublicKeyFromBase58(destination))
+	txBuilder.SetDestinationAccount(solana.MustPublicKeyFromBase58(destinationAccount))
 	txBuilder.SetMintAccount(solana.MustPublicKeyFromBase58(mint))
+	txBuilder.SetAmount(amount)
 	tx, err := txBuilder.ValidateAndBuild()
 	if err != nil {
 		return "", err
 	}
-	return s.signAndBroadcast(ctx, tx)
+	instructions = append(instructions, tx)
+	return s.signAndBroadcast(ctx, instructions...)
+}
+
+func (s *Solana) MintToWallet(
+	ctx context.Context, mint, destWallet string, amount uint64,
+) (string, error) {
+	mintPubKey := solana.MustPublicKeyFromBase58(mint)
+	destWalletPubKey := solana.MustPublicKeyFromBase58(destWallet)
+	destAccount, _, err := solana.FindAssociatedTokenAddress(destWalletPubKey, mintPubKey)
+	if err != nil {
+		return "", err
+	}
+	var instructions []solana.Instruction
+	if _, err := s.Client.GetTokenAccountBalance(ctx, destAccount, "confirmed"); err != nil {
+		txBuilder := associatedtokenaccount.NewCreateInstructionBuilder()
+		txBuilder.SetMint(mintPubKey)
+		txBuilder.SetPayer(s.Wallet.PublicKey())
+		txBuilder.SetWallet(destWalletPubKey)
+		instruction, err := txBuilder.ValidateAndBuild()
+		if err != nil {
+			return "", err
+		}
+		instructions = append(instructions, instruction)
+	}
+	return s.MintToAccount(ctx, mint, destAccount.String(), amount, instructions...)
 }
 
 func (s *Solana) signAndBroadcast(
@@ -114,7 +141,7 @@ func (s *Solana) signAndBroadcast(
 		return "", fmt.Errorf("failed to send transaction, err %s", err)
 	}
 	logFields["txHash"] = txHash
-	return "", nil
+	return txHash.String(), nil
 }
 
 func getURL(env configs.Environment) string {

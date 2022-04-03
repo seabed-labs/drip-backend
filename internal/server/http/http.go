@@ -38,10 +38,7 @@ func listenAndServe(
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 	r.HandleFunc("/", http.HandlerFunc(api.Ping)).Methods("GET")
-	r.HandleFunc("/mint/{publicKey}", http.HandlerFunc(api.GetMint)).Methods("GET")
-	// mux := http.NewServeMux()
-	// mux.Handle("/", logMiddleware(http.HandlerFunc(api.Ping)))
-	// mux.Handle("/mint/:address", logMiddleware(http.HandlerFunc(api.GetMint)))
+	r.HandleFunc("/mint", http.HandlerFunc(api.GetMint)).Methods("GET")
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: r,
