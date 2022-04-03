@@ -57,21 +57,6 @@ func listenAndServe(
 	r.GET("/ping", api.Ping)
 	r.GET("/mint", api.Mint)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	// srv := &http.Server{
-	// 	Addr:    ":8080",
-	// 	Handler: router,
-	// }
-	// go func() {
-	// 	// listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-	// 	if err := r.Run(fmt.Sprintf(":%d", config.Port)); err != nil {
-	// 		log.WithField("err", err.Error()).Fatalf("server listening")
-	// 	}
-	// }()
-	// return r
-	// r := mux.NewRouter()
-	// r.Use(loggingMiddleware)
-	// r.HandleFunc("/", http.HandlerFunc(api.Ping)).Methods("GET")
-	// r.HandleFunc("/mint", http.HandlerFunc(api.GetMint)).Methods("GET")
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: r,
