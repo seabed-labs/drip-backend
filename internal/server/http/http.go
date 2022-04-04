@@ -52,6 +52,7 @@ func listenAndServe(
 
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Host = getURL(config)
 	r.Use(loggingMiddleware())
 	r.GET("/", api.Ping)
 	r.GET("/ping", api.Ping)
@@ -93,5 +94,20 @@ func loggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.WithField("params", c.Params).Infof("handling %s", c.Request.RequestURI)
 		c.Next()
+	}
+}
+
+func getURL(config *configs.Config) string {
+	switch config.Environment {
+	case configs.DevnetEnv:
+		return "https://drip-backend-devnet.herokuapp.com"
+	case configs.MainnetEnv:
+		return "https://drip-backend-mainnet.herokuapp.com"
+	case configs.NilEnv:
+		fallthrough
+	case configs.LocalnetEnv:
+		fallthrough
+	default:
+		return fmt.Sprintf("localhost:%d", config.Port)
 	}
 }
