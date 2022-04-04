@@ -100,9 +100,9 @@ func loggingMiddleware() gin.HandlerFunc {
 func getURL(config *configs.Config) string {
 	switch config.Environment {
 	case configs.DevnetEnv:
-		return "https://drip-backend-devnet.herokuapp.com"
+		return "drip-backend-devnet.herokuapp.com"
 	case configs.MainnetEnv:
-		return "https://drip-backend-mainnet.herokuapp.com"
+		return "drip-backend-mainnet.herokuapp.com"
 	case configs.NilEnv:
 		fallthrough
 	case configs.LocalnetEnv:
