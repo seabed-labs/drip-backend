@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/internal/server"
+
 	"github.com/dcaf-protocol/drip/internal/api"
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/pkg/solanaclient"
-	"github.com/dcaf-protocol/drip/internal/server/http"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -20,7 +21,7 @@ func main() {
 		),
 		fx.Invoke(
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
-			http.Run,
+			server.Run,
 		),
 		fx.NopLogger,
 	)

@@ -1,0 +1,111 @@
+oepnapi: "3.0.0"
+info:
+  title: Drip Backend
+  description: Drip backend service.
+  contact:
+    email: dcafmocha@protonmail.com
+    name: Dcaf Mocha
+  version: 1.0.0
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+  - http
+
+paths:
+  /:
+    get:
+      summary: Health Check
+      description: Ping server.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/pingResponse'
+  /mint:
+    get:
+      summary: Mint tokens (DEVNET ONLY)
+      description: mint test tokens to a desired associated token account, or passed
+        in token account
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/mint"
+        - $ref: "#/components/parameters/wallet"
+        - $ref: "#/components/parameters/amount"
+      produces:
+        - application/json
+      tags:
+        - mint
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mintResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+components:
+  parameters:
+    mint:
+      name: mint
+      description: Mint base58 public key.
+      required: true
+      in: query
+      schema:
+        type: string
+    wallet:
+      name: wallet
+      description: Wallet base58 public key.
+      required: true
+      in: query
+      schema:
+        type: string
+    amount:
+      name: amount
+      description: Amount to be minted in base amount.
+      required: true
+      in: query
+      schema:
+        type: string
+  schemas:
+    mintResponse:
+      required:
+        - txHash
+      properties:
+        txHash:
+          type: string
+
+    pingResponse:
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+    errorResponse:
+      required:
+        - error
+      properties:
+        error:
+          type: string

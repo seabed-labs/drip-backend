@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"context"
@@ -6,71 +6,77 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcaf-protocol/drip/docs"
 	"github.com/dcaf-protocol/drip/internal/api"
 	"github.com/dcaf-protocol/drip/internal/configs"
+	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/fx"
 )
 
-// gin-swagger middleware
-// swagger embed files
-
-// @title           Drip Backend
-// @version         1.0
-// @description     Drip backend service.
-
-// @contact.name   Dcaf Mocha
-// @contact.email  dcafmocha@protonmail.com
-
-// @host  localhost:8080
 func Run(
 	lc fx.Lifecycle,
 	api *api.Handler,
 	config *configs.Config,
 ) {
-	var httpSrv http.Server
+	var httpSrv *http.Server
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			httpSrv = *listenAndServe(api, config)
-			return nil
+			var err error
+			httpSrv, err = listenAndServe(api, config)
+			return err
 		},
 		OnStop: func(ctx context.Context) error {
-			shutdown(&httpSrv)
-			return nil
+			return shutdown(httpSrv)
 		},
 	})
 }
 
 func listenAndServe(
-	api *api.Handler,
+	handler *api.Handler,
 	config *configs.Config,
-) *http.Server {
-
-	r := gin.Default()
-	docs.SwaggerInfo.BasePath = "/"
-	docs.SwaggerInfo.Host = getURL(config)
-	r.Use(loggingMiddleware())
-	r.GET("/", api.Ping)
-	r.GET("/ping", api.Ping)
-	if !configs.IsProd(config.Environment) {
-		r.GET("/mint", api.Mint)
+) (*http.Server, error) {
+	swaggerSpec, err := swagger.GetSwagger()
+	if err != nil {
+		return nil, err
 	}
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	swaggerSpec.Servers = nil
+
+	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
+
+	swagger.RegisterHandlers(e, handler)
+	// Use our validation middleware to check all requests against the
+	// OpenAPI schema.
+	//r.Use(middleware.OapiRequestValidator(swaggerSpec))
+	//swagger.RegisterHandlers()
+	// We now register our petStore above as the handler for the interface
+	//return nil, nil
+	//swagger, err := api.
+	//docs.SwaggerInfo.BasePath = "/"
+	//docs.SwaggerInfo.Host = getURL(config)
+	//r.Use(loggingMiddleware())
+	//r.GET("/", api.Ping)
+	//r.GET("/ping", api.Ping)
+	//if !configs.IsProd(config.Environment) {
+	//	r.GET("/mint", api.Mint)
+	//}
+	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: r,
+		Handler: e,
 	}
-	log.WithField("port", config.Port).Infof("starting server")
+	//log.WithField("port", config.Port).Infof("starting server")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.WithField("err", err.Error()).Fatalf("server listening")
 		}
 	}()
-	return srv
+	return srv, nil
 }
 
 func shutdown(

@@ -32,19 +32,22 @@ func NewSolanaClient(
 	resp, err := solClient.GetVersion(context.Background())
 	if err != nil {
 		log.WithError(err).Fatalf("failed to get client version info")
+
 		return nil, err
 	}
 	log.
 		WithFields(log.Fields{
 			"version": resp.SolanaCore,
-			"url":     url}).
+			"url":     url,
+		}).
 		Info("created solana client")
 
 	solanaClient.Client = &solClient
 	if configs.IsLocal(config.Environment) {
 		log.Infof("creating and funding test wallet")
 		solanaClient.Wallet = solana.NewWallet()
-		solClient.RequestAirdrop(context.Background(), solanaClient.Wallet.PublicKey(), solana.LAMPORTS_PER_SOL*1, "confirmed")
+		_, _ = solClient.RequestAirdrop(
+			context.Background(), solanaClient.Wallet.PublicKey(), solana.LAMPORTS_PER_SOL*1, "confirmed")
 	} else {
 		var accountBytes []byte
 		if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {
@@ -60,6 +63,7 @@ func NewSolanaClient(
 	log.
 		WithFields(logrus.Fields{"publicKey": solanaClient.Wallet.PublicKey()}).
 		Infof("loaded wallet")
+
 	return &solanaClient, nil
 }
 
@@ -76,6 +80,7 @@ func (s *Solana) MintToAccount(
 		return "", err
 	}
 	instructions = append(instructions, tx)
+
 	return s.signAndBroadcast(ctx, instructions...)
 }
 
@@ -100,6 +105,7 @@ func (s *Solana) MintToWallet(
 		}
 		instructions = append(instructions, instruction)
 	}
+
 	return s.MintToAccount(ctx, mint, destAccount.String(), amount, instructions...)
 }
 
@@ -127,6 +133,7 @@ func (s *Solana) signAndBroadcast(
 			if s.Wallet.PublicKey().Equals(key) {
 				return &s.Wallet.PrivateKey
 			}
+
 			return nil
 		},
 	); err != nil {
@@ -141,6 +148,7 @@ func (s *Solana) signAndBroadcast(
 		return "", fmt.Errorf("failed to send transaction, err %s", err)
 	}
 	logFields["txHash"] = txHash
+
 	return txHash.String(), nil
 }
 
