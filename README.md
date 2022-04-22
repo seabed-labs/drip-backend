@@ -27,18 +27,18 @@ go run main.go
 
 ## API Docs
 
-We use [swaggo](https://github.com/swaggo/swag) to code gen our api spec.
+We use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
 
 To install the swaggo cli run the following:
 
 ```bash
-go install github.com/swaggo/swag/cmd/swag@latest
+go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 ```
 
 To update the spec run the following from root:
 
 ```bash
-swag init -g internal/server/http/http.go
+ oapi-codegen ./docs/swagger.yml > pkg/swagger/generated.go
 ```
 
 API docs are viewable at `http://localhost:8080/swagger/index.html`.
