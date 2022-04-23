@@ -10,7 +10,6 @@ import (
 	"github.com/dcaf-protocol/drip/internal/configs"
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
-	"github.com/gin-gonic/gin"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
@@ -76,11 +75,4 @@ func shutdown(
 
 	log.Infof("server exited")
 	return nil
-}
-
-func loggingMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		log.WithField("params", c.Params).Infof("handling %s", c.Request.RequestURI)
-		c.Next()
-	}
 }
