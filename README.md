@@ -1,5 +1,8 @@
 # drip-backend
 
+<a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/maintainability"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/maintainability" /></a>
+<a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/test_coverage"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/test_coverage" /></a>
+
 ## Setup
 
 - install go
