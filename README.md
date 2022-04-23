@@ -32,8 +32,6 @@ go run main.go
 
 We use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
 
-To install the swaggo cli run the following:
-
 ```bash
 go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 ```
@@ -44,4 +42,4 @@ To update the spec run the following from root:
  oapi-codegen ./docs/swagger.yml > pkg/swagger/generated.go
 ```
 
-API docs are viewable at `http://localhost:8080/swagger/index.html`.
+API docs are viewable at `http://localhost:8080/swagger.json`.
