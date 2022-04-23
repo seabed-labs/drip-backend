@@ -32,9 +32,7 @@ const (
 
 func NewConfig() (*Config, error) {
 	LoadEnv()
-
 	environment := GetEnv(Environment(os.Getenv(string(ENV))))
-
 	configFileName := fmt.Sprintf("./internal/configs/%s.yaml", environment)
 	configFileName = fmt.Sprintf("%s/%s", GetProjectRoot(), configFileName)
 
@@ -48,14 +46,11 @@ func NewConfig() (*Config, error) {
 			log.WithError(err).Errorf("failed to close config file")
 		}
 	}(configFile)
-
 	var config Config
 	if err := cleanenv.ReadConfig(configFileName, &config); err != nil {
 		return nil, err
 	}
-
 	log.Info("loaded drip-backend configs")
-
 	return &config, nil
 }
 
