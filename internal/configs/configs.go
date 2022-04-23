@@ -43,7 +43,11 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer configFile.Close()
+	defer func(configFile *os.File) {
+		if err := configFile.Close(); err != nil {
+			log.WithError(err).Errorf("failed to close config file")
+		}
+	}(configFile)
 
 	var config Config
 	if err := cleanenv.ReadConfig(configFileName, &config); err != nil {
