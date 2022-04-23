@@ -15,7 +15,7 @@ type Handler struct {
 
 func NewHandler(
 	solanaClient *solanaclient.Solana,
-	config configs.Config,
+	config *configs.Config,
 ) *Handler {
 	return &Handler{
 		decoder:      schema.NewDecoder(),
