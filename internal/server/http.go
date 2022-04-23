@@ -48,29 +48,12 @@ func listenAndServe(
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
-
 	swagger.RegisterHandlers(e, handler)
-	// Use our validation middleware to check all requests against the
-	// OpenAPI schema.
-	//r.Use(middleware.OapiRequestValidator(swaggerSpec))
-	//swagger.RegisterHandlers()
-	// We now register our petStore above as the handler for the interface
-	//return nil, nil
-	//swagger, err := api.
-	//docs.SwaggerInfo.BasePath = "/"
-	//docs.SwaggerInfo.Host = getURL(config)
-	//r.Use(loggingMiddleware())
-	//r.GET("/", api.Ping)
-	//r.GET("/ping", api.Ping)
-	//if !configs.IsProd(config.Environment) {
-	//	r.GET("/mint", api.Mint)
-	//}
-	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: e,
 	}
-	//log.WithField("port", config.Port).Infof("starting server")
+	log.WithField("port", config.Port).Infof("starting server")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.WithField("err", err.Error()).Fatalf("server listening")
