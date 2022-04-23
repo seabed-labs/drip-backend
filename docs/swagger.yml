@@ -31,6 +31,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/pingResponse'
+
+  /swagger.json:
+    get:
+      summary: Swagger spec
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
   /mint:
     get:
       summary: Mint tokens (DEVNET ONLY)

@@ -44,7 +44,6 @@ func listenAndServe(
 		return nil, err
 	}
 	swaggerSpec.Servers = nil
-
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
@@ -83,20 +82,5 @@ func loggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.WithField("params", c.Params).Infof("handling %s", c.Request.RequestURI)
 		c.Next()
-	}
-}
-
-func getURL(config *configs.Config) string {
-	switch config.Environment {
-	case configs.DevnetEnv:
-		return "drip-backend-devnet.herokuapp.com"
-	case configs.MainnetEnv:
-		return "drip-backend-mainnet.herokuapp.com"
-	case configs.NilEnv:
-		fallthrough
-	case configs.LocalnetEnv:
-		fallthrough
-	default:
-		return fmt.Sprintf("localhost:%d", config.Port)
 	}
 }

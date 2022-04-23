@@ -135,6 +135,9 @@ type ClientInterface interface {
 
 	// GetMint request
 	GetMint(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSwaggerJson request
+	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -151,6 +154,18 @@ func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.
 
 func (c *Client) GetMint(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetMintRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSwaggerJsonRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -255,6 +270,33 @@ func NewGetMintRequest(server string, params *GetMintParams) (*http.Request, err
 	return req, nil
 }
 
+// NewGetSwaggerJsonRequest generates requests for GetSwaggerJson
+func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/swagger.json")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -303,6 +345,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetMint request
 	GetMintWithResponse(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*GetMintResponse, error)
+
+	// GetSwaggerJson request
+	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
 }
 
 type GetResponse struct {
@@ -351,6 +396,28 @@ func (r GetMintResponse) StatusCode() int {
 	return 0
 }
 
+type GetSwaggerJsonResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSwaggerJsonResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSwaggerJsonResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetWithResponse request returning *GetResponse
 func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error) {
 	rsp, err := c.Get(ctx, reqEditors...)
@@ -367,6 +434,15 @@ func (c *ClientWithResponses) GetMintWithResponse(ctx context.Context, params *G
 		return nil, err
 	}
 	return ParseGetMintResponse(rsp)
+}
+
+// GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
+func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error) {
+	rsp, err := c.GetSwaggerJson(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSwaggerJsonResponse(rsp)
 }
 
 // ParseGetResponse parses an HTTP response from a GetWithResponse call
@@ -435,6 +511,32 @@ func ParseGetMintResponse(rsp *http.Response) (*GetMintResponse, error) {
 	return response, nil
 }
 
+// ParseGetSwaggerJsonResponse parses an HTTP response from a GetSwaggerJsonWithResponse call
+func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSwaggerJsonResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Health Check
@@ -443,6 +545,9 @@ type ServerInterface interface {
 	// Mint tokens (DEVNET ONLY)
 	// (GET /mint)
 	GetMint(ctx echo.Context, params GetMintParams) error
+	// Swagger spec
+	// (GET /swagger.json)
+	GetSwaggerJson(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -491,6 +596,15 @@ func (w *ServerInterfaceWrapper) GetMint(ctx echo.Context) error {
 	return err
 }
 
+// GetSwaggerJson converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetSwaggerJson(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -521,23 +635,25 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.GET(baseURL+"/mint", wrapper.GetMint)
+	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8RVTW/TQBD9K6uBA0hWEj4qIZ+gtKIVtEUFgVCVw2Q9iZd4P7q7LkSV/zvasa3ENFFa",
-	"hOASJTOz783Om325BWm1s4ZMDJDfgkOPmiJ5/oXa1iambwUF6ZWLyhrI4Q3HRbRiRkIrE6kQyogZBhLt",
-	"mRFkoFLpdU1+BRkY1AR5j5iBp+taeSogj76mDIIsSWOiiiuXKkP0yiygaTJIDHebOFMmMuXBK+HqWaWk",
-	"WNJqFzFjPIz2B1YVbSH+yvH7U3c4DyFv+iTLQN5bf0nBWROIVfLWkY+K1untV1gzXnVl026eu+HizxMM",
-	"5X68ri4BOmUWuwE1hYAL2o/YF055ANKaUOsEcQXoXKUkJgHG34M1ME2jntuEKa2JKFkn0qgqyKGQONdW",
-	"lvjaeRutSeGRtHqtyZHEuThLJdBkv+l75JUTM5RLMoUI5G+UpKRtVLGiPn/Y5iGDG/KhPfhsNBlNEp4l",
-	"Z9ApyOEFhzKwjroIZOAwljyZcfpYtDu277rDHj8qs+DeyI9aeM/lpwXk8I63zXlb1HI3oO8E406eTyb9",
-	"LKl9bHeO5LcbC/vY0xxyeDRe28e429jxYBtYymHvF+9Z+VBrjX4FOZwQVrEUb0uSyzRnXHDTLPA0lY57",
-	"B/ijWaXDIlJIhrUkE5JvoSgopL0TGIKVCpOFcVqglMmjMmG9cBhC622D3LaJn7UGs2mgV9vntC5p79Vk",
-	"e+s6C7lHZWewzfQ/LsDAX3YsQAYv/yLj0CG3UB5iIS7puqaQpggH/5L71ETyBivxid+rOGYjHj4B/jPr",
-	"1vPJ0fGX8+PP4uL8w7enG++Bl6X1xn3Scm9tuozRwbT5FQAA//8oxKG26QcAAA==",
+	"H4sIAAAAAAAC/8RVW2/TTBD9K6v5vgeQrCRcKiE/QWlFC7RFLQKhKg+T9cText7dzq5bosr/He3aVmqa",
+	"KCni8hIlO2fPmZ3LyR1IU1mjSXsH6R1YZKzIE8dfWJla+/AtIydZWa+MhhTexHPhjZiRqJT2lAmlxQwd",
+	"ifbOCBJQAXpdEy8hAY0VQdozJsB0XSumDFLPNSXgZEEVBim/tAHpPCudQ9MkEBQeJnGitI+Se6+ErWel",
+	"kmJBy03CkeNxsrdYlrRG+Gs8312643mMeNMHYxuI2fA5OWu0o9glNpbYK1qF1z9hpXjZwaZdPTfT+e9H",
+	"6IrtfB0uEFql882EFTmHOW1n7IHTWABptKurQHEJaG2pJIYGjK+c0TANpZ6bwCmN9ihjn6hCVUIKmcR5",
+	"ZWSBry0bb3Q4HklTrXpyIHEuTgIEmuSn/h6wsmKGckE6E474RkkKvfXKl9TH99s4JHBD7NqLz0aT0STw",
+	"GbIarYIUXsSjBIyl7gQSsOiLWJlx+MjbGdv23GGOn5TOY27Eo5aeI/w4gxTexWmzbLJabibkrmExk+eT",
+	"SV9LapftwZX07t7A/s80hxT+G6/sY9xN7HgwDbGVw9zPPsTOu7qqkJeQwhFh6QvxtiC5CHXGPCYdGzwN",
+	"0HHvAL9Uq3BZeHLBsBakXfAtFBm5MHcCnTNSYbCwGBYoZfCoRBgWFp1rvW0QW1fxk9Zg7hvo5fo6rSDt",
+	"u5pkK66zkB2QncE20384AAN/2TAACbz8jYpDh1wjuY+ZOKfrmlyoIuz9Te1j7Yk1luIi7qs4jEY8XIH4",
+	"Z9aN55ODwy+nh5/F2enHb0/v7UMclnYf3C3mOfGoz7TbiwdDedHi3gfYHx6IztrN7Iqk32ntu+SEsyTX",
+	"rH2zPeGo3oYL7y1Mmx8BAAD//+uVdNbQCAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
