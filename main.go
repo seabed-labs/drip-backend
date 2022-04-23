@@ -13,7 +13,18 @@ import (
 )
 
 func main() {
-	fxApp := fx.New(
+	fxApp := fx.New(getDependencies()...)
+	if err := fxApp.Start(context.Background()); err != nil {
+		log.WithError(err).Fatalf("failed to start drip backend")
+	}
+	log.Info("starting drip backend")
+	sig := <-fxApp.Done()
+	log.WithFields(log.Fields{"signal": sig}).
+		Infof("received exit signal, stoping server")
+}
+
+func getDependencies() []fx.Option {
+	return []fx.Option{
 		fx.Provide(
 			configs.NewConfig,
 			solanaclient.NewSolanaClient,
@@ -24,13 +35,5 @@ func main() {
 			server.Run,
 		),
 		fx.NopLogger,
-	)
-	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start drip backend")
 	}
-	log.Info("starting drip backend")
-	sig := <-fxApp.Done()
-	log.WithFields(log.Fields{"signal": sig}).
-		Infof("received exit signal, stoping server")
-
 }
