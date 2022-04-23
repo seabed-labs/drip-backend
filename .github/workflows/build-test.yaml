@@ -84,4 +84,4 @@ jobs:
 
       - name: Code Coverage After Build
         if: ${{ github.event_name != 'pull_request' }}
-        run: cc-test-reporter after-build --prefix github.com/Dcaf-Protocol/drip-backend --exit-code $?
+        run: cc-test-reporter after-build --prefix github.com/dcaf-protocol/drip --exit-code $?
