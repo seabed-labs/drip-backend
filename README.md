@@ -2,12 +2,12 @@
 
 <a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/maintainability"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/maintainability" /></a>
 <a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/test_coverage"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/test_coverage" /></a>
-<a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy.yaml/badge.svg" /></a>
-
+<a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy.yaml/badge.svg?branch=main" /></a>
+<a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml/badge.svg?branch=main" /></a>
 ## Setup
 
 - install go
-- install all pacakges
+- install all packages
 
 ```bash
 go get -u ./...
