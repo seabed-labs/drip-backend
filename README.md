@@ -26,7 +26,7 @@ DRIP_BACKEND_WALLET="[some byte array]"
 - run the server
 
 ```bash
-go run main.go
+ENV=DEVNET go run main.go
 ```
 
 ## API Docs
