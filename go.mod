@@ -6,6 +6,7 @@ go 1.18
 require (
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/getkin/kin-openapi v0.94.0
+	github.com/golang/mock v1.4.3
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/test-go/testify v1.1.4
 )
