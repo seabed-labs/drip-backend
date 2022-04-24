@@ -15,7 +15,7 @@ import (
 func (h Handler) GetMint(
 	c echo.Context, params Swagger.GetMintParams,
 ) error {
-	resp, err := h.solanaClient.Client.GetAccountInfo(c.Request().Context(), solana.MustPublicKeyFromBase58(string(params.Mint)))
+	resp, err := h.solanaClient.GetAccountInfo(c.Request().Context(), solana.MustPublicKeyFromBase58(string(params.Mint)))
 	if err != nil {
 		errMsg := "failed to get account info"
 		logrus.WithError(err).Errorf(errMsg)
@@ -27,8 +27,8 @@ func (h Handler) GetMint(
 		logrus.WithError(err).Errorf(errMsg)
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: errMsg})
 	}
-	if *mint.MintAuthority != h.solanaClient.Wallet.PublicKey() {
-		err := fmt.Errorf("invalid mint, %s is not MintAuthority", h.solanaClient.Wallet.PublicKey())
+	if *mint.MintAuthority != h.solanaClient.GetWalletPubKey() {
+		err := fmt.Errorf("invalid mint, %s is not MintAuthority", h.solanaClient.GetWalletPubKey())
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: err.Error()})
 	}
 	txHash, err := h.solanaClient.MintToWallet(c.Request().Context(), string(params.Mint), string(params.Wallet), 1)

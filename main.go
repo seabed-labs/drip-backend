@@ -27,7 +27,7 @@ func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
 			configs.NewConfig,
-			solanaclient.NewSolanaClient,
+			solanaclient.CreateSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(

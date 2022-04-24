@@ -8,13 +8,13 @@ import (
 
 type Handler struct {
 	decoder      *schema.Decoder
-	solanaClient *solanaclient.Solana
+	solanaClient solanaclient.Solana
 	env          configs.Environment
 	port         int
 }
 
 func NewHandler(
-	solanaClient *solanaclient.Solana,
+	solanaClient solanaclient.Solana,
 	config *configs.Config,
 ) *Handler {
 	return &Handler{
