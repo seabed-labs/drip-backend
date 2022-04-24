@@ -48,7 +48,7 @@ func TestHandler_PostMint(t *testing.T) {
 		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"invalid amount, must be uint64\"}\n", rec.Body.String())
+		assert.Equal(t, "{\"error\":\"invalid amount, must be float64\"}\n", rec.Body.String())
 	})
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
