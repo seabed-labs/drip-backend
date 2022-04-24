@@ -3,9 +3,11 @@ package api
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
@@ -20,11 +22,34 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
-func TestHandler_GetMint(t *testing.T) {
+func TestHandler_PostMint(t *testing.T) {
 	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
 	e := echo.New()
+
+	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
+		m := client.NewMockSolana(ctrl)
+		h := NewHandler(m, &configs.Config{
+			Environment: configs.DevnetEnv,
+			Wallet:      privKey,
+		})
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "xyz",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		err = h.PostMint(c)
+		assert.NoError(t, err)
+		assert.Equal(t, rec.Code, http.StatusInternalServerError)
+		assert.Equal(t, "{\"error\":\"invalid amount, must be uint64\"}\n", rec.Body.String())
+	})
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
 		m := client.NewMockSolana(ctrl)
@@ -32,22 +57,23 @@ func TestHandler_GetMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		})
-		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "100",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-
 		m.
 			EXPECT().
 			GetAccountInfo(gomock.Any(), gomock.Any()).
 			Return(nil, fmt.Errorf("some error")).
 			AnyTimes()
 
-		err := h.GetMint(c, Swagger.GetMintParams{
-			Mint:   Swagger.Mint(mint),
-			Wallet: Swagger.Wallet(solana.NewWallet().PublicKey().String()),
-			Amount: "100",
-		})
+		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
 		assert.Equal(t, "{\"error\":\"failed to get account info\"}\n", rec.Body.String())
@@ -59,7 +85,13 @@ func TestHandler_GetMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		})
-		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "100",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -80,11 +112,7 @@ func TestHandler_GetMint(t *testing.T) {
 			}, nil).
 			AnyTimes()
 
-		err = h.GetMint(c, Swagger.GetMintParams{
-			Mint:   Swagger.Mint(mint),
-			Wallet: Swagger.Wallet(solana.NewWallet().PublicKey().String()),
-			Amount: "100",
-		})
+		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
 		assert.Equal(t, "{\"error\":\"failed to decode mint\"}\n", rec.Body.String())
@@ -96,7 +124,13 @@ func TestHandler_GetMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		})
-		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "100",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -132,11 +166,7 @@ func TestHandler_GetMint(t *testing.T) {
 			}, nil).
 			AnyTimes()
 
-		err = h.GetMint(c, Swagger.GetMintParams{
-			Mint:   Swagger.Mint(mint),
-			Wallet: Swagger.Wallet(solana.NewWallet().PublicKey().String()),
-			Amount: "100",
-		})
+		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
 		assert.Equal(t, "{\"error\":\"invalid mint, J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer is not MintAuthority\"}\n", rec.Body.String())
@@ -148,7 +178,13 @@ func TestHandler_GetMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		})
-		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "100",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -189,11 +225,7 @@ func TestHandler_GetMint(t *testing.T) {
 			Return("", fmt.Errorf("some error")).
 			AnyTimes()
 
-		err = h.GetMint(c, Swagger.GetMintParams{
-			Mint:   Swagger.Mint(mint),
-			Wallet: Swagger.Wallet(solana.NewWallet().PublicKey().String()),
-			Amount: "100",
-		})
+		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
 		assert.Equal(t, "{\"error\":\"failed to mint\"}\n", rec.Body.String())
@@ -205,7 +237,13 @@ func TestHandler_GetMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		})
-		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		reqBody, err := json.Marshal(Swagger.MintRequest{
+			Amount: "100",
+			Mint:   mint,
+			Wallet: solana.NewWallet().PublicKey().String(),
+		})
+		assert.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -246,11 +284,7 @@ func TestHandler_GetMint(t *testing.T) {
 			Return("some tx hash", nil).
 			AnyTimes()
 
-		err = h.GetMint(c, Swagger.GetMintParams{
-			Mint:   Swagger.Mint(mint),
-			Wallet: Swagger.Wallet(solana.NewWallet().PublicKey().String()),
-			Amount: "100",
-		})
+		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusOK)
 		assert.Equal(t, "{\"txHash\":\"some tx hash\"}\n", rec.Body.String())

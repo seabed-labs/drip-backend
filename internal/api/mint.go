@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	bin "github.com/gagliardetto/binary"
@@ -12,10 +13,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetMint(
-	c echo.Context, params Swagger.GetMintParams,
+func (h Handler) PostMint(
+	c echo.Context,
 ) error {
-	resp, err := h.solanaClient.GetAccountInfo(c.Request().Context(), solana.MustPublicKeyFromBase58(string(params.Mint)))
+	var mintRequest Swagger.MintRequest
+	if err := c.Bind(&mintRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid request body"})
+	}
+	amount, err := strconv.ParseUint(mintRequest.Amount, 10, 64)
+	if err != nil {
+		errMsg := "invalid amount, must be uint64"
+		logrus.WithError(err).Errorf(errMsg)
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: errMsg})
+	}
+	resp, err := h.solanaClient.GetAccountInfo(c.Request().Context(), solana.MustPublicKeyFromBase58(mintRequest.Mint))
 	if err != nil {
 		errMsg := "failed to get account info"
 		logrus.WithError(err).Errorf(errMsg)
@@ -31,7 +42,7 @@ func (h Handler) GetMint(
 		err := fmt.Errorf("invalid mint, %s is not MintAuthority", h.solanaClient.GetWalletPubKey())
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: err.Error()})
 	}
-	txHash, err := h.solanaClient.MintToWallet(c.Request().Context(), string(params.Mint), string(params.Wallet), 1)
+	txHash, err := h.solanaClient.MintToWallet(c.Request().Context(), mintRequest.Mint, mintRequest.Wallet, amount)
 	if err != nil {
 		errMsg := "failed to mint"
 		logrus.WithError(err).Errorf(errMsg)

@@ -10,13 +10,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
 
-	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +24,13 @@ import (
 // ErrorResponse defines model for errorResponse.
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+// MintRequest defines model for mintRequest.
+type MintRequest struct {
+	Amount string `json:"amount"`
+	Mint   string `json:"mint"`
+	Wallet string `json:"wallet"`
 }
 
 // MintResponse defines model for mintResponse.
@@ -36,26 +43,11 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
-// Amount defines model for amount.
-type Amount string
+// PostMintJSONBody defines parameters for PostMint.
+type PostMintJSONBody MintRequest
 
-// Mint defines model for mint.
-type Mint string
-
-// Wallet defines model for wallet.
-type Wallet string
-
-// GetMintParams defines parameters for GetMint.
-type GetMintParams struct {
-	// Mint base58 public key.
-	Mint Mint `json:"mint"`
-
-	// Wallet base58 public key.
-	Wallet Wallet `json:"wallet"`
-
-	// Amount to be minted in base amount.
-	Amount Amount `json:"amount"`
-}
+// PostMintJSONRequestBody defines body for PostMint for application/json ContentType.
+type PostMintJSONRequestBody PostMintJSONBody
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -133,8 +125,10 @@ type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetMint request
-	GetMint(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostMint request with any body
+	PostMintWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -152,8 +146,20 @@ func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetMint(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetMintRequest(c.Server, params)
+func (c *Client) PostMintWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMintRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMintRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -203,8 +209,19 @@ func NewGetRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewGetMintRequest generates requests for GetMint
-func NewGetMintRequest(server string, params *GetMintParams) (*http.Request, error) {
+// NewPostMintRequest calls the generic PostMint builder with application/json body
+func NewPostMintRequest(server string, body PostMintJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMintRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMintRequestWithBody generates requests for PostMint with any type of body
+func NewPostMintRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -222,50 +239,12 @@ func NewGetMintRequest(server string, params *GetMintParams) (*http.Request, err
 		return nil, err
 	}
 
-	queryValues := queryURL.Query()
-
-	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "mint", runtime.ParamLocationQuery, params.Mint); err != nil {
-		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-		return nil, err
-	} else {
-		for k, v := range parsed {
-			for _, v2 := range v {
-				queryValues.Add(k, v2)
-			}
-		}
-	}
-
-	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
-		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-		return nil, err
-	} else {
-		for k, v := range parsed {
-			for _, v2 := range v {
-				queryValues.Add(k, v2)
-			}
-		}
-	}
-
-	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "amount", runtime.ParamLocationQuery, params.Amount); err != nil {
-		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-		return nil, err
-	} else {
-		for k, v := range parsed {
-			for _, v2 := range v {
-				queryValues.Add(k, v2)
-			}
-		}
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -343,8 +322,10 @@ type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
 
-	// GetMint request
-	GetMintWithResponse(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*GetMintResponse, error)
+	// PostMint request with any body
+	PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
+
+	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
@@ -372,7 +353,7 @@ func (r GetResponse) StatusCode() int {
 	return 0
 }
 
-type GetMintResponse struct {
+type PostMintResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *MintResponse
@@ -381,7 +362,7 @@ type GetMintResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetMintResponse) Status() string {
+func (r PostMintResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -389,7 +370,7 @@ func (r GetMintResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetMintResponse) StatusCode() int {
+func (r PostMintResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -427,13 +408,21 @@ func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ..
 	return ParseGetResponse(rsp)
 }
 
-// GetMintWithResponse request returning *GetMintResponse
-func (c *ClientWithResponses) GetMintWithResponse(ctx context.Context, params *GetMintParams, reqEditors ...RequestEditorFn) (*GetMintResponse, error) {
-	rsp, err := c.GetMint(ctx, params, reqEditors...)
+// PostMintWithBodyWithResponse request with arbitrary body returning *PostMintResponse
+func (c *ClientWithResponses) PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error) {
+	rsp, err := c.PostMintWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetMintResponse(rsp)
+	return ParsePostMintResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error) {
+	rsp, err := c.PostMint(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMintResponse(rsp)
 }
 
 // GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
@@ -471,15 +460,15 @@ func ParseGetResponse(rsp *http.Response) (*GetResponse, error) {
 	return response, nil
 }
 
-// ParseGetMintResponse parses an HTTP response from a GetMintWithResponse call
-func ParseGetMintResponse(rsp *http.Response) (*GetMintResponse, error) {
+// ParsePostMintResponse parses an HTTP response from a PostMintWithResponse call
+func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetMintResponse{
+	response := &PostMintResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -543,8 +532,8 @@ type ServerInterface interface {
 	// (GET /)
 	Get(ctx echo.Context) error
 	// Mint tokens (DEVNET ONLY)
-	// (GET /mint)
-	GetMint(ctx echo.Context, params GetMintParams) error
+	// (POST /mint)
+	PostMint(ctx echo.Context) error
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
@@ -564,35 +553,12 @@ func (w *ServerInterfaceWrapper) Get(ctx echo.Context) error {
 	return err
 }
 
-// GetMint converts echo context to params.
-func (w *ServerInterfaceWrapper) GetMint(ctx echo.Context) error {
+// PostMint converts echo context to params.
+func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 	var err error
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetMintParams
-	// ------------- Required query parameter "mint" -------------
-
-	err = runtime.BindQueryParameter("form", true, true, "mint", ctx.QueryParams(), &params.Mint)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter mint: %s", err))
-	}
-
-	// ------------- Required query parameter "wallet" -------------
-
-	err = runtime.BindQueryParameter("form", true, true, "wallet", ctx.QueryParams(), &params.Wallet)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter wallet: %s", err))
-	}
-
-	// ------------- Required query parameter "amount" -------------
-
-	err = runtime.BindQueryParameter("form", true, true, "amount", ctx.QueryParams(), &params.Amount)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter amount: %s", err))
-	}
-
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetMint(ctx, params)
+	err = w.Handler.PostMint(ctx)
 	return err
 }
 
@@ -634,7 +600,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/", wrapper.Get)
-	router.GET(baseURL+"/mint", wrapper.GetMint)
+	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 
 }
@@ -642,18 +608,17 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/8RVW2/TTBD9K6v5vgeQrCRcKiE/QWlFC7RFLQKhKg+T9cText7dzq5bosr/He3aVmqa",
-	"KCni8hIlO2fPmZ3LyR1IU1mjSXsH6R1YZKzIE8dfWJla+/AtIydZWa+MhhTexHPhjZiRqJT2lAmlxQwd",
-	"ifbOCBJQAXpdEy8hAY0VQdozJsB0XSumDFLPNSXgZEEVBim/tAHpPCudQ9MkEBQeJnGitI+Se6+ErWel",
-	"kmJBy03CkeNxsrdYlrRG+Gs8312643mMeNMHYxuI2fA5OWu0o9glNpbYK1qF1z9hpXjZwaZdPTfT+e9H",
-	"6IrtfB0uEFql882EFTmHOW1n7IHTWABptKurQHEJaG2pJIYGjK+c0TANpZ6bwCmN9ihjn6hCVUIKmcR5",
-	"ZWSBry0bb3Q4HklTrXpyIHEuTgIEmuSn/h6wsmKGckE6E474RkkKvfXKl9TH99s4JHBD7NqLz0aT0STw",
-	"GbIarYIUXsSjBIyl7gQSsOiLWJlx+MjbGdv23GGOn5TOY27Eo5aeI/w4gxTexWmzbLJabibkrmExk+eT",
-	"SV9LapftwZX07t7A/s80hxT+G6/sY9xN7HgwDbGVw9zPPsTOu7qqkJeQwhFh6QvxtiC5CHXGPCYdGzwN",
-	"0HHvAL9Uq3BZeHLBsBakXfAtFBm5MHcCnTNSYbCwGBYoZfCoRBgWFp1rvW0QW1fxk9Zg7hvo5fo6rSDt",
-	"u5pkK66zkB2QncE20384AAN/2TAACbz8jYpDh1wjuY+ZOKfrmlyoIuz9Te1j7Yk1luIi7qs4jEY8XIH4",
-	"Z9aN55ODwy+nh5/F2enHb0/v7UMclnYf3C3mOfGoz7TbiwdDedHi3gfYHx6IztrN7Iqk32ntu+SEsyTX",
-	"rH2zPeGo3oYL7y1Mmx8BAAD//+uVdNbQCAAA",
+	"H4sIAAAAAAAC/7xVXU/bShD9K6u59+FeyUrSrxc/VRRUaMuHoKpUoTws64m9YO8sO2MoQv7v1a4dwEqi",
+	"oAr6Elk7s2fOnpkzuQdDjSeHThjye2BTYaPTJ4ZA4RTZk2OMBz6QxyAWH8PxQ+48Qg4swboSui6DgNet",
+	"DVhAfj6kzbsMGuvkFK9bZFlF0w21TtbA9ffWBm51XaNsp5AAHtKzZa1HTpueKL/2NVfbCwx5EdBbV24G",
+	"bJBZl/gMykPivIsRQ47bJkKcg/a+tkaLJTe9ZHIwz8C6BUVMQ060SYpgo20NORRGLxoylf7oAwm5eDwx",
+	"1EAGTjeRwa7RC3UYU6KmBbIJ1kf4GAvWqwttrtAVijHcWIMTyECs1LiM7/RxyOAGA/cX30xmk1nEI/RO",
+	"ews5vEtHGZDH4QQy8FqqpMw0/pR9N7c9d8zxxLoyccMw6eFDSj8oIIfPqeE+UNGazYBhaFhi8nY2W2qJ",
+	"/eCtXHnwSfz6N+ACcvhn+mik6eCi6WgaUivH3I+/ps5z2zQ63EEO+6hrqdSnCs1V1FmXiXRq8DymTpdu",
+	"8MR/IFa8rQRZlNAVOlZCSqsCOQ6e0sxkrBYs+rDSxkSrZIqC8poZC2XdOLYi+QmxHPaO26572gY7VNy9",
+	"mORPt8waxU9Q0puL+EQlFSoWCghP7Sehxe4Vp2K0dDZMRQbvX7DieJWvKbmjC/WgWgYf/mbtAycYnK7V",
+	"WTKx2kv/GGNfHKa57Uf2v929H0d739Xx0bef/z8xSXJGbxK+1WWJYbJkOiyWld1w1ud9iWmvvCaGfU8X",
+	"l2jkWbtgIKfYo1mzC7rthFP1PlyJeJh3vwMAAP//WlG3ZO8HAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

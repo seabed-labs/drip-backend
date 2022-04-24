@@ -47,16 +47,19 @@ paths:
               schema:
                 type: object
   /mint:
-    get:
+    post:
       summary: Mint tokens (DEVNET ONLY)
       description: mint test tokens to a desired associated token account, or passed
         in token account
       consumes:
         - application/json
-      parameters:
-        - $ref: "#/components/parameters/mint"
-        - $ref: "#/components/parameters/wallet"
-        - $ref: "#/components/parameters/amount"
+      requestBody:
+        description: Pet to add to the store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/mintRequest'
       produces:
         - application/json
       tags:
@@ -104,6 +107,18 @@ components:
       schema:
         type: string
   schemas:
+    mintRequest:
+      required:
+        - mint
+        - wallet
+        - amount
+      properties:
+        mint:
+          type: string
+        wallet:
+          type: string
+        amount:
+          type: string
     mintResponse:
       required:
         - txHash
