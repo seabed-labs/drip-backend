@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -20,9 +21,9 @@ func (h Handler) PostMint(
 	if err := c.Bind(&mintRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid request body"})
 	}
-	amount, err := strconv.ParseUint(mintRequest.Amount, 10, 64)
+	amount, err := strconv.ParseFloat(mintRequest.Amount, 64)
 	if err != nil {
-		errMsg := "invalid amount, must be uint64"
+		errMsg := "invalid amount, must be float64"
 		logrus.WithError(err).Errorf(errMsg)
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: errMsg})
 	}
@@ -42,11 +43,18 @@ func (h Handler) PostMint(
 		err := fmt.Errorf("invalid mint, %s is not MintAuthority", h.solanaClient.GetWalletPubKey())
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: err.Error()})
 	}
-	txHash, err := h.solanaClient.MintToWallet(c.Request().Context(), mintRequest.Mint, mintRequest.Wallet, amount)
+	txHash, err := h.solanaClient.MintToWallet(c.Request().Context(), mintRequest.Mint, mintRequest.Wallet, getBaseAmountWithDecimals(amount, mint.Decimals))
 	if err != nil {
 		errMsg := "failed to mint"
 		logrus.WithError(err).Errorf(errMsg)
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: errMsg})
 	}
 	return c.JSON(http.StatusOK, Swagger.MintResponse{TxHash: txHash})
+}
+
+func getBaseAmountWithDecimals(amount float64, decimals uint8) uint64 {
+	if decimals <= 1 {
+		return uint64(amount)
+	}
+	return uint64(amount * math.Pow(10, float64(decimals)))
 }

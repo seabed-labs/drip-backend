@@ -119,6 +119,7 @@ components:
           type: string
         amount:
           type: string
+
     mintResponse:
       required:
         - txHash
