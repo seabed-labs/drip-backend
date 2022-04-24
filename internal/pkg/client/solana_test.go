@@ -1,4 +1,4 @@
-package solanaclient
+package client
 
 import (
 	"context"
@@ -25,15 +25,11 @@ func TestSolanaClient(t *testing.T) {
 		context.Background(), client.GetWalletPubKey(), 100000000, "confirmed")
 	assert.NoError(t, err)
 
-	t.Run("should GetWalletPubKey", func(t *testing.T) {
+	t.Run("GetWalletPubKey should return public key", func(t *testing.T) {
 		assert.Equal(t, client.GetWalletPubKey().String(), "J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")
 	})
 
-	t.Run("should GetWalletPubKey", func(t *testing.T) {
-		assert.Equal(t, client.GetWalletPubKey().String(), "J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")
-	})
-
-	t.Run("should getWalletPrivKey", func(t *testing.T) {
+	t.Run("getWalletPrivKey should return private key", func(t *testing.T) {
 		assert.Equal(t, client.getWalletPrivKey().String(),
 			"2v28DUBnjz9eGHbgMH4fVzixzpyP8SfdBVmo19vdhgzDddqnD4HMNiFgNKtQsKErEfhnRYKFY9k4WbaGyyFKQzai")
 	})
@@ -44,19 +40,26 @@ func TestSolanaClient(t *testing.T) {
 		assert.NotEmpty(t, versionResponse.FeatureSet)
 	})
 
-	t.Run("should mintToWallet without token account", func(t *testing.T) {
+	t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
 		destWallet := solana.NewWallet()
 		txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, txHash)
 	})
 
-	t.Run("should mintToWallet with token account", func(t *testing.T) {
+	t.Run("mintToWallet should mint when wallet has a token account", func(t *testing.T) {
 		destWallet := solana.NewWallet()
 		_, err = client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
 		assert.NoError(t, err)
 		txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, txHash)
+	})
+
+	t.Run("getURL should return correct RPC url", func(t *testing.T) {
+		assert.Equal(t, getURL(configs.NilEnv), rpc.LocalNet_RPC)
+		assert.Equal(t, getURL(configs.LocalnetEnv), rpc.LocalNet_RPC)
+		assert.Equal(t, getURL(configs.DevnetEnv), rpc.DevNet_RPC)
+		assert.Equal(t, getURL(configs.MainnetEnv), rpc.MainNetBeta_RPC)
 	})
 }

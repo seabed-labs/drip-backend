@@ -26,7 +26,7 @@ func TestIsLocal(t *testing.T) {
 }
 
 func TestIsProd(t *testing.T) {
-	assert.Equal(t, IsProd(MainnetEnv), true)
-	assert.Equal(t, IsProd(LocalnetEnv), false)
-	assert.Equal(t, IsProd("random"), false)
+	assert.Equal(t, IsMainnet(MainnetEnv), true)
+	assert.Equal(t, IsMainnet(LocalnetEnv), false)
+	assert.Equal(t, IsMainnet("random"), false)
 }

@@ -62,7 +62,7 @@ func IsDev(env Environment) bool {
 	return env == DevnetEnv
 }
 
-func IsProd(env Environment) bool {
+func IsMainnet(env Environment) bool {
 	return env == MainnetEnv
 }
 

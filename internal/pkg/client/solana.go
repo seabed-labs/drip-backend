@@ -1,4 +1,4 @@
-package solanaclient
+package client
 
 import (
 	"context"
@@ -30,25 +30,25 @@ type Solana interface {
 func CreateSolanaClient(
 	config *configs.Config,
 ) (Solana, error) {
-	return createSolanaImplClient(config)
+	return createsolanaImplClient(config)
 }
 
-type SolanaImpl struct {
+type solanaImpl struct {
 	client *rpc.Client
 	wallet *solana.Wallet
 }
 
-func createSolanaImplClient(
+func createsolanaImplClient(
 	config *configs.Config,
-) (SolanaImpl, error) {
+) (solanaImpl, error) {
 	url := getURL(config.Environment)
-	solanaClient := SolanaImpl{
+	solanaClient := solanaImpl{
 		client: rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
 		log.WithError(err).Fatalf("failed to get client version info")
-		return SolanaImpl{}, err
+		return solanaImpl{}, err
 	}
 	log.
 		WithFields(log.Fields{
@@ -59,12 +59,12 @@ func createSolanaImplClient(
 
 	var accountBytes []byte
 	if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {
-		return SolanaImpl{}, err
+		return solanaImpl{}, err
 	}
 	priv := base58.Encode(accountBytes)
 	solWallet, err := solana.WalletFromPrivateKeyBase58(priv)
 	if err != nil {
-		return SolanaImpl{}, err
+		return solanaImpl{}, err
 	}
 	solanaClient.wallet = solWallet
 	log.
@@ -74,7 +74,7 @@ func createSolanaImplClient(
 	return solanaClient, nil
 }
 
-func (s SolanaImpl) MintToWallet(
+func (s solanaImpl) MintToWallet(
 	ctx context.Context, mint, destWallet string, amount uint64,
 ) (string, error) {
 	mintPubKey := solana.MustPublicKeyFromBase58(mint)
@@ -112,11 +112,11 @@ func (s SolanaImpl) MintToWallet(
 /// Wallet Wrapper
 ////////////////////////////////////////////////////////////
 
-func (s SolanaImpl) GetWalletPubKey() solana.PublicKey {
+func (s solanaImpl) GetWalletPubKey() solana.PublicKey {
 	return s.wallet.PublicKey()
 }
 
-func (s SolanaImpl) getWalletPrivKey() solana.PrivateKey {
+func (s solanaImpl) getWalletPrivKey() solana.PrivateKey {
 	return s.wallet.PrivateKey
 }
 
@@ -124,23 +124,23 @@ func (s SolanaImpl) getWalletPrivKey() solana.PrivateKey {
 /// RPC Client Wrapper
 ////////////////////////////////////////////////////////////
 
-func (s SolanaImpl) GetTokenAccountBalance(
+func (s solanaImpl) GetTokenAccountBalance(
 	ctx context.Context, destAccount solana.PublicKey, commitmentType rpc.CommitmentType,
 ) (*rpc.GetTokenAccountBalanceResult, error) {
 	return s.client.GetTokenAccountBalance(ctx, destAccount, commitmentType)
 }
 
-func (s SolanaImpl) GetAccountInfo(
+func (s solanaImpl) GetAccountInfo(
 	ctx context.Context, account solana.PublicKey,
 ) (*rpc.GetAccountInfoResult, error) {
 	return s.client.GetAccountInfo(ctx, account)
 }
 
-func (s SolanaImpl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {
+func (s solanaImpl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {
 	return s.client.GetVersion(ctx)
 }
 
-func (s SolanaImpl) signAndBroadcast(
+func (s solanaImpl) signAndBroadcast(
 	ctx context.Context, instructions ...solana.Instruction,
 ) (string, error) {
 	recent, err := s.client.GetRecentBlockhash(ctx, rpc.CommitmentConfirmed)

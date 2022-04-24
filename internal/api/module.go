@@ -2,19 +2,19 @@ package api
 
 import (
 	"github.com/dcaf-protocol/drip/internal/configs"
-	"github.com/dcaf-protocol/drip/internal/pkg/solanaclient"
+	"github.com/dcaf-protocol/drip/internal/pkg/client"
 	"github.com/gorilla/schema"
 )
 
 type Handler struct {
 	decoder      *schema.Decoder
-	solanaClient solanaclient.Solana
+	solanaClient client.Solana
 	env          configs.Environment
 	port         int
 }
 
 func NewHandler(
-	solanaClient solanaclient.Solana,
+	solanaClient client.Solana,
 	config *configs.Config,
 ) *Handler {
 	return &Handler{
