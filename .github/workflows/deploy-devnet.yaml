@@ -15,4 +15,4 @@ jobs:
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "drip-backend-devnet" 
-          heroku_email: "dcafmocha@protonmail.com"
+          heroku_email: "mocha@dcaf.so"
