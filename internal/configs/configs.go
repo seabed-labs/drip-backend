@@ -9,9 +9,29 @@ import (
 )
 
 type Config struct {
-	Environment Environment `yaml:"environment" env:"ENV"`
-	Wallet      string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
-	Port        int         `yaml:"port"        env:"PORT"`
+	Environment  Environment   `yaml:"environment" env:"ENV"`
+	Wallet       string        `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
+	Port         int           `yaml:"port"        env:"PORT"`
+	VaultConfigs []VaultConfig `yaml:"vaults"`
+}
+
+type VaultConfig struct {
+	Vault                       string `yaml:"vault"`
+	VaultProtoConfig            string `yaml:"vaultProtoConfig"`
+	VaultProtoConfigGranularity uint32 `yaml:"vaultProtoConfigGranularity"`
+	VaultTokenAAccount          string `yaml:"vaultTokenAAccount"`
+	VaultTokenBAccount          string `yaml:"vaultTokenBAccount"`
+	VaultTreasuryTokenBAccount  string `yaml:"vaultTreasuryTokenBAccount"`
+	TokenAMint                  string `yaml:"tokenAMint"`
+	TokenASymbol                string `yaml:"tokenASymbol"`
+	TokenBMint                  string `yaml:"tokenBMint"`
+	TokenBSymbol                string `yaml:"tokenBSymbol"`
+	SwapTokenMint               string `yaml:"swapTokenMint"`
+	SwapTokenAAccount           string `yaml:"swapTokenAAccount"`
+	SwapTokenBAccount           string `yaml:"swapTokenBAccount"`
+	SwapFeeAccount              string `yaml:"swapFeeAccount"`
+	SwapAuthority               string `yaml:"swapAuthority"`
+	Swap                        string `yaml:"swap"`
 }
 
 type Environment string

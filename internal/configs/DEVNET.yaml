@@ -1,6 +1,6 @@
 port: 8080
 environment: DEVNET
-triggerDCA:
+vaults:
   - vault: 3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV
     vaultProtoConfig: mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L
     vaultProtoConfigGranularity: 60
