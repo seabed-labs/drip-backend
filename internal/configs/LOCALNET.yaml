@@ -1,3 +1,2 @@
 environment: "LOCALNET"
-wallet: "wallet"
 port: 8080
