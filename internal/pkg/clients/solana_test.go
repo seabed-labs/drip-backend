@@ -1,10 +1,10 @@
-package client
+package clients
 
 import (
 	"context"
 	"testing"
 
-	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/pkg/configs"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/test-go/testify/assert"

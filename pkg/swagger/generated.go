@@ -119,11 +119,11 @@ type ClientOption func(*Client) error
 
 // Creates a new Client, with reasonable defaults
 func NewClient(server string, opts ...ClientOption) (*Client, error) {
-	// create a client with sane default values
+	// create a clients with sane default values
 	client := Client{
 		Server: server,
 	}
-	// mutate client and add all optional params
+	// mutate clients and add all optional params
 	for _, o := range opts {
 		if err := o(&client); err != nil {
 			return nil, err
@@ -158,7 +158,7 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 	}
 }
 
-// The interface specification for the client above.
+// The interface specification for the clients above.
 type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -449,7 +449,7 @@ func WithBaseURL(baseURL string) ClientOption {
 	}
 }
 
-// ClientWithResponsesInterface is the interface specification for the client with responses above.
+// ClientWithResponsesInterface is the interface specification for the clients with responses above.
 type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)

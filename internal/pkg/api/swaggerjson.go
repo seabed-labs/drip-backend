@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+	"github.com/labstack/echo/v4"
+
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/labstack/echo/v4"
 )
 
 func (h Handler) GetSwaggerJson(

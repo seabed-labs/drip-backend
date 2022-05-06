@@ -53,17 +53,17 @@ const (
 func NewConfig() (*Config, error) {
 	LoadEnv()
 	environment := GetEnv(Environment(os.Getenv(string(ENV))))
-	configFileName := fmt.Sprintf("./internal/configs/%s.yaml", environment)
+	configFileName := fmt.Sprintf("./internal/pkg/configs/%s.yaml", environment)
 	configFileName = fmt.Sprintf("%s/%s", GetProjectRoot(), configFileName)
 
-	log.WithField("configFileName", configFileName).Infof("loading config file")
+	log.WithField("configFileName", configFileName).Infof("loading configs file")
 	configFile, err := os.Open(configFileName)
 	if err != nil {
 		return nil, err
 	}
 	defer func(configFile *os.File) {
 		if err := configFile.Close(); err != nil {
-			log.WithError(err).Errorf("failed to close config file")
+			log.WithError(err).Errorf("failed to close configs file")
 		}
 	}(configFile)
 	var config Config

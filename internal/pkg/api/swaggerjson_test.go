@@ -6,8 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/pkg/configs"
 	"github.com/labstack/echo/v4"
+
 	"github.com/test-go/testify/assert"
 )
 

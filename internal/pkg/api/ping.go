@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
-
 	"github.com/labstack/echo/v4"
+
+	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 )
 
 func (h Handler) Get(

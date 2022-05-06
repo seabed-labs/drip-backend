@@ -1,11 +1,12 @@
-package client
+package clients
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 
-	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+
 	"github.com/gagliardetto/solana-go"
 	associatedtokenaccount "github.com/gagliardetto/solana-go/programs/associated-token-account"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -47,7 +48,7 @@ func createsolanaImplClient(
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
-		log.WithError(err).Fatalf("failed to get client version info")
+		log.WithError(err).Fatalf("failed to get clients version info")
 		return solanaImpl{}, err
 	}
 	log.
@@ -55,7 +56,7 @@ func createsolanaImplClient(
 			"version": resp.SolanaCore,
 			"url":     url,
 		}).
-		Info("created solana client")
+		Info("created solana clients")
 
 	var accountBytes []byte
 	if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {

@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcaf-protocol/drip/internal/api"
-	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/pkg/api"
+	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
