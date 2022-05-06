@@ -6,10 +6,17 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
-func TestNewConfig(t *testing.T) {
+func TestNewAppConfig(t *testing.T) {
 	config, err := NewAppConfig()
 	assert.NoError(t, err)
+	assert.NotNil(t, config)
 	assert.Contains(t, []Environment{NilEnv, LocalnetEnv, DevnetEnv}, config.Environment)
+}
+
+func TestNewPSQLConfig(t *testing.T) {
+	config, err := NewPSQLConfig()
+	assert.NoError(t, err)
+	assert.NotNil(t, config)
 }
 
 func TestIsDev(t *testing.T) {
