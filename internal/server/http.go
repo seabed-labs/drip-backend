@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/api"
-	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+	"github.com/dcaf-protocol/drip/internal/configs"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/api"
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
@@ -20,7 +20,7 @@ import (
 func Run(
 	lc fx.Lifecycle,
 	api *api.Handler,
-	config *configs.Config,
+	config *configs.AppConfig,
 ) {
 	var httpSrv *http.Server
 	lc.Append(fx.Hook{
@@ -37,7 +37,7 @@ func Run(
 
 func listenAndServe(
 	handler *api.Handler,
-	config *configs.Config,
+	config *configs.AppConfig,
 ) (*http.Server, error) {
 	swaggerSpec, err := swagger.GetSwagger()
 	if err != nil {

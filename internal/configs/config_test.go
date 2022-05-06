@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewConfig(t *testing.T) {
-	config, err := NewConfig()
+	config, err := NewAppConfig()
 	assert.NoError(t, err)
 	assert.Contains(t, []Environment{NilEnv, LocalnetEnv, DevnetEnv}, config.Environment)
 }

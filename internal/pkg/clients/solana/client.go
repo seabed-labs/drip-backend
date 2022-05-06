@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+	"github.com/dcaf-protocol/drip/internal/configs"
+
 	"github.com/gagliardetto/solana-go"
 	associatedtokenaccount "github.com/gagliardetto/solana-go/programs/associated-token-account"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -28,7 +29,7 @@ type Solana interface {
 }
 
 func CreateSolanaClient(
-	config *configs.Config,
+	config *configs.AppConfig,
 ) (Solana, error) {
 	return createsolanaImplClient(config)
 }
@@ -39,7 +40,7 @@ type solanaImpl struct {
 }
 
 func createsolanaImplClient(
-	config *configs.Config,
+	config *configs.AppConfig,
 ) (solanaImpl, error) {
 	url := getURL(config.Environment)
 	solanaClient := solanaImpl{

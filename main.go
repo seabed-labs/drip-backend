@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
+	"github.com/dcaf-protocol/drip/internal/database/psql"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/configs"
+	"github.com/dcaf-protocol/drip/internal/configs"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
 
@@ -29,11 +31,14 @@ func main() {
 func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
-			configs.NewConfig,
+			configs.NewAppConfig,
+			configs.NewPSQLConfig,
+			psql.NewDatabase,
 			solana.CreateSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(
+			psql.RunMigrations,
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			server.Run,
 		),

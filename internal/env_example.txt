@@ -1,0 +1,7 @@
+ENV="DEVNET"
+DRIP_BACKEND_WALLET="<...>"
+PSQL_USER="dcaf"
+PSQL_PASS="drip"
+PSQL_DBNAME="drip"
+PSQL_PORT="5432"
+PSQL_HOST="localhost"

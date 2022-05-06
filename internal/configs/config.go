@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Config struct {
+type AppConfig struct {
 	Environment  Environment   `yaml:"environment" env:"ENV"`
 	Wallet       string        `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
 	Port         int           `yaml:"port"        env:"PORT"`
@@ -36,6 +36,14 @@ type VaultConfig struct {
 
 type Environment string
 
+type PSQLConfig struct {
+	User     string `yaml:"psql_username" env:"PSQL_USER"`
+	Password string `yaml:"psql_password" env:"PSQL_PASS"`
+	DBName   string `yaml:"psql_database" env:"PSQL_DBNAME"`
+	Port     int    `yaml:"psql_port" env:"PSQL_PORT"`
+	Host     string `yaml:"psql_host" env:"PSQL_HOST"`
+}
+
 const (
 	NilEnv      = Environment("")
 	LocalnetEnv = Environment("LOCALNET")
@@ -50,27 +58,35 @@ const (
 	PROJECT_ROOT_OVERRIDE EnvVar = "PROJECT_ROOT_OVERRIDE"
 )
 
-func NewConfig() (*Config, error) {
+// Note: config has to be a pointer
+func parseToConfig(config interface{}) error {
 	LoadEnv()
 	environment := GetEnv(Environment(os.Getenv(string(ENV))))
-	configFileName := fmt.Sprintf("./internal/pkg/configs/%s.yaml", environment)
+	configFileName := fmt.Sprintf("./internal/configs/%s.yaml", environment)
 	configFileName = fmt.Sprintf("%s/%s", GetProjectRoot(), configFileName)
 
 	log.WithField("configFileName", configFileName).Infof("loading configs file")
-	configFile, err := os.Open(configFileName)
-	if err != nil {
+	if err := cleanenv.ReadConfig(configFileName, config); err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewAppConfig() (*AppConfig, error) {
+	var config AppConfig
+	if err := parseToConfig(&config); err != nil {
 		return nil, err
 	}
-	defer func(configFile *os.File) {
-		if err := configFile.Close(); err != nil {
-			log.WithError(err).Errorf("failed to close configs file")
-		}
-	}(configFile)
-	var config Config
-	if err := cleanenv.ReadConfig(configFileName, &config); err != nil {
+	log.Info("loaded drip-backend app configs")
+	return &config, nil
+}
+
+func NewPSQLConfig() (*PSQLConfig, error) {
+	var config PSQLConfig
+	if err := parseToConfig(&config); err != nil {
 		return nil, err
 	}
-	log.Info("loaded drip-backend configs")
+	log.Info("loaded drip-backend app configs")
 	return &config, nil
 }
 

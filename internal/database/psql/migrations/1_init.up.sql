@@ -8,7 +8,7 @@ CREATE TABLE "vault" (
   "treasury_token_b_account" varchar(255) NOT NULL,
   "last_dca_period" numeric NOT NULL,
   "drip_amount" numeric NOT NULL,
-  "dca_activation_timestamp" int64 NOT NULL
+  "dca_activation_timestamp" timestamp NOT NULL
 );
 
 CREATE TABLE "vault_period" (
@@ -32,7 +32,7 @@ CREATE TABLE "position" (
   "authority" varchar(255) NOT NULL,
   "deposited_token_a_amount" numeric NOT NULL,
   "withdrawn_token_b_amount" numeric NOT NULL,
-  "deposit_timestamp" int64 NOT NULL,
+  "deposit_timestamp" timestamp NOT NULL,
   "dca_period_id_before_deposit" numeric NOT NULL,
   "number_of_swaps" numeric NOT NULL,
   "periodic_drip_amount" numeric NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE "token_price" (
   "base" varchar(255),
   "quote" varchar(255),
   "close" numeric NOT NULL,
-  "date" datetime NOT NULL,
+  "date" timestamp NOT NULL,
   "source" varchar(255)
 );
 
@@ -86,8 +86,6 @@ ALTER TABLE "vault" ADD FOREIGN KEY ("proto_config") REFERENCES "proto_config" (
 ALTER TABLE "vault_period" ADD FOREIGN KEY ("vault") REFERENCES "vault" ("pubkey");
 
 ALTER TABLE "position" ADD FOREIGN KEY ("vault") REFERENCES "vault" ("pubkey");
-
-ALTER TABLE "user_position" ADD FOREIGN KEY ("mint") REFERENCES "position" ("authority");
 
 ALTER TABLE "token_price" ADD FOREIGN KEY ("base") REFERENCES "token" ("pubkey");
 
