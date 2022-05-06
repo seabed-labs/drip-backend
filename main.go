@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/configs"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
 
 	"github.com/dcaf-protocol/drip/internal/server"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/clients"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -29,7 +30,7 @@ func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
 			configs.NewConfig,
-			clients.CreateSolanaClient,
+			solana.CreateSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(

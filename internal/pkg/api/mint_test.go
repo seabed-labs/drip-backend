@@ -10,10 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	solana2 "github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/configs"
 	"github.com/labstack/echo/v4"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/clients"
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
@@ -30,7 +31,7 @@ func TestHandler_PostMint(t *testing.T) {
 	e := echo.New()
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -53,7 +54,7 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -81,7 +82,7 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -120,7 +121,7 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when server wallet is not mint authority", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -174,7 +175,7 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -233,7 +234,7 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return success", func(t *testing.T) {
-		m := clients.NewMockSolana(ctrl)
+		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(m, &configs.Config{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,

@@ -2,7 +2,7 @@
 // Source: pkg/clients/mock.go
 
 // Package mock_client is a generated GoMock package.
-package clients
+package solana
 
 import (
 	context "context"
