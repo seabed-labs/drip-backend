@@ -10,7 +10,6 @@ type Handler struct {
 	decoder      *schema.Decoder
 	solanaClient solana.Solana
 	env          configs.Environment
-	vaultConfigs []configs.VaultConfig
 	port         int
 }
 
@@ -22,7 +21,6 @@ func NewHandler(
 		decoder:      schema.NewDecoder(),
 		solanaClient: solanaClient,
 		env:          config.Environment,
-		vaultConfigs: config.VaultConfigs,
 		port:         config.Port,
 	}
 }
