@@ -10,12 +10,15 @@ import (
 func NewDatabase(
 	config *configs.PSQLConfig,
 ) (*sqlx.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	return sqlx.Connect("postgres", getConnectionString(config))
+}
+
+func getConnectionString(config *configs.PSQLConfig) string {
+	return fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		config.Host,
 		config.Port,
 		config.User,
 		config.Password,
 		config.DBName)
-	return sqlx.Connect("postgres", psqlInfo)
 }

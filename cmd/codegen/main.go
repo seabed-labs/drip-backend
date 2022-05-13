@@ -29,7 +29,7 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			psql.RunMigrations,
-			codegen,
+			psql.GenerateModels,
 		),
 		fx.NopLogger,
 	}
