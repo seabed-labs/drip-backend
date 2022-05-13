@@ -7,7 +7,6 @@ import (
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 
 	// Needed for loading drivers
@@ -18,9 +17,13 @@ import (
 const migrationDir = "./internal/database/psql/migrations"
 
 func RunMigrations(
-	db *sqlx.DB,
 	config *configs.PSQLConfig,
 ) (int, error) {
+	db, err := NewDatabase(config)
+	if err != nil {
+		logrus.WithField("err", err.Error()).Error("could not connect to db with config")
+		return 0, err
+	}
 	if err := db.Ping(); err != nil {
 		logrus.WithField("err", err.Error()).Error("could not ping DB")
 		return 0, err

@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"os/exec"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/database/psql"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -33,15 +31,4 @@ func getDependencies() []fx.Option {
 		),
 		fx.NopLogger,
 	}
-}
-
-func codegen() {
-	configs.LoadEnv()
-	cmd := exec.Command("sqlboiler", "psql")
-	stdout, err := cmd.Output()
-	if err != nil {
-		logrus.WithError(err).Fatalf("failed to run sqlboiler")
-		return
-	}
-	logrus.Infof(string(stdout))
 }

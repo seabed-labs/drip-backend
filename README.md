@@ -8,23 +8,30 @@
 
 - install go
 - install all packages
-
 ```bash
 go get -u ./...
 ```
 
-- setup `.env` file
-
-ex:
-
+- setup a `.env` file
+- ex:
 ```env
-ENV=DEVNET
+PORT="8080"
+ENV="DEVNET"
 # must be the mint authority (tokenOwnerKeypair from setupKepperBot.ts)
 DRIP_BACKEND_WALLET="[some byte array]"
+PSQL_USER="dcaf"
+PSQL_PASS="drip"
+PSQL_DBNAME="drip"
+PSQL_PORT="5432"
+PSQL_HOST="localhost"
+```
+
+- run all tests
+```bash
+go test ./...
 ```
 
 - run the server
-
 ```bash
 ENV=DEVNET go run main.go
 ```
@@ -45,18 +52,44 @@ To update the spec run the following from root:
 
 API docs are viewable at `http://localhost:8080/swagger.json`.
 
-## Data: Postgres Database Migrations and Models
-- Database [models](app/internal/data/psql/generated) are generated using the database schema via [sqlboiler](https://github.com/volatiletech/sqlboiler)
-- sqlboiler introspects the database schema and creates the model files
-- Before generating the models, the database needs to be running, and the migrations need to be executed
-```bash
-docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up -d
-./scripts/run-database-migrations.sh
-./scripts/generate-database-models.sh
-```
-- Note: Running `main.go` will automatically run relevant migrations
+## Database
 
-### Process for Creating New Database Models
-- Create a migration file under `data/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
-- Run the migration script `./scripts/run-database-migrations.sh # run from the root of the repo`
-- Generate database models `./scripts/generate-database-models.sh # run from the root of the repo`
+Locally the db can be started with
+```bash
+docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up
+```
+and stopped with 
+```bash
+docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down
+```
+
+> **_NOTE:_** TODO(mocha) do codegen in a dockerized db that is setup and destroyed automatically in the script.
+
+### Migrations
+
+- located in `internal/database/psql/migrations`
+- All migrations that are a number larger then what the db version is will be run automatically on startup or during codegen
+- Running the migrations will automatically increment the schema version in the db
+```bash
+go run cmd/migrate/main.go
+```
+
+> **_NOTE:_**  The DB must be running prior to running this script.
+
+### Codegen
+
+- Database [models](app/internal/data/psql/generated) are generated using the database schema via [go-gorm/gen](https://github.com/go-gorm/gen)
+- Before generating the models, the database needs to be running
+- The codegen script will also run migrations if needed
+```bash
+go run cmd/codegen/main.go
+```
+
+> **_NOTE:_**  The DB must be running prior to running this script.
+
+### Process for Creating/Updating Database Models
+- Create a migration file under `internal/database/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
+- Run the migration + codegen script `go run cmd/codegen/main.go`
+
+> **_NOTE:_**  The DB must be running prior to running this script.
+
