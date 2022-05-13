@@ -1,9 +1,6 @@
 package configs
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
 )
@@ -59,22 +56,22 @@ const (
 )
 
 // Note: config has to be a pointer
-func parseToConfig(config interface{}) error {
+func ParseToConfig(config interface{}, configFileName string) error {
 	LoadEnv()
-	environment := GetEnv(Environment(os.Getenv(string(ENV))))
-	configFileName := fmt.Sprintf("./internal/configs/%s.yaml", environment)
-	configFileName = fmt.Sprintf("%s/%s", GetProjectRoot(), configFileName)
-
-	log.WithField("configFileName", configFileName).Infof("loading configs file")
-	if err := cleanenv.ReadConfig(configFileName, config); err != nil {
-		log.WithField("configFileName", configFileName).Warning("config file does not exist")
+	//configFileName := fmt.Sprintf("./internal/configs/%s.yaml", environment)
+	//configFileName = fmt.Sprintf("%s/%s", GetProjectRoot(), configFileName)
+	if configFileName != "" {
+		log.WithField("configFileName", configFileName).Infof("loading configs file")
+		if err := cleanenv.ReadConfig(configFileName, config); err != nil {
+			log.WithField("configFileName", configFileName).Warning("config file does not exist")
+		}
 	}
 	return cleanenv.ReadEnv(config)
 }
 
 func NewAppConfig() (*AppConfig, error) {
 	var config AppConfig
-	if err := parseToConfig(&config); err != nil {
+	if err := ParseToConfig(&config, ""); err != nil {
 		return nil, err
 	}
 	log.Info("loaded drip-backend app configs")
@@ -83,7 +80,7 @@ func NewAppConfig() (*AppConfig, error) {
 
 func NewPSQLConfig() (*PSQLConfig, error) {
 	var config PSQLConfig
-	if err := parseToConfig(&config); err != nil {
+	if err := ParseToConfig(&config, ""); err != nil {
 		return nil, err
 	}
 	log.Info("loaded drip-backend app configs")

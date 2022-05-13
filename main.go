@@ -33,12 +33,14 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
+			//repository.NewVaultRepository,
 			psql.NewDatabase,
 			solana.CreateSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(
 			psql.RunMigrations,
+			//scripts.Backfill,
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			server.Run,
 		),
