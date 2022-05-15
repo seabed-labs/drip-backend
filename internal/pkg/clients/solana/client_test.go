@@ -3,6 +3,7 @@ package solana
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 
@@ -63,4 +64,44 @@ func TestSolanaClient(t *testing.T) {
 		assert.Equal(t, getURL(configs.DevnetEnv), rpc.DevNet_RPC)
 		assert.Equal(t, getURL(configs.MainnetEnv), rpc.MainNetBeta_RPC)
 	})
+
+	t.Run("ProgramSubscribe should subscribe to program", func(t *testing.T) {
+		timeout := time.Second * 5
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) {
+			assert.NotEmpty(t, address)
+			assert.NotEmpty(t, data)
+		})
+		assert.NoError(t, err)
+		select {
+		case <-time.After(timeout):
+			break
+		}
+	})
+
+	//t.Run("ProgramSubscribe should subscribe to drip", func(t *testing.T) {
+	//	timeout := time.Minute * 30
+	//	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	//	defer cancel()
+	//	err := client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), func(address string, data []byte) {
+	//		var vaultPeriod dca_vault.VaultPeriod
+	//		logrus.WithField("address", address).Infof("got message")
+	//		if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err != nil {
+	//			logrus.
+	//				WithError(err).
+	//				Errorf("failed to decode as vault period")
+	//		} else {
+	//			logrus.
+	//				WithField("vaultPeriod", vaultPeriod).
+	//				Infof("decoded vault period")
+	//		}
+	//		assert.NotEmpty(t, data)
+	//	})
+	//	assert.NoError(t, err)
+	//	select {
+	//	case <-time.After(timeout):
+	//		break
+	//	}
+	//})
 }

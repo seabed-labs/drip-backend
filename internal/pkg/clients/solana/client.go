@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gagliardetto/solana-go/rpc/ws"
+
 	"github.com/dcaf-protocol/drip/internal/configs"
 
 	"github.com/gagliardetto/solana-go"
@@ -26,6 +28,7 @@ type Solana interface {
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
 	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
+	ProgramSubscribe(context.Context, string, func(string, []byte)) error
 }
 
 func CreateSolanaClient(
@@ -35,8 +38,9 @@ func CreateSolanaClient(
 }
 
 type solanaImpl struct {
-	client *rpc.Client
-	wallet *solana.Wallet
+	environment configs.Environment
+	client      *rpc.Client
+	wallet      *solana.Wallet
 }
 
 func createsolanaImplClient(
@@ -44,7 +48,8 @@ func createsolanaImplClient(
 ) (solanaImpl, error) {
 	url := getURL(config.Environment)
 	solanaClient := solanaImpl{
-		client: rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
+		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
+		environment: config.Environment,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -107,6 +112,59 @@ func (s solanaImpl) MintToWallet(
 	}
 	instructions = append(instructions, tx)
 	return s.signAndBroadcast(ctx, instructions...)
+}
+
+// TODO(Mocha): Pass in an error channel so that subscribers can handle errors
+func (s solanaImpl) ProgramSubscribe(
+	ctx context.Context, program string, onReceive func(string, []byte),
+) error {
+	url := getWSURL(s.environment)
+	client, err := ws.Connect(ctx, url)
+	if err != nil {
+		return err
+	}
+	sub, err := client.ProgramSubscribeWithOpts(
+		solana.MustPublicKeyFromBase58(program),
+		rpc.CommitmentRecent,
+		solana.EncodingBase64Zstd,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	go func() {
+		defer sub.Unsubscribe()
+		for {
+			msg, err := sub.Recv()
+			if err != nil {
+				log.
+					WithFields(log.Fields{
+						"program": program,
+					}).
+					Error("failed to get next msg from program ws")
+				continue
+			}
+			if msg.Value.Account == nil || msg.Value.Account.Data == nil {
+				log.
+					WithFields(log.Fields{
+						"program": program,
+					}).
+					Warning("program ws msg account or account data is nil")
+				continue
+			}
+			decodedBinary := msg.Value.Account.Data.GetBinary()
+			if decodedBinary == nil {
+				log.
+					WithFields(log.Fields{
+						"program": program,
+					}).
+					Warning("program ws msg decoded binary is nil")
+				continue
+			}
+			onReceive(msg.Value.Pubkey.String(), decodedBinary)
+		}
+	}()
+	return nil
 }
 
 ////////////////////////////////////////////////////////////
@@ -197,5 +255,20 @@ func getURL(env configs.Environment) string {
 		fallthrough
 	default:
 		return rpc.LocalNet_RPC
+	}
+}
+
+func getWSURL(env configs.Environment) string {
+	switch env {
+	case configs.DevnetEnv:
+		return rpc.DevNet_WS
+	case configs.MainnetEnv:
+		return rpc.MainNetBeta_WS
+	case configs.NilEnv:
+		fallthrough
+	case configs.LocalnetEnv:
+		fallthrough
+	default:
+		return rpc.LocalNet_WS
 	}
 }
