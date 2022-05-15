@@ -12,6 +12,7 @@ type AppConfig struct {
 }
 
 type PSQLConfig struct {
+	URL      string `env:"DATABASE_URL"`
 	User     string `yaml:"psql_username" env:"PSQL_USER"`
 	Password string `yaml:"psql_password" env:"PSQL_PASS"`
 	DBName   string `yaml:"psql_database" env:"PSQL_DBNAME"`

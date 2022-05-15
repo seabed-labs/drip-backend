@@ -7,6 +7,9 @@ import (
 )
 
 func getConnectionString(config *configs.PSQLConfig) string {
+	if config.URL != "" {
+		return config.URL
+	}
 	return fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		config.Host,
