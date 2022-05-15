@@ -35,7 +35,12 @@ go test ./...
 ```bash
 ENV=DEVNET go run main.go
 ```
+## Tests
+If an interface is changed, the associated mocks need to be re-generated.
+```bash
+mockgen -source=client.go -destination=mock.go
 
+```
 ## API Docs
 
 We use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
@@ -96,6 +101,6 @@ go run cmd/codegen/main.go
 ### Backfill DB for Devnet
 Run the following script
 ```bash
-go run cmd/backfill/main.go
+go run cmd/event/main.go
 ```
 > **_NOTE:_**  This backfills based on the content of `devnet.yaml`.

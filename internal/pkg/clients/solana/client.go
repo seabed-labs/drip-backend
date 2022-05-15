@@ -139,26 +139,26 @@ func (s solanaImpl) ProgramSubscribe(
 			if err != nil {
 				log.
 					WithFields(log.Fields{
-						"program": program,
+						"event": program,
 					}).
-					Error("failed to get next msg from program ws")
+					Error("failed to get next msg from event ws")
 				continue
 			}
 			if msg.Value.Account == nil || msg.Value.Account.Data == nil {
 				log.
 					WithFields(log.Fields{
-						"program": program,
+						"event": program,
 					}).
-					Warning("program ws msg account or account data is nil")
+					Warning("event ws msg account or account data is nil")
 				continue
 			}
 			decodedBinary := msg.Value.Account.Data.GetBinary()
 			if decodedBinary == nil {
 				log.
 					WithFields(log.Fields{
-						"program": program,
+						"event": program,
 					}).
-					Warning("program ws msg decoded binary is nil")
+					Warning("event ws msg decoded binary is nil")
 				continue
 			}
 			onReceive(msg.Value.Pubkey.String(), decodedBinary)

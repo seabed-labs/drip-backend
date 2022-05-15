@@ -59,7 +59,7 @@ func Backfill(
 	client := rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(rpc.DevNet_RPC, 10))
 
 	if !configs.IsDev(config.Environment) {
-		logrus.WithField("environment", config.Environment).Infof("skipping backfill")
+		logrus.WithField("environment", config.Environment).Infof("skipping event")
 		return nil
 	}
 	logrus.Infof("backfilling devnet vaults")
