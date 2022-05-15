@@ -3,15 +3,15 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/database/psql"
-
-	"github.com/dcaf-protocol/drip/internal/configs"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
-
 	"github.com/dcaf-protocol/drip/internal/server"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/repository"
+
+	"github.com/dcaf-protocol/drip/internal/configs"
+	"github.com/dcaf-protocol/drip/internal/database/psql"
 
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -33,14 +33,13 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
-			//repository.NewVaultRepository,
-			psql.NewDatabase,
+			psql.NewGORMDatabase,
+			repository.Use,
 			solana.CreateSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(
 			psql.RunMigrations,
-			//scripts.Backfill,
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			server.Run,
 		),

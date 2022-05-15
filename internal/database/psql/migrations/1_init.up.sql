@@ -22,8 +22,8 @@ CREATE TABLE "vault_period" (
 CREATE TABLE "proto_config" (
   "pubkey" varchar(255) PRIMARY KEY,
   "granularity" numeric NOT NULL,
-  "trigger_dca_spread" smallint NOT NULL,
-  "base_withdrawal_spread" smallint NOT NULL
+  "trigger_dca_spread" numeric NOT NULL,
+  "base_withdrawal_spread" numeric NOT NULL
 );
 
 CREATE TABLE "position" (

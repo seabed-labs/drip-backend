@@ -1,4 +1,5 @@
-vaults:
+environment: DEVNET
+triggerDCA:
   - vault: 3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV
     vaultProtoConfig: mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L
     vaultProtoConfigGranularity: 60
@@ -271,4 +272,3 @@ vaults:
     swapFeeAccount: J17vvwGNP5i867oC9WbD7djHjRr3ut3NEyxdj3czxoK9
     swapAuthority: 5s3TTqV6kYWrobVqoXhEYJdupZ33VPJE2jXLgibmWRki
     swap: FN7LaD6GZCxenG3wwYNqW6pf1R4zbrfuePJP8DVYe3CX
-

@@ -8,9 +8,9 @@ const TableNameTokenPair = "token_pair"
 
 // TokenPair mapped from table <token_pair>
 type TokenPair struct {
-	ID     string `gorm:"column:id;primaryKey" json:"id"`
-	TokenA string `gorm:"column:token_a;not null" json:"token_a"`
-	TokenB string `gorm:"column:token_b;not null" json:"token_b"`
+	ID     string `gorm:"column:id;primaryKey" json:"id" yaml:"id"`
+	TokenA string `gorm:"column:token_a;not null" json:"token_a" yaml:"token_a"`
+	TokenB string `gorm:"column:token_b;not null" json:"token_b" yaml:"token_b"`
 }
 
 // TableName TokenPair's table name

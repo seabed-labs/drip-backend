@@ -12,16 +12,16 @@ const TableNamePosition = "position"
 
 // Position mapped from table <position>
 type Position struct {
-	Pubkey                   string    `gorm:"column:pubkey;primaryKey" json:"pubkey"`
-	Vault                    string    `gorm:"column:vault;not null" json:"vault"`
-	Authority                string    `gorm:"column:authority;not null" json:"authority"`
-	DepositedTokenAAmount    float64   `gorm:"column:deposited_token_a_amount;not null" json:"deposited_token_a_amount"`
-	WithdrawnTokenBAmount    float64   `gorm:"column:withdrawn_token_b_amount;not null" json:"withdrawn_token_b_amount"`
-	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;not null" json:"deposit_timestamp"`
-	DcaPeriodIDBeforeDeposit float64   `gorm:"column:dca_period_id_before_deposit;not null" json:"dca_period_id_before_deposit"`
-	NumberOfSwaps            float64   `gorm:"column:number_of_swaps;not null" json:"number_of_swaps"`
-	PeriodicDripAmount       float64   `gorm:"column:periodic_drip_amount;not null" json:"periodic_drip_amount"`
-	IsClosed                 bool      `gorm:"column:is_closed;not null" json:"is_closed"`
+	Pubkey                   string    `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
+	Vault                    string    `gorm:"column:vault;not null" json:"vault" yaml:"vault"`
+	Authority                string    `gorm:"column:authority;not null" json:"authority" yaml:"authority"`
+	DepositedTokenAAmount    float64   `gorm:"column:deposited_token_a_amount;not null" json:"deposited_token_a_amount" yaml:"deposited_token_a_amount"`
+	WithdrawnTokenBAmount    float64   `gorm:"column:withdrawn_token_b_amount;not null" json:"withdrawn_token_b_amount" yaml:"withdrawn_token_b_amount"`
+	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;not null" json:"deposit_timestamp" yaml:"deposit_timestamp"`
+	DcaPeriodIDBeforeDeposit float64   `gorm:"column:dca_period_id_before_deposit;not null" json:"dca_period_id_before_deposit" yaml:"dca_period_id_before_deposit"`
+	NumberOfSwaps            float64   `gorm:"column:number_of_swaps;not null" json:"number_of_swaps" yaml:"number_of_swaps"`
+	PeriodicDripAmount       float64   `gorm:"column:periodic_drip_amount;not null" json:"periodic_drip_amount" yaml:"periodic_drip_amount"`
+	IsClosed                 bool      `gorm:"column:is_closed;not null" json:"is_closed" yaml:"is_closed"`
 }
 
 // TableName Position's table name

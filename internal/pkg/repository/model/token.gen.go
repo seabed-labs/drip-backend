@@ -8,10 +8,10 @@ const TableNameToken = "token"
 
 // Token mapped from table <token>
 type Token struct {
-	Pubkey   string  `gorm:"column:pubkey;primaryKey" json:"pubkey"`
-	Symbol   *string `gorm:"column:symbol" json:"symbol"`
-	Decimals int16   `gorm:"column:decimals;not null" json:"decimals"`
-	IconURL  *string `gorm:"column:icon_url" json:"icon_url"`
+	Pubkey   string  `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
+	Symbol   *string `gorm:"column:symbol" json:"symbol" yaml:"symbol"`
+	Decimals int16   `gorm:"column:decimals;not null" json:"decimals" yaml:"decimals"`
+	IconURL  *string `gorm:"column:icon_url" json:"icon_url" yaml:"icon_url"`
 }
 
 // TableName Token's table name

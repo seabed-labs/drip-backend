@@ -8,9 +8,9 @@ const TableNameUserPosition = "user_position"
 
 // UserPosition mapped from table <user_position>
 type UserPosition struct {
-	Pubkey string `gorm:"column:pubkey;primaryKey" json:"pubkey"`
-	Mint   string `gorm:"column:mint;not null" json:"mint"`
-	Amount bool   `gorm:"column:amount;not null" json:"amount"`
+	Pubkey string `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
+	Mint   string `gorm:"column:mint;not null" json:"mint" yaml:"mint"`
+	Amount bool   `gorm:"column:amount;not null" json:"amount" yaml:"amount"`
 }
 
 // TableName UserPosition's table name
