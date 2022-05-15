@@ -74,9 +74,6 @@ func TestSolanaClient(t *testing.T) {
 			assert.NotEmpty(t, data)
 		})
 		assert.NoError(t, err)
-		select {
-		case <-time.After(timeout):
-			break
-		}
+		time.Sleep(timeout)
 	})
 }
