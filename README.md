@@ -38,6 +38,7 @@ ENV=DEVNET go run main.go
 ## Tests
 If an interface is changed, the associated mocks need to be re-generated.
 ```bash
+# ex: from inside drip-backend/internal/pkg/clients/solana
 mockgen -source=client.go -destination=mock.go
 
 ```
