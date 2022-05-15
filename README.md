@@ -93,3 +93,9 @@ go run cmd/codegen/main.go
 
 > **_NOTE:_**  The DB must be running prior to running this script.
 
+### Backfill DB for Devnet
+Run the following script
+```bash
+go run cmd/backfill/main.go
+```
+> **_NOTE:_**  This backfills based on the content of `devnet.yaml`.
