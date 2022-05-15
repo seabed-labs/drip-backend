@@ -46,6 +46,39 @@ paths:
             application/json:
               schema:
                 type: object
+  /vaults:
+    get:
+      summary: Get Supported Vaults
+      description: Get all vaults with filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/tokenA"
+        - $ref: "#/components/parameters/tokenB"
+        - $ref: "#/components/parameters/granularity"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listVaultsResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /mint:
     post:
       summary: Mint tokens (DEVNET ONLY)
@@ -85,27 +118,22 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
 components:
   parameters:
-    mint:
-      name: mint
-      description: Mint base58 public key.
-      required: true
+    tokenA:
+      name: tokenA
       in: query
       schema:
         type: string
-    wallet:
-      name: wallet
-      description: Wallet base58 public key.
-      required: true
+    tokenB:
+      name: tokenB
       in: query
       schema:
         type: string
-    amount:
-      name: amount
-      description: Amount to be minted in base amount.
-      required: true
+    granularity:
+      name: granularity
+      description: Granularity in seconds.
       in: query
       schema:
-        type: string
+        type: number
   schemas:
     mintRequest:
       required:
@@ -140,3 +168,70 @@ components:
       properties:
         error:
           type: string
+
+    listVaultsResponse:
+      type: array
+      items:
+        type: object
+        required:
+          - vault
+          - vaultProtoConfig
+          - vaultTokenAAcount
+          - vaultTokenBAccount
+          - vaultTreasuryTokenBAccount
+          - tokenAMint
+          - tokenASymbol
+          - tokenBMint
+          - tokenBSymbol
+          - swapTokenMint
+          - swapTokenAAccount
+          - swapTokenBAccount
+          - swapFeeAccount
+          - swapAuthority
+          - swap
+        properties:
+          vault:
+            type: string
+            example: 3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV
+          vaultProtoConfig:
+            type: string
+            example: mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L
+          vaultTokenAAcount:
+            type: string
+            exampe: 6PmcdLzbELLxaPc3Fq6FjiSj7wtjA4MEt1UCZBnHh6tw
+          vaultTokenBAccount:
+            type: string
+            example: 5q7HLgfvxmkqAK6QaEFYrNmvKvzQZjWJzjwRu4toi9Sw
+          vaultTreasuryTokenBAccount:
+            type: string
+            example: CrVdqMmYCbBs8zG2rmwdWgmsSArKTbMUv3qvTz8J6YWC
+          tokenAMint:
+            type: string
+            example: BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq
+          tokenASymbol:
+            type: string
+            example: SOL
+          tokenBMint:
+            type: string
+            example: ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8
+          tokenBSymbol:
+            type: string
+            example: USDC
+          swapTokenMint:
+            type: string
+            example: 5U7X6mgvmsu5sSUFWCXtPhsNMVmEyZ4zJzhgweVTjFfX
+          swapTokenAAccount:
+            type: string
+            example: 7cJ5h3JgGBYKt1QzD8z5veLvBQcaEuJMm9CyFp6c5XeG
+          swapTokenBAccount:
+            type: string
+            example: 6fg6TGxUjBKF5BBtreMVpDP7YGrnrizHsDaME1UE5ejy
+          swapFeeAccount:
+            type: string
+            example: Gj8DqPPVjgZwTjvvQA7gRzFE22fT3s9ztAYfiTim4HiH
+          swapAuthority:
+            type: string
+            example: 216G8d1QWwLmxw89Y5Kai69nE1MTzMPNMArX2mQ7KK2Z
+          swap:
+            type: string
+            example: 8Vx5D6dKfv1vyLzL6hdxB1KNnRr5yiHSaw8bDh5LVNAE

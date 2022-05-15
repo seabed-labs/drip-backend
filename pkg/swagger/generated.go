@@ -17,6 +17,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +25,25 @@ import (
 // ErrorResponse defines model for errorResponse.
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+// ListVaultsResponse defines model for listVaultsResponse.
+type ListVaultsResponse []struct {
+	Swap                       string `json:"swap"`
+	SwapAuthority              string `json:"swapAuthority"`
+	SwapFeeAccount             string `json:"swapFeeAccount"`
+	SwapTokenAAccount          string `json:"swapTokenAAccount"`
+	SwapTokenBAccount          string `json:"swapTokenBAccount"`
+	SwapTokenMint              string `json:"swapTokenMint"`
+	TokenAMint                 string `json:"tokenAMint"`
+	TokenASymbol               string `json:"tokenASymbol"`
+	TokenBMint                 string `json:"tokenBMint"`
+	TokenBSymbol               string `json:"tokenBSymbol"`
+	Vault                      string `json:"vault"`
+	VaultProtoConfig           string `json:"vaultProtoConfig"`
+	VaultTokenAAcount          string `json:"vaultTokenAAcount"`
+	VaultTokenBAccount         string `json:"vaultTokenBAccount"`
+	VaultTreasuryTokenBAccount string `json:"vaultTreasuryTokenBAccount"`
 }
 
 // MintRequest defines model for mintRequest.
@@ -43,8 +63,26 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
+// Granularity defines model for granularity.
+type Granularity float32
+
+// TokenA defines model for tokenA.
+type TokenA string
+
+// TokenB defines model for tokenB.
+type TokenB string
+
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
+
+// GetVaultsParams defines parameters for GetVaults.
+type GetVaultsParams struct {
+	TokenA *TokenA `json:"tokenA,omitempty"`
+	TokenB *TokenB `json:"tokenB,omitempty"`
+
+	// Granularity in seconds.
+	Granularity *Granularity `json:"granularity,omitempty"`
+}
 
 // PostMintJSONRequestBody defines body for PostMint for application/json ContentType.
 type PostMintJSONRequestBody PostMintJSONBody
@@ -81,11 +119,11 @@ type ClientOption func(*Client) error
 
 // Creates a new Client, with reasonable defaults
 func NewClient(server string, opts ...ClientOption) (*Client, error) {
-	// create a client with sane default values
+	// create a clients with sane default values
 	client := Client{
 		Server: server,
 	}
-	// mutate client and add all optional params
+	// mutate clients and add all optional params
 	for _, o := range opts {
 		if err := o(&client); err != nil {
 			return nil, err
@@ -120,7 +158,7 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 	}
 }
 
-// The interface specification for the client above.
+// The interface specification for the clients above.
 type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -132,6 +170,9 @@ type ClientInterface interface {
 
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetVaults request
+	GetVaults(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -172,6 +213,18 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetVaults(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetVaultsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -276,6 +329,85 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetVaultsRequest generates requests for GetVaults
+func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/vaults")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenA != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.TokenB != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Granularity != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "granularity", runtime.ParamLocationQuery, *params.Granularity); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -317,7 +449,7 @@ func WithBaseURL(baseURL string) ClientOption {
 	}
 }
 
-// ClientWithResponsesInterface is the interface specification for the client with responses above.
+// ClientWithResponsesInterface is the interface specification for the clients with responses above.
 type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
@@ -329,6 +461,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
+
+	// GetVaults request
+	GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error)
 }
 
 type GetResponse struct {
@@ -399,6 +534,30 @@ func (r GetSwaggerJsonResponse) StatusCode() int {
 	return 0
 }
 
+type GetVaultsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListVaultsResponse
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetVaultsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetVaultsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // GetWithResponse request returning *GetResponse
 func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error) {
 	rsp, err := c.Get(ctx, reqEditors...)
@@ -432,6 +591,15 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
+}
+
+// GetVaultsWithResponse request returning *GetVaultsResponse
+func (c *ClientWithResponses) GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error) {
+	rsp, err := c.GetVaults(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetVaultsResponse(rsp)
 }
 
 // ParseGetResponse parses an HTTP response from a GetWithResponse call
@@ -526,6 +694,46 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 	return response, nil
 }
 
+// ParseGetVaultsResponse parses an HTTP response from a GetVaultsWithResponse call
+func ParseGetVaultsResponse(rsp *http.Response) (*GetVaultsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetVaultsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListVaultsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Health Check
@@ -537,6 +745,9 @@ type ServerInterface interface {
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
+	// Get Supported Vaults
+	// (GET /vaults)
+	GetVaults(ctx echo.Context, params GetVaultsParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -571,6 +782,38 @@ func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 	return err
 }
 
+// GetVaults converts echo context to params.
+func (w *ServerInterfaceWrapper) GetVaults(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetVaultsParams
+	// ------------- Optional query parameter "tokenA" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
+	}
+
+	// ------------- Optional query parameter "tokenB" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
+	}
+
+	// ------------- Optional query parameter "granularity" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "granularity", ctx.QueryParams(), &params.Granularity)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter granularity: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetVaults(ctx, params)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -602,23 +845,38 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
+	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

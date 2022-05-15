@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  psql:
+    image: postgres
+    environment:
+      POSTGRES_DB: ${PSQL_DBNAME}
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASS}
+    ports:
+      - ${PSQL_PORT}:5432
+    volumes:
+      - ./.docker/psql_data:/var/lib/postgresql/data
+volumes:
+  psql_data:
+    driver: local
