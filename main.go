@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/internal/scripts"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
@@ -40,6 +42,7 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			psql.RunMigrations,
+			scripts.Backfill,
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			server.Run,
 		),
