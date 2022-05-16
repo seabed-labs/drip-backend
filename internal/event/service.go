@@ -98,6 +98,7 @@ func (d DripProgramProcessor) processEvent(address string, data []byte) {
 		}
 		return
 	}
+	// TODO(mocha): we don't want to process vault changes, we don't want to ingest random vaults for security purposes
 	var vault dca_vault.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		logrus.WithField("address", address).Infof("decoded as vault")
