@@ -6,7 +6,7 @@
 <a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml/badge.svg?branch=main" /></a>
 ## Setup
 
-- install go
+- install go 1.18
 - install all packages
 ```bash
 go get -u ./...
