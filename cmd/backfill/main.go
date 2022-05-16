@@ -31,7 +31,7 @@ func getDependencies() []fx.Option {
 			configs.NewPSQLConfig,
 			psql.NewGORMDatabase,
 			repository.Use,
-			solana.CreateSolanaClient,
+			solana.NewSolanaClient,
 			api.NewHandler,
 		),
 		fx.Invoke(

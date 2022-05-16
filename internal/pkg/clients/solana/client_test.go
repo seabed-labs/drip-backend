@@ -19,7 +19,7 @@ func TestSolanaClient(t *testing.T) {
 		Environment: configs.DevnetEnv,
 		Wallet:      privKey,
 	}
-	client, err := CreateSolanaClient(&config)
+	client, err := NewSolanaClient(&config)
 	assert.NoError(t, err)
 
 	rpcClient := rpc.New(getURL(configs.DevnetEnv))

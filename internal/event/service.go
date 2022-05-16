@@ -2,42 +2,49 @@ package event
 
 import (
 	"context"
+	"time"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
+	"github.com/shopspring/decimal"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/dca_vault"
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/processor"
+
 	bin "github.com/gagliardetto/binary"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
 
 type DripProgramProcessor struct {
-	repo   *repository.Query
-	client solana.Solana
-	cancel context.CancelFunc
+	client    solana.Solana
+	processor processor.Processor
+	cancel    context.CancelFunc
 }
 
 func NewDripProgramProcessor(
 	lifecycle fx.Lifecycle,
-	repo *repository.Query,
 	client solana.Solana,
+	processor processor.Processor,
 ) *DripProgramProcessor {
 	ctx, cancel := context.WithCancel(context.Background())
-	processor := DripProgramProcessor{
-		repo:   repo,
-		client: client,
-		cancel: cancel,
+	dripProgramProcessor := DripProgramProcessor{
+		client:    client,
+		processor: processor,
+		cancel:    cancel,
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			return processor.start(ctx)
+			return dripProgramProcessor.start(ctx)
 		},
 		OnStop: func(_ context.Context) error {
-			processor.stop()
+			dripProgramProcessor.stop()
 			return nil
 		},
 	})
-	return &processor
+	return &dripProgramProcessor
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
@@ -48,52 +55,82 @@ func (d DripProgramProcessor) stop() {
 	d.cancel()
 }
 
+//
 func (d DripProgramProcessor) processEvent(address string, data []byte) {
 	logrus.WithField("address", address).Infof("received drip account update")
 	var vaultPeriod dca_vault.VaultPeriod
 	if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err == nil {
 		logrus.WithField("address", address).Infof("decoded as vaultPeriod")
+		twap, err := decimal.NewFromString(vaultPeriod.Twap.String())
+		if err != nil {
+			logrus.WithError(err).Errorf("failed to decode twap as decimal")
+			return
+		}
+		if err := d.processor.UpsertVaultPeriods(context.Background(), &model.VaultPeriod{
+			Pubkey:   address,
+			Vault:    vaultPeriod.Vault.String(),
+			PeriodID: vaultPeriod.PeriodId,
+			Twap:     twap,
+			Dar:      vaultPeriod.Dar,
+		}); err != nil {
+			logrus.WithError(err).Errorf("failed to upsert vault period")
+			return
+		}
 		return
 	}
 	var position dca_vault.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		logrus.WithField("address", address).Infof("decoded as position")
+		if err := d.processor.UpsertPositions(context.Background(), &model.Position{
+			Pubkey:                   address,
+			Vault:                    position.Vault.String(),
+			Authority:                position.PositionAuthority.String(),
+			DepositedTokenAAmount:    position.DepositedTokenAAmount,
+			WithdrawnTokenBAmount:    position.WithdrawnTokenBAmount,
+			DepositTimestamp:         time.Unix(position.DepositTimestamp, 0),
+			DcaPeriodIDBeforeDeposit: position.DcaPeriodIdBeforeDeposit,
+			NumberOfSwaps:            position.NumberOfSwaps,
+			PeriodicDripAmount:       position.PeriodicDripAmount,
+			IsClosed:                 position.IsClosed,
+		}); err != nil {
+			logrus.WithError(err).Errorf("failed to upsert position")
+			return
+		}
 		return
 	}
 	var vault dca_vault.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		logrus.WithField("address", address).Infof("decoded as vault")
+		if err := d.processor.UpsertVaults(context.Background(), &model.Vault{
+			Pubkey:                 address,
+			ProtoConfig:            vault.ProtoConfig.String(),
+			TokenAMint:             vault.TokenAMint.String(),
+			TokenBMint:             vault.TokenBMint.String(),
+			TokenAAccount:          vault.TokenAAccount.String(),
+			TokenBAccount:          vault.TokenBAccount.String(),
+			TreasuryTokenBAccount:  vault.TreasuryTokenBAccount.String(),
+			LastDcaPeriod:          vault.LastDcaPeriod,
+			DripAmount:             vault.DripAmount,
+			DcaActivationTimestamp: time.Unix(vault.DcaActivationTimestamp, 0),
+		}); err != nil {
+			logrus.WithError(err).Errorf("failed to upsert vault")
+			return
+		}
 		return
 	}
 	var protoConfig dca_vault.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
 		logrus.WithField("address", address).Infof("decoded as protoConfig")
+		if err := d.processor.UpsertProtoConfigs(context.Background(), &model.ProtoConfig{
+			Pubkey:               address,
+			Granularity:          protoConfig.Granularity,
+			TriggerDcaSpread:     protoConfig.TriggerDcaSpread,
+			BaseWithdrawalSpread: protoConfig.BaseWithdrawalSpread,
+		}); err != nil {
+			logrus.WithError(err).Errorf("failed to upsert proto config")
+			return
+		}
 		return
 	}
 	logrus.WithField("address", address).Errorf("failed to decode account")
 }
-
-//t.Run("ProgramSubscribe should subscribe to drip", func(t *testing.T) {
-//	timeout := time.Minute * 30
-//	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-//	defer cancel()
-//	err := client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), func(address string, data []byte) {
-//		var vaultPeriod dca_vault.VaultPeriod
-//		logrus.WithField("address", address).Infof("got message")
-//		if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err != nil {
-//			logrus.
-//				WithError(err).
-//				Errorf("failed to decode as vault period")
-//		} else {
-//			logrus.
-//				WithField("vaultPeriod", vaultPeriod).
-//				Infof("decoded vault period")
-//		}
-//		assert.NotEmpty(t, data)
-//	})
-//	assert.NoError(t, err)
-//	select {
-//	case <-time.After(timeout):
-//		break
-//	}
-//})

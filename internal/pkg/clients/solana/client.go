@@ -31,7 +31,7 @@ type Solana interface {
 	ProgramSubscribe(context.Context, string, func(string, []byte)) error
 }
 
-func CreateSolanaClient(
+func NewSolanaClient(
 	config *configs.AppConfig,
 ) (Solana, error) {
 	return createsolanaImplClient(config)

@@ -51,5 +51,12 @@ func GenerateModels(
 		gen.FieldType("dar", "uint64"),
 		gen.FieldType("twap", "decimal.Decimal"),
 	)
+	g.GenerateModel("position",
+		gen.FieldType("deposited_token_a_amount", "uint64"),
+		gen.FieldType("withdrawn_token_b_amount", "uint64"),
+		gen.FieldType("dca_period_id_before_deposit", "uint64"),
+		gen.FieldType("number_of_swaps", "uint64"),
+		gen.FieldType("periodic_drip_amount", "uint64"),
+	)
 	g.Execute()
 }

@@ -6,19 +6,11 @@ import (
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
 
 	"github.com/dcaf-protocol/drip/internal/event"
-
-	"github.com/dcaf-protocol/drip/internal/scripts"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/api"
-	"github.com/dcaf-protocol/drip/internal/server"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/database/psql"
-
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -26,12 +18,12 @@ import (
 func main() {
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start drip backend")
+		log.WithError(err).Fatalf("failed to start drip event processor")
 	}
-	log.Info("starting drip backend")
+	log.Info("starting drip event processor")
 	sig := <-fxApp.Done()
 	log.WithFields(log.Fields{"signal": sig}).
-		Infof("received exit signal, stoping server")
+		Infof("received exit signal, stoping event processor")
 }
 
 func getDependencies() []fx.Option {
@@ -42,15 +34,9 @@ func getDependencies() []fx.Option {
 			psql.NewGORMDatabase,
 			repository.Use,
 			solana.NewSolanaClient,
-			api.NewHandler,
 			processor.NewProcessor,
 		),
 		fx.Invoke(
-			// func() { log.SetFormatter(&log.JSONFormatter{}) },
-			psql.RunMigrations,
-			scripts.Backfill,
-			server.Run,
-			// TODO(mocha): this should run in it's own deployment
 			event.NewDripProgramProcessor,
 		),
 		fx.NopLogger,
