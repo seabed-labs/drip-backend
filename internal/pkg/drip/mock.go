@@ -50,6 +50,21 @@ func (mr *MockDripMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockDrip)(nil).GetProtoConfigs), arg0, arg1, arg2)
 }
 
+// GetVaultPeriods mocks base method.
+func (m *MockDrip) GetVaultPeriods(arg0 context.Context, arg1 string, arg2, arg3 int, arg4 *string) ([]*model.VaultPeriod, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVaultPeriods", arg0, arg1, arg2, arg3, arg4)
+	ret0, _ := ret[0].([]*model.VaultPeriod)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVaultPeriods indicates an expected call of GetVaultPeriods.
+func (mr *MockDripMockRecorder) GetVaultPeriods(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultPeriods", reflect.TypeOf((*MockDrip)(nil).GetVaultPeriods), arg0, arg1, arg2, arg3, arg4)
+}
+
 // GetVaults mocks base method.
 func (m *MockDrip) GetVaults(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
