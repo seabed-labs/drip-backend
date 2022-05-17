@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/api"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 	"github.com/dcaf-protocol/drip/internal/scripts"
@@ -32,7 +31,6 @@ func getDependencies() []fx.Option {
 			psql.NewGORMDatabase,
 			repository.Use,
 			solana.NewSolanaClient,
-			api.NewHandler,
 		),
 		fx.Invoke(
 			psql.RunMigrations,

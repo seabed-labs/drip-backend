@@ -7,13 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
-
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
-
 	"github.com/dcaf-protocol/drip/internal/configs"
 	solana2 "github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-	mock_drip "github.com/dcaf-protocol/drip/internal/pkg/drip"
+	"github.com/dcaf-protocol/drip/internal/pkg/drip"
+	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
+	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"
@@ -51,8 +49,7 @@ func TestHandler_GetVaults(t *testing.T) {
 	e := echo.New()
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
-		m := mock_drip.NewMockDrip(ctrl)
-		mock_drip.NewMockDrip(ctrl)
+		m := drip.NewMockDrip(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -70,7 +67,7 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetVaults(gomock.Any()).
+			GetVaults(gomock.Any(), nil, nil, nil).
 			Return(nil, fmt.Errorf("some error")).
 			AnyTimes()
 
@@ -81,8 +78,7 @@ func TestHandler_GetVaults(t *testing.T) {
 	})
 
 	t.Run("should return vaults without filter", func(t *testing.T) {
-		m := mock_drip.NewMockDrip(ctrl)
-		mock_drip.NewMockDrip(ctrl)
+		m := drip.NewMockDrip(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
@@ -100,7 +96,7 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetVaults(gomock.Any()).
+			GetVaults(gomock.Any(), nil, nil, nil).
 			Return(res, nil).
 			AnyTimes()
 

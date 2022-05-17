@@ -36,18 +36,18 @@ func (m *MockDrip) EXPECT() *MockDripMockRecorder {
 }
 
 // GetVaults mocks base method.
-func (m *MockDrip) GetVaults(ctx context.Context) ([]*model.Vault, error) {
+func (m *MockDrip) GetVaults(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetVaults", ctx)
+	ret := m.ctrl.Call(m, "GetVaults", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetVaults indicates an expected call of GetVaults.
-func (mr *MockDripMockRecorder) GetVaults(ctx interface{}) *gomock.Call {
+func (mr *MockDripMockRecorder) GetVaults(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaults", reflect.TypeOf((*MockDrip)(nil).GetVaults), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaults", reflect.TypeOf((*MockDrip)(nil).GetVaults), arg0, arg1, arg2, arg3)
 }
 
 // UpsertVaultByAddress mocks base method.

@@ -12,17 +12,17 @@ import (
 type Drip interface {
 	UpsertVaultByAddress(context.Context, string) error
 	UpsertVaults(context.Context, ...*model.Vault) error
-	GetVaults(ctx context.Context) ([]*model.Vault, error)
+	GetVaults(context.Context, *string, *string, *string) ([]*model.Vault, error)
 }
 
 type dripImpl struct {
 	client solana.Solana
-	repo   repository.Query
+	repo   *repository.Query
 }
 
 func NewDripService(
 	client solana.Solana,
-	repo repository.Query,
+	repo *repository.Query,
 ) Drip {
 	return dripImpl{
 		client: client,
@@ -30,10 +30,18 @@ func NewDripService(
 	}
 }
 
-func (d dripImpl) GetVaults(ctx context.Context) ([]*model.Vault, error) {
-	return d.repo.Vault.
-		WithContext(ctx).
-		Find()
+func (d dripImpl) GetVaults(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
+	query := d.repo.Vault.WithContext(ctx)
+	if tokenAMint != nil {
+		query = query.Where(d.repo.Vault.TokenAMint.Eq(*tokenAMint))
+	}
+	if tokenBMint != nil {
+		query = query.Where(d.repo.Vault.TokenBMint.Eq(*tokenBMint))
+	}
+	if protoConfig != nil {
+		query = query.Where(d.repo.Vault.ProtoConfig.Eq(*protoConfig))
+	}
+	return query.Find()
 }
 
 func (d dripImpl) UpsertVaultByAddress(ctx context.Context, s string) error {

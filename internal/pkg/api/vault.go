@@ -14,7 +14,12 @@ import (
 func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
 	var res Swagger.ListVaults
 
-	vaultModels, err := h.drip.GetVaults(c.Request().Context())
+	vaultModels, err := h.drip.GetVaults(
+		c.Request().Context(),
+		(*string)(params.TokenA),
+		(*string)(params.TokenB),
+		(*string)(params.ProtoConfig),
+	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vaults")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
