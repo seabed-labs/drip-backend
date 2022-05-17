@@ -27,8 +27,6 @@ func newVault(db *gorm.DB) vault {
 	_vault.ALL = field.NewField(tableName, "*")
 	_vault.Pubkey = field.NewString(tableName, "pubkey")
 	_vault.ProtoConfig = field.NewString(tableName, "proto_config")
-	_vault.TokenAMint = field.NewString(tableName, "token_a_mint")
-	_vault.TokenBMint = field.NewString(tableName, "token_b_mint")
 	_vault.TokenAAccount = field.NewString(tableName, "token_a_account")
 	_vault.TokenBAccount = field.NewString(tableName, "token_b_account")
 	_vault.TreasuryTokenBAccount = field.NewString(tableName, "treasury_token_b_account")
@@ -36,6 +34,7 @@ func newVault(db *gorm.DB) vault {
 	_vault.DripAmount = field.NewUint64(tableName, "drip_amount")
 	_vault.DcaActivationTimestamp = field.NewTime(tableName, "dca_activation_timestamp")
 	_vault.Enabled = field.NewBool(tableName, "enabled")
+	_vault.TokenPairID = field.NewString(tableName, "token_pair_id")
 
 	_vault.fillFieldMap()
 
@@ -48,8 +47,6 @@ type vault struct {
 	ALL                    field.Field
 	Pubkey                 field.String
 	ProtoConfig            field.String
-	TokenAMint             field.String
-	TokenBMint             field.String
 	TokenAAccount          field.String
 	TokenBAccount          field.String
 	TreasuryTokenBAccount  field.String
@@ -57,6 +54,7 @@ type vault struct {
 	DripAmount             field.Uint64
 	DcaActivationTimestamp field.Time
 	Enabled                field.Bool
+	TokenPairID            field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -75,8 +73,6 @@ func (v *vault) updateTableName(table string) *vault {
 	v.ALL = field.NewField(table, "*")
 	v.Pubkey = field.NewString(table, "pubkey")
 	v.ProtoConfig = field.NewString(table, "proto_config")
-	v.TokenAMint = field.NewString(table, "token_a_mint")
-	v.TokenBMint = field.NewString(table, "token_b_mint")
 	v.TokenAAccount = field.NewString(table, "token_a_account")
 	v.TokenBAccount = field.NewString(table, "token_b_account")
 	v.TreasuryTokenBAccount = field.NewString(table, "treasury_token_b_account")
@@ -84,6 +80,7 @@ func (v *vault) updateTableName(table string) *vault {
 	v.DripAmount = field.NewUint64(table, "drip_amount")
 	v.DcaActivationTimestamp = field.NewTime(table, "dca_activation_timestamp")
 	v.Enabled = field.NewBool(table, "enabled")
+	v.TokenPairID = field.NewString(table, "token_pair_id")
 
 	v.fillFieldMap()
 
@@ -106,11 +103,9 @@ func (v *vault) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *vault) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 11)
+	v.fieldMap = make(map[string]field.Expr, 10)
 	v.fieldMap["pubkey"] = v.Pubkey
 	v.fieldMap["proto_config"] = v.ProtoConfig
-	v.fieldMap["token_a_mint"] = v.TokenAMint
-	v.fieldMap["token_b_mint"] = v.TokenBMint
 	v.fieldMap["token_a_account"] = v.TokenAAccount
 	v.fieldMap["token_b_account"] = v.TokenBAccount
 	v.fieldMap["treasury_token_b_account"] = v.TreasuryTokenBAccount
@@ -118,6 +113,7 @@ func (v *vault) fillFieldMap() {
 	v.fieldMap["drip_amount"] = v.DripAmount
 	v.fieldMap["dca_activation_timestamp"] = v.DcaActivationTimestamp
 	v.fieldMap["enabled"] = v.Enabled
+	v.fieldMap["token_pair_id"] = v.TokenPairID
 }
 
 func (v vault) clone(db *gorm.DB) vault {

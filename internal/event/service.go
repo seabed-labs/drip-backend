@@ -102,23 +102,23 @@ func (d DripProgramProcessor) processEvent(address string, data []byte) {
 	var vault dca_vault.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		logrus.WithField("address", address).Infof("decoded as vault")
-		if err := d.processor.UpsertVaults(context.Background(), &model.Vault{
-			Pubkey:                 address,
-			ProtoConfig:            vault.ProtoConfig.String(),
-			TokenAMint:             vault.TokenAMint.String(),
-			TokenBMint:             vault.TokenBMint.String(),
-			TokenAAccount:          vault.TokenAAccount.String(),
-			TokenBAccount:          vault.TokenBAccount.String(),
-			TreasuryTokenBAccount:  vault.TreasuryTokenBAccount.String(),
-			LastDcaPeriod:          vault.LastDcaPeriod,
-			DripAmount:             vault.DripAmount,
-			DcaActivationTimestamp: time.Unix(vault.DcaActivationTimestamp, 0),
-			Enabled:                false,
-		}); err != nil {
-			logrus.WithError(err).Errorf("failed to upsert vault")
-			return
-		}
-		return
+		//if err := d.processor.UpsertVaults(context.Background(), &model.Vault{
+		//	Pubkey:                 address,
+		//	ProtoConfig:            vault.ProtoConfig.String(),
+		//	TokenAMint:             vault.TokenAMint.String(),
+		//	TokenBMint:             vault.TokenBMint.String(),
+		//	TokenAAccount:          vault.TokenAAccount.String(),
+		//	TokenBAccount:          vault.TokenBAccount.String(),
+		//	TreasuryTokenBAccount:  vault.TreasuryTokenBAccount.String(),
+		//	LastDcaPeriod:          vault.LastDcaPeriod,
+		//	DripAmount:             vault.DripAmount,
+		//	DcaActivationTimestamp: time.Unix(vault.DcaActivationTimestamp, 0),
+		//	Enabled:                false,
+		//}); err != nil {
+		//	logrus.WithError(err).Errorf("failed to upsert vault")
+		//	return
+		//}
+		//return
 	}
 	var protoConfig dca_vault.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {

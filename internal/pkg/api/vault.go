@@ -27,6 +27,12 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 
 	for i := range vaultModels {
 		vault := vaultModels[i]
+		// TODO(mocha): this can be done in the same query as the vault
+		tokenPair, err := h.drip.GetTokenPair(c.Request().Context(), vault.TokenPairID)
+		if err != nil {
+			logrus.WithError(err).WithField("tokenPairID", tokenPair.ID).Errorf("could not find token pair")
+			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		}
 		res = append(res, struct {
 			DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
 			DripAmount             string `json:"dripAmount"`
@@ -45,9 +51,9 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 			ProtoConfig:            vault.ProtoConfig,
 			Pubkey:                 vault.Pubkey,
 			TokenAAccount:          vault.TokenAAccount,
-			TokenAMint:             vault.TokenAMint,
+			TokenAMint:             tokenPair.TokenA,
 			TokenBAccount:          vault.TokenBAccount,
-			TokenBMint:             vault.TokenBMint,
+			TokenBMint:             tokenPair.TokenB,
 			TreasuryTokenBAccount:  vault.TreasuryTokenBAccount},
 		)
 	}

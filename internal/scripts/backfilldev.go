@@ -74,7 +74,7 @@ func Backfill(
 	tokenPairMap := backfillTokenPairs(repo, vaultConfigs)
 	backfillTokenSwaps(repo, vaultConfigs, tokenPairMap)
 	backfillProtoConfigs(repo, client, vaultConfigs)
-	vaultMap := backfillVaults(repo, client, vaultConfigs)
+	vaultMap := backfillVaults(repo, client, vaultConfigs, tokenPairMap)
 	backfillVaultPeriods(repo, client, vaultConfigs, vaultMap)
 	logrus.Infof("done backfilling")
 	return nil
@@ -145,7 +145,10 @@ func backfillVaultPeriods(repo *repository.Query, client *rpc.Client, vaultConfi
 	}
 }
 
-func backfillVaults(repo *repository.Query, client *rpc.Client, vaultConfigs Config) map[string]*model.Vault {
+func backfillVaults(
+	repo *repository.Query, client *rpc.Client,
+	vaultConfigs Config, mintToTokenPair map[string]*model.TokenPair,
+) map[string]*model.Vault {
 	var vaults []*model.Vault
 	vaultSet := make(map[string]*model.Vault)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
@@ -154,11 +157,18 @@ func backfillVaults(repo *repository.Query, client *rpc.Client, vaultConfigs Con
 			if err := getAccount(client, vaultConfig.Vault, &vault); err != nil {
 				continue
 			}
+			tokenPair, ok := mintToTokenPair[vaultConfig.TokenAMint+vaultConfig.TokenBMint]
+			if !ok {
+				logrus.
+					WithField("tokenA", vaultConfig.TokenAMint).
+					WithField("tokenB", vaultConfig.TokenBMint).
+					Warning("missing token pair")
+				continue
+			}
 			vaultModel := &model.Vault{
 				Pubkey:                 vaultConfig.Vault,
 				ProtoConfig:            vault.ProtoConfig.String(),
-				TokenAMint:             vault.TokenAMint.String(),
-				TokenBMint:             vault.TokenBMint.String(),
+				TokenPairID:            tokenPair.ID,
 				TokenAAccount:          vault.TokenAAccount.String(),
 				TokenBAccount:          vault.TokenBAccount.String(),
 				TreasuryTokenBAccount:  vault.TreasuryTokenBAccount.String(),

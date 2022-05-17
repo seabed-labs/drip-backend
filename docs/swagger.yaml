@@ -149,6 +149,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /tokens:
+    get:
+      summary: Get Vault Periods
+      description: Get vault periods with pagination and filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/tokenA"
+        - $ref: "#/components/parameters/tokenB"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listVaultPeriods'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /mint:
     post:
       summary: Mint tokens (DEVNET ONLY)

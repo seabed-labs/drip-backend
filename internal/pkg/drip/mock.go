@@ -50,6 +50,36 @@ func (mr *MockDripMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockDrip)(nil).GetProtoConfigs), arg0, arg1, arg2)
 }
 
+// GetTokenPair mocks base method.
+func (m *MockDrip) GetTokenPair(arg0 context.Context, arg1 string) (*model.TokenPair, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokenPair", arg0, arg1)
+	ret0, _ := ret[0].(*model.TokenPair)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenPair indicates an expected call of GetTokenPair.
+func (mr *MockDripMockRecorder) GetTokenPair(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPair", reflect.TypeOf((*MockDrip)(nil).GetTokenPair), arg0, arg1)
+}
+
+// GetTokens mocks base method.
+func (m *MockDrip) GetTokens(arg0 context.Context, arg1, arg2 *string) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokens", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokens indicates an expected call of GetTokens.
+func (mr *MockDripMockRecorder) GetTokens(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokens", reflect.TypeOf((*MockDrip)(nil).GetTokens), arg0, arg1, arg2)
+}
+
 // GetVaultPeriods mocks base method.
 func (m *MockDrip) GetVaultPeriods(arg0 context.Context, arg1 string, arg2, arg3 int, arg4 *string) ([]*model.VaultPeriod, error) {
 	m.ctrl.T.Helper()
