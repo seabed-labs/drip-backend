@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	mock_drip "github.com/dcaf-protocol/drip/internal/pkg/drip"
+
 	"github.com/dcaf-protocol/drip/internal/configs"
 
 	solana2 "github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
@@ -33,10 +35,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
@@ -56,10 +58,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -84,10 +86,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -123,10 +125,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when server wallet is not mint authority", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -177,10 +179,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -236,10 +238,10 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return success", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
-		h := NewHandler(m, &configs.AppConfig{
+		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		})
+		}, m, mock_drip.NewMockDrip(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -286,13 +288,11 @@ func TestHandler_PostMint(t *testing.T) {
 			MintToWallet(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return("some tx hash", nil).
 			AnyTimes()
-
 		err = h.PostMint(c)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusOK)
 		assert.Equal(t, "{\"txHash\":\"some tx hash\"}\n", rec.Body.String())
 	})
-
 }
 
 func encodeMintToBase64(mint token.Mint) (string, error) {

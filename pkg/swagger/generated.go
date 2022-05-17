@@ -27,23 +27,19 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// ListVaultsResponse defines model for listVaultsResponse.
-type ListVaultsResponse []struct {
-	Swap                       string `json:"swap"`
-	SwapAuthority              string `json:"swapAuthority"`
-	SwapFeeAccount             string `json:"swapFeeAccount"`
-	SwapTokenAAccount          string `json:"swapTokenAAccount"`
-	SwapTokenBAccount          string `json:"swapTokenBAccount"`
-	SwapTokenMint              string `json:"swapTokenMint"`
-	TokenAMint                 string `json:"tokenAMint"`
-	TokenASymbol               string `json:"tokenASymbol"`
-	TokenBMint                 string `json:"tokenBMint"`
-	TokenBSymbol               string `json:"tokenBSymbol"`
-	Vault                      string `json:"vault"`
-	VaultProtoConfig           string `json:"vaultProtoConfig"`
-	VaultTokenAAcount          string `json:"vaultTokenAAcount"`
-	VaultTokenBAccount         string `json:"vaultTokenBAccount"`
-	VaultTreasuryTokenBAccount string `json:"vaultTreasuryTokenBAccount"`
+// ListVaults defines model for listVaults.
+type ListVaults []struct {
+	// unix timestamp
+	DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
+	DripAmount             string `json:"dripAmount"`
+	LastDcaPeriod          string `json:"lastDcaPeriod"`
+	ProtoConfig            string `json:"protoConfig"`
+	Pubkey                 string `json:"pubkey"`
+	TokenAAccount          string `json:"tokenAAccount"`
+	TokenAMint             string `json:"tokenAMint"`
+	TokenBAccount          string `json:"tokenBAccount"`
+	TokenBMint             string `json:"tokenBMint"`
+	TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
 }
 
 // MintRequest defines model for mintRequest.
@@ -63,8 +59,8 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
-// Granularity defines model for granularity.
-type Granularity float32
+// ProtoConfig defines model for protoConfig.
+type ProtoConfig string
 
 // TokenA defines model for tokenA.
 type TokenA string
@@ -80,8 +76,8 @@ type GetVaultsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
 
-	// Granularity in seconds.
-	Granularity *Granularity `json:"granularity,omitempty"`
+	// Vault proto config public key.
+	ProtoConfig *ProtoConfig `json:"protoConfig,omitempty"`
 }
 
 // PostMintJSONRequestBody defines body for PostMint for application/json ContentType.
@@ -119,11 +115,11 @@ type ClientOption func(*Client) error
 
 // Creates a new Client, with reasonable defaults
 func NewClient(server string, opts ...ClientOption) (*Client, error) {
-	// create a clients with sane default values
+	// create a client with sane default values
 	client := Client{
 		Server: server,
 	}
-	// mutate clients and add all optional params
+	// mutate client and add all optional params
 	for _, o := range opts {
 		if err := o(&client); err != nil {
 			return nil, err
@@ -158,7 +154,7 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 	}
 }
 
-// The interface specification for the clients above.
+// The interface specification for the client above.
 type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -382,9 +378,9 @@ func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request,
 
 	}
 
-	if params.Granularity != nil {
+	if params.ProtoConfig != nil {
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "granularity", runtime.ParamLocationQuery, *params.Granularity); err != nil {
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "protoConfig", runtime.ParamLocationQuery, *params.ProtoConfig); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -449,7 +445,7 @@ func WithBaseURL(baseURL string) ClientOption {
 	}
 }
 
-// ClientWithResponsesInterface is the interface specification for the clients with responses above.
+// ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
@@ -537,7 +533,7 @@ func (r GetSwaggerJsonResponse) StatusCode() int {
 type GetVaultsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ListVaultsResponse
+	JSON200      *ListVaults
 	JSON400      *ErrorResponse
 	JSON500      *ErrorResponse
 }
@@ -709,7 +705,7 @@ func ParseGetVaultsResponse(rsp *http.Response) (*GetVaultsResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListVaultsResponse
+		var dest ListVaults
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -802,11 +798,11 @@ func (w *ServerInterfaceWrapper) GetVaults(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
 	}
 
-	// ------------- Optional query parameter "granularity" -------------
+	// ------------- Optional query parameter "protoConfig" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "granularity", ctx.QueryParams(), &params.Granularity)
+	err = runtime.BindQueryParameter("form", true, false, "protoConfig", ctx.QueryParams(), &params.ProtoConfig)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter granularity: %s", err))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter protoConfig: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
@@ -852,31 +848,27 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -2,6 +2,9 @@ package api
 
 import (
 	"net/http"
+	"strconv"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
 
@@ -9,49 +12,38 @@ import (
 )
 
 func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
-	var res Swagger.ListVaultsResponse
-	//for _, vault := range h.vaultConfigs {
-	//	if params.TokenA != nil && vault.TokenAMint != string(*params.TokenA) {
-	//		continue
-	//	}
-	//	if params.TokenB != nil && vault.TokenBMint != string(*params.TokenB) {
-	//		continue
-	//	}
-	//	if params.Granularity != nil && float32(vault.VaultProtoConfigGranularity) != float32(*params.Granularity) {
-	//		continue
-	//	}
-	//	res = append(res, struct {
-	//		Swap                       string `json:"swap"`
-	//		SwapAuthority              string `json:"swapAuthority"`
-	//		SwapFeeAccount             string `json:"swapFeeAccount"`
-	//		SwapTokenAAccount          string `json:"swapTokenAAccount"`
-	//		SwapTokenBAccount          string `json:"swapTokenBAccount"`
-	//		SwapTokenMint              string `json:"swapTokenMint"`
-	//		TokenAMint                 string `json:"tokenAMint"`
-	//		TokenASymbol               string `json:"tokenASymbol"`
-	//		TokenBMint                 string `json:"tokenBMint"`
-	//		TokenBSymbol               string `json:"tokenBSymbol"`
-	//		Vault                      string `json:"vault"`
-	//		VaultProtoConfig           string `json:"vaultProtoConfig"`
-	//		VaultTokenAAcount          string `json:"vaultTokenAAcount"`
-	//		VaultTokenBAccount         string `json:"vaultTokenBAccount"`
-	//		VaultTreasuryTokenBAccount string `json:"vaultTreasuryTokenBAccount"`
-	//	}{
-	//		Swap:                       vault.Swap,
-	//		SwapAuthority:              vault.SwapAuthority,
-	//		SwapFeeAccount:             vault.SwapFeeAccount,
-	//		SwapTokenAAccount:          vault.SwapTokenAAccount,
-	//		SwapTokenBAccount:          vault.SwapTokenBAccount,
-	//		SwapTokenMint:              vault.SwapTokenMint,
-	//		TokenAMint:                 vault.TokenAMint,
-	//		TokenASymbol:               vault.TokenASymbol,
-	//		TokenBMint:                 vault.TokenBMint,
-	//		Vault:                      vault.Vault,
-	//		VaultProtoConfig:           vault.VaultProtoConfig,
-	//		VaultTokenAAcount:          vault.VaultTokenAAccount,
-	//		VaultTokenBAccount:         vault.VaultTokenBAccount,
-	//		VaultTreasuryTokenBAccount: vault.VaultTreasuryTokenBAccount,
-	//	})
-	//}
+	var res Swagger.ListVaults
+
+	vaultModels, err := h.drip.GetVaults(c.Request().Context())
+	if err != nil {
+		logrus.WithError(err).Errorf("failed to get vaults")
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+	}
+
+	for _, vault := range vaultModels {
+		res = append(res, struct {
+			DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
+			DripAmount             string `json:"dripAmount"`
+			LastDcaPeriod          string `json:"lastDcaPeriod"`
+			ProtoConfig            string `json:"protoConfig"`
+			Pubkey                 string `json:"pubkey"`
+			TokenAAccount          string `json:"tokenAAccount"`
+			TokenAMint             string `json:"tokenAMint"`
+			TokenBAccount          string `json:"tokenBAccount"`
+			TokenBMint             string `json:"tokenBMint"`
+			TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
+		}{
+			DcaActivationTimestamp: strconv.FormatInt(vault.DcaActivationTimestamp.Unix(), 10),
+			DripAmount:             strconv.FormatUint(vault.DripAmount, 10),
+			LastDcaPeriod:          strconv.FormatUint(vault.LastDcaPeriod, 10),
+			ProtoConfig:            vault.ProtoConfig,
+			Pubkey:                 vault.Pubkey,
+			TokenAAccount:          vault.TokenAAccount,
+			TokenAMint:             vault.TokenAMint,
+			TokenBAccount:          vault.TokenBAccount,
+			TokenBMint:             vault.TokenBMint,
+			TreasuryTokenBAccount:  vault.TreasuryTokenBAccount},
+		)
+	}
 	return c.JSON(http.StatusOK, res)
 }
