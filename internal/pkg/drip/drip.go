@@ -41,6 +41,7 @@ func (d dripImpl) GetVaults(ctx context.Context, tokenAMint, tokenBMint, protoCo
 	if protoConfig != nil {
 		query = query.Where(d.repo.Vault.ProtoConfig.Eq(*protoConfig))
 	}
+	query = query.Where(d.repo.Vault.Enabled.Is(true))
 	return query.Find()
 }
 

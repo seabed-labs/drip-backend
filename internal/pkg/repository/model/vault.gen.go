@@ -22,6 +22,7 @@ type Vault struct {
 	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;not null" json:"lastDcaPeriod" yaml:"lastDcaPeriod"`
 	DripAmount             uint64    `gorm:"column:drip_amount;not null" json:"dripAmount" yaml:"dripAmount"`
 	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;not null" json:"dcaActivationTimestamp" yaml:"dcaActivationTimestamp"`
+	Enabled                bool      `gorm:"column:enabled;not null;default:true" json:"enabled" yaml:"enabled"`
 }
 
 // TableName Vault's table name

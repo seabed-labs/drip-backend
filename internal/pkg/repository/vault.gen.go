@@ -35,6 +35,7 @@ func newVault(db *gorm.DB) vault {
 	_vault.LastDcaPeriod = field.NewFloat64(tableName, "last_dca_period")
 	_vault.DripAmount = field.NewFloat64(tableName, "drip_amount")
 	_vault.DcaActivationTimestamp = field.NewTime(tableName, "dca_activation_timestamp")
+	_vault.Enabled = field.NewBool(tableName, "enabled")
 
 	_vault.fillFieldMap()
 
@@ -55,6 +56,7 @@ type vault struct {
 	LastDcaPeriod          field.Float64
 	DripAmount             field.Float64
 	DcaActivationTimestamp field.Time
+	Enabled                field.Bool
 
 	fieldMap map[string]field.Expr
 }
@@ -81,6 +83,7 @@ func (v *vault) updateTableName(table string) *vault {
 	v.LastDcaPeriod = field.NewFloat64(table, "last_dca_period")
 	v.DripAmount = field.NewFloat64(table, "drip_amount")
 	v.DcaActivationTimestamp = field.NewTime(table, "dca_activation_timestamp")
+	v.Enabled = field.NewBool(table, "enabled")
 
 	v.fillFieldMap()
 
@@ -103,7 +106,7 @@ func (v *vault) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *vault) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 10)
+	v.fieldMap = make(map[string]field.Expr, 11)
 	v.fieldMap["pubkey"] = v.Pubkey
 	v.fieldMap["proto_config"] = v.ProtoConfig
 	v.fieldMap["token_a_mint"] = v.TokenAMint
@@ -114,6 +117,7 @@ func (v *vault) fillFieldMap() {
 	v.fieldMap["last_dca_period"] = v.LastDcaPeriod
 	v.fieldMap["drip_amount"] = v.DripAmount
 	v.fieldMap["dca_activation_timestamp"] = v.DcaActivationTimestamp
+	v.fieldMap["enabled"] = v.Enabled
 }
 
 func (v vault) clone(db *gorm.DB) vault {

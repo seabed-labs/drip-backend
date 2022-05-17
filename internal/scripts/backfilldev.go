@@ -165,6 +165,7 @@ func backfillVaults(repo *repository.Query, client *rpc.Client, vaultConfigs Con
 				LastDcaPeriod:          vault.LastDcaPeriod,
 				DripAmount:             vault.DripAmount,
 				DcaActivationTimestamp: time.Unix(vault.DcaActivationTimestamp, 0),
+				Enabled:                true,
 			}
 
 			vaults = append(vaults, vaultModel)

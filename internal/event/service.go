@@ -113,6 +113,7 @@ func (d DripProgramProcessor) processEvent(address string, data []byte) {
 			LastDcaPeriod:          vault.LastDcaPeriod,
 			DripAmount:             vault.DripAmount,
 			DcaActivationTimestamp: time.Unix(vault.DcaActivationTimestamp, 0),
+			Enabled:                false,
 		}); err != nil {
 			logrus.WithError(err).Errorf("failed to upsert vault")
 			return
