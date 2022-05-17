@@ -25,7 +25,8 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
 	}
 
-	for _, vault := range vaultModels {
+	for i := range vaultModels {
+		vault := vaultModels[i]
 		res = append(res, struct {
 			DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
 			DripAmount             string `json:"dripAmount"`

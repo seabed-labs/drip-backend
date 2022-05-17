@@ -79,6 +79,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /protoConfigs:
+    get:
+      summary: Get Proto Configs
+      description: Get all proto configs with filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/tokenA"
+        - $ref: "#/components/parameters/tokenB"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listProtoConfigs'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /mint:
     post:
       summary: Mint tokens (DEVNET ONLY)
@@ -216,3 +249,26 @@ components:
             type: string
             example: "1652747980"
             description: unix timestamp
+
+    listProtoConfigs:
+      type: array
+      items:
+        type: object
+        required:
+          - pubkey
+          - granularity
+          - triggerDcaSpread
+          - baseWithdrawalSpread
+        properties:
+          pubkey:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          granularity:
+            type: number
+            exampe: 60
+          triggerDcaSpread:
+            type: number
+            example: 50
+          baseWithdrawalSpread:
+            type: number
+            example: 50

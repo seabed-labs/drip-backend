@@ -35,6 +35,21 @@ func (m *MockDrip) EXPECT() *MockDripMockRecorder {
 	return m.recorder
 }
 
+// GetProtoConfigs mocks base method.
+func (m *MockDrip) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*model.ProtoConfig)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProtoConfigs indicates an expected call of GetProtoConfigs.
+func (mr *MockDripMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockDrip)(nil).GetProtoConfigs), arg0, arg1, arg2)
+}
+
 // GetVaults mocks base method.
 func (m *MockDrip) GetVaults(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
@@ -48,37 +63,4 @@ func (m *MockDrip) GetVaults(arg0 context.Context, arg1, arg2, arg3 *string) ([]
 func (mr *MockDripMockRecorder) GetVaults(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaults", reflect.TypeOf((*MockDrip)(nil).GetVaults), arg0, arg1, arg2, arg3)
-}
-
-// UpsertVaultByAddress mocks base method.
-func (m *MockDrip) UpsertVaultByAddress(arg0 context.Context, arg1 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpsertVaultByAddress", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpsertVaultByAddress indicates an expected call of UpsertVaultByAddress.
-func (mr *MockDripMockRecorder) UpsertVaultByAddress(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaultByAddress", reflect.TypeOf((*MockDrip)(nil).UpsertVaultByAddress), arg0, arg1)
-}
-
-// UpsertVaults mocks base method.
-func (m *MockDrip) UpsertVaults(arg0 context.Context, arg1 ...*model.Vault) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpsertVaults", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpsertVaults indicates an expected call of UpsertVaults.
-func (mr *MockDripMockRecorder) UpsertVaults(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaults", reflect.TypeOf((*MockDrip)(nil).UpsertVaults), varargs...)
 }

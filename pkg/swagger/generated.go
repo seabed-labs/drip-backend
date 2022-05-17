@@ -27,6 +27,14 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// ListProtoConfigs defines model for listProtoConfigs.
+type ListProtoConfigs []struct {
+	BaseWithdrawalSpread float32 `json:"baseWithdrawalSpread"`
+	Granularity          float32 `json:"granularity"`
+	Pubkey               string  `json:"pubkey"`
+	TriggerDcaSpread     float32 `json:"triggerDcaSpread"`
+}
+
 // ListVaults defines model for listVaults.
 type ListVaults []struct {
 	// unix timestamp
@@ -70,6 +78,12 @@ type TokenB string
 
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
+
+// GetProtoConfigsParams defines parameters for GetProtoConfigs.
+type GetProtoConfigsParams struct {
+	TokenA *TokenA `json:"tokenA,omitempty"`
+	TokenB *TokenB `json:"tokenB,omitempty"`
+}
 
 // GetVaultsParams defines parameters for GetVaults.
 type GetVaultsParams struct {
@@ -164,6 +178,9 @@ type ClientInterface interface {
 
 	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetProtoConfigs request
+	GetProtoConfigs(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -197,6 +214,18 @@ func (c *Client) PostMintWithBody(ctx context.Context, contentType string, body 
 
 func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostMintRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetProtoConfigs(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProtoConfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -294,6 +323,69 @@ func NewPostMintRequestWithBody(server string, contentType string, body io.Reade
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetProtoConfigsRequest generates requests for GetProtoConfigs
+func NewGetProtoConfigsRequest(server string, params *GetProtoConfigsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/protoConfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenA != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.TokenB != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -455,6 +547,9 @@ type ClientWithResponsesInterface interface {
 
 	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
+	// GetProtoConfigs request
+	GetProtoConfigsWithResponse(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*GetProtoConfigsResponse, error)
+
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
 
@@ -502,6 +597,30 @@ func (r PostMintResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostMintResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetProtoConfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListProtoConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetProtoConfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetProtoConfigsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -580,6 +699,15 @@ func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body Pos
 	return ParsePostMintResponse(rsp)
 }
 
+// GetProtoConfigsWithResponse request returning *GetProtoConfigsResponse
+func (c *ClientWithResponses) GetProtoConfigsWithResponse(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*GetProtoConfigsResponse, error) {
+	rsp, err := c.GetProtoConfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetProtoConfigsResponse(rsp)
+}
+
 // GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
 func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error) {
 	rsp, err := c.GetSwaggerJson(ctx, reqEditors...)
@@ -640,6 +768,46 @@ func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest MintResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetProtoConfigsResponse parses an HTTP response from a GetProtoConfigsWithResponse call
+func ParseGetProtoConfigsResponse(rsp *http.Response) (*GetProtoConfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetProtoConfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListProtoConfigs
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -738,6 +906,9 @@ type ServerInterface interface {
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
+	// Get Proto Configs
+	// (GET /protoConfigs)
+	GetProtoConfigs(ctx echo.Context, params GetProtoConfigsParams) error
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
@@ -766,6 +937,31 @@ func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PostMint(ctx)
+	return err
+}
+
+// GetProtoConfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetProtoConfigs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetProtoConfigsParams
+	// ------------- Optional query parameter "tokenA" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
+	}
+
+	// ------------- Optional query parameter "tokenB" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetProtoConfigs(ctx, params)
 	return err
 }
 
@@ -840,6 +1036,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
+	router.GET(baseURL+"/protoConfigs", wrapper.GetProtoConfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
@@ -848,27 +1045,29 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
