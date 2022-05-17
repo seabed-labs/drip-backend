@@ -104,6 +104,7 @@ func TestHandler_GetVaults(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusOK)
 		vaults, err := Swagger.ParseGetVaultsResponse(rec.Result())
+		assert.NoError(t, err)
 		assert.NotNil(t, vaults.JSON200)
 		assert.Equal(t, len(*vaults.JSON200), 2)
 	})
