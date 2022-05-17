@@ -11,7 +11,7 @@ type Token struct {
 	Pubkey   string  `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
 	Symbol   *string `gorm:"column:symbol" json:"symbol" yaml:"symbol"`
 	Decimals int16   `gorm:"column:decimals;not null" json:"decimals" yaml:"decimals"`
-	IconURL  *string `gorm:"column:icon_url" json:"icon_url" yaml:"icon_url"`
+	IconURL  *string `gorm:"column:icon_url" json:"iconUrl" yaml:"iconUrl"`
 }
 
 // TableName Token's table name

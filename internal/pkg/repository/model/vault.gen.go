@@ -13,15 +13,15 @@ const TableNameVault = "vault"
 // Vault mapped from table <vault>
 type Vault struct {
 	Pubkey                 string    `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
-	ProtoConfig            string    `gorm:"column:proto_config;not null" json:"proto_config" yaml:"proto_config"`
-	TokenAMint             string    `gorm:"column:token_a_mint;not null" json:"token_a_mint" yaml:"token_a_mint"`
-	TokenBMint             string    `gorm:"column:token_b_mint;not null" json:"token_b_mint" yaml:"token_b_mint"`
-	TokenAAccount          string    `gorm:"column:token_a_account;not null" json:"token_a_account" yaml:"token_a_account"`
-	TokenBAccount          string    `gorm:"column:token_b_account;not null" json:"token_b_account" yaml:"token_b_account"`
-	TreasuryTokenBAccount  string    `gorm:"column:treasury_token_b_account;not null" json:"treasury_token_b_account" yaml:"treasury_token_b_account"`
-	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;not null" json:"last_dca_period" yaml:"last_dca_period"`
-	DripAmount             uint64    `gorm:"column:drip_amount;not null" json:"drip_amount" yaml:"drip_amount"`
-	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;not null" json:"dca_activation_timestamp" yaml:"dca_activation_timestamp"`
+	ProtoConfig            string    `gorm:"column:proto_config;not null" json:"protoConfig" yaml:"protoConfig"`
+	TokenAMint             string    `gorm:"column:token_a_mint;not null" json:"tokenAMint" yaml:"tokenAMint"`
+	TokenBMint             string    `gorm:"column:token_b_mint;not null" json:"tokenBMint" yaml:"tokenBMint"`
+	TokenAAccount          string    `gorm:"column:token_a_account;not null" json:"tokenAAccount" yaml:"tokenAAccount"`
+	TokenBAccount          string    `gorm:"column:token_b_account;not null" json:"tokenBAccount" yaml:"tokenBAccount"`
+	TreasuryTokenBAccount  string    `gorm:"column:treasury_token_b_account;not null" json:"treasuryTokenBAccount" yaml:"treasuryTokenBAccount"`
+	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;not null" json:"lastDcaPeriod" yaml:"lastDcaPeriod"`
+	DripAmount             uint64    `gorm:"column:drip_amount;not null" json:"dripAmount" yaml:"dripAmount"`
+	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;not null" json:"dcaActivationTimestamp" yaml:"dcaActivationTimestamp"`
 }
 
 // TableName Vault's table name

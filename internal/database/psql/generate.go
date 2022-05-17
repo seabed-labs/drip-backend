@@ -3,6 +3,8 @@ package psql
 import (
 	"fmt"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 
@@ -28,12 +30,11 @@ func GenerateModels(
 		FieldNullable:  true,
 		FieldCoverable: true,
 		FieldSignable:  true,
-		//fieldNewTagNS:
 	})
-	// TODO(mocha): convert snake case column name to camel case
 	g.WithNewTagNameStrategy(func(columnName string) string {
-		return fmt.Sprintf("yaml:\"%s\"", columnName)
+		return fmt.Sprintf("yaml:\"%s\"", strcase.ToLowerCamel(columnName))
 	})
+	g.WithJSONTagNameStrategy(strcase.ToLowerCamel)
 	g.UseDB(db)
 	tables := g.GenerateAllTable()
 	g.ApplyBasic(tables...)

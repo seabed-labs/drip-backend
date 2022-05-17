@@ -12,7 +12,7 @@ const TableNameVaultPeriod = "vault_period"
 type VaultPeriod struct {
 	Pubkey   string          `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
 	Vault    string          `gorm:"column:vault;not null" json:"vault" yaml:"vault"`
-	PeriodID uint64          `gorm:"column:period_id;not null" json:"period_id" yaml:"period_id"`
+	PeriodID uint64          `gorm:"column:period_id;not null" json:"periodId" yaml:"periodId"`
 	Twap     decimal.Decimal `gorm:"column:twap;not null" json:"twap" yaml:"twap"`
 	Dar      uint64          `gorm:"column:dar;not null" json:"dar" yaml:"dar"`
 }

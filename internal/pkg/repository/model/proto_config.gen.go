@@ -10,8 +10,8 @@ const TableNameProtoConfig = "proto_config"
 type ProtoConfig struct {
 	Pubkey               string `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
 	Granularity          uint64 `gorm:"column:granularity;not null" json:"granularity" yaml:"granularity"`
-	TriggerDcaSpread     uint16 `gorm:"column:trigger_dca_spread;not null" json:"trigger_dca_spread" yaml:"trigger_dca_spread"`
-	BaseWithdrawalSpread uint16 `gorm:"column:base_withdrawal_spread;not null" json:"base_withdrawal_spread" yaml:"base_withdrawal_spread"`
+	TriggerDcaSpread     uint16 `gorm:"column:trigger_dca_spread;not null" json:"triggerDcaSpread" yaml:"triggerDcaSpread"`
+	BaseWithdrawalSpread uint16 `gorm:"column:base_withdrawal_spread;not null" json:"baseWithdrawalSpread" yaml:"baseWithdrawalSpread"`
 }
 
 // TableName ProtoConfig's table name
