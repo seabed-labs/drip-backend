@@ -28,12 +28,12 @@ func newPosition(db *gorm.DB) position {
 	_position.Pubkey = field.NewString(tableName, "pubkey")
 	_position.Vault = field.NewString(tableName, "vault")
 	_position.Authority = field.NewString(tableName, "authority")
-	_position.DepositedTokenAAmount = field.NewFloat64(tableName, "deposited_token_a_amount")
-	_position.WithdrawnTokenBAmount = field.NewFloat64(tableName, "withdrawn_token_b_amount")
+	_position.DepositedTokenAAmount = field.NewUint64(tableName, "deposited_token_a_amount")
+	_position.WithdrawnTokenBAmount = field.NewUint64(tableName, "withdrawn_token_b_amount")
 	_position.DepositTimestamp = field.NewTime(tableName, "deposit_timestamp")
-	_position.DcaPeriodIDBeforeDeposit = field.NewFloat64(tableName, "dca_period_id_before_deposit")
-	_position.NumberOfSwaps = field.NewFloat64(tableName, "number_of_swaps")
-	_position.PeriodicDripAmount = field.NewFloat64(tableName, "periodic_drip_amount")
+	_position.DcaPeriodIDBeforeDeposit = field.NewUint64(tableName, "dca_period_id_before_deposit")
+	_position.NumberOfSwaps = field.NewUint64(tableName, "number_of_swaps")
+	_position.PeriodicDripAmount = field.NewUint64(tableName, "periodic_drip_amount")
 	_position.IsClosed = field.NewBool(tableName, "is_closed")
 
 	_position.fillFieldMap()
@@ -48,12 +48,12 @@ type position struct {
 	Pubkey                   field.String
 	Vault                    field.String
 	Authority                field.String
-	DepositedTokenAAmount    field.Float64
-	WithdrawnTokenBAmount    field.Float64
+	DepositedTokenAAmount    field.Uint64
+	WithdrawnTokenBAmount    field.Uint64
 	DepositTimestamp         field.Time
-	DcaPeriodIDBeforeDeposit field.Float64
-	NumberOfSwaps            field.Float64
-	PeriodicDripAmount       field.Float64
+	DcaPeriodIDBeforeDeposit field.Uint64
+	NumberOfSwaps            field.Uint64
+	PeriodicDripAmount       field.Uint64
 	IsClosed                 field.Bool
 
 	fieldMap map[string]field.Expr
@@ -74,12 +74,12 @@ func (p *position) updateTableName(table string) *position {
 	p.Pubkey = field.NewString(table, "pubkey")
 	p.Vault = field.NewString(table, "vault")
 	p.Authority = field.NewString(table, "authority")
-	p.DepositedTokenAAmount = field.NewFloat64(table, "deposited_token_a_amount")
-	p.WithdrawnTokenBAmount = field.NewFloat64(table, "withdrawn_token_b_amount")
+	p.DepositedTokenAAmount = field.NewUint64(table, "deposited_token_a_amount")
+	p.WithdrawnTokenBAmount = field.NewUint64(table, "withdrawn_token_b_amount")
 	p.DepositTimestamp = field.NewTime(table, "deposit_timestamp")
-	p.DcaPeriodIDBeforeDeposit = field.NewFloat64(table, "dca_period_id_before_deposit")
-	p.NumberOfSwaps = field.NewFloat64(table, "number_of_swaps")
-	p.PeriodicDripAmount = field.NewFloat64(table, "periodic_drip_amount")
+	p.DcaPeriodIDBeforeDeposit = field.NewUint64(table, "dca_period_id_before_deposit")
+	p.NumberOfSwaps = field.NewUint64(table, "number_of_swaps")
+	p.PeriodicDripAmount = field.NewUint64(table, "periodic_drip_amount")
 	p.IsClosed = field.NewBool(table, "is_closed")
 
 	p.fillFieldMap()

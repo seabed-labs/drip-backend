@@ -11,6 +11,7 @@ import (
 type Drip interface {
 	GetVaults(context.Context, *string, *string, *string) ([]*model.Vault, error)
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
+	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
 }
 
 type dripImpl struct {
@@ -54,4 +55,16 @@ func (d dripImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string, token
 	}
 	query = query.Where(d.repo.Vault.Enabled.Is(true))
 	return query.Find()
+}
+
+func (d dripImpl) GetVaultPeriods(ctx context.Context, vault string, limit int, offset int, vaultPeriod *string) ([]*model.VaultPeriod, error) {
+	query := d.repo.
+		VaultPeriod.WithContext(ctx).
+		Join(d.repo.Vault, d.repo.VaultPeriod.Vault.EqCol(d.repo.Vault.Pubkey)).
+		Where(d.repo.VaultPeriod.Vault.Eq(vault)).
+		Where(d.repo.Vault.Enabled.Is(true))
+	if vaultPeriod != nil {
+		query = query.Where(d.repo.VaultPeriod.Pubkey.Eq(*vaultPeriod))
+	}
+	return query.Limit(limit).Offset(offset).Find()
 }

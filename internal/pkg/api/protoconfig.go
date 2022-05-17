@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetProtoConfigs(c echo.Context, params Swagger.GetProtoConfigsParams) error {
+func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsParams) error {
 	var res Swagger.ListProtoConfigs
 
 	protoConfigModels, err := h.drip.GetProtoConfigs(

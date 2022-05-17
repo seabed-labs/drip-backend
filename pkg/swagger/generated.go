@@ -35,6 +35,15 @@ type ListProtoConfigs []struct {
 	TriggerDcaSpread     float32 `json:"triggerDcaSpread"`
 }
 
+// ListVaultPeriods defines model for listVaultPeriods.
+type ListVaultPeriods []struct {
+	Dar      string `json:"dar"`
+	PeriodId string `json:"periodId"`
+	Pubkey   string `json:"pubkey"`
+	Twap     string `json:"twap"`
+	Vault    string `json:"vault"`
+}
+
 // ListVaults defines model for listVaults.
 type ListVaults []struct {
 	// unix timestamp
@@ -67,8 +76,17 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
+// Limit defines model for limit.
+type Limit float32
+
+// Offset defines model for offset.
+type Offset float32
+
 // ProtoConfig defines model for protoConfig.
 type ProtoConfig string
+
+// RequiredVault defines model for requiredVault.
+type RequiredVault string
 
 // TokenA defines model for tokenA.
 type TokenA string
@@ -76,13 +94,24 @@ type TokenA string
 // TokenB defines model for tokenB.
 type TokenB string
 
+// VaultPeriod defines model for vaultPeriod.
+type VaultPeriod string
+
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
 
-// GetProtoConfigsParams defines parameters for GetProtoConfigs.
-type GetProtoConfigsParams struct {
+// GetProtoconfigsParams defines parameters for GetProtoconfigs.
+type GetProtoconfigsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
+}
+
+// GetVaultperiodsParams defines parameters for GetVaultperiods.
+type GetVaultperiodsParams struct {
+	Vault       RequiredVault `json:"vault"`
+	VaultPeriod *VaultPeriod  `json:"vaultPeriod,omitempty"`
+	Offset      *Offset       `json:"offset,omitempty"`
+	Limit       *Limit        `json:"limit,omitempty"`
 }
 
 // GetVaultsParams defines parameters for GetVaults.
@@ -178,11 +207,14 @@ type ClientInterface interface {
 
 	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProtoConfigs request
-	GetProtoConfigs(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProtoconfigs request
+	GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetVaultperiods request
+	GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetVaults request
 	GetVaults(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -224,8 +256,8 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProtoConfigs(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProtoConfigsRequest(c.Server, params)
+func (c *Client) GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProtoconfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +270,18 @@ func (c *Client) GetProtoConfigs(ctx context.Context, params *GetProtoConfigsPar
 
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetVaultperiodsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -327,8 +371,8 @@ func NewPostMintRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
-// NewGetProtoConfigsRequest generates requests for GetProtoConfigs
-func NewGetProtoConfigsRequest(server string, params *GetProtoConfigsParams) (*http.Request, error) {
+// NewGetProtoconfigsRequest generates requests for GetProtoconfigs
+func NewGetProtoconfigsRequest(server string, params *GetProtoconfigsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -336,7 +380,7 @@ func NewGetProtoConfigsRequest(server string, params *GetProtoConfigsParams) (*h
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/protoConfigs")
+	operationPath := fmt.Sprintf("/protoconfigs")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -408,6 +452,97 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetVaultperiodsRequest generates requests for GetVaultperiods
+func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/vaultperiods")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, params.Vault); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.VaultPeriod != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vaultPeriod", runtime.ParamLocationQuery, *params.VaultPeriod); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Offset != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -547,11 +682,14 @@ type ClientWithResponsesInterface interface {
 
 	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
-	// GetProtoConfigs request
-	GetProtoConfigsWithResponse(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*GetProtoConfigsResponse, error)
+	// GetProtoconfigs request
+	GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
 
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
+
+	// GetVaultperiods request
+	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
 
 	// GetVaults request
 	GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error)
@@ -603,7 +741,7 @@ func (r PostMintResponse) StatusCode() int {
 	return 0
 }
 
-type GetProtoConfigsResponse struct {
+type GetProtoconfigsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListProtoConfigs
@@ -612,7 +750,7 @@ type GetProtoConfigsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProtoConfigsResponse) Status() string {
+func (r GetProtoconfigsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -620,7 +758,7 @@ func (r GetProtoConfigsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProtoConfigsResponse) StatusCode() int {
+func (r GetProtoconfigsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -643,6 +781,30 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetVaultperiodsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListVaultPeriods
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetVaultperiodsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetVaultperiodsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -699,13 +861,13 @@ func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body Pos
 	return ParsePostMintResponse(rsp)
 }
 
-// GetProtoConfigsWithResponse request returning *GetProtoConfigsResponse
-func (c *ClientWithResponses) GetProtoConfigsWithResponse(ctx context.Context, params *GetProtoConfigsParams, reqEditors ...RequestEditorFn) (*GetProtoConfigsResponse, error) {
-	rsp, err := c.GetProtoConfigs(ctx, params, reqEditors...)
+// GetProtoconfigsWithResponse request returning *GetProtoconfigsResponse
+func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error) {
+	rsp, err := c.GetProtoconfigs(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProtoConfigsResponse(rsp)
+	return ParseGetProtoconfigsResponse(rsp)
 }
 
 // GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
@@ -715,6 +877,15 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
+}
+
+// GetVaultperiodsWithResponse request returning *GetVaultperiodsResponse
+func (c *ClientWithResponses) GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error) {
+	rsp, err := c.GetVaultperiods(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetVaultperiodsResponse(rsp)
 }
 
 // GetVaultsWithResponse request returning *GetVaultsResponse
@@ -792,15 +963,15 @@ func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	return response, nil
 }
 
-// ParseGetProtoConfigsResponse parses an HTTP response from a GetProtoConfigsWithResponse call
-func ParseGetProtoConfigsResponse(rsp *http.Response) (*GetProtoConfigsResponse, error) {
+// ParseGetProtoconfigsResponse parses an HTTP response from a GetProtoconfigsWithResponse call
+func ParseGetProtoconfigsResponse(rsp *http.Response) (*GetProtoconfigsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProtoConfigsResponse{
+	response := &GetProtoconfigsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -858,6 +1029,46 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 	return response, nil
 }
 
+// ParseGetVaultperiodsResponse parses an HTTP response from a GetVaultperiodsWithResponse call
+func ParseGetVaultperiodsResponse(rsp *http.Response) (*GetVaultperiodsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetVaultperiodsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListVaultPeriods
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetVaultsResponse parses an HTTP response from a GetVaultsWithResponse call
 func ParseGetVaultsResponse(rsp *http.Response) (*GetVaultsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -907,11 +1118,14 @@ type ServerInterface interface {
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
 	// Get Proto Configs
-	// (GET /protoConfigs)
-	GetProtoConfigs(ctx echo.Context, params GetProtoConfigsParams) error
+	// (GET /protoconfigs)
+	GetProtoconfigs(ctx echo.Context, params GetProtoconfigsParams) error
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
+	// Get Vault Periods
+	// (GET /vaultperiods)
+	GetVaultperiods(ctx echo.Context, params GetVaultperiodsParams) error
 	// Get Supported Vaults
 	// (GET /vaults)
 	GetVaults(ctx echo.Context, params GetVaultsParams) error
@@ -940,12 +1154,12 @@ func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 	return err
 }
 
-// GetProtoConfigs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetProtoConfigs(ctx echo.Context) error {
+// GetProtoconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetProtoconfigs(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetProtoConfigsParams
+	var params GetProtoconfigsParams
 	// ------------- Optional query parameter "tokenA" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
@@ -961,7 +1175,7 @@ func (w *ServerInterfaceWrapper) GetProtoConfigs(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetProtoConfigs(ctx, params)
+	err = w.Handler.GetProtoconfigs(ctx, params)
 	return err
 }
 
@@ -971,6 +1185,45 @@ func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetSwaggerJson(ctx)
+	return err
+}
+
+// GetVaultperiods converts echo context to params.
+func (w *ServerInterfaceWrapper) GetVaultperiods(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetVaultperiodsParams
+	// ------------- Required query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// ------------- Optional query parameter "vaultPeriod" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vaultPeriod", ctx.QueryParams(), &params.VaultPeriod)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vaultPeriod: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", ctx.QueryParams(), &params.Offset)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetVaultperiods(ctx, params)
 	return err
 }
 
@@ -1036,8 +1289,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
-	router.GET(baseURL+"/protoConfigs", wrapper.GetProtoConfigs)
+	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
+	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
 }
@@ -1045,29 +1299,32 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"uvg3AAD//+q4gRROGgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

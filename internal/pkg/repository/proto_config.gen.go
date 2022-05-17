@@ -26,7 +26,7 @@ func newProtoConfig(db *gorm.DB) protoConfig {
 	tableName := _protoConfig.protoConfigDo.TableName()
 	_protoConfig.ALL = field.NewField(tableName, "*")
 	_protoConfig.Pubkey = field.NewString(tableName, "pubkey")
-	_protoConfig.Granularity = field.NewFloat64(tableName, "granularity")
+	_protoConfig.Granularity = field.NewUint64(tableName, "granularity")
 	_protoConfig.TriggerDcaSpread = field.NewInt16(tableName, "trigger_dca_spread")
 	_protoConfig.BaseWithdrawalSpread = field.NewInt16(tableName, "base_withdrawal_spread")
 
@@ -40,7 +40,7 @@ type protoConfig struct {
 
 	ALL                  field.Field
 	Pubkey               field.String
-	Granularity          field.Float64
+	Granularity          field.Uint64
 	TriggerDcaSpread     field.Int16
 	BaseWithdrawalSpread field.Int16
 
@@ -60,7 +60,7 @@ func (p protoConfig) As(alias string) *protoConfig {
 func (p *protoConfig) updateTableName(table string) *protoConfig {
 	p.ALL = field.NewField(table, "*")
 	p.Pubkey = field.NewString(table, "pubkey")
-	p.Granularity = field.NewFloat64(table, "granularity")
+	p.Granularity = field.NewUint64(table, "granularity")
 	p.TriggerDcaSpread = field.NewInt16(table, "trigger_dca_spread")
 	p.BaseWithdrawalSpread = field.NewInt16(table, "base_withdrawal_spread")
 

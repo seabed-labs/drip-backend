@@ -7,6 +7,8 @@ import (
 	"github.com/gorilla/schema"
 )
 
+const defaultLimit = 500
+
 type Handler struct {
 	decoder      *schema.Decoder
 	solanaClient solana.Solana

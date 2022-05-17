@@ -32,8 +32,8 @@ func newVault(db *gorm.DB) vault {
 	_vault.TokenAAccount = field.NewString(tableName, "token_a_account")
 	_vault.TokenBAccount = field.NewString(tableName, "token_b_account")
 	_vault.TreasuryTokenBAccount = field.NewString(tableName, "treasury_token_b_account")
-	_vault.LastDcaPeriod = field.NewFloat64(tableName, "last_dca_period")
-	_vault.DripAmount = field.NewFloat64(tableName, "drip_amount")
+	_vault.LastDcaPeriod = field.NewUint64(tableName, "last_dca_period")
+	_vault.DripAmount = field.NewUint64(tableName, "drip_amount")
 	_vault.DcaActivationTimestamp = field.NewTime(tableName, "dca_activation_timestamp")
 	_vault.Enabled = field.NewBool(tableName, "enabled")
 
@@ -53,8 +53,8 @@ type vault struct {
 	TokenAAccount          field.String
 	TokenBAccount          field.String
 	TreasuryTokenBAccount  field.String
-	LastDcaPeriod          field.Float64
-	DripAmount             field.Float64
+	LastDcaPeriod          field.Uint64
+	DripAmount             field.Uint64
 	DcaActivationTimestamp field.Time
 	Enabled                field.Bool
 
@@ -80,8 +80,8 @@ func (v *vault) updateTableName(table string) *vault {
 	v.TokenAAccount = field.NewString(table, "token_a_account")
 	v.TokenBAccount = field.NewString(table, "token_b_account")
 	v.TreasuryTokenBAccount = field.NewString(table, "treasury_token_b_account")
-	v.LastDcaPeriod = field.NewFloat64(table, "last_dca_period")
-	v.DripAmount = field.NewFloat64(table, "drip_amount")
+	v.LastDcaPeriod = field.NewUint64(table, "last_dca_period")
+	v.DripAmount = field.NewUint64(table, "drip_amount")
 	v.DcaActivationTimestamp = field.NewTime(table, "dca_activation_timestamp")
 	v.Enabled = field.NewBool(table, "enabled")
 

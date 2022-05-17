@@ -15,7 +15,7 @@ type TokenPrice struct {
 	ID     int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id" yaml:"id"`
 	Base   *string   `gorm:"column:base" json:"base" yaml:"base"`
 	Quote  *string   `gorm:"column:quote" json:"quote" yaml:"quote"`
-	Close  float64   `gorm:"column:close;not null" json:"close" yaml:"close"`
+	Close  uint64    `gorm:"column:close;not null" json:"close" yaml:"close"`
 	Date   time.Time `gorm:"column:date;not null" json:"date" yaml:"date"`
 	Source *string   `gorm:"column:source" json:"source" yaml:"source"`
 }

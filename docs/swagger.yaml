@@ -46,6 +46,7 @@ paths:
             application/json:
               schema:
                 type: object
+
   /vaults:
     get:
       summary: Get Supported Vaults
@@ -79,7 +80,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /protoConfigs:
+
+  /protoconfigs:
     get:
       summary: Get Proto Configs
       description: Get all proto configs with filters.
@@ -99,6 +101,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/listProtoConfigs'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /vaultperiods:
+    get:
+      summary: Get Vault Periods
+      description: Get vault periods with pagination and filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/requiredVault"
+        - $ref: "#/components/parameters/vaultPeriod"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listVaultPeriods'
         "400":
           description: Bad Request
           content:
@@ -151,6 +188,22 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
 components:
   parameters:
+    vault:
+      name: vault
+      in: query
+      schema:
+        type: string
+    requiredVault:
+      name: vault
+      in: query
+      schema:
+        type: string
+      required: true
+    vaultPeriod:
+      name: vaultPeriod
+      in: query
+      schema:
+        type: string
     tokenA:
       name: tokenA
       in: query
@@ -167,6 +220,16 @@ components:
       in: query
       schema:
         type: string
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: number
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: number
   schemas:
     mintRequest:
       required:
@@ -272,3 +335,30 @@ components:
           baseWithdrawalSpread:
             type: number
             example: 50
+
+    listVaultPeriods:
+      type: array
+      items:
+        type: object
+        required:
+          - pubkey
+          - vault
+          - periodId
+          - twap
+          - dar
+        properties:
+          pubkey:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          vault:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+          periodId:
+            type: string
+            example: "123"
+          twap:
+            type: string
+            example: "123"
+          dar:
+            type: string
+            example: "123"

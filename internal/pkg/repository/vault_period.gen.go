@@ -27,9 +27,9 @@ func newVaultPeriod(db *gorm.DB) vaultPeriod {
 	_vaultPeriod.ALL = field.NewField(tableName, "*")
 	_vaultPeriod.Pubkey = field.NewString(tableName, "pubkey")
 	_vaultPeriod.Vault = field.NewString(tableName, "vault")
-	_vaultPeriod.PeriodID = field.NewFloat64(tableName, "period_id")
-	_vaultPeriod.Twap = field.NewFloat64(tableName, "twap")
-	_vaultPeriod.Dar = field.NewFloat64(tableName, "dar")
+	_vaultPeriod.PeriodID = field.NewUint64(tableName, "period_id")
+	_vaultPeriod.Twap = field.NewUint64(tableName, "twap")
+	_vaultPeriod.Dar = field.NewUint64(tableName, "dar")
 
 	_vaultPeriod.fillFieldMap()
 
@@ -42,9 +42,9 @@ type vaultPeriod struct {
 	ALL      field.Field
 	Pubkey   field.String
 	Vault    field.String
-	PeriodID field.Float64
-	Twap     field.Float64
-	Dar      field.Float64
+	PeriodID field.Uint64
+	Twap     field.Uint64
+	Dar      field.Uint64
 
 	fieldMap map[string]field.Expr
 }
@@ -63,9 +63,9 @@ func (v *vaultPeriod) updateTableName(table string) *vaultPeriod {
 	v.ALL = field.NewField(table, "*")
 	v.Pubkey = field.NewString(table, "pubkey")
 	v.Vault = field.NewString(table, "vault")
-	v.PeriodID = field.NewFloat64(table, "period_id")
-	v.Twap = field.NewFloat64(table, "twap")
-	v.Dar = field.NewFloat64(table, "dar")
+	v.PeriodID = field.NewUint64(table, "period_id")
+	v.Twap = field.NewUint64(table, "twap")
+	v.Dar = field.NewUint64(table, "dar")
 
 	v.fillFieldMap()
 

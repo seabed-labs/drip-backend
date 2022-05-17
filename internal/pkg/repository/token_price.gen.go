@@ -28,7 +28,7 @@ func newTokenPrice(db *gorm.DB) tokenPrice {
 	_tokenPrice.ID = field.NewInt32(tableName, "id")
 	_tokenPrice.Base = field.NewString(tableName, "base")
 	_tokenPrice.Quote = field.NewString(tableName, "quote")
-	_tokenPrice.Close = field.NewFloat64(tableName, "close")
+	_tokenPrice.Close = field.NewUint64(tableName, "close")
 	_tokenPrice.Date = field.NewTime(tableName, "date")
 	_tokenPrice.Source = field.NewString(tableName, "source")
 
@@ -44,7 +44,7 @@ type tokenPrice struct {
 	ID     field.Int32
 	Base   field.String
 	Quote  field.String
-	Close  field.Float64
+	Close  field.Uint64
 	Date   field.Time
 	Source field.String
 
@@ -66,7 +66,7 @@ func (t *tokenPrice) updateTableName(table string) *tokenPrice {
 	t.ID = field.NewInt32(table, "id")
 	t.Base = field.NewString(table, "base")
 	t.Quote = field.NewString(table, "quote")
-	t.Close = field.NewFloat64(table, "close")
+	t.Close = field.NewUint64(table, "close")
 	t.Date = field.NewTime(table, "date")
 	t.Source = field.NewString(table, "source")
 

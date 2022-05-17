@@ -31,6 +31,11 @@ func GenerateModels(
 		FieldCoverable: true,
 		FieldSignable:  true,
 	})
+	dataMap := map[string]func(detailType string) (dataType string){
+		"numeric": func(detailType string) (dataType string) { return "uint64" },
+	}
+	g.WithDataTypeMap(dataMap)
+
 	g.WithNewTagNameStrategy(func(columnName string) string {
 		return fmt.Sprintf("yaml:\"%s\"", strcase.ToLowerCamel(columnName))
 	})
@@ -38,6 +43,7 @@ func GenerateModels(
 	g.UseDB(db)
 	tables := g.GenerateAllTable()
 	g.ApplyBasic(tables...)
+
 	g.GenerateModel("proto_config",
 		gen.FieldType("granularity", "uint64"),
 		gen.FieldType("trigger_dca_spread", "uint16"),
