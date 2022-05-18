@@ -241,14 +241,25 @@ func backfillTokenPairs(repo *repository.Query, vaultConfigs Config) map[string]
 	var tokenPairs []*model.TokenPair
 	tokenPairSet := make(map[string]*model.TokenPair)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
-		if _, ok := tokenPairSet[vaultConfig.TokenAMint+vaultConfig.TokenBMint]; !ok {
-			tokenPair := &model.TokenPair{
-				ID:     uuid.New().String(),
-				TokenA: vaultConfig.TokenAMint,
-				TokenB: vaultConfig.TokenBMint,
-			}
-			tokenPairs = append(tokenPairs, tokenPair)
+		tokenPair, err := repo.TokenPair.
+			WithContext(context.Background()).
+			Where(repo.TokenPair.TokenA.Eq(vaultConfig.TokenAMint)).
+			Where(repo.TokenPair.TokenB.Eq(vaultConfig.TokenBMint)).First()
+		if err != nil {
+			logrus.WithField("len", len(tokenPairs)).Infof("failed to find token pair")
+		}
+		if tokenPair != nil {
 			tokenPairSet[vaultConfig.TokenAMint+vaultConfig.TokenBMint] = tokenPair
+		} else {
+			if _, ok := tokenPairSet[vaultConfig.TokenAMint+vaultConfig.TokenBMint]; !ok {
+				tokenPair := &model.TokenPair{
+					ID:     uuid.New().String(),
+					TokenA: vaultConfig.TokenAMint,
+					TokenB: vaultConfig.TokenBMint,
+				}
+				tokenPairs = append(tokenPairs, tokenPair)
+				tokenPairSet[vaultConfig.TokenAMint+vaultConfig.TokenBMint] = tokenPair
+			}
 		}
 	}
 	logrus.WithField("len", len(tokenPairs)).Infof("inserting tokenPairs")

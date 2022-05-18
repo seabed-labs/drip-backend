@@ -149,7 +149,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /tokens:
+  /tokenpairs:
     get:
       summary: Get Vault Periods
       description: Get vault periods with pagination and filters.
@@ -168,7 +168,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listVaultPeriods'
+                $ref: '#/components/schemas/listTokenPairs'
         "400":
           description: Bad Request
           content:
@@ -395,3 +395,22 @@ components:
           dar:
             type: string
             example: "123"
+
+    listTokenPairs:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - tokenA
+          - tokenB
+        properties:
+          id:
+            type: string
+            example: "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda"
+          tokenA:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          tokenB:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"

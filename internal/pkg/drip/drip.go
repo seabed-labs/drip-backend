@@ -15,11 +15,22 @@ type Drip interface {
 	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
 	GetTokens(context.Context, *string, *string) ([]*model.Token, error)
 	GetTokenPair(context.Context, string) (*model.TokenPair, error)
+	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 }
 
 type dripImpl struct {
 	client solana.Solana
 	repo   *repository.Query
+}
+
+func NewDripService(
+	client solana.Solana,
+	repo *repository.Query,
+) Drip {
+	return dripImpl{
+		client: client,
+		repo:   repo,
+	}
 }
 
 func (d dripImpl) GetTokenPair(ctx context.Context, id string) (*model.TokenPair, error) {
@@ -33,21 +44,31 @@ func (d dripImpl) GetTokenPair(ctx context.Context, id string) (*model.TokenPair
 	return nil, sql.ErrNoRows
 }
 
-func (d dripImpl) GetTokens(ctx context.Context, tokenA *string, tokenB *string) ([]*model.Token, error) {
-	//query := d.repo.Token.WithContext(ctx)
-	//query = query.Join(d.repo.Vault, d.repo.ProtoConfig.Pubkey.EqCol(d.repo.Vault.ProtoConfig))
-	//TODO implement me
-	panic("implement me")
+func (d dripImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.TokenPair, error) {
+	query := d.repo.TokenPair.WithContext(ctx)
+	if tokenAMint != nil {
+		query = query.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
+	}
+	if tokenBMint != nil {
+		query = query.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
+	}
+	return query.Find()
 }
 
-func NewDripService(
-	client solana.Solana,
-	repo *repository.Query,
-) Drip {
-	return dripImpl{
-		client: client,
-		repo:   repo,
+func (d dripImpl) GetTokens(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.Token, error) {
+	query := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
+	if tokenAMint != nil {
+		query = query.Join(d.repo.TokenPair, d.repo.TokenPair.TokenA.EqCol(d.repo.Token.Pubkey))
 	}
+	if tokenBMint != nil {
+		query = query.Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey))
+	}
+	if tokenAMint != nil || tokenBMint != nil {
+		query = query.
+			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+			Where(d.repo.Vault.Enabled.Is(true))
+	}
+	return query.Find()
 }
 
 func (d dripImpl) GetVaults(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
