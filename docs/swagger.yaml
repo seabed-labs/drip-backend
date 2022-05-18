@@ -151,8 +151,8 @@ paths:
 
   /tokenpairs:
     get:
-      summary: Get Vault Periods
-      description: Get vault periods with pagination and filters.
+      summary: Get Token Pairs
+      description: Get token pairs with filters.
       consumes:
         - application/json
       parameters:
@@ -169,6 +169,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/listTokenPairs'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /tokens:
+    get:
+      summary: Get Tokens
+      description: Get tokens with filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/tokenA"
+        - $ref: "#/components/parameters/tokenB"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listTokens'
         "400":
           description: Bad Request
           content:
@@ -257,12 +290,12 @@ components:
       name: offset
       in: query
       schema:
-        type: number
+        type: integer
     limit:
       name: limit
       in: query
       schema:
-        type: number
+        type: integer
   schemas:
     mintRequest:
       required:
@@ -360,13 +393,13 @@ components:
             type: string
             example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
           granularity:
-            type: number
+            type: integer
             exampe: 60
           triggerDcaSpread:
-            type: number
+            type: integer
             example: 50
           baseWithdrawalSpread:
-            type: number
+            type: integer
             example: 50
 
     listVaultPeriods:
@@ -414,3 +447,23 @@ components:
           tokenB:
             type: string
             example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+
+    listTokens:
+      type: array
+      items:
+        type: object
+        required:
+          - pubkey
+          - symbol
+          - decimals
+          - iconUrl
+        properties:
+          pubkey:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          symbol:
+            type: string
+            example: "SOL"
+          decimals:
+            type: integer
+            example: 10

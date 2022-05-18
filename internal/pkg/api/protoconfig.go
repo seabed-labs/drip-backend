@@ -24,15 +24,15 @@ func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsP
 	for i := range protoConfigModels {
 		protoConfig := protoConfigModels[i]
 		res = append(res, struct {
-			BaseWithdrawalSpread float32 `json:"baseWithdrawalSpread"`
-			Granularity          float32 `json:"granularity"`
-			Pubkey               string  `json:"pubkey"`
-			TriggerDcaSpread     float32 `json:"triggerDcaSpread"`
+			BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
+			Granularity          int    `json:"granularity"`
+			Pubkey               string `json:"pubkey"`
+			TriggerDcaSpread     int    `json:"triggerDcaSpread"`
 		}{
 			Pubkey:               protoConfig.Pubkey,
-			BaseWithdrawalSpread: float32(protoConfig.BaseWithdrawalSpread),
-			Granularity:          float32(protoConfig.Granularity),
-			TriggerDcaSpread:     float32(protoConfig.TriggerDcaSpread),
+			BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
+			Granularity:          int(protoConfig.Granularity),
+			TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
 		},
 		)
 	}

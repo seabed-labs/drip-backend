@@ -65,19 +65,34 @@ func (mr *MockDripMockRecorder) GetTokenPair(arg0, arg1 interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPair", reflect.TypeOf((*MockDrip)(nil).GetTokenPair), arg0, arg1)
 }
 
-// GetTokens mocks base method.
-func (m *MockDrip) GetTokens(arg0 context.Context, arg1, arg2 *string) ([]*model.Token, error) {
+// GetTokenPairs mocks base method.
+func (m *MockDrip) GetTokenPairs(arg0 context.Context, arg1, arg2 *string) ([]*model.TokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokens", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetTokenPairs", arg0, arg1, arg2)
+	ret0, _ := ret[0].([]*model.TokenPair)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenPairs indicates an expected call of GetTokenPairs.
+func (mr *MockDripMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairs", reflect.TypeOf((*MockDrip)(nil).GetTokenPairs), arg0, arg1, arg2)
+}
+
+// GetTokensWithSupportedTokenPair mocks base method.
+func (m *MockDrip) GetTokensWithSupportedTokenPair(arg0 context.Context, arg1 *string, arg2 bool) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokensWithSupportedTokenPair", arg0, arg1, arg2)
 	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetTokens indicates an expected call of GetTokens.
-func (mr *MockDripMockRecorder) GetTokens(arg0, arg1, arg2 interface{}) *gomock.Call {
+// GetTokensWithSupportedTokenPair indicates an expected call of GetTokensWithSupportedTokenPair.
+func (mr *MockDripMockRecorder) GetTokensWithSupportedTokenPair(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokens", reflect.TypeOf((*MockDrip)(nil).GetTokens), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensWithSupportedTokenPair", reflect.TypeOf((*MockDrip)(nil).GetTokensWithSupportedTokenPair), arg0, arg1, arg2)
 }
 
 // GetVaultPeriods mocks base method.

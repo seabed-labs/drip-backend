@@ -29,10 +29,10 @@ type ErrorResponse struct {
 
 // ListProtoConfigs defines model for listProtoConfigs.
 type ListProtoConfigs []struct {
-	BaseWithdrawalSpread float32 `json:"baseWithdrawalSpread"`
-	Granularity          float32 `json:"granularity"`
-	Pubkey               string  `json:"pubkey"`
-	TriggerDcaSpread     float32 `json:"triggerDcaSpread"`
+	BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
+	Granularity          int    `json:"granularity"`
+	Pubkey               string `json:"pubkey"`
+	TriggerDcaSpread     int    `json:"triggerDcaSpread"`
 }
 
 // ListTokenPairs defines model for listTokenPairs.
@@ -40,6 +40,13 @@ type ListTokenPairs []struct {
 	Id     string `json:"id"`
 	TokenA string `json:"tokenA"`
 	TokenB string `json:"tokenB"`
+}
+
+// ListTokens defines model for listTokens.
+type ListTokens []struct {
+	Decimals int    `json:"decimals"`
+	Pubkey   string `json:"pubkey"`
+	Symbol   string `json:"symbol"`
 }
 
 // ListVaultPeriods defines model for listVaultPeriods.
@@ -84,10 +91,10 @@ type PingResponse struct {
 }
 
 // Limit defines model for limit.
-type Limit float32
+type Limit int
 
 // Offset defines model for offset.
-type Offset float32
+type Offset int
 
 // ProtoConfig defines model for protoConfig.
 type ProtoConfig string
@@ -115,6 +122,12 @@ type GetProtoconfigsParams struct {
 
 // GetTokenpairsParams defines parameters for GetTokenpairs.
 type GetTokenpairsParams struct {
+	TokenA *TokenA `json:"tokenA,omitempty"`
+	TokenB *TokenB `json:"tokenB,omitempty"`
+}
+
+// GetTokensParams defines parameters for GetTokens.
+type GetTokensParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
 }
@@ -229,6 +242,9 @@ type ClientInterface interface {
 	// GetTokenpairs request
 	GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetTokens request
+	GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetVaultperiods request
 	GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -298,6 +314,18 @@ func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditor
 
 func (c *Client) GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetTokenpairsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetTokensRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -499,6 +527,69 @@ func NewGetTokenpairsRequest(server string, params *GetTokenpairsParams) (*http.
 	}
 
 	operationPath := fmt.Sprintf("/tokenpairs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenA != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.TokenB != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetTokensRequest generates requests for GetTokens
+func NewGetTokensRequest(server string, params *GetTokensParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/tokens")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -782,6 +873,9 @@ type ClientWithResponsesInterface interface {
 	// GetTokenpairs request
 	GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error)
 
+	// GetTokens request
+	GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error)
+
 	// GetVaultperiods request
 	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
 
@@ -905,6 +999,30 @@ func (r GetTokenpairsResponse) StatusCode() int {
 	return 0
 }
 
+type GetTokensResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListTokens
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetTokensResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetTokensResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetVaultperiodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1004,6 +1122,15 @@ func (c *ClientWithResponses) GetTokenpairsWithResponse(ctx context.Context, par
 		return nil, err
 	}
 	return ParseGetTokenpairsResponse(rsp)
+}
+
+// GetTokensWithResponse request returning *GetTokensResponse
+func (c *ClientWithResponses) GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error) {
+	rsp, err := c.GetTokens(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetTokensResponse(rsp)
 }
 
 // GetVaultperiodsWithResponse request returning *GetVaultperiodsResponse
@@ -1196,6 +1323,46 @@ func ParseGetTokenpairsResponse(rsp *http.Response) (*GetTokenpairsResponse, err
 	return response, nil
 }
 
+// ParseGetTokensResponse parses an HTTP response from a GetTokensWithResponse call
+func ParseGetTokensResponse(rsp *http.Response) (*GetTokensResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetTokensResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListTokens
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetVaultperiodsResponse parses an HTTP response from a GetVaultperiodsWithResponse call
 func ParseGetVaultperiodsResponse(rsp *http.Response) (*GetVaultperiodsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1290,9 +1457,12 @@ type ServerInterface interface {
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
-	// Get Vault Periods
+	// Get Token Pairs
 	// (GET /tokenpairs)
 	GetTokenpairs(ctx echo.Context, params GetTokenpairsParams) error
+	// Get Tokens
+	// (GET /tokens)
+	GetTokens(ctx echo.Context, params GetTokensParams) error
 	// Get Vault Periods
 	// (GET /vaultperiods)
 	GetVaultperiods(ctx echo.Context, params GetVaultperiodsParams) error
@@ -1380,6 +1550,31 @@ func (w *ServerInterfaceWrapper) GetTokenpairs(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetTokenpairs(ctx, params)
+	return err
+}
+
+// GetTokens converts echo context to params.
+func (w *ServerInterfaceWrapper) GetTokens(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetTokensParams
+	// ------------- Optional query parameter "tokenA" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
+	}
+
+	// ------------- Optional query parameter "tokenB" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetTokens(ctx, params)
 	return err
 }
 
@@ -1487,6 +1682,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
+	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
@@ -1495,33 +1691,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"LSIAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

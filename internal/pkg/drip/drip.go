@@ -13,7 +13,7 @@ type Drip interface {
 	GetVaults(context.Context, *string, *string, *string) ([]*model.Vault, error)
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
 	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
-	GetTokens(context.Context, *string, *string) ([]*model.Token, error)
+	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
 	GetTokenPair(context.Context, string) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 }
@@ -55,16 +55,31 @@ func (d dripImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBM
 	return query.Find()
 }
 
-func (d dripImpl) GetTokens(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.Token, error) {
+func (d dripImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model.Token, error) {
 	query := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
-	if tokenAMint != nil {
-		query = query.Join(d.repo.TokenPair, d.repo.TokenPair.TokenA.EqCol(d.repo.Token.Pubkey))
+	if tokenMint != nil {
+		if supportedTokenA {
+			query = query.
+				Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
+				Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+				Where(d.repo.Vault.Enabled.Is(true)).
+				Where(d.repo.TokenPair.TokenA.Eq(*tokenMint))
+		} else {
+			query = query.
+				Join(d.repo.TokenPair, d.repo.TokenPair.TokenA.EqCol(d.repo.Token.Pubkey)).
+				Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+				Where(d.repo.Vault.Enabled.Is(true)).
+				Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
+		}
 	}
+	return query.Find()
+}
+
+func (d dripImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
+	query := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
 	if tokenBMint != nil {
-		query = query.Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey))
-	}
-	if tokenAMint != nil || tokenBMint != nil {
 		query = query.
+			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
 			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
 			Where(d.repo.Vault.Enabled.Is(true))
 	}
