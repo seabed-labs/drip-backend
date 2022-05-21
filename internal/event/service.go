@@ -47,9 +47,10 @@ func NewDripProgramProcessor(
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
-	//if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
-	//	return err
-	//}
+	// TODO(Mocha): the program ID's should be in a config since they will change
+	if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
+		return err
+	}
 	if err := d.client.ProgramSubscribe(ctx, token_swap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
 		return err
 	}

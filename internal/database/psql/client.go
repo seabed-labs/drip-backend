@@ -18,25 +18,15 @@ func NewDatabase(
 	return sqlx.Connect("postgres", getConnectionString(config))
 }
 
-type gormLogger struct {
-	logrus.Logger
-}
+type gormLogger struct{}
 
-func (g gormLogger) LogMode(level logger.LogLevel) logger.Interface {
-	return gormLogger{}
-}
+func (g gormLogger) LogMode(level logger.LogLevel) logger.Interface { return gormLogger{} }
 
-func (g gormLogger) Info(ctx context.Context, s string, i ...interface{}) {
-	g.Logger.Info(ctx, s, i)
-}
+func (g gormLogger) Info(ctx context.Context, s string, i ...interface{}) { logrus.Info(ctx, s, i) }
 
-func (g gormLogger) Warn(ctx context.Context, s string, i ...interface{}) {
-	g.Logger.Warn(ctx, s, i)
-}
+func (g gormLogger) Warn(ctx context.Context, s string, i ...interface{}) { logrus.Warn(ctx, s, i) }
 
-func (g gormLogger) Error(ctx context.Context, s string, i ...interface{}) {
-	g.Logger.Error(ctx, s, i)
-}
+func (g gormLogger) Error(ctx context.Context, s string, i ...interface{}) { logrus.Error(ctx, s, i) }
 
 func (g gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 }
