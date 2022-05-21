@@ -134,7 +134,7 @@ func backfillVaultPeriods(repo *query.Query, client *rpc.Client, vaultConfigs Co
 						WithContext(context.Background()).
 						Clauses(clause.OnConflict{UpdateAll: true}).
 						Create(vaultPeriods...); err != nil {
-						logrus.WithError(err).Error("failed to upsert vaults")
+						logrus.WithError(err).Error("failed to upsert vaultPeriods")
 					}
 				}
 				logrus.

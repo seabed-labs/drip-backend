@@ -5,6 +5,8 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/repository"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
@@ -33,6 +35,7 @@ func getDependencies() []fx.Option {
 			configs.NewPSQLConfig,
 			psql.NewGORMDatabase,
 			query.Use,
+			repository.NewRepository,
 			solana.NewSolanaClient,
 			processor.NewProcessor,
 		),

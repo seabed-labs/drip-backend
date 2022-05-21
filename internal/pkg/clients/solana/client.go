@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	bin "github.com/gagliardetto/binary"
+
 	"github.com/gagliardetto/solana-go/rpc/ws"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
@@ -22,6 +24,7 @@ type Solana interface {
 	MintToWallet(context.Context, string, string, uint64) (string, error)
 	signAndBroadcast(context.Context, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
+	GetAccount(context.Context, string, interface{}) error
 	// Wrappers
 
 	GetWalletPubKey() solana.PublicKey
@@ -78,6 +81,32 @@ func createsolanaImplClient(
 		Infof("loaded wallet")
 
 	return solanaClient, nil
+}
+
+func (s solanaImpl) GetAccount(ctx context.Context, address string, v interface{}) error {
+	resp, err := s.client.GetAccountInfoWithOpts(
+		ctx,
+		solana.MustPublicKeyFromBase58(address),
+		&rpc.GetAccountInfoOpts{
+			Encoding:   solana.EncodingBase64,
+			Commitment: "confirmed",
+			DataSlice:  nil,
+		})
+	if err != nil {
+		logrus.
+			WithError(err).
+			WithField("address", address).
+			Errorf("couldn't get acount info")
+		return err
+	}
+	if err := bin.NewBinDecoder(resp.Value.Data.GetBinary()).Decode(v); err != nil {
+		logrus.
+			WithError(err).
+			WithField("address", address).
+			Errorf("failed to decode")
+		return err
+	}
+	return nil
 }
 
 func (s solanaImpl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetTokenAccountsResult, error) {
