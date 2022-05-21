@@ -21,7 +21,7 @@ import (
 type Solana interface {
 	MintToWallet(context.Context, string, string, uint64) (string, error)
 	signAndBroadcast(context.Context, ...solana.Instruction) (string, error)
-
+	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	// Wrappers
 
 	GetWalletPubKey() solana.PublicKey
@@ -78,6 +78,19 @@ func createsolanaImplClient(
 		Infof("loaded wallet")
 
 	return solanaClient, nil
+}
+
+func (s solanaImpl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetTokenAccountsResult, error) {
+	return s.client.GetTokenAccountsByOwner(
+		ctx,
+		solana.MustPublicKeyFromBase58(wallet),
+		&rpc.GetTokenAccountsConfig{
+			ProgramId: &solana.TokenProgramID,
+		},
+		&rpc.GetTokenAccountsOpts{
+			Commitment: rpc.CommitmentMax,
+			Encoding:   solana.EncodingJSONParsed,
+		})
 }
 
 func (s solanaImpl) MintToWallet(

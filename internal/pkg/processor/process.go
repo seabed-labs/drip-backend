@@ -3,8 +3,9 @@ package processor
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 	"gorm.io/gorm/clause"
 )
@@ -24,12 +25,12 @@ type Processor interface {
 }
 
 type ProcessorImpl struct {
-	repo   *repository.Query
+	repo   *query.Query
 	client solana.Solana
 }
 
 func NewProcessor(
-	repo *repository.Query,
+	repo *query.Query,
 	client solana.Solana,
 ) Processor {
 	return ProcessorImpl{

@@ -214,6 +214,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /positions:
+    get:
+      summary: Get User Positions
+      description: Get all user positions.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/requiredWallet"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listPositions'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /mint:
     post:
@@ -261,6 +292,12 @@ components:
         type: string
     requiredVault:
       name: vault
+      in: query
+      schema:
+        type: string
+      required: true
+    requiredWallet:
+      name: Wallet
       in: query
       schema:
         type: string
@@ -467,3 +504,48 @@ components:
           decimals:
             type: integer
             example: 10
+    listPositions:
+      type: array
+      items:
+        type: object
+        required:
+          - pubkey
+          - vault
+          - authority
+          - depositedTokenAAmount
+          - withdrawnTokenBAmount
+          - depositTimestamp
+          - dcaPeriodIdBeforeDeposit
+          - numberOfSwaps
+          - periodicDripAmount
+          - isClosed
+        properties:
+          pubkey:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          vault:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          authority:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          depositedTokenAAmount:
+            type: integer
+            example: 10000
+          withdrawnTokenBAmount:
+            type: integer
+            example: 10000
+          depositTimestamp:
+            type: string
+            example: "1652747980"
+          dcaPeriodIdBeforeDeposit:
+            type: integer
+            example: 10
+          numberOfSwaps:
+            type: integer
+            example: 543
+          periodicDripAmount:
+            type: integer
+            example: 40
+          isClosed:
+            type: boolean

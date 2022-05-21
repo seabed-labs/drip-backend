@@ -27,6 +27,20 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// ListPositions defines model for listPositions.
+type ListPositions []struct {
+	Authority                string `json:"authority"`
+	DcaPeriodIdBeforeDeposit int    `json:"dcaPeriodIdBeforeDeposit"`
+	DepositTimestamp         string `json:"depositTimestamp"`
+	DepositedTokenAAmount    int    `json:"depositedTokenAAmount"`
+	IsClosed                 bool   `json:"isClosed"`
+	NumberOfSwaps            int    `json:"numberOfSwaps"`
+	PeriodicDripAmount       int    `json:"periodicDripAmount"`
+	Pubkey                   string `json:"pubkey"`
+	Vault                    string `json:"vault"`
+	WithdrawnTokenBAmount    int    `json:"withdrawnTokenBAmount"`
+}
+
 // ListProtoConfigs defines model for listProtoConfigs.
 type ListProtoConfigs []struct {
 	BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
@@ -102,6 +116,9 @@ type ProtoConfig string
 // RequiredVault defines model for requiredVault.
 type RequiredVault string
 
+// RequiredWallet defines model for requiredWallet.
+type RequiredWallet string
+
 // TokenA defines model for tokenA.
 type TokenA string
 
@@ -113,6 +130,11 @@ type VaultPeriod string
 
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
+
+// GetPositionsParams defines parameters for GetPositions.
+type GetPositionsParams struct {
+	Wallet RequiredWallet `json:"Wallet"`
+}
 
 // GetProtoconfigsParams defines parameters for GetProtoconfigs.
 type GetProtoconfigsParams struct {
@@ -233,6 +255,9 @@ type ClientInterface interface {
 
 	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetPositions request
+	GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetProtoconfigs request
 	GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -278,6 +303,18 @@ func (c *Client) PostMintWithBody(ctx context.Context, contentType string, body 
 
 func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostMintRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPositionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -423,6 +460,49 @@ func NewPostMintRequestWithBody(server string, contentType string, body io.Reade
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetPositionsRequest generates requests for GetPositions
+func NewGetPositionsRequest(server string, params *GetPositionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/positions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "Wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -864,6 +944,9 @@ type ClientWithResponsesInterface interface {
 
 	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
+	// GetPositions request
+	GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error)
+
 	// GetProtoconfigs request
 	GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
 
@@ -923,6 +1006,30 @@ func (r PostMintResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostMintResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPositionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListPositions
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPositionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPositionsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1097,6 +1204,15 @@ func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body Pos
 	return ParsePostMintResponse(rsp)
 }
 
+// GetPositionsWithResponse request returning *GetPositionsResponse
+func (c *ClientWithResponses) GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error) {
+	rsp, err := c.GetPositions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPositionsResponse(rsp)
+}
+
 // GetProtoconfigsWithResponse request returning *GetProtoconfigsResponse
 func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error) {
 	rsp, err := c.GetProtoconfigs(ctx, params, reqEditors...)
@@ -1193,6 +1309,46 @@ func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest MintResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPositionsResponse parses an HTTP response from a GetPositionsWithResponse call
+func ParseGetPositionsResponse(rsp *http.Response) (*GetPositionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPositionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListPositions
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1451,6 +1607,9 @@ type ServerInterface interface {
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
+	// Get User Positions
+	// (GET /positions)
+	GetPositions(ctx echo.Context, params GetPositionsParams) error
 	// Get Proto Configs
 	// (GET /protoconfigs)
 	GetProtoconfigs(ctx echo.Context, params GetProtoconfigsParams) error
@@ -1491,6 +1650,24 @@ func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PostMint(ctx)
+	return err
+}
+
+// GetPositions converts echo context to params.
+func (w *ServerInterfaceWrapper) GetPositions(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPositionsParams
+	// ------------- Required query parameter "Wallet" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "Wallet", ctx.QueryParams(), &params.Wallet)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter Wallet: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetPositions(ctx, params)
 	return err
 }
 
@@ -1679,6 +1856,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
+	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
@@ -1691,35 +1869,38 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"LSIAAA==",
+	"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",
+	"pb2A/oUoAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

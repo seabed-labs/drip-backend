@@ -19,7 +19,7 @@ func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsP
 	if params.Offset != nil {
 		offset = int(*params.Offset)
 	}
-	vaultPeriodModels, err := h.drip.GetVaultPeriods(
+	vaultPeriodModels, err := h.repo.GetVaultPeriods(
 		c.Request().Context(),
 		(string)(params.Vault),
 		limit,

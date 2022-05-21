@@ -13,19 +13,19 @@ import (
 )
 
 const modelDir = "./internal/pkg/repository/model"
-const queryDir = "./internal/pkg/repository"
+const queryDir = "./internal/pkg/repository/query"
 
 func GenerateModels(
 	db *gorm.DB,
 ) {
 	modelPkgPath := fmt.Sprintf("%s/%s", configs.GetProjectRoot(), modelDir)
-	outPath := fmt.Sprintf("%s/%s", configs.GetProjectRoot(), queryDir)
+	queryPkgPath := fmt.Sprintf("%s/%s", configs.GetProjectRoot(), queryDir)
 	logrus.
 		WithField("modelPkgPath", modelPkgPath).
-		WithField("outPath", outPath).
+		WithField("outPath", queryPkgPath).
 		Info("starting repo models codegen")
 	g := gen.NewGenerator(gen.Config{
-		OutPath:        outPath,
+		OutPath:        queryPkgPath,
 		ModelPkgPath:   modelPkgPath,
 		FieldNullable:  true,
 		FieldCoverable: true,

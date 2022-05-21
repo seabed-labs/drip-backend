@@ -14,7 +14,7 @@ import (
 func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
 	var res Swagger.ListVaults
 
-	vaultModels, err := h.drip.GetVaults(
+	vaultModels, err := h.repo.GetVaults(
 		c.Request().Context(),
 		(*string)(params.TokenA),
 		(*string)(params.TokenB),
@@ -28,7 +28,7 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 	for i := range vaultModels {
 		vault := vaultModels[i]
 		// TODO(mocha): this can be done in the same query as the vault
-		tokenPair, err := h.drip.GetTokenPair(c.Request().Context(), vault.TokenPairID)
+		tokenPair, err := h.repo.GetTokenPair(c.Request().Context(), vault.TokenPairID)
 		if err != nil {
 			logrus.WithError(err).WithField("tokenPairID", tokenPair.ID).Errorf("could not find token pair")
 			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})

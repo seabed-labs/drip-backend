@@ -22,7 +22,7 @@ func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error
 		mintFilter = (*string)(params.TokenB)
 		supportedTokenA = false
 	}
-	tokens, err := h.drip.GetTokensWithSupportedTokenPair(c.Request().Context(), mintFilter, supportedTokenA)
+	tokens, err := h.repo.GetTokensWithSupportedTokenPair(c.Request().Context(), mintFilter, supportedTokenA)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})

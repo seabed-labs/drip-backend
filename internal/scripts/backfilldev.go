@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
+
 	"github.com/shopspring/decimal"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/dca_vault"
@@ -24,7 +26,6 @@ import (
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 	"github.com/sirupsen/logrus"
 )
 
@@ -54,7 +55,7 @@ type TriggerDCAConfig struct {
 // TODO(mocha): sql dump the output of this
 func Backfill(
 	config *configs.AppConfig,
-	repo *repository.Query,
+	repo *query.Query,
 ) error {
 	client := rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(rpc.DevNet_RPC, 10))
 
@@ -80,7 +81,7 @@ func Backfill(
 	return nil
 }
 
-func backfillVaultPeriods(repo *repository.Query, client *rpc.Client, vaultConfigs Config, vaultSet map[string]*model.Vault) {
+func backfillVaultPeriods(repo *query.Query, client *rpc.Client, vaultConfigs Config, vaultSet map[string]*model.Vault) {
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
 		vault := vaultSet[vaultConfig.Vault]
 		logrus.
@@ -146,7 +147,7 @@ func backfillVaultPeriods(repo *repository.Query, client *rpc.Client, vaultConfi
 }
 
 func backfillVaults(
-	repo *repository.Query, client *rpc.Client,
+	repo *query.Query, client *rpc.Client,
 	vaultConfigs Config, mintToTokenPair map[string]*model.TokenPair,
 ) map[string]*model.Vault {
 	var vaults []*model.Vault
@@ -192,7 +193,7 @@ func backfillVaults(
 	return vaultSet
 }
 
-func backfillTokens(repo *repository.Query, client *rpc.Client, vaultConfigs Config) map[string]*model.Token {
+func backfillTokens(repo *query.Query, client *rpc.Client, vaultConfigs Config) map[string]*model.Token {
 	var tokens []*model.Token
 	tokenSet := make(map[string]*model.Token)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
@@ -237,7 +238,7 @@ func backfillTokens(repo *repository.Query, client *rpc.Client, vaultConfigs Con
 	return tokenSet
 }
 
-func backfillTokenPairs(repo *repository.Query, vaultConfigs Config) map[string]*model.TokenPair {
+func backfillTokenPairs(repo *query.Query, vaultConfigs Config) map[string]*model.TokenPair {
 	var tokenPairs []*model.TokenPair
 	tokenPairSet := make(map[string]*model.TokenPair)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
@@ -272,7 +273,7 @@ func backfillTokenPairs(repo *repository.Query, vaultConfigs Config) map[string]
 	return tokenPairSet
 }
 
-func backfillTokenSwaps(repo *repository.Query, vaultConfigs Config, tokenPairSet map[string]*model.TokenPair) map[string]*model.TokenSwap {
+func backfillTokenSwaps(repo *query.Query, vaultConfigs Config, tokenPairSet map[string]*model.TokenPair) map[string]*model.TokenSwap {
 	var tokenSwaps []*model.TokenSwap
 	tokenSwapSet := make(map[string]*model.TokenSwap)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
@@ -301,7 +302,7 @@ func backfillTokenSwaps(repo *repository.Query, vaultConfigs Config, tokenPairSe
 	return tokenSwapSet
 }
 
-func backfillProtoConfigs(repo *repository.Query, client *rpc.Client, vaultConfigs Config) map[string]*model.ProtoConfig {
+func backfillProtoConfigs(repo *query.Query, client *rpc.Client, vaultConfigs Config) map[string]*model.ProtoConfig {
 	var protoConfigs []*model.ProtoConfig
 	protoConfigSet := make(map[string]*model.ProtoConfig)
 	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {

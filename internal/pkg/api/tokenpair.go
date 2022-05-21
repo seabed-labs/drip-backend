@@ -11,7 +11,7 @@ import (
 func (h Handler) GetTokenpairs(c echo.Context, params Swagger.GetTokenpairsParams) error {
 	var res Swagger.ListTokenPairs
 
-	tokenPairs, err := h.drip.GetTokenPairs(c.Request().Context(), (*string)(params.TokenA), (*string)(params.TokenB))
+	tokenPairs, err := h.repo.GetTokenPairs(c.Request().Context(), (*string)(params.TokenA), (*string)(params.TokenB))
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})

@@ -10,20 +10,17 @@ import (
 	"strings"
 	"testing"
 
-	mock_drip "github.com/dcaf-protocol/drip/internal/pkg/drip"
+	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
-
 	solana2 "github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-
-	"github.com/labstack/echo/v4"
-
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"
 )
 
@@ -38,7 +35,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
@@ -61,7 +58,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -89,7 +86,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -128,7 +125,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -182,7 +179,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -241,7 +238,7 @@ func TestHandler_PostMint(t *testing.T) {
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
-		}, m, mock_drip.NewMockDrip(ctrl))
+		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
 			Amount: "100",
 			Mint:   mint,

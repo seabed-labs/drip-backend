@@ -76,4 +76,20 @@ func TestSolanaClient(t *testing.T) {
 		assert.NoError(t, err)
 		time.Sleep(timeout)
 	})
+
+	//t.Run("GetA should return token accounts", func(t *testing.T) {
+	//	res, err := client.GetUserBalances(context.Background(), "DG43NUhq6gxUAcNGCJ45zCrBHgPDNNjMovocPHdHUqUD")
+	//	assert.NoError(t, err)
+	//	assert.NotNil(t, res)
+	//	assert.NotNil(t, res.Value)
+	//	assert.NotEmpty(t, res.Value)
+	//	for _, a := range res.Value {
+	//		rpc.mustJSONToInterface(mustAnyToJSON(out))
+	//		//var tokenAccount token.Account
+	//		//tokenAccount.
+	//		//err := bin.NewBinDecoder(a.Account.Data.GetBinary()).Decode(&tokenAccount)
+	//		//assert.NoError(t, err)
+	//		//fmt.Println(tokenAccount)
+	//	}
+	//})
 }

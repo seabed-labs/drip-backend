@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/drip"
+	"github.com/dcaf-protocol/drip/internal/pkg/repository"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
 
@@ -13,8 +15,6 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
 	"github.com/dcaf-protocol/drip/internal/server"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/database/psql"
@@ -40,9 +40,9 @@ func getDependencies() []fx.Option {
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
 			psql.NewGORMDatabase,
-			repository.Use,
+			query.Use,
 			solana.NewSolanaClient,
-			drip.NewDripService,
+			repository.NewRepository,
 			api.NewHandler,
 			processor.NewProcessor,
 		),

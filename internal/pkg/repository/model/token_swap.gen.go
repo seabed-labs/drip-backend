@@ -8,13 +8,13 @@ const TableNameTokenSwap = "token_swap"
 
 // TokenSwap mapped from table <token_swap>
 type TokenSwap struct {
-	Pubkey        string `gorm:"column:pubkey;primaryKey" json:"pubkey" yaml:"pubkey"`
-	Mint          string `gorm:"column:mint;not null" json:"mint" yaml:"mint"`
-	Authority     string `gorm:"column:authority;not null" json:"authority" yaml:"authority"`
-	FeeAccount    string `gorm:"column:fee_account;not null" json:"feeAccount" yaml:"feeAccount"`
-	TokenAAccount string `gorm:"column:token_a_account;not null" json:"tokenAAccount" yaml:"tokenAAccount"`
-	TokenBAccount string `gorm:"column:token_b_account;not null" json:"tokenBAccount" yaml:"tokenBAccount"`
-	Pair          string `gorm:"column:pair;not null" json:"pair" yaml:"pair"`
+	Pubkey        string `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" yaml:"pubkey"`
+	Mint          string `gorm:"column:mint;type:varchar;not null" json:"mint" yaml:"mint"`
+	Authority     string `gorm:"column:authority;type:varchar;not null" json:"authority" yaml:"authority"`
+	FeeAccount    string `gorm:"column:fee_account;type:varchar;not null" json:"feeAccount" yaml:"feeAccount"`
+	TokenAAccount string `gorm:"column:token_a_account;type:varchar;not null" json:"tokenAAccount" yaml:"tokenAAccount"`
+	TokenBAccount string `gorm:"column:token_b_account;type:varchar;not null" json:"tokenBAccount" yaml:"tokenBAccount"`
+	Pair          string `gorm:"column:pair;type:uuid;not null" json:"pair" yaml:"pair"`
 }
 
 // TableName TokenSwap's table name
