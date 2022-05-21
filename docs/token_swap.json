@@ -1,0 +1,98 @@
+{
+  "version": "0.1.0",
+  "name": "token_swap",
+  "ref": "https://github.com/solana-labs/solana-program-library/blob/master/token-swap/js/src/index.ts",
+  "accounts": [
+    {
+      "name": "TokenSwap",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "isInitialized",
+            "type": "u8"
+          },
+          {
+            "name": "bumpSeed",
+            "type": "u8"
+          },
+          {
+            "name": "tokenProgramId",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenAccountA",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenAccountB",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenPool",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintA",
+            "type": "publicKey"
+          },
+          {
+            "name": "mintB",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "tradeFeeNumerator",
+            "type": "u64"
+          },
+          {
+            "name": "tradeFeeDenominator",
+            "type": "u64"
+          },
+          {
+            "name": "ownerTradeFeeNumerator",
+            "type": "u64"
+          },
+          {
+            "name": "ownerTradeFeeDenominator",
+            "type": "u64"
+          },
+          {
+            "name": "ownerWithdrawFeeNumerator",
+            "type": "u64"
+          },
+          {
+            "name": "ownerWithdrawFeeDenominator",
+            "type": "u64"
+          },
+          {
+            "name": "hostFeeNumerator",
+            "type": "u64"
+          },
+          {
+            "name": "hostFeeDenominator",
+            "type": "u64"
+          },
+          {
+            "name": "curveType",
+            "type": "u8"
+          },
+          {
+            "name": "curveParameters",
+            "type": "bytes"
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "address": "SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8"
+  }
+}
