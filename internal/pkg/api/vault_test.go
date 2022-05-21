@@ -78,7 +78,7 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetVaults(gomock.Any(), nil, nil, nil).
+			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
 			Return(nil, fmt.Errorf("some error")).
 			AnyTimes()
 
@@ -107,17 +107,17 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetTokenPair(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
+			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
 			Return(tokenPairs[0], nil).
 			AnyTimes()
 		m.
 			EXPECT().
-			GetTokenPair(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
+			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
 			Return(tokenPairs[1], nil).
 			AnyTimes()
 		m.
 			EXPECT().
-			GetVaults(gomock.Any(), nil, nil, nil).
+			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
 			Return(vaults, nil).
 			AnyTimes()
 

@@ -162,7 +162,7 @@ type GetVaultperiodsParams struct {
 	Limit       *Limit        `json:"limit,omitempty"`
 }
 
-// GetVaultsParams defines parameters for GetVaults.
+// GetVaultsParams defines parameters for GetVaultsWithFilter.
 type GetVaultsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
@@ -814,7 +814,7 @@ func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*h
 	return req, nil
 }
 
-// NewGetVaultsRequest generates requests for GetVaults
+// NewGetVaultsRequest generates requests for GetVaultsWithFilter
 func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request, error) {
 	var err error
 
@@ -962,7 +962,7 @@ type ClientWithResponsesInterface interface {
 	// GetVaultperiods request
 	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
 
-	// GetVaults request
+	// GetVaultsWithFilter request
 	GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error)
 }
 
