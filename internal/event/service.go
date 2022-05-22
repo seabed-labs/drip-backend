@@ -4,6 +4,8 @@ import (
 	"context"
 	"runtime/debug"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/dca_vault"
@@ -45,15 +47,22 @@ func NewDripProgramProcessor(
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
-	return d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processEvent)
+	// TODO(Mocha): the program ID's should be in a config since they will change
+	if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
+		return err
+	}
+	if err := d.client.ProgramSubscribe(ctx, token_swap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (d DripProgramProcessor) stop() {
 	d.cancel()
 }
 
-func (d DripProgramProcessor) processEvent(address string, data []byte) {
-
+// TODO(Mocha): Backfill using GetProgramAccounts
+func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
 	log.Infof("received drip account update")
@@ -95,4 +104,25 @@ func (d DripProgramProcessor) processEvent(address string, data []byte) {
 		return
 	}
 	log.Errorf("failed to decode account")
+}
+
+func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte) {
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	log.Infof("received token swap account update")
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
+		}
+	}()
+	var tokenSwap token_swap.TokenSwap
+	err := bin.NewBinDecoder(data).Decode(&tokenSwap)
+	if err == nil {
+		log.Infof("decoded as tokenSwap")
+		if err := d.processor.UpsertTokenSwapByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert tokenSwap")
+		}
+		return
+	}
+	log.WithError(err).Errorf("failed to decode token swap account")
 }

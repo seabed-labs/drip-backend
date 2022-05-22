@@ -212,6 +212,25 @@ func (mr *MockRepositoryMockRecorder) UpsertTokenPairs(arg0 interface{}, arg1 ..
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).UpsertTokenPairs), varargs...)
 }
 
+// UpsertTokenSwaps mocks base method.
+func (m *MockRepository) UpsertTokenSwaps(arg0 context.Context, arg1 ...*model.TokenSwap) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertTokenSwaps", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertTokenSwaps indicates an expected call of UpsertTokenSwaps.
+func (mr *MockRepositoryMockRecorder) UpsertTokenSwaps(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertTokenSwaps", reflect.TypeOf((*MockRepository)(nil).UpsertTokenSwaps), varargs...)
+}
+
 // UpsertTokens mocks base method.
 func (m *MockRepository) UpsertTokens(arg0 context.Context, arg1 ...*model.Token) error {
 	m.ctrl.T.Helper()

@@ -17,6 +17,7 @@ type Repository interface {
 	UpsertVaults(context.Context, ...*model.Vault) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
+	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
@@ -41,6 +42,13 @@ func NewRepository(
 		client: client,
 		repo:   repo,
 	}
+}
+
+func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error {
+	return d.repo.TokenSwap.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{UpdateAll: true}).
+		Create(tokenSwaps...)
 }
 
 func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error {
