@@ -4,6 +4,8 @@ import (
 	"context"
 	"runtime/debug"
 
+	"github.com/dcaf-protocol/drip/internal/configs"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
@@ -18,21 +20,24 @@ import (
 )
 
 type DripProgramProcessor struct {
-	client    solana.Solana
-	processor processor.Processor
-	cancel    context.CancelFunc
+	client      solana.Solana
+	processor   processor.Processor
+	cancel      context.CancelFunc
+	environment configs.Environment
 }
 
 func NewDripProgramProcessor(
 	lifecycle fx.Lifecycle,
 	client solana.Solana,
 	processor processor.Processor,
+	config *configs.AppConfig,
 ) *DripProgramProcessor {
 	ctx, cancel := context.WithCancel(context.Background())
 	dripProgramProcessor := DripProgramProcessor{
-		client:    client,
-		processor: processor,
-		cancel:    cancel,
+		client:      client,
+		processor:   processor,
+		cancel:      cancel,
+		environment: config.Environment,
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
@@ -55,7 +60,9 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 		return err
 	}
 	go d.Backfill(context.Background(), dca_vault.ProgramID.String(), d.processDripEvent)
-	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
+	if configs.IsDev(d.environment) {
+		go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
+	}
 	return nil
 }
 
