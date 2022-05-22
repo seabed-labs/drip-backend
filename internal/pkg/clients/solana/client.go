@@ -25,13 +25,13 @@ type Solana interface {
 	signAndBroadcast(context.Context, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	GetAccount(context.Context, string, interface{}) error
-	// Wrappers
+	GetProgramAccounts(context.Context, string) ([]string, error)
+	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
+	ProgramSubscribe(context.Context, string, func(string, []byte)) error
 
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
-	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
-	ProgramSubscribe(context.Context, string, func(string, []byte)) error
 }
 
 func NewSolanaClient(
@@ -109,6 +109,41 @@ func (s solanaImpl) GetAccount(ctx context.Context, address string, v interface{
 	return nil
 }
 
+func (s solanaImpl) GetProgramAccounts(ctx context.Context, address string) ([]string, error) {
+	offset := uint64(0)
+	length := uint64(0)
+	var res []string
+	resp, err := s.client.GetProgramAccountsWithOpts(
+		ctx,
+		solana.MustPublicKeyFromBase58(address),
+		&rpc.GetProgramAccountsOpts{
+			Encoding:   solana.EncodingBase64,
+			Commitment: "confirmed",
+			DataSlice: &rpc.DataSlice{
+				Offset: &offset,
+				Length: &length,
+			},
+			Filters: []rpc.RPCFilter{
+				{
+					Memcmp: &rpc.RPCFilterMemcmp{
+						Offset: 0,
+					},
+				},
+			},
+		})
+	if err != nil {
+		logrus.
+			WithError(err).
+			WithField("address", address).
+			Errorf("couldn't get acount info")
+		return nil, err
+	}
+	for i := range resp {
+		res = append(res, resp[i].Pubkey.String())
+	}
+	return res, nil
+}
+
 func (s solanaImpl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetTokenAccountsResult, error) {
 	return s.client.GetTokenAccountsByOwner(
 		ctx,
@@ -180,6 +215,7 @@ func (s solanaImpl) ProgramSubscribe(
 			msg, err := sub.Recv()
 			if err != nil {
 				log.
+					WithError(err).
 					WithFields(log.Fields{
 						"event": program,
 					}).

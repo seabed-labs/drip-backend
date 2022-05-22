@@ -2,8 +2,11 @@ package solana
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 
@@ -75,6 +78,17 @@ func TestSolanaClient(t *testing.T) {
 		})
 		assert.NoError(t, err)
 		time.Sleep(timeout)
+	})
+
+	t.Run("GetProgramAccounts should return all account publickeys", func(t *testing.T) {
+		timeout := time.Second * 5
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		offset, err := client.GetProgramAccounts(ctx, token_swap.ProgramID.String())
+		fmt.Println(len(offset))
+		assert.NoError(t, err)
+		assert.NotZero(t, offset)
+		assert.True(t, len(offset) > 4500)
 	})
 
 	//t.Run("GetA should return token accounts", func(t *testing.T) {
