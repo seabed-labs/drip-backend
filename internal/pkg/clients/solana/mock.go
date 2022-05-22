@@ -65,6 +65,20 @@ func (mr *MockSolanaMockRecorder) GetAccountInfo(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccountInfo", reflect.TypeOf((*MockSolana)(nil).GetAccountInfo), arg0, arg1)
 }
 
+// GetAccounts mocks base method.
+func (m *MockSolana) GetAccounts(arg0 context.Context, arg1 []string, arg2 func(string, []byte)) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAccounts", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// GetAccounts indicates an expected call of GetAccounts.
+func (mr *MockSolanaMockRecorder) GetAccounts(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockSolana)(nil).GetAccounts), arg0, arg1, arg2)
+}
+
 // GetProgramAccounts mocks base method.
 func (m *MockSolana) GetProgramAccounts(arg0 context.Context, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()

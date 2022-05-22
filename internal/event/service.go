@@ -54,6 +54,8 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	if err := d.client.ProgramSubscribe(ctx, token_swap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
 		return err
 	}
+	go d.Backfill(context.Background(), dca_vault.ProgramID.String(), d.processDripEvent)
+	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
 	return nil
 }
 
@@ -61,7 +63,32 @@ func (d DripProgramProcessor) stop() {
 	d.cancel()
 }
 
-// TODO(Mocha): Backfill using GetProgramAccounts
+func (d DripProgramProcessor) Backfill(ctx context.Context, programId string, processor func(string, []byte)) {
+	log := logrus.WithField("program", programId).WithField("func", "Backfill")
+	accounts, err := d.client.GetProgramAccounts(ctx, programId)
+	if err != nil {
+		log.WithError(err).Error("failed to get accounts")
+	}
+	page, pageSize, total := 0, 50, len(accounts)
+	start, end := paginate(page, pageSize, total)
+	for start < end {
+		log = log.
+			WithField("page", page).
+			WithField("pageSize", pageSize).
+			WithField("total", total)
+		log.Infof("backfilling program accounts")
+		err := d.client.GetAccounts(ctx, accounts[start:end], func(address string, data []byte) {
+			processor(address, data)
+		})
+		if err != nil {
+			log.WithError(err).
+				Error("failed to get accounts")
+		}
+		page++
+		start, end = paginate(page, pageSize, total)
+	}
+}
+
 func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
@@ -125,4 +152,19 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 		return
 	}
 	log.WithError(err).Errorf("failed to decode token swap account")
+}
+
+func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
+	start := pageNum * pageSize
+
+	if start > sliceLength {
+		start = sliceLength
+	}
+
+	end := start + pageSize
+	if end > sliceLength {
+		end = sliceLength
+	}
+
+	return start, end
 }

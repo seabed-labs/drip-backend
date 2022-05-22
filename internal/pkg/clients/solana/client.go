@@ -25,6 +25,7 @@ type Solana interface {
 	signAndBroadcast(context.Context, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	GetAccount(context.Context, string, interface{}) error
+	GetAccounts(context.Context, []string, func(string, []byte)) error
 	GetProgramAccounts(context.Context, string) ([]string, error)
 	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
 	ProgramSubscribe(context.Context, string, func(string, []byte)) error
@@ -37,27 +38,27 @@ type Solana interface {
 func NewSolanaClient(
 	config *configs.AppConfig,
 ) (Solana, error) {
-	return createsolanaImplClient(config)
+	return createClient(config)
 }
 
-type solanaImpl struct {
+type impl struct {
 	environment configs.Environment
 	client      *rpc.Client
 	wallet      *solana.Wallet
 }
 
-func createsolanaImplClient(
+func createClient(
 	config *configs.AppConfig,
-) (solanaImpl, error) {
+) (impl, error) {
 	url := getURL(config.Environment)
-	solanaClient := solanaImpl{
+	solanaClient := impl{
 		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
 		environment: config.Environment,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
 		log.WithError(err).Fatalf("failed to get clients version info")
-		return solanaImpl{}, err
+		return impl{}, err
 	}
 	log.
 		WithFields(log.Fields{
@@ -68,12 +69,12 @@ func createsolanaImplClient(
 
 	var accountBytes []byte
 	if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {
-		return solanaImpl{}, err
+		return impl{}, err
 	}
 	priv := base58.Encode(accountBytes)
 	solWallet, err := solana.WalletFromPrivateKeyBase58(priv)
 	if err != nil {
-		return solanaImpl{}, err
+		return impl{}, err
 	}
 	solanaClient.wallet = solWallet
 	log.
@@ -83,7 +84,38 @@ func createsolanaImplClient(
 	return solanaClient, nil
 }
 
-func (s solanaImpl) GetAccount(ctx context.Context, address string, v interface{}) error {
+func (s impl) GetAccounts(ctx context.Context, addresses []string, decode func(string, []byte)) error {
+	var pubkeys []solana.PublicKey
+	for _, address := range addresses {
+		pubkey, err := solana.PublicKeyFromBase58(address)
+		if err != nil {
+			return err
+		}
+		pubkeys = append(pubkeys, pubkey)
+	}
+	resp, err := s.client.GetMultipleAccountsWithOpts(ctx, pubkeys, &rpc.GetMultipleAccountsOpts{
+		Encoding:   solana.EncodingBase64,
+		Commitment: "confirmed",
+	})
+	if err != nil {
+		logrus.
+			WithError(err).
+			Errorf("couldn't get multiple account infos")
+		return err
+	}
+	if len(resp.Value) != len(addresses) {
+		return fmt.Errorf("response does not match length of addresses")
+	}
+	for i, val := range resp.Value {
+		if val == nil || val.Data == nil {
+			continue
+		}
+		decode(addresses[i], val.Data.GetBinary())
+	}
+	return nil
+}
+
+func (s impl) GetAccount(ctx context.Context, address string, v interface{}) error {
 	resp, err := s.client.GetAccountInfoWithOpts(
 		ctx,
 		solana.MustPublicKeyFromBase58(address),
@@ -109,7 +141,7 @@ func (s solanaImpl) GetAccount(ctx context.Context, address string, v interface{
 	return nil
 }
 
-func (s solanaImpl) GetProgramAccounts(ctx context.Context, address string) ([]string, error) {
+func (s impl) GetProgramAccounts(ctx context.Context, address string) ([]string, error) {
 	offset := uint64(0)
 	length := uint64(0)
 	var res []string
@@ -144,7 +176,7 @@ func (s solanaImpl) GetProgramAccounts(ctx context.Context, address string) ([]s
 	return res, nil
 }
 
-func (s solanaImpl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetTokenAccountsResult, error) {
+func (s impl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetTokenAccountsResult, error) {
 	return s.client.GetTokenAccountsByOwner(
 		ctx,
 		solana.MustPublicKeyFromBase58(wallet),
@@ -157,7 +189,7 @@ func (s solanaImpl) GetUserBalances(ctx context.Context, wallet string) (*rpc.Ge
 		})
 }
 
-func (s solanaImpl) MintToWallet(
+func (s impl) MintToWallet(
 	ctx context.Context, mint, destWallet string, amount uint64,
 ) (string, error) {
 	mintPubKey := solana.MustPublicKeyFromBase58(mint)
@@ -192,7 +224,7 @@ func (s solanaImpl) MintToWallet(
 }
 
 // TODO(Mocha): Pass in an error channel so that subscribers can handle errors
-func (s solanaImpl) ProgramSubscribe(
+func (s impl) ProgramSubscribe(
 	ctx context.Context, program string, onReceive func(string, []byte),
 ) error {
 	url := getWSURL(s.environment)
@@ -249,11 +281,11 @@ func (s solanaImpl) ProgramSubscribe(
 /// Wallet Wrapper
 ////////////////////////////////////////////////////////////
 
-func (s solanaImpl) GetWalletPubKey() solana.PublicKey {
+func (s impl) GetWalletPubKey() solana.PublicKey {
 	return s.wallet.PublicKey()
 }
 
-func (s solanaImpl) getWalletPrivKey() solana.PrivateKey {
+func (s impl) getWalletPrivKey() solana.PrivateKey {
 	return s.wallet.PrivateKey
 }
 
@@ -261,23 +293,23 @@ func (s solanaImpl) getWalletPrivKey() solana.PrivateKey {
 /// RPC Client Wrapper
 ////////////////////////////////////////////////////////////
 
-func (s solanaImpl) GetTokenAccountBalance(
+func (s impl) GetTokenAccountBalance(
 	ctx context.Context, destAccount solana.PublicKey, commitmentType rpc.CommitmentType,
 ) (*rpc.GetTokenAccountBalanceResult, error) {
 	return s.client.GetTokenAccountBalance(ctx, destAccount, commitmentType)
 }
 
-func (s solanaImpl) GetAccountInfo(
+func (s impl) GetAccountInfo(
 	ctx context.Context, account solana.PublicKey,
 ) (*rpc.GetAccountInfoResult, error) {
 	return s.client.GetAccountInfo(ctx, account)
 }
 
-func (s solanaImpl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {
+func (s impl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {
 	return s.client.GetVersion(ctx)
 }
 
-func (s solanaImpl) signAndBroadcast(
+func (s impl) signAndBroadcast(
 	ctx context.Context, instructions ...solana.Instruction,
 ) (string, error) {
 	recent, err := s.client.GetRecentBlockhash(ctx, rpc.CommitmentConfirmed)
