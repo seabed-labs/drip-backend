@@ -9,8 +9,6 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
 
-	"github.com/dcaf-protocol/drip/internal/event"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/api"
@@ -52,7 +50,7 @@ func getDependencies() []fx.Option {
 			//scripts.Backfill,
 			server.Run,
 			// TODO(mocha): this should run in it's own deployment
-			event.NewDripProgramProcessor,
+			//event.NewDripProgramProcessor,
 		),
 		fx.NopLogger,
 	}
