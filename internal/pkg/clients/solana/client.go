@@ -52,7 +52,7 @@ func createClient(
 ) (impl, error) {
 	url := getURL(config.Environment)
 	solanaClient := impl{
-		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
+		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 3)),
 		environment: config.Environment,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
