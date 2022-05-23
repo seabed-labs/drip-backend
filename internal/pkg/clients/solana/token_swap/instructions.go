@@ -5,6 +5,7 @@ package token_swap
 import (
 	"bytes"
 	"fmt"
+
 	ag_spew "github.com/davecgh/go-spew/spew"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -12,7 +13,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var ProgramID ag_solanago.PublicKey
+var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8")
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
