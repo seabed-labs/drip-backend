@@ -60,9 +60,9 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 		return err
 	}
 	go d.Backfill(context.Background(), dca_vault.ProgramID.String(), d.processDripEvent)
-	if configs.IsDev(d.environment) {
-		go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
-	}
+	//if configs.IsDev(d.environment) {
+	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
+	//}
 	return nil
 }
 
