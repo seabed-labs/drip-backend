@@ -12,7 +12,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8")
+var ProgramID ag_solanago.PublicKey
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey
@@ -27,11 +27,35 @@ func init() {
 	}
 }
 
-var ()
+var (
+	Instruction_Initialize = ag_binary.TypeID([8]byte{175, 175, 109, 31, 13, 152, 155, 237})
+
+	Instruction_Swap = ag_binary.TypeID([8]byte{248, 198, 158, 145, 225, 117, 135, 200})
+
+	Instruction_DepositAllTokenTypes = ag_binary.TypeID([8]byte{32, 95, 69, 60, 75, 79, 205, 238})
+
+	Instruction_WithdrawAllTokenTypes = ag_binary.TypeID([8]byte{189, 254, 156, 174, 210, 9, 164, 216})
+
+	Instruction_DepositSingleTokenTypeExactAmountIn = ag_binary.TypeID([8]byte{99, 207, 4, 42, 88, 157, 45, 55})
+
+	Instruction_WithdrawSingleTokenTypeExactAmountOut = ag_binary.TypeID([8]byte{243, 192, 70, 139, 209, 156, 8, 139})
+)
 
 // InstructionIDToName returns the name of the instruction given its ID.
 func InstructionIDToName(id ag_binary.TypeID) string {
 	switch id {
+	case Instruction_Initialize:
+		return "Initialize"
+	case Instruction_Swap:
+		return "Swap"
+	case Instruction_DepositAllTokenTypes:
+		return "DepositAllTokenTypes"
+	case Instruction_WithdrawAllTokenTypes:
+		return "WithdrawAllTokenTypes"
+	case Instruction_DepositSingleTokenTypeExactAmountIn:
+		return "DepositSingleTokenTypeExactAmountIn"
+	case Instruction_WithdrawSingleTokenTypeExactAmountOut:
+		return "WithdrawSingleTokenTypeExactAmountOut"
 	default:
 		return ""
 	}
@@ -51,7 +75,26 @@ func (inst *Instruction) EncodeToTree(parent ag_treeout.Branches) {
 
 var InstructionImplDef = ag_binary.NewVariantDefinition(
 	ag_binary.AnchorTypeIDEncoding,
-	[]ag_binary.VariantType{},
+	[]ag_binary.VariantType{
+		{
+			"initialize", (*Initialize)(nil),
+		},
+		{
+			"swap", (*Swap)(nil),
+		},
+		{
+			"deposit_all_token_types", (*DepositAllTokenTypes)(nil),
+		},
+		{
+			"withdraw_all_token_types", (*WithdrawAllTokenTypes)(nil),
+		},
+		{
+			"deposit_single_token_type_exact_amount_in", (*DepositSingleTokenTypeExactAmountIn)(nil),
+		},
+		{
+			"withdraw_single_token_type_exact_amount_out", (*WithdrawSingleTokenTypeExactAmountOut)(nil),
+		},
+	},
 )
 
 func (inst *Instruction) ProgramID() ag_solanago.PublicKey {
