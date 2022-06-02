@@ -23,6 +23,4 @@ type TokenSwap struct {
 	OwnerWithdrawFeeDenominator uint64
 	HostFeeNumerator            uint64
 	HostFeeDenominator          uint64
-	CurveType                   uint8
-	CurveParameters             []byte
 }
