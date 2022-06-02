@@ -41,7 +41,8 @@ func EventServer(
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			return dripProgramProcessor.start(ctx)
+			go dripProgramProcessor.start(ctx)
+			return nil
 		},
 		OnStop: func(_ context.Context) error {
 			dripProgramProcessor.stop()
@@ -52,10 +53,20 @@ func EventServer(
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
 	// TODO(Mocha): the program ID's should be in a config since they will change
+	d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processDripEvent)
 	if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}
-	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processDripEvent)
+
+	for _, swapProgram := range []string{
+		token_swap.ProgramID.String(),
+		"9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP", // orca swap v2
+		"DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1", // orca swap v1
+		"SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr",  // Saros AMM
+		"PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP",  // Penguin Swap
+	} {
+		d.Backfill(context.Background(), swapProgram, d.processTokenSwapEvent)
+	}
 
 	for _, swapProgram := range []string{
 		token_swap.ProgramID.String(),
@@ -67,7 +78,6 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 		if err := d.client.ProgramSubscribe(ctx, swapProgram, d.processTokenSwapEvent); err != nil {
 			return err
 		}
-		go d.Backfill(context.Background(), swapProgram, d.processTokenSwapEvent)
 	}
 	return nil
 }
