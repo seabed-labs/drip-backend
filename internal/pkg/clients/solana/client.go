@@ -381,7 +381,7 @@ func getURL(env configs.Environment) string {
 	case configs.DevnetEnv:
 		return rpc.DevNet_RPC
 	case configs.MainnetEnv:
-		return rpc.MainNetBeta_RPC
+		return "https://ssc-dao.genesysgo.net"
 	case configs.NilEnv:
 		fallthrough
 	case configs.LocalnetEnv:
@@ -396,7 +396,7 @@ func getWSURL(env configs.Environment) string {
 	case configs.DevnetEnv:
 		return rpc.DevNet_WS
 	case configs.MainnetEnv:
-		return rpc.MainNetBeta_WS
+		return "wss://ssc-dao.genesysgo.net"
 	case configs.NilEnv:
 		fallthrough
 	case configs.LocalnetEnv:
