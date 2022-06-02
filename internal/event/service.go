@@ -26,12 +26,12 @@ type DripProgramProcessor struct {
 	environment configs.Environment
 }
 
-func NewDripProgramProcessor(
+func EventServer(
 	lifecycle fx.Lifecycle,
 	client solana.Solana,
 	processor processor.Processor,
 	config *configs.AppConfig,
-) *DripProgramProcessor {
+) {
 	ctx, cancel := context.WithCancel(context.Background())
 	dripProgramProcessor := DripProgramProcessor{
 		client:      client,
@@ -48,7 +48,6 @@ func NewDripProgramProcessor(
 			return nil
 		},
 	})
-	return &dripProgramProcessor
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
@@ -56,13 +55,20 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}
-	if err := d.client.ProgramSubscribe(ctx, token_swap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
-		return err
+	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processDripEvent)
+
+	for _, swapProgram := range []string{
+		token_swap.ProgramID.String(),
+		"9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP", // orca swap v2
+		"DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1", // orca swap v1
+		"SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr",  // Saros AMM
+		"PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP",  // Penguin Swap
+	} {
+		if err := d.client.ProgramSubscribe(ctx, swapProgram, d.processTokenSwapEvent); err != nil {
+			return err
+		}
+		go d.Backfill(context.Background(), swapProgram, d.processTokenSwapEvent)
 	}
-	go d.Backfill(context.Background(), dca_vault.ProgramID.String(), d.processDripEvent)
-	//if configs.IsDev(d.environment) {
-	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processTokenSwapEvent)
-	//}
 	return nil
 }
 
@@ -70,9 +76,9 @@ func (d DripProgramProcessor) stop() {
 	d.cancel()
 }
 
-func (d DripProgramProcessor) Backfill(ctx context.Context, programId string, processor func(string, []byte)) {
-	log := logrus.WithField("program", programId).WithField("func", "Backfill")
-	accounts, err := d.client.GetProgramAccounts(ctx, programId)
+func (d DripProgramProcessor) Backfill(ctx context.Context, programID string, processor func(string, []byte)) {
+	log := logrus.WithField("program", programID).WithField("func", "Backfill")
+	accounts, err := d.client.GetProgramAccounts(ctx, programID)
 	if err != nil {
 		log.WithError(err).Error("failed to get accounts")
 	}

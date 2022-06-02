@@ -52,7 +52,7 @@ func createClient(
 ) (impl, error) {
 	url := getURL(config.Environment)
 	solanaClient := impl{
-		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 3)),
+		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 2)),
 		environment: config.Environment,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
@@ -223,7 +223,6 @@ func (s impl) MintToWallet(
 	return s.signAndBroadcast(ctx, instructions...)
 }
 
-// TODO(Mocha): Pass in an error channel so that subscribers can handle errors
 func (s impl) ProgramSubscribe(
 	ctx context.Context, program string, onReceive func(string, []byte),
 ) error {
@@ -245,6 +244,7 @@ func (s impl) ProgramSubscribe(
 		defer sub.Unsubscribe()
 		for {
 			msg, err := sub.Recv()
+			// TODO(Mocha): This err block is super ugly
 			if err != nil {
 				log.
 					WithError(err).
@@ -252,6 +252,29 @@ func (s impl) ProgramSubscribe(
 						"event": program,
 					}).
 					Error("failed to get next msg from event ws")
+				client, err = ws.Connect(ctx, url)
+				if err != nil {
+					log.
+						WithError(err).
+						WithFields(log.Fields{
+							"event": program,
+						}).
+						Error("failed to get new ws client")
+				}
+				sub, err = client.ProgramSubscribeWithOpts(
+					solana.MustPublicKeyFromBase58(program),
+					rpc.CommitmentRecent,
+					solana.EncodingBase64Zstd,
+					nil,
+				)
+				if err != nil {
+					log.
+						WithError(err).
+						WithFields(log.Fields{
+							"event": program,
+						}).
+						Error("failed to get new program websocket subscription")
+				}
 				continue
 			}
 			if msg.Value.Account == nil || msg.Value.Account.Data == nil {

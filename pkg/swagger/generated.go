@@ -162,7 +162,7 @@ type GetVaultperiodsParams struct {
 	Limit       *Limit        `json:"limit,omitempty"`
 }
 
-// GetVaultsParams defines parameters for GetVaultsWithFilter.
+// GetVaultsParams defines parameters for GetVaults.
 type GetVaultsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
@@ -814,7 +814,7 @@ func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*h
 	return req, nil
 }
 
-// NewGetVaultsRequest generates requests for GetVaultsWithFilter
+// NewGetVaultsRequest generates requests for GetVaults
 func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request, error) {
 	var err error
 
@@ -962,7 +962,7 @@ type ClientWithResponsesInterface interface {
 	// GetVaultperiods request
 	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
 
-	// GetVaultsWithFilter request
+	// GetVaults request
 	GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error)
 }
 
@@ -1890,17 +1890,17 @@ var swaggerSpec = []string{
 	"NAofE3mLJgESMuXmtKrdLaJ9nLEwW92LdzPnh3zMlhflyNfjKqase6J8voBitN9BZKcAGSbDbEAfCQGH",
 	"KEfIkeGjvtnalIjAVxA/DciYh21N/+FYUKKox8SlCtOmREI7FKEPsWfUVL5cn9oj+B8tG6I+PrCpv75h",
 	"n9nQBdfKJLz0xduxeoYHFrSfEHGAQHyKbXSgpIOlFrheb4Tr6jBBXIRfPDooHBQUHkWMQIZVU9MfmQZl",
-	"KPpEaRnKkWbmUP0zDLO5b7vJGDuYDHVsiB+E8Fybq1Pe+KoTzjh1AjsbkEcJ05EUC4UllygU3tZXar9i",
-	"k4h/cuQaNeMfh+sp2WE0ijhMqEGnMhn7tyudeRH4PuRzo2ZcIOjJEWiOkP2keIZDHbRO8KMyPVxWA6Pi",
-	"DWSpbwOJhAS6GwggKYDAQUIJD0AhqI2hRE64DGDYFExAOWBQCOQATJJrW5R3qJBRB9rPu+4GDerM343y",
-	"eJdJYbyDpN6zo7YI5AgBISlHW+OzxQeqItF0MlRhGqV39Jich6W4bEAHrFgzjZM/0/cfRCJOoAe6uohB",
-	"S4/dknVxrXUbSvZfZ63+TasHvt20H/4dKxJdGWGRsPis7k1d5SuSAHoeCATiYAWX2mDWg0EzMRv/mc7L",
-	"2uRwY8C7ePwLW1VyxPmpyjyqVCK5UwKJSyClZ+uj114Ps35LkfHfMQSYYTkCLvaUntLVGff9WoFGo42F",
-	"mc+y8TeQcHxu+KnivCrWtIHmSiYpIhYzOBwifrCMMBLxluC6od2lMvtgMWxcOXI8X0XBAcGQnb5NLWS2",
-	"nHm+uVLDZySNs79Ge2uf//sVGhsqf9Zn3vrUpIFOJJEs2b6DZPOq9f9GqZ8qfaVKMwSqB81sPcl/s0yn",
-	"4dscIVKoVgaHmOjvAUicneLtx8N46/N6+KZHDiXH317IYR6965LDMnyx5i+vkMTPM591krdOwheSOisV",
-	"ZpXL718WQpj9PT36Aefje/p+y/h4++8h8E9p55d2N2CMcokcsJLUproX+3OqwwqXR1Iy43Hx3wAAAP//",
-	"pb2A/oUoAAA=",
+	"KPpEaRnKkWbmUP0zDLO5b7vJGDuYDAFk+CDE5tpWHfHGV51txqkT2NloPMqWDqNYKCyJRKHqtr5S+xUb",
+	"Q/yTI9eoGf84XI/IDqM5xGFCCjqPycC/Xem0i8D3IZ8bNeMCQU+OQHOE7CdFMhzqoHV2H5Xp4bIUGBVv",
+	"YEp9G0gkJNCtQABJAQQOEkp1AApBbQwlcsJlAMOOYALKAYNCIAdgklzborxDhYzaz37edStoUGf+bpTH",
+	"W0wK4x0k9Z4dtUUgRwgISTnamp0tPlAViY6ToQrTKL2jx+QwLMVlAzpgxZppnPyZvv8gEnECPdBFfIo4",
+	"aOmZW7IurrVuQ8n+66zVv2n1wLeb9sO/Y0WiKyMsEhYf1L2ppXxFEkDPA4FAHKzgUhvMeipoJgbjP9N5",
+	"WZscbkx3F49/YatKzjc/VZlHlUokd0ogcQmk9Gx97trrSdZvKTL+I4YAMyxHwMWe0lO6OuO+XyvQaK6x",
+	"MPNZNv4GEo4PDT9VnFfFmjbQXMkkRcRiBodDxA+WEUYi3hJcN7S7VGYfLIaN+0aO56soOCAYstO3qYXM",
+	"lgPPN1dq+IykcfbXaG/t83+/QmMT5c/6zFufmjTQiSSSJdt3kGxetf7fKPVTpa9UaYZA9ZSZrcf4b5bp",
+	"NHyVI0QK1crgEBP9PQCJs1O8/XgYb31eD1/zyKHk+KsLOcyjF11yWIZv1fzlFZL4beazTvLWSfg2Umel",
+	"wqxy+f3LQgizv6dHv958fE/fbxmfbf89BP4p7fzS7gaMUS6RA1aS2lT3Yn9OdVjh8khKZjwu/hsAAP//",
+	"EYKL/IIoAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

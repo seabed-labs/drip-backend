@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"bytes"
@@ -120,7 +120,7 @@ func TestHandler_PostMint(t *testing.T) {
 		assert.Equal(t, "{\"error\":\"failed to decode mint\"}\n", rec.Body.String())
 	})
 
-	t.Run("should return an error when server wallet is not mint authority", func(t *testing.T) {
+	t.Run("should return an error when api wallet is not mint authority", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Environment: configs.DevnetEnv,

@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/api"
+	"github.com/dcaf-protocol/drip/internal/pkg/controller"
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
@@ -17,9 +17,9 @@ import (
 	"go.uber.org/fx"
 )
 
-func Run(
+func APIServer(
 	lc fx.Lifecycle,
-	api *api.Handler,
+	api *controller.Handler,
 	config *configs.AppConfig,
 ) {
 	var httpSrv *http.Server
@@ -36,7 +36,7 @@ func Run(
 }
 
 func listenAndServe(
-	handler *api.Handler,
+	handler *controller.Handler,
 	config *configs.AppConfig,
 ) (*http.Server, error) {
 	swaggerSpec, err := swagger.GetSwagger()
@@ -52,10 +52,10 @@ func listenAndServe(
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: e,
 	}
-	log.WithField("port", config.Port).Infof("starting server")
+	log.WithField("port", config.Port).Infof("starting api")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.WithField("err", err.Error()).Fatalf("server listening")
+			log.WithField("err", err.Error()).Fatalf("api listening")
 		}
 	}()
 	return srv, nil
@@ -64,16 +64,16 @@ func listenAndServe(
 func shutdown(
 	httpSrv *http.Server,
 ) error {
-	log.Infof("stopping server")
+	log.Infof("stopping api")
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
 		cancel()
 	}()
 	if err := httpSrv.Shutdown(ctxShutDown); err != nil {
-		log.WithField("err", err.Error()).Fatalf("failed to shutdown server")
+		log.WithField("err", err.Error()).Fatalf("failed to shutdown api")
 		return err
 	}
 
-	log.Infof("server exited")
+	log.Infof("api exited")
 	return nil
 }

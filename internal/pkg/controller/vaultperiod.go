@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -28,7 +28,7 @@ func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsP
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault periods")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
 	for i := range vaultPeriodModels {

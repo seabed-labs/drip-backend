@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"github.com/dcaf-protocol/drip/internal/configs"

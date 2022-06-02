@@ -40,7 +40,7 @@ func getDependencies() []fx.Option {
 			processor.NewProcessor,
 		),
 		fx.Invoke(
-			event.NewDripProgramProcessor,
+			event.EventServer,
 		),
 		fx.NopLogger,
 	}

@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"fmt"
@@ -85,7 +85,7 @@ func TestHandler_GetVaults(t *testing.T) {
 		err := h.GetVaults(c, params)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"internal server error\"}\n", rec.Body.String())
+		assert.Equal(t, "{\"error\":\"internal api error\"}\n", rec.Body.String())
 	})
 
 	t.Run("should return vaults without filter", func(t *testing.T) {

@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -15,7 +15,7 @@ import (
 
 func TestHandler_GetSwaggerJson(t *testing.T) {
 
-	t.Run("getURL should return correct server URL", func(t *testing.T) {
+	t.Run("getURL should return correct api URL", func(t *testing.T) {
 		assert.True(t, strings.Contains(getURL(configs.NilEnv, 0), "localhost"))
 		assert.True(t, strings.Contains(getURL(configs.LocalnetEnv, 0), "localhost"))
 		assert.True(t, strings.Contains(getURL(configs.DevnetEnv, 0), "devnet"))

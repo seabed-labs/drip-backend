@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -18,7 +18,7 @@ func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsP
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get proto configs")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
 	for i := range protoConfigModels {

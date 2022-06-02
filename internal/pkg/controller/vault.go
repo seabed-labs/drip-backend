@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -22,7 +22,7 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vaults")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
 	for i := range vaultModels {
@@ -31,7 +31,7 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 		tokenPair, err := h.repo.GetTokenPairByID(c.Request().Context(), vault.TokenPairID)
 		if err != nil {
 			logrus.WithError(err).WithField("tokenPairID", tokenPair.ID).Errorf("could not find token pair")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 		}
 		res = append(res, struct {
 			DcaActivationTimestamp string `json:"dcaActivationTimestamp"`

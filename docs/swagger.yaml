@@ -17,7 +17,7 @@ paths:
   /:
     get:
       summary: Health Check
-      description: Ping server.
+      description: Ping api.
       consumes:
         - application/json
       produces:

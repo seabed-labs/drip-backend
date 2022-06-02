@@ -11,8 +11,8 @@ import (
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/api"
-	"github.com/dcaf-protocol/drip/internal/server"
+	"github.com/dcaf-protocol/drip/internal/api"
+	"github.com/dcaf-protocol/drip/internal/pkg/controller"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/database/psql"
@@ -29,7 +29,7 @@ func main() {
 	log.Info("starting drip backend")
 	sig := <-fxApp.Done()
 	log.WithFields(log.Fields{"signal": sig}).
-		Infof("received exit signal, stoping server")
+		Infof("received exit signal, stoping api")
 }
 
 func getDependencies() []fx.Option {
@@ -41,14 +41,14 @@ func getDependencies() []fx.Option {
 			query.Use,
 			solana.NewSolanaClient,
 			repository.NewRepository,
-			api.NewHandler,
+			controller.NewHandler,
 			processor.NewProcessor,
 		),
 		fx.Invoke(
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			psql.RunMigrations,
 			//scripts.Backfill,
-			server.Run,
+			api.APIServer,
 			// TODO(mocha): this should run in it's own deployment
 			//event.NewDripProgramProcessor,
 		),

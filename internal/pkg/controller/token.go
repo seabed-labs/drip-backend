@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -25,7 +25,7 @@ func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error
 	tokens, err := h.repo.GetTokensWithSupportedTokenPair(c.Request().Context(), mintFilter, supportedTokenA)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 	for i := range tokens {
 		token := tokens[i]

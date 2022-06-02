@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
