@@ -41,7 +41,9 @@ func EventServer(
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			go dripProgramProcessor.start(ctx)
+			go func() {
+				_ = dripProgramProcessor.start(ctx)
+			}()
 			return nil
 		},
 		OnStop: func(_ context.Context) error {
