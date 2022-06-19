@@ -51,7 +51,7 @@ func listenAndServe(
 	swagger.RegisterHandlers(e, handler)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: cors.Default().Handler(e),
+		Handler: cors.AllowAll().Handler(e),
 	}
 	log.WithField("port", config.Port).Infof("starting api")
 	go func() {
