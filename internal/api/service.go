@@ -13,6 +13,7 @@ import (
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -50,7 +51,7 @@ func listenAndServe(
 	swagger.RegisterHandlers(e, handler)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
-		Handler: e,
+		Handler: cors.Default().Handler(e),
 	}
 	log.WithField("port", config.Port).Infof("starting api")
 	go func() {
