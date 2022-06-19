@@ -65,7 +65,7 @@ func TestSolanaClient(t *testing.T) {
 		assert.Equal(t, getURL(configs.NilEnv), rpc.LocalNet_RPC)
 		assert.Equal(t, getURL(configs.LocalnetEnv), rpc.LocalNet_RPC)
 		assert.Equal(t, getURL(configs.DevnetEnv), rpc.DevNet_RPC)
-		assert.Equal(t, getURL(configs.MainnetEnv), rpc.MainNetBeta_RPC)
+		assert.Equal(t, getURL(configs.MainnetEnv), "https://ssc-dao.genesysgo.net")
 	})
 
 	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {
