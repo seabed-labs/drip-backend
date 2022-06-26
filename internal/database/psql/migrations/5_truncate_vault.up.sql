@@ -1,0 +1,3 @@
+TRUNCATE vault CASCADE;
+
+TRUNCATE vault_period CASCADE;
