@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/dca_vault"
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/drip"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
@@ -63,7 +63,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 }
 
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
-	var protoConfig dca_vault.VaultProtoConfig
+	var protoConfig drip.VaultProtoConfig
 	if err := p.client.GetAccount(ctx, address, &protoConfig); err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 }
 
 func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
-	var vaultAccount dca_vault.Vault
+	var vaultAccount drip.Vault
 	if err := p.client.GetAccount(ctx, address, &vaultAccount); err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 }
 
 func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error {
-	var position dca_vault.Position
+	var position drip.Position
 	if err := p.client.GetAccount(ctx, address, &position); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 }
 
 func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) error {
-	var vaultPeriodAccount dca_vault.VaultPeriod
+	var vaultPeriodAccount drip.VaultPeriod
 	if err := p.client.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
 		return err
 	}

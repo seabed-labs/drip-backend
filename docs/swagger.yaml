@@ -1,4 +1,4 @@
-oepnapi: "3.0.0"
+openapi: 3.0.0
 info:
   title: Drip Backend
   description: Drip backend service.
@@ -6,22 +6,12 @@ info:
     email: dcafmocha@protonmail.com
     name: Dcaf Mocha
   version: 1.0.0
-consumes:
-  - application/json
-produces:
-  - application/json
-schemes:
-  - http
 
 paths:
   /:
     get:
       summary: Health Check
       description: Ping api.
-      consumes:
-        - application/json
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -35,8 +25,6 @@ paths:
   /swagger.json:
     get:
       summary: Swagger spec
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -51,14 +39,10 @@ paths:
     get:
       summary: Get Supported Vaults
       description: Get all vaults with filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/tokenA"
         - $ref: "#/components/parameters/tokenB"
         - $ref: "#/components/parameters/protoConfig"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -85,13 +69,9 @@ paths:
     get:
       summary: Get Proto Configs
       description: Get all proto configs with filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/tokenA"
         - $ref: "#/components/parameters/tokenB"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -118,15 +98,11 @@ paths:
     get:
       summary: Get Vault Periods
       description: Get vault periods with pagination and filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/requiredVault"
         - $ref: "#/components/parameters/vaultPeriod"
         - $ref: "#/components/parameters/offset"
         - $ref: "#/components/parameters/limit"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -153,12 +129,8 @@ paths:
     get:
       summary: Get Token Swaps
       description: Get token swaps with filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/tokenPair"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -185,13 +157,9 @@ paths:
     get:
       summary: Get Token Pairs
       description: Get token pairs with filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/tokenA"
         - $ref: "#/components/parameters/tokenB"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -218,13 +186,9 @@ paths:
     get:
       summary: Get Tokens
       description: Get tokens with filters.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/tokenA"
         - $ref: "#/components/parameters/tokenB"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -251,12 +215,8 @@ paths:
     get:
       summary: Get User Positions
       description: Get all user positions.
-      consumes:
-        - application/json
       parameters:
         - $ref: "#/components/parameters/requiredWallet"
-      produces:
-        - application/json
       tags:
         - info
       responses:
@@ -284,8 +244,6 @@ paths:
       summary: Mint tokens (DEVNET ONLY)
       description: mint test tokens to a desired associated token account, or passed
         in token account
-      consumes:
-        - application/json
       requestBody:
         description: Pet to add to the store
         required: true
@@ -293,8 +251,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/mintRequest'
-      produces:
-        - application/json
       tags:
         - mint
       responses:
@@ -432,7 +388,7 @@ components:
             example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
           tokenAAccount:
             type: string
-            exampe: "6PmcdLzbELLxaPc3Fq6FjiSj7wtjA4MEt1UCZBnHh6tw"
+            example: "6PmcdLzbELLxaPc3Fq6FjiSj7wtjA4MEt1UCZBnHh6tw"
           tokenBAccount:
             type: string
             example: "5q7HLgfvxmkqAK6QaEFYrNmvKvzQZjWJzjwRu4toi9Sw"
@@ -471,7 +427,7 @@ components:
             example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
           granularity:
             type: integer
-            exampe: 60
+            example: 60
           triggerDcaSpread:
             type: integer
             example: 50
