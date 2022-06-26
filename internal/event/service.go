@@ -53,7 +53,7 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}
-	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processDripEvent)
+	go d.Backfill(context.Background(), drip.ProgramID.String(), d.processDripEvent)
 
 	for _, swapProgram := range []string{
 		token_swap.ProgramID.String(),
