@@ -5,15 +5,10 @@ import (
 	"runtime/debug"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/dca_vault"
-
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/drip"
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
-
 	bin "github.com/gagliardetto/binary"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -55,7 +50,7 @@ func EventServer(
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
 	// TODO(Mocha): the program ID's should be in a config since they will change
-	if err := d.client.ProgramSubscribe(ctx, dca_vault.ProgramID.String(), d.processDripEvent); err != nil {
+	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}
 	go d.Backfill(context.Background(), token_swap.ProgramID.String(), d.processDripEvent)
@@ -114,7 +109,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 			log.WithField("stack", debug.Stack()).Errorf("panic in processEvent")
 		}
 	}()
-	var vaultPeriod dca_vault.VaultPeriod
+	var vaultPeriod drip.VaultPeriod
 	if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err == nil {
 		log.Infof("decoded as vaultPeriod")
 		if err := d.processor.UpsertVaultPeriodByAddress(ctx, address); err != nil {
@@ -122,7 +117,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var position dca_vault.Position
+	var position drip.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		log.Infof("decoded as position")
 		if err := d.processor.UpsertPositionByAddress(ctx, address); err != nil {
@@ -130,7 +125,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var vault dca_vault.Vault
+	var vault drip.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		log.Infof("decoded as vault")
 		if err := d.processor.UpsertVaultByAddress(ctx, address); err != nil {
@@ -138,7 +133,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var protoConfig dca_vault.VaultProtoConfig
+	var protoConfig drip.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
 		log.Infof("decoded as protoConfig")
 		if err := d.processor.UpsertProtoConfigByAddress(ctx, address); err != nil {
