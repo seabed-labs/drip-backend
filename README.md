@@ -4,16 +4,19 @@
 <a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/test_coverage"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/test_coverage" /></a>
 <a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy-devnet.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/deploy-devnet.yaml/badge.svg?branch=main" /></a>
 <a href="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml"><img src="https://github.com/dcaf-protocol/drip-backend/actions/workflows/build-test.yaml/badge.svg?branch=main" /></a>
+
 ## Setup
 
 - install go 1.18
 - install all packages
+
 ```bash
 go get -u ./...
 ```
 
 - setup a `.env` file
 - ex:
+
 ```env
 PORT="8080"
 ENV="DEVNET"
@@ -27,21 +30,27 @@ PSQL_HOST="localhost"
 ```
 
 - run all tests
+
 ```bash
 go test ./...
 ```
 
 - run the server
+
 ```bash
 ENV=DEVNET go run main.go
 ```
+
 ## Tests
+
 If an interface is changed, the associated mocks need to be re-generated.
+
 ```bash
 # ex: from inside drip-backend/internal/pkg/clients/solana
 mockgen -source=client.go -destination=mock.go
 
 ```
+
 ## API Docs
 
 We use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
@@ -61,10 +70,13 @@ API docs are viewable at `http://localhost:8080/swagger.json`.
 ## Database
 
 Locally the db can be started with
+
 ```bash
 docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up
 ```
-and stopped with 
+
+and stopped with
+
 ```bash
 docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down
 ```
@@ -76,6 +88,7 @@ docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down
 - located in `internal/database/psql/migrations`
 - All migrations that are a number larger then what the db version is will be run automatically on startup or during codegen
 - Running the migrations will automatically increment the schema version in the db
+
 ```bash
 go run cmd/migrate/main.go
 ```
@@ -87,6 +100,7 @@ go run cmd/migrate/main.go
 - Database [models](app/internal/data/psql/generated) are generated using the database schema via [go-gorm/gen](https://github.com/go-gorm/gen)
 - Before generating the models, the database needs to be running
 - The codegen script will also run migrations if needed
+
 ```bash
 go run cmd/codegen/main.go
 ```
@@ -94,14 +108,18 @@ go run cmd/codegen/main.go
 > **_NOTE:_**  The DB must be running prior to running this script.
 
 ### Process for Creating/Updating Database Models
+
 - Create a migration file under `internal/database/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
 - Run the migration + codegen script `go run cmd/codegen/main.go`
 
 > **_NOTE:_**  The DB must be running prior to running this script.
 
 ### Backfill DB for Devnet
+
 Run the following script
+
 ```bash
 go run cmd/event/main.go
 ```
+
 > **_NOTE:_**  This backfills based on the content of `devnet.yaml`.

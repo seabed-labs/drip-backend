@@ -56,6 +56,19 @@ type ListTokenPairs []struct {
 	TokenB string `json:"tokenB"`
 }
 
+// ListTokenSwaps defines model for listTokenSwaps.
+type ListTokenSwaps []struct {
+	Authority  string `json:"authority"`
+	FeeAccount string `json:"feeAccount"`
+	Mint       string `json:"mint"`
+
+	// token pair reference identifier
+	Pair          string `json:"pair"`
+	Pubkey        string `json:"pubkey"`
+	TokenAAccount string `json:"tokenAAccount"`
+	TokenBAccount string `json:"tokenBAccount"`
+}
+
 // ListTokens defines model for listTokens.
 type ListTokens []struct {
 	Decimals int    `json:"decimals"`
@@ -125,6 +138,9 @@ type TokenA string
 // TokenB defines model for tokenB.
 type TokenB string
 
+// Token pair identifier.
+type TokenPair string
+
 // VaultPeriod defines model for vaultPeriod.
 type VaultPeriod string
 
@@ -140,6 +156,11 @@ type GetPositionsParams struct {
 type GetProtoconfigsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
+}
+
+// GetSwapsParams defines parameters for GetSwaps.
+type GetSwapsParams struct {
+	TokenPair *TokenPair `json:"tokenPair,omitempty"`
 }
 
 // GetTokenpairsParams defines parameters for GetTokenpairs.
@@ -264,6 +285,9 @@ type ClientInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetSwaps request
+	GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetTokenpairs request
 	GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -339,6 +363,18 @@ func (c *Client) GetProtoconfigs(ctx context.Context, params *GetProtoconfigsPar
 
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSwapsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -588,6 +624,53 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSwapsRequest generates requests for GetSwaps
+func NewGetSwapsRequest(server string, params *GetSwapsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/swaps")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenPair != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenPair", runtime.ParamLocationQuery, *params.TokenPair); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -953,6 +1036,9 @@ type ClientWithResponsesInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
 
+	// GetSwaps request
+	GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error)
+
 	// GetTokenpairs request
 	GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error)
 
@@ -1076,6 +1162,30 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetSwapsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListTokenSwaps
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSwapsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSwapsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1229,6 +1339,15 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
+}
+
+// GetSwapsWithResponse request returning *GetSwapsResponse
+func (c *ClientWithResponses) GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error) {
+	rsp, err := c.GetSwaps(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSwapsResponse(rsp)
 }
 
 // GetTokenpairsWithResponse request returning *GetTokenpairsResponse
@@ -1439,6 +1558,46 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 	return response, nil
 }
 
+// ParseGetSwapsResponse parses an HTTP response from a GetSwapsWithResponse call
+func ParseGetSwapsResponse(rsp *http.Response) (*GetSwapsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSwapsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListTokenSwaps
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetTokenpairsResponse parses an HTTP response from a GetTokenpairsWithResponse call
 func ParseGetTokenpairsResponse(rsp *http.Response) (*GetTokenpairsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1616,6 +1775,9 @@ type ServerInterface interface {
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
+	// Get Token Swaps
+	// (GET /swaps)
+	GetSwaps(ctx echo.Context, params GetSwapsParams) error
 	// Get Token Pairs
 	// (GET /tokenpairs)
 	GetTokenpairs(ctx echo.Context, params GetTokenpairsParams) error
@@ -1702,6 +1864,24 @@ func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetSwaggerJson(ctx)
+	return err
+}
+
+// GetSwaps converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSwaps(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetSwapsParams
+	// ------------- Optional query parameter "tokenPair" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenPair", ctx.QueryParams(), &params.TokenPair)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenPair: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetSwaps(ctx, params)
 	return err
 }
 
@@ -1859,6 +2039,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
+	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
@@ -1869,38 +2050,40 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"EYKL/IIoAAA=",
+	"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",
+	"fwMAAP//qcuM8oIuAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -149,6 +149,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /swaps:
+    get:
+      summary: Get Token Swaps
+      description: Get token swaps with filters.
+      consumes:
+        - application/json
+      parameters:
+        - $ref: "#/components/parameters/tokenPair"
+      produces:
+        - application/json
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listTokenSwaps'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /tokenpairs:
     get:
       summary: Get Token Pairs
@@ -214,6 +246,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
   /positions:
     get:
       summary: Get User Positions
@@ -283,6 +316,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
 components:
   parameters:
     vault:
@@ -317,6 +351,12 @@ components:
       in: query
       schema:
         type: string
+    tokenPair:
+      name: tokenPair
+      in: query
+      schema:
+        type: string
+        description: Token pair identifier.
     protoConfig:
       name: protoConfig
       description: Vault proto config public key.
@@ -484,6 +524,42 @@ components:
           tokenB:
             type: string
             example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+    
+    listTokenSwaps:
+      type: array
+      items:
+        type: object
+        required:
+          - pubkey
+          - mint
+          - authority
+          - feeAccount
+          - tokenAAccount
+          - tokenBAccount
+          - pair
+        properties:
+          pubkey:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          mint:
+            type: string
+            example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+          authority:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+          feeAccount:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+          tokenAAccount:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+          tokenBAccount:
+            type: string
+            example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+          pair:
+            type: string
+            example: "123"
+            description: token pair reference identifier
 
     listTokens:
       type: array
@@ -504,6 +580,7 @@ components:
           decimals:
             type: integer
             example: 10
+
     listPositions:
       type: array
       items:

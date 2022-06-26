@@ -27,6 +27,7 @@ type Repository interface {
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
+	GetTokenSwaps(context.Context, *string) ([]*model.TokenSwap, error)
 }
 
 type repositoryImpl struct {
@@ -120,6 +121,14 @@ func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, t
 	}
 	if tokenBMint != nil {
 		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID *string) ([]*model.TokenSwap, error) {
+	stmt := d.repo.TokenSwap.WithContext(ctx)
+	if tokenPairID != nil {
+		stmt = stmt.Where(d.repo.TokenSwap.Pair.Eq(*tokenPairID))
 	}
 	return stmt.Find()
 }
