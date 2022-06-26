@@ -141,7 +141,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	log.Errorf("failed to decode account to known types")
+	log.Errorf("failed to decode drip account to known types")
 }
 
 func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte) {
