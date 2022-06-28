@@ -49,6 +49,22 @@ type ListProtoConfigs []struct {
 	TriggerDcaSpread     int    `json:"triggerDcaSpread"`
 }
 
+// ListSwapConfigs defines model for listSwapConfigs.
+type ListSwapConfigs []struct {
+	Swap               string `json:"swap"`
+	SwapAuthority      string `json:"swapAuthority"`
+	SwapFeeAccount     string `json:"swapFeeAccount"`
+	SwapTokenAAccount  string `json:"swapTokenAAccount"`
+	SwapTokenBAccount  string `json:"swapTokenBAccount"`
+	SwapTokenMint      string `json:"swapTokenMint"`
+	TokenAMint         string `json:"tokenAMint"`
+	TokenBMint         string `json:"tokenBMint"`
+	Vault              string `json:"vault"`
+	VaultProtoConfig   string `json:"vaultProtoConfig"`
+	VaultTokenAAccount string `json:"vaultTokenAAccount"`
+	VaultTokenBAccount string `json:"vaultTokenBAccount"`
+}
+
 // ListTokenPairs defines model for listTokenPairs.
 type ListTokenPairs []struct {
 	Id     string `json:"id"`
@@ -141,6 +157,9 @@ type TokenB string
 // Token pair identifier.
 type TokenPair string
 
+// Vault defines model for vault.
+type Vault string
+
 // VaultPeriod defines model for vaultPeriod.
 type VaultPeriod string
 
@@ -156,6 +175,11 @@ type GetPositionsParams struct {
 type GetProtoconfigsParams struct {
 	TokenA *TokenA `json:"tokenA,omitempty"`
 	TokenB *TokenB `json:"tokenB,omitempty"`
+}
+
+// GetSwapConfigsParams defines parameters for GetSwapConfigs.
+type GetSwapConfigsParams struct {
+	Vault *Vault `json:"vault,omitempty"`
 }
 
 // GetSwapsParams defines parameters for GetSwaps.
@@ -285,6 +309,9 @@ type ClientInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetSwapConfigs request
+	GetSwapConfigs(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSwaps request
 	GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -363,6 +390,18 @@ func (c *Client) GetProtoconfigs(ctx context.Context, params *GetProtoconfigsPar
 
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSwapConfigs(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSwapConfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -624,6 +663,53 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSwapConfigsRequest generates requests for GetSwapConfigs
+func NewGetSwapConfigsRequest(server string, params *GetSwapConfigsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/swapConfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Vault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1036,6 +1122,9 @@ type ClientWithResponsesInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
 
+	// GetSwapConfigs request
+	GetSwapConfigsWithResponse(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*GetSwapConfigsResponse, error)
+
 	// GetSwaps request
 	GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error)
 
@@ -1162,6 +1251,30 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetSwapConfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListSwapConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSwapConfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSwapConfigsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1339,6 +1452,15 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
+}
+
+// GetSwapConfigsWithResponse request returning *GetSwapConfigsResponse
+func (c *ClientWithResponses) GetSwapConfigsWithResponse(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*GetSwapConfigsResponse, error) {
+	rsp, err := c.GetSwapConfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSwapConfigsResponse(rsp)
 }
 
 // GetSwapsWithResponse request returning *GetSwapsResponse
@@ -1552,6 +1674,46 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSwapConfigsResponse parses an HTTP response from a GetSwapConfigsWithResponse call
+func ParseGetSwapConfigsResponse(rsp *http.Response) (*GetSwapConfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSwapConfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListSwapConfigs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
 
 	}
 
@@ -1775,6 +1937,9 @@ type ServerInterface interface {
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
+	// Get Token Swaps Configs
+	// (GET /swapConfigs)
+	GetSwapConfigs(ctx echo.Context, params GetSwapConfigsParams) error
 	// Get Token Swaps
 	// (GET /swaps)
 	GetSwaps(ctx echo.Context, params GetSwapsParams) error
@@ -1864,6 +2029,24 @@ func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetSwaggerJson(ctx)
+	return err
+}
+
+// GetSwapConfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSwapConfigs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetSwapConfigsParams
+	// ------------- Optional query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetSwapConfigs(ctx, params)
 	return err
 }
 
@@ -2039,6 +2222,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
+	router.GET(baseURL+"/swapConfigs", wrapper.GetSwapConfigs)
 	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
@@ -2050,40 +2234,49 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"fwMAAP//qcuM8oIuAAA=",
+	"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",
+	"AP//OiyqdL4zAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -153,6 +153,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /swapConfigs:
+    get:
+      summary: Get Token Swaps Configs
+      description: Get token swap configs fro triggerDCA.
+      parameters:
+        - $ref: "#/components/parameters/vault"
+      tags:
+        - info
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listSwapConfigs'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /tokenpairs:
     get:
       summary: Get Token Pairs
@@ -516,6 +544,61 @@ components:
             type: string
             example: "123"
             description: token pair reference identifier
+
+    listSwapConfigs:
+      type: array
+      items:
+        type: object
+        required:
+          - vault
+          - vaultProtoConfig
+          - vaultTokenAAccount
+          - vaultTokenBAccount
+          - tokenAMint
+          - tokenBMint
+          - swapTokenMint
+          - swapTokenAAccount
+          - swapTokenBAccount
+          - swapFeeAccount
+          - swapAuthority
+          - swap
+        properties:
+          vault:
+            type: string
+            example: "2k3nyxNQM9uZYqjg9QMZX6bgysdX33qA2K1S32GFryA5"
+          vaultProtoConfig:
+            type: string
+            example: "9qHr7wYoRKkAFQEJw7BDB4Cq8sT4CGfAco3cNH7krBPW"
+          vaultTokenAAccount:
+            type: string
+            example: "GEZGArFvdqMyF4hixou9m6rEEQtKfSu7xKgi9iKejQ5Y"
+          vaultTokenBAccount:
+            type: string
+            example: "91wtsxi19rDSuh2TuQKxZvWyi1STDQEpYimAFoMy58by"
+          tokenAMint:
+            type: string
+            example: "BTZN3hrJ2S8s4A5iAEfUEEeaRnMUX8EsuG1nvTah2hmX"
+          tokenBMint:
+            type: string
+            example: "5r23oKMycxnnjAJ4cEEkh1bbCowcZwzL6HYmhLqRazQa"
+          swapTokenMint:
+            type: string
+            example: "8R9mBFFr621RKDZNak1KLabLstUE4Aejb8LBfDhNPsa3"
+          swapTokenAAccount:
+            type: string
+            example: "8KtF8GWBm2P9wdAxNZhmiZqR15TKnBVBE9XsfJ8wixZp"
+          swapTokenBAccount:
+            type: string
+            example: "35q6Uv3h3oS6Guc6QQ8HxQDZzzbVYtxL1tRWW7hF1i5L"
+          swapFeeAccount:
+            type: string
+            example: "JbQVLnQNck1kGbrUJFjETxbFfRDhsuu9EqifFMdUSyH"
+          swapAuthority:
+            type: string
+            example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"
+          swap:
+            type: string
+            example: "k9LNnxsgztcarvTQyFX6Lz5CG8pMV99RpeZz9ujEtz4"
 
     listTokens:
       type: array
