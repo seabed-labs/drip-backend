@@ -31,6 +31,7 @@ func GenerateModels(
 		FieldCoverable: true,
 		FieldSignable:  true,
 	})
+	// TODO(Mocha): map UUID
 	dataMap := map[string]func(detailType string) (dataType string){
 		"numeric": func(detailType string) (dataType string) { return "uint64" },
 	}
