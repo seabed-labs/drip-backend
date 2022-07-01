@@ -47,11 +47,12 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err := p.client.GetAccount(ctx, tokenSwap.TokenPool.String(), &tokenLPMint); err != nil {
 		return err
 	}
+	// Add swap A -> B
 	tokenPair, err := p.ensureTokenPair(ctx, tokenSwap.MintA.String(), tokenSwap.MintB.String())
 	if err != nil {
 		return err
 	}
-	return p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -62,6 +63,25 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 		TokenBMint:    tokenSwap.MintB.String(),
 		TokenBAccount: tokenSwap.TokenAccountB.String(),
 		TokenPairID:   tokenPair.ID,
+	}); err != nil {
+		return err
+	}
+	// Add swap B -> A
+	tokenPairInverse, err := p.ensureTokenPair(ctx, tokenSwap.MintB.String(), tokenSwap.MintA.String())
+	if err != nil {
+		return err
+	}
+	return p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+		ID:            uuid.New().String(),
+		Pubkey:        address,
+		Mint:          tokenSwap.TokenPool.String(),
+		Authority:     tokenLPMint.MintAuthority.String(),
+		FeeAccount:    tokenSwap.FeeAccount.String(),
+		TokenAMint:    tokenSwap.MintB.String(),
+		TokenAAccount: tokenSwap.TokenAccountB.String(),
+		TokenBMint:    tokenSwap.MintA.String(),
+		TokenBAccount: tokenSwap.TokenAccountA.String(),
+		TokenPairID:   tokenPairInverse.ID,
 	})
 }
 

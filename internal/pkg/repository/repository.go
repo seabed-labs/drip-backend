@@ -48,7 +48,10 @@ func NewRepository(
 func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error {
 	return d.repo.TokenSwap.
 		WithContext(ctx).
-		Clauses(clause.OnConflict{UpdateAll: true}).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "pubkey"}, {Name: "token_a_mint"}, {Name: "token_b_mint"}},
+			UpdateAll: true,
+		}).
 		Create(tokenSwaps...)
 }
 
