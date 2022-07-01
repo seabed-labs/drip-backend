@@ -27,7 +27,7 @@ type Repository interface {
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
-	GetTokenSwaps(context.Context, *string) ([]*model.TokenSwap, error)
+	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
 }
 
 type repositoryImpl struct {
@@ -125,10 +125,10 @@ func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, t
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID *string) ([]*model.TokenSwap, error) {
+func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string) ([]*model.TokenSwap, error) {
 	stmt := d.repo.TokenSwap.WithContext(ctx)
-	if tokenPairID != nil {
-		stmt = stmt.Where(d.repo.TokenSwap.Pair.Eq(*tokenPairID))
+	if len(tokenPairID) > 0 {
+		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairID...))
 	}
 	return stmt.Find()
 }
@@ -183,7 +183,11 @@ func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tok
 }
 
 func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
-	return d.repo.WithContext(ctx).Vault.Where(d.repo.Vault.Pubkey.Eq(address)).First()
+	return d.repo.
+		Vault.WithContext(ctx).
+		Where(d.repo.Vault.Pubkey.Eq(address)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		First()
 }
 
 func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.ProtoConfig, error) {

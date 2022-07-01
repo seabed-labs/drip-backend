@@ -52,13 +52,16 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 		return err
 	}
 	return p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
 		Authority:     tokenLPMint.MintAuthority.String(),
 		FeeAccount:    tokenSwap.FeeAccount.String(),
+		TokenAMint:    tokenSwap.MintA.String(),
 		TokenAAccount: tokenSwap.TokenAccountA.String(),
+		TokenBMint:    tokenSwap.MintB.String(),
 		TokenBAccount: tokenSwap.TokenAccountB.String(),
-		Pair:          tokenPair.ID,
+		TokenPairID:   tokenPair.ID,
 	})
 }
 

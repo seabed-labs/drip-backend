@@ -31,7 +31,10 @@ func newTokenSwap(db *gorm.DB) tokenSwap {
 	_tokenSwap.FeeAccount = field.NewString(tableName, "fee_account")
 	_tokenSwap.TokenAAccount = field.NewString(tableName, "token_a_account")
 	_tokenSwap.TokenBAccount = field.NewString(tableName, "token_b_account")
-	_tokenSwap.Pair = field.NewString(tableName, "pair")
+	_tokenSwap.TokenPairID = field.NewString(tableName, "token_pair_id")
+	_tokenSwap.TokenAMint = field.NewString(tableName, "token_a_mint")
+	_tokenSwap.TokenBMint = field.NewString(tableName, "token_b_mint")
+	_tokenSwap.ID = field.NewString(tableName, "id")
 
 	_tokenSwap.fillFieldMap()
 
@@ -48,7 +51,10 @@ type tokenSwap struct {
 	FeeAccount    field.String
 	TokenAAccount field.String
 	TokenBAccount field.String
-	Pair          field.String
+	TokenPairID   field.String
+	TokenAMint    field.String
+	TokenBMint    field.String
+	ID            field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -71,7 +77,10 @@ func (t *tokenSwap) updateTableName(table string) *tokenSwap {
 	t.FeeAccount = field.NewString(table, "fee_account")
 	t.TokenAAccount = field.NewString(table, "token_a_account")
 	t.TokenBAccount = field.NewString(table, "token_b_account")
-	t.Pair = field.NewString(table, "pair")
+	t.TokenPairID = field.NewString(table, "token_pair_id")
+	t.TokenAMint = field.NewString(table, "token_a_mint")
+	t.TokenBMint = field.NewString(table, "token_b_mint")
+	t.ID = field.NewString(table, "id")
 
 	t.fillFieldMap()
 
@@ -96,14 +105,17 @@ func (t *tokenSwap) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *tokenSwap) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 7)
+	t.fieldMap = make(map[string]field.Expr, 10)
 	t.fieldMap["pubkey"] = t.Pubkey
 	t.fieldMap["mint"] = t.Mint
 	t.fieldMap["authority"] = t.Authority
 	t.fieldMap["fee_account"] = t.FeeAccount
 	t.fieldMap["token_a_account"] = t.TokenAAccount
 	t.fieldMap["token_b_account"] = t.TokenBAccount
-	t.fieldMap["pair"] = t.Pair
+	t.fieldMap["token_pair_id"] = t.TokenPairID
+	t.fieldMap["token_a_mint"] = t.TokenAMint
+	t.fieldMap["token_b_mint"] = t.TokenBMint
+	t.fieldMap["id"] = t.ID
 }
 
 func (t tokenSwap) clone(db *gorm.DB) tokenSwap {
