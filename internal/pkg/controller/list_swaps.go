@@ -11,7 +11,7 @@ import (
 func (h Handler) GetSwaps(c echo.Context, params Swagger.GetSwapsParams) error {
 	var res Swagger.ListTokenSwaps
 
-	tokenSwaps, err := h.repo.GetTokenSwaps(c.Request().Context(), (*string)(params.TokenPair))
+	tokenSwaps, err := h.repo.GetTokenSwaps(c.Request().Context(), []string{string(*params.TokenPair)})
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
@@ -33,7 +33,7 @@ func (h Handler) GetSwaps(c echo.Context, params Swagger.GetSwapsParams) error {
 			Authority:     tokenSwap.Authority,
 			FeeAccount:    tokenSwap.FeeAccount,
 			Mint:          tokenSwap.Mint,
-			Pair:          tokenSwap.Pair,
+			Pair:          tokenSwap.TokenPairID,
 			Pubkey:        tokenSwap.Pubkey,
 			TokenAAccount: tokenSwap.TokenAAccount,
 			TokenBAccount: tokenSwap.TokenBAccount,
