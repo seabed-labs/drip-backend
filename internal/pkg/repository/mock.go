@@ -96,7 +96,7 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}
 }
 
 // GetTokenSwaps mocks base method.
-func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 *string) ([]*model.TokenSwap, error) {
+func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 []string) ([]*model.TokenSwap, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenSwaps", arg0, arg1)
 	ret0, _ := ret[0].([]*model.TokenSwap)
