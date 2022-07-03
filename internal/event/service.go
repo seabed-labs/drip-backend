@@ -4,6 +4,8 @@ import (
 	"context"
 	"runtime/debug"
 
+	"github.com/gagliardetto/solana-go/programs/token"
+
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/drip"
@@ -66,6 +68,9 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 			return err
 		}
 		go d.Backfill(context.Background(), swapProgram, d.processTokenSwapEvent)
+	}
+	if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processTokenEvent); err != nil {
+		return err
 	}
 	return nil
 }
@@ -163,6 +168,27 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 		return
 	}
 	log.WithError(err).Errorf("failed to decode token swap account")
+}
+
+func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	log.Infof("received token swap account update")
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
+		}
+	}()
+	var tokenAccount token.Account
+	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
+	if err == nil {
+		log.Infof("decoded as tokenAccount")
+		if err := d.processor.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
+			log.WithError(err).Error("failed to upsert tokenSwap")
+		}
+		return
+	}
+	// Don't log the failure, it's too noisy
 }
 
 func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {

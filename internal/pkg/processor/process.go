@@ -21,6 +21,8 @@ type Processor interface {
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
+	UpsertTokenAccountBalanceByAddress(context.Context, string) error
+	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 }
 
 type impl struct {
@@ -47,6 +49,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err := p.client.GetAccount(ctx, tokenSwap.TokenPool.String(), &tokenLPMint); err != nil {
 		return err
 	}
+
 	// Add swap A -> B
 	tokenPair, err := p.ensureTokenPair(ctx, tokenSwap.MintA.String(), tokenSwap.MintB.String())
 	if err != nil {
@@ -71,7 +74,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-	return p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -82,6 +85,44 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 		TokenBMint:    tokenSwap.MintA.String(),
 		TokenBAccount: tokenSwap.TokenAccountA.String(),
 		TokenPairID:   tokenPairInverse.ID,
+	}); err != nil {
+		return err
+	}
+
+	// Upsert balances
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
+	var tokenAccount token.Account
+	if err := p.client.GetAccount(ctx, address, &tokenAccount); err != nil {
+		return err
+	}
+	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
+}
+
+func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
+	if isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address); !isTokenSwapTokenAccount {
+		return nil
+	}
+	state := "initialized"
+	if tokenAccount.State == token.Uninitialized {
+		state = "uninitialized"
+	} else if tokenAccount.State == token.Frozen {
+		state = "frozen"
+	}
+	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
+		Pubkey: address,
+		Mint:   tokenAccount.Mint.String(),
+		Owner:  tokenAccount.Owner.String(),
+		Amount: tokenAccount.Amount,
+		State:  state,
 	})
 }
 
@@ -196,6 +237,17 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
 	})
+}
+
+func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccount string) (bool, error) {
+	tokenSwap, err := p.repo.GetTokenSwapForTokenAccount(ctx, tokenAccount)
+	if err != nil {
+		return false, err
+	}
+	if tokenSwap == nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys

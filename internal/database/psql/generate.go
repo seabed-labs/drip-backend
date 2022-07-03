@@ -40,6 +40,9 @@ func GenerateModels(
 	g.WithNewTagNameStrategy(func(columnName string) string {
 		return fmt.Sprintf("yaml:\"%s\"", strcase.ToLowerCamel(columnName))
 	})
+	g.WithNewTagNameStrategy(func(columnName string) string {
+		return fmt.Sprintf("db:\"%s\"", strcase.ToSnake(columnName))
+	})
 	g.WithJSONTagNameStrategy(strcase.ToLowerCamel)
 	g.UseDB(db)
 	tables := g.GenerateAllTable()

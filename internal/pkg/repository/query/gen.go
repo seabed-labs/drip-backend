@@ -13,83 +13,88 @@ import (
 
 func Use(db *gorm.DB) *Query {
 	return &Query{
-		db:              db,
-		Position:        newPosition(db),
-		ProtoConfig:     newProtoConfig(db),
-		SchemaMigration: newSchemaMigration(db),
-		SourceReference: newSourceReference(db),
-		Token:           newToken(db),
-		TokenPair:       newTokenPair(db),
-		TokenPrice:      newTokenPrice(db),
-		TokenSwap:       newTokenSwap(db),
-		UserPosition:    newUserPosition(db),
-		Vault:           newVault(db),
-		VaultPeriod:     newVaultPeriod(db),
+		db:                  db,
+		Position:            newPosition(db),
+		ProtoConfig:         newProtoConfig(db),
+		SchemaMigration:     newSchemaMigration(db),
+		SourceReference:     newSourceReference(db),
+		Token:               newToken(db),
+		TokenAccountBalance: newTokenAccountBalance(db),
+		TokenPair:           newTokenPair(db),
+		TokenPrice:          newTokenPrice(db),
+		TokenSwap:           newTokenSwap(db),
+		UserPosition:        newUserPosition(db),
+		Vault:               newVault(db),
+		VaultPeriod:         newVaultPeriod(db),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Position        position
-	ProtoConfig     protoConfig
-	SchemaMigration schemaMigration
-	SourceReference sourceReference
-	Token           token
-	TokenPair       tokenPair
-	TokenPrice      tokenPrice
-	TokenSwap       tokenSwap
-	UserPosition    userPosition
-	Vault           vault
-	VaultPeriod     vaultPeriod
+	Position            position
+	ProtoConfig         protoConfig
+	SchemaMigration     schemaMigration
+	SourceReference     sourceReference
+	Token               token
+	TokenAccountBalance tokenAccountBalance
+	TokenPair           tokenPair
+	TokenPrice          tokenPrice
+	TokenSwap           tokenSwap
+	UserPosition        userPosition
+	Vault               vault
+	VaultPeriod         vaultPeriod
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:              db,
-		Position:        q.Position.clone(db),
-		ProtoConfig:     q.ProtoConfig.clone(db),
-		SchemaMigration: q.SchemaMigration.clone(db),
-		SourceReference: q.SourceReference.clone(db),
-		Token:           q.Token.clone(db),
-		TokenPair:       q.TokenPair.clone(db),
-		TokenPrice:      q.TokenPrice.clone(db),
-		TokenSwap:       q.TokenSwap.clone(db),
-		UserPosition:    q.UserPosition.clone(db),
-		Vault:           q.Vault.clone(db),
-		VaultPeriod:     q.VaultPeriod.clone(db),
+		db:                  db,
+		Position:            q.Position.clone(db),
+		ProtoConfig:         q.ProtoConfig.clone(db),
+		SchemaMigration:     q.SchemaMigration.clone(db),
+		SourceReference:     q.SourceReference.clone(db),
+		Token:               q.Token.clone(db),
+		TokenAccountBalance: q.TokenAccountBalance.clone(db),
+		TokenPair:           q.TokenPair.clone(db),
+		TokenPrice:          q.TokenPrice.clone(db),
+		TokenSwap:           q.TokenSwap.clone(db),
+		UserPosition:        q.UserPosition.clone(db),
+		Vault:               q.Vault.clone(db),
+		VaultPeriod:         q.VaultPeriod.clone(db),
 	}
 }
 
 type queryCtx struct {
-	Position        positionDo
-	ProtoConfig     protoConfigDo
-	SchemaMigration schemaMigrationDo
-	SourceReference sourceReferenceDo
-	Token           tokenDo
-	TokenPair       tokenPairDo
-	TokenPrice      tokenPriceDo
-	TokenSwap       tokenSwapDo
-	UserPosition    userPositionDo
-	Vault           vaultDo
-	VaultPeriod     vaultPeriodDo
+	Position            positionDo
+	ProtoConfig         protoConfigDo
+	SchemaMigration     schemaMigrationDo
+	SourceReference     sourceReferenceDo
+	Token               tokenDo
+	TokenAccountBalance tokenAccountBalanceDo
+	TokenPair           tokenPairDo
+	TokenPrice          tokenPriceDo
+	TokenSwap           tokenSwapDo
+	UserPosition        userPositionDo
+	Vault               vaultDo
+	VaultPeriod         vaultPeriodDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Position:        *q.Position.WithContext(ctx),
-		ProtoConfig:     *q.ProtoConfig.WithContext(ctx),
-		SchemaMigration: *q.SchemaMigration.WithContext(ctx),
-		SourceReference: *q.SourceReference.WithContext(ctx),
-		Token:           *q.Token.WithContext(ctx),
-		TokenPair:       *q.TokenPair.WithContext(ctx),
-		TokenPrice:      *q.TokenPrice.WithContext(ctx),
-		TokenSwap:       *q.TokenSwap.WithContext(ctx),
-		UserPosition:    *q.UserPosition.WithContext(ctx),
-		Vault:           *q.Vault.WithContext(ctx),
-		VaultPeriod:     *q.VaultPeriod.WithContext(ctx),
+		Position:            *q.Position.WithContext(ctx),
+		ProtoConfig:         *q.ProtoConfig.WithContext(ctx),
+		SchemaMigration:     *q.SchemaMigration.WithContext(ctx),
+		SourceReference:     *q.SourceReference.WithContext(ctx),
+		Token:               *q.Token.WithContext(ctx),
+		TokenAccountBalance: *q.TokenAccountBalance.WithContext(ctx),
+		TokenPair:           *q.TokenPair.WithContext(ctx),
+		TokenPrice:          *q.TokenPrice.WithContext(ctx),
+		TokenSwap:           *q.TokenSwap.WithContext(ctx),
+		UserPosition:        *q.UserPosition.WithContext(ctx),
+		Vault:               *q.Vault.WithContext(ctx),
+		VaultPeriod:         *q.VaultPeriod.WithContext(ctx),
 	}
 }
 
