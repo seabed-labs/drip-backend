@@ -3,12 +3,23 @@ package repository
 import (
 	"context"
 
+	"github.com/google/uuid"
+
+	"github.com/lib/pq"
+
+	"github.com/jmoiron/sqlx"
+
 	"gorm.io/gorm/clause"
 
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
 )
+
+type TokenSwapWithLiquidityRatio struct {
+	model.TokenSwap
+	LiquidityRatio float64 `json:"liquidityRatio" db:"liquidity_ratio"`
+}
 
 type Repository interface {
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
@@ -18,6 +29,7 @@ type Repository interface {
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
+	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
@@ -28,20 +40,25 @@ type Repository interface {
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
+	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
+	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
 }
 
 type repositoryImpl struct {
 	client solana.Solana
 	repo   *query.Query
+	db     *sqlx.DB
 }
 
 func NewRepository(
 	client solana.Solana,
 	repo *query.Query,
+	db *sqlx.DB,
 ) Repository {
 	return repositoryImpl{
 		client: client,
 		repo:   repo,
+		db:     db,
 	}
 }
 
@@ -53,6 +70,15 @@ func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*mod
 			UpdateAll: true,
 		}).
 		Create(tokenSwaps...)
+}
+
+func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccountBalance) error {
+	return d.repo.TokenAccountBalance.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(tokenAccountBalances...)
 }
 
 func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error {
@@ -134,6 +160,66 @@ func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string)
 		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairID...))
 	}
 	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
+	var tokenSwaps []TokenSwapWithLiquidityRatio
+	// TODO(Mocha): No clue how to do this in gorm-gen
+	if len(tokenPairIDs) > 0 {
+		var temp []uuid.UUID
+		for _, tokenPairID := range tokenPairIDs {
+			tokenPairUUID, _ := uuid.Parse(tokenPairID)
+			temp = append(temp, tokenPairUUID)
+		}
+		// We should sort by liquidity ratio ascending, so that the largest ratio is at the end of the list
+		if err := d.db.SelectContext(ctx,
+			&tokenSwaps,
+			`SELECT token_swap.*, token_account_b_balance.amount/token_account_a_balance.amount as liquidity_ratio
+				FROM token_swap
+				JOIN vault
+				ON vault.token_pair_id = token_swap.token_pair_id
+				JOIN token_account_balance token_account_a_balance
+				ON token_account_a_balance.pubkey = token_swap.token_a_account
+				JOIN token_account_balance token_account_b_balance
+				ON token_account_b_balance.pubkey = token_swap.token_b_account
+				WHERE token_account_a_balance.amount != 0
+				AND token_account_b_balance.amount != 0
+				AND vault.enabled = true
+				AND token_swap.token_pair_id=ANY($1)
+				ORDER BY token_swap.token_pair_id desc, liquidity_ratio asc;`,
+			pq.Array(temp),
+		); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := d.db.SelectContext(ctx,
+			&tokenSwaps,
+			`SELECT token_swap.*, token_account_b_balance.amount/token_account_a_balance.amount as liquidity_ratio
+				FROM token_swap
+				JOIN vault
+				ON vault.token_pair_id = token_swap.token_pair_id
+				JOIN token_account_balance token_account_a_balance
+				ON token_account_a_balance.pubkey = token_swap.token_a_account
+				JOIN token_account_balance token_account_b_balance
+				ON token_account_b_balance.pubkey = token_swap.token_b_account
+				WHERE token_account_a_balance.amount != 0
+				AND token_account_b_balance.amount != 0
+				AND vault.enabled = true
+				ORDER BY liquidity_ratio asc;`,
+		); err != nil {
+			return nil, err
+		}
+	}
+	return tokenSwaps, nil
+}
+
+func (d repositoryImpl) GetTokenSwapForTokenAccount(ctx context.Context, tokenAccount string) (*model.TokenSwap, error) {
+	return d.repo.
+		TokenSwap.
+		WithContext(ctx).
+		Where(d.repo.TokenSwap.TokenAAccount.Eq(tokenAccount)).
+		Or(d.repo.TokenSwap.TokenBAccount.Eq(tokenAccount)).
+		First()
 }
 
 func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model.Token, error) {

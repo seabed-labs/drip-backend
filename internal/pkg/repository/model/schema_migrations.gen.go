@@ -8,8 +8,8 @@ const TableNameSchemaMigration = "schema_migrations"
 
 // SchemaMigration mapped from table <schema_migrations>
 type SchemaMigration struct {
-	Version int64 `gorm:"column:version;type:int8;primaryKey" json:"version" yaml:"version"`
-	Dirty   bool  `gorm:"column:dirty;type:bool;not null" json:"dirty" yaml:"dirty"`
+	Version int64 `gorm:"column:version;type:int8;primaryKey" json:"version" db:"version"`
+	Dirty   bool  `gorm:"column:dirty;type:bool;not null" json:"dirty" db:"dirty"`
 }
 
 // TableName SchemaMigration's table name

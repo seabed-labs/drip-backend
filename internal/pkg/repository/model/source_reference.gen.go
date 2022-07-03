@@ -8,7 +8,7 @@ const TableNameSourceReference = "source_reference"
 
 // SourceReference mapped from table <source_reference>
 type SourceReference struct {
-	Value string `gorm:"column:value;primaryKey" json:"value" yaml:"value"`
+	Value string `gorm:"column:value;primaryKey" json:"value" db:"value"`
 }
 
 // TableName SourceReference's table name

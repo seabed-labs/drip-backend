@@ -12,16 +12,16 @@ const TableNamePosition = "position"
 
 // Position mapped from table <position>
 type Position struct {
-	Pubkey                   string    `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" yaml:"pubkey"`
-	Vault                    string    `gorm:"column:vault;type:varchar;not null" json:"vault" yaml:"vault"`
-	Authority                string    `gorm:"column:authority;type:varchar;not null" json:"authority" yaml:"authority"`
-	DepositedTokenAAmount    uint64    `gorm:"column:deposited_token_a_amount;type:numeric;not null" json:"depositedTokenAAmount" yaml:"depositedTokenAAmount"`
-	WithdrawnTokenBAmount    uint64    `gorm:"column:withdrawn_token_b_amount;type:numeric;not null" json:"withdrawnTokenBAmount" yaml:"withdrawnTokenBAmount"`
-	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;type:timestamp;not null" json:"depositTimestamp" yaml:"depositTimestamp"`
-	DcaPeriodIDBeforeDeposit uint64    `gorm:"column:dca_period_id_before_deposit;type:numeric;not null" json:"dcaPeriodIdBeforeDeposit" yaml:"dcaPeriodIdBeforeDeposit"`
-	NumberOfSwaps            uint64    `gorm:"column:number_of_swaps;type:numeric;not null" json:"numberOfSwaps" yaml:"numberOfSwaps"`
-	PeriodicDripAmount       uint64    `gorm:"column:periodic_drip_amount;type:numeric;not null" json:"periodicDripAmount" yaml:"periodicDripAmount"`
-	IsClosed                 bool      `gorm:"column:is_closed;type:bool;not null" json:"isClosed" yaml:"isClosed"`
+	Pubkey                   string    `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
+	Vault                    string    `gorm:"column:vault;type:varchar;not null" json:"vault" db:"vault"`
+	Authority                string    `gorm:"column:authority;type:varchar;not null" json:"authority" db:"authority"`
+	DepositedTokenAAmount    uint64    `gorm:"column:deposited_token_a_amount;type:numeric;not null" json:"depositedTokenAAmount" db:"deposited_token_a_amount"`
+	WithdrawnTokenBAmount    uint64    `gorm:"column:withdrawn_token_b_amount;type:numeric;not null" json:"withdrawnTokenBAmount" db:"withdrawn_token_b_amount"`
+	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;type:timestamp;not null" json:"depositTimestamp" db:"deposit_timestamp"`
+	DcaPeriodIDBeforeDeposit uint64    `gorm:"column:dca_period_id_before_deposit;type:numeric;not null" json:"dcaPeriodIdBeforeDeposit" db:"dca_period_id_before_deposit"`
+	NumberOfSwaps            uint64    `gorm:"column:number_of_swaps;type:numeric;not null" json:"numberOfSwaps" db:"number_of_swaps"`
+	PeriodicDripAmount       uint64    `gorm:"column:periodic_drip_amount;type:numeric;not null" json:"periodicDripAmount" db:"periodic_drip_amount"`
+	IsClosed                 bool      `gorm:"column:is_closed;type:bool;not null" json:"isClosed" db:"is_closed"`
 }
 
 // TableName Position's table name

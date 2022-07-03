@@ -3,6 +3,8 @@ package controller
 import (
 	"net/http"
 
+	"github.com/dcaf-protocol/drip/internal/pkg/repository"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
@@ -34,17 +36,17 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
 	}
 
-	tokenSwaps, err := h.repo.GetTokenSwaps(c.Request().Context(), tokenPairIDS)
+	tokenSwaps, err := h.repo.GetTokenSwapsSortedByLiquidity(c.Request().Context(), tokenPairIDS)
 	if err != nil {
-		logrus.WithError(err).Errorf("failed to get tokens")
+		logrus.WithError(err).Errorf("failed to get token swaps")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
 	// TODO(Mocha): Return token swap with the most liquidity
-	tokenSwapsByTokenPairID := make(map[string]model.TokenSwap)
+	tokenSwapsByTokenPairID := make(map[string]repository.TokenSwapWithLiquidityRatio)
 	for i := range tokenSwaps {
 		tokenSwap := tokenSwaps[i]
-		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = *tokenSwap
+		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = tokenSwap
 	}
 
 	for i := range vaults {

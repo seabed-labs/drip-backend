@@ -23,6 +23,7 @@ func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
 			configs.NewPSQLConfig,
+			psql.NewDatabase,
 			psql.NewGORMDatabase,
 		),
 		fx.Invoke(

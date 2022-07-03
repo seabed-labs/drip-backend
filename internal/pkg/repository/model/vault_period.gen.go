@@ -10,11 +10,11 @@ const TableNameVaultPeriod = "vault_period"
 
 // VaultPeriod mapped from table <vault_period>
 type VaultPeriod struct {
-	Pubkey   string          `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" yaml:"pubkey"`
-	Vault    string          `gorm:"column:vault;type:varchar;not null" json:"vault" yaml:"vault"`
-	PeriodID uint64          `gorm:"column:period_id;type:numeric;not null" json:"periodId" yaml:"periodId"`
-	Twap     decimal.Decimal `gorm:"column:twap;type:numeric;not null" json:"twap" yaml:"twap"`
-	Dar      uint64          `gorm:"column:dar;type:numeric;not null" json:"dar" yaml:"dar"`
+	Pubkey   string          `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
+	Vault    string          `gorm:"column:vault;type:varchar;not null" json:"vault" db:"vault"`
+	PeriodID uint64          `gorm:"column:period_id;type:numeric;not null" json:"periodId" db:"period_id"`
+	Twap     decimal.Decimal `gorm:"column:twap;type:numeric;not null" json:"twap" db:"twap"`
+	Dar      uint64          `gorm:"column:dar;type:numeric;not null" json:"dar" db:"dar"`
 }
 
 // TableName VaultPeriod's table name

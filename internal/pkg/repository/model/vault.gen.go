@@ -12,16 +12,16 @@ const TableNameVault = "vault"
 
 // Vault mapped from table <vault>
 type Vault struct {
-	Pubkey                 string    `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" yaml:"pubkey"`
-	ProtoConfig            string    `gorm:"column:proto_config;type:varchar;not null" json:"protoConfig" yaml:"protoConfig"`
-	TokenAAccount          string    `gorm:"column:token_a_account;type:varchar;not null" json:"tokenAAccount" yaml:"tokenAAccount"`
-	TokenBAccount          string    `gorm:"column:token_b_account;type:varchar;not null" json:"tokenBAccount" yaml:"tokenBAccount"`
-	TreasuryTokenBAccount  string    `gorm:"column:treasury_token_b_account;type:varchar;not null" json:"treasuryTokenBAccount" yaml:"treasuryTokenBAccount"`
-	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;type:numeric;not null" json:"lastDcaPeriod" yaml:"lastDcaPeriod"`
-	DripAmount             uint64    `gorm:"column:drip_amount;type:numeric;not null" json:"dripAmount" yaml:"dripAmount"`
-	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" yaml:"dcaActivationTimestamp"`
-	Enabled                bool      `gorm:"column:enabled;type:bool;not null;default:true" json:"enabled" yaml:"enabled"`
-	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" yaml:"tokenPairId"`
+	Pubkey                 string    `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
+	ProtoConfig            string    `gorm:"column:proto_config;type:varchar;not null" json:"protoConfig" db:"proto_config"`
+	TokenAAccount          string    `gorm:"column:token_a_account;type:varchar;not null" json:"tokenAAccount" db:"token_a_account"`
+	TokenBAccount          string    `gorm:"column:token_b_account;type:varchar;not null" json:"tokenBAccount" db:"token_b_account"`
+	TreasuryTokenBAccount  string    `gorm:"column:treasury_token_b_account;type:varchar;not null" json:"treasuryTokenBAccount" db:"treasury_token_b_account"`
+	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;type:numeric;not null" json:"lastDcaPeriod" db:"last_dca_period"`
+	DripAmount             uint64    `gorm:"column:drip_amount;type:numeric;not null" json:"dripAmount" db:"drip_amount"`
+	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" db:"dca_activation_timestamp"`
+	Enabled                bool      `gorm:"column:enabled;type:bool;not null;default:true" json:"enabled" db:"enabled"`
+	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 }
 
 // TableName Vault's table name
