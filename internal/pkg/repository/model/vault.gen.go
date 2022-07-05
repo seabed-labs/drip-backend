@@ -20,7 +20,7 @@ type Vault struct {
 	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;type:numeric;not null" json:"lastDcaPeriod" db:"last_dca_period"`
 	DripAmount             uint64    `gorm:"column:drip_amount;type:numeric;not null" json:"dripAmount" db:"drip_amount"`
 	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" db:"dca_activation_timestamp"`
-	Enabled                bool      `gorm:"column:enabled;type:bool;not null;default:true" json:"enabled" db:"enabled"`
+	Enabled                bool      `gorm:"column:enabled;type:bool;not null;default:false" json:"enabled" db:"enabled"`
 	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 }
 

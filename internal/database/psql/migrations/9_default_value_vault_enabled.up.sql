@@ -1,0 +1,3 @@
+ALTER TABLE vault
+ALTER COLUMN enabled
+SET DEFAULT false;
