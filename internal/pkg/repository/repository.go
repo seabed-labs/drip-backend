@@ -103,21 +103,10 @@ func (d repositoryImpl) UpsertTokenPairs(ctx context.Context, tokenPairs ...*mod
 }
 
 func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model.Vault) error {
-	// Make sure to not update enabled
 	return d.repo.Vault.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
-			OnConstraint: "vault_pkey",
-			DoUpdates: clause.AssignmentColumns([]string{
-				d.repo.Vault.TokenPairID.ColumnName().String(),
-				d.repo.Vault.DcaActivationTimestamp.ColumnName().String(),
-				d.repo.Vault.ProtoConfig.ColumnName().String(),
-				d.repo.Vault.DripAmount.ColumnName().String(),
-				d.repo.Vault.LastDcaPeriod.ColumnName().String(),
-				d.repo.Vault.TreasuryTokenBAccount.ColumnName().String(),
-				d.repo.Vault.TokenBAccount.ColumnName().String(),
-				d.repo.Vault.TokenAAccount.ColumnName().String(),
-			}),
+			UpdateAll: true,
 		}).
 		Create(vaults...)
 }

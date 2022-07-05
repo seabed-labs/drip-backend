@@ -173,7 +173,7 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
-	log.Infof("received token swap account update")
+	//log.Infof("received token swap account update")
 	defer func() {
 		if r := recover(); r != nil {
 			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
@@ -182,7 +182,7 @@ func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
 	var tokenAccount token.Account
 	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
 	if err == nil {
-		log.Infof("decoded as tokenAccount")
+		//log.Infof("decoded as tokenAccount")
 		if err := d.processor.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
 			log.WithError(err).Error("failed to upsert tokenSwap")
 		}
