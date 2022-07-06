@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	model "github.com/dcaf-protocol/drip/internal/pkg/repository/model"
+	uuid "github.com/gofrs/uuid"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -81,18 +82,18 @@ func (mr *MockRepositoryMockRecorder) GetTokenPair(arg0, arg1, arg2 interface{})
 }
 
 // GetTokenPairByID mocks base method.
-func (m *MockRepository) GetTokenPairByID(arg0 context.Context, arg1 string) (*model.TokenPair, error) {
+func (m *MockRepository) GetTokenPairByID(ctx context.Context, id uuid.UUID) (*model.TokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenPairByID", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetTokenPairByID", ctx, id)
 	ret0, _ := ret[0].(*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTokenPairByID indicates an expected call of GetTokenPairByID.
-func (mr *MockRepositoryMockRecorder) GetTokenPairByID(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetTokenPairByID(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairByID", reflect.TypeOf((*MockRepository)(nil).GetTokenPairByID), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairByID", reflect.TypeOf((*MockRepository)(nil).GetTokenPairByID), ctx, id)
 }
 
 // GetTokenPairs mocks base method.
@@ -141,7 +142,7 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwaps(arg0, arg1 interface{}) *gom
 }
 
 // GetTokenSwapsSortedByLiquidity mocks base method.
-func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
+func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []uuid.UUID) ([]TokenSwapWithLiquidityRatio, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenSwapsSortedByLiquidity", ctx, tokenPairIDs)
 	ret0, _ := ret[0].([]TokenSwapWithLiquidityRatio)

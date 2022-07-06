@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
@@ -22,12 +24,12 @@ func TestHandler_GetVaults(t *testing.T) {
 	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
 	tokenPairs := []*model.TokenPair{
 		{
-			ID:     "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
+			ID:     uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda"),
 			TokenA: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
 			TokenB: "ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8",
 		},
 		{
-			ID:     "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
+			ID:     uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda"),
 			TokenA: "ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8",
 			TokenB: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
 		},
@@ -39,7 +41,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			TokenAAccount:          "6PmcdLzbELLxaPc3Fq6FjiSj7wtjA4MEt1UCZBnHh6tw",
 			TokenBAccount:          "5q7HLgfvxmkqAK6QaEFYrNmvKvzQZjWJzjwRu4toi9Sw",
 			TreasuryTokenBAccount:  "CrVdqMmYCbBs8zG2rmwdWgmsSArKTbMUv3qvTz8J6YWC",
-			TokenPairID:            "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
+			TokenPairID:            uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda"),
 			LastDcaPeriod:          10,
 			DripAmount:             1000,
 			DcaActivationTimestamp: time.Unix(1652748331, 0),
@@ -50,7 +52,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			TokenAAccount:          "5y95dsjKJPaf94Kv8K6NbhyDYWswZycfcHNbwXMo6Xdk",
 			TokenBAccount:          "9B6zNC4ijKfgGjReicqzv5dEPhJMt2oDH97b4AjUAs9a",
 			TreasuryTokenBAccount:  "ugY3pNYSKmMo4msf9VRVnf7SxFQXDqhNcjbNMKSW9gL",
-			TokenPairID:            "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
+			TokenPairID:            uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda"),
 			LastDcaPeriod:          99,
 			DripAmount:             50,
 			DcaActivationTimestamp: time.Unix(1652748331, 0),
@@ -107,12 +109,12 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
+			GetTokenPairByID(gomock.Any(), uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda")).
 			Return(tokenPairs[0], nil).
 			AnyTimes()
 		m.
 			EXPECT().
-			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
+			GetTokenPairByID(gomock.Any(), uuid.FromStringOrNil("96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda")).
 			Return(tokenPairs[1], nil).
 			AnyTimes()
 		m.
