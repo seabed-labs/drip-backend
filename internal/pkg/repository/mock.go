@@ -35,6 +35,21 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// EnableVault mocks base method.
+func (m *MockRepository) EnableVault(ctx context.Context, pubkey string) (*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnableVault", ctx, pubkey)
+	ret0, _ := ret[0].(*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnableVault indicates an expected call of EnableVault.
+func (mr *MockRepositoryMockRecorder) EnableVault(ctx, pubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableVault", reflect.TypeOf((*MockRepository)(nil).EnableVault), ctx, pubkey)
+}
+
 // GetProtoConfigs mocks base method.
 func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
@@ -198,6 +213,21 @@ func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, a
 func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1, arg2, arg3)
+}
+
+// InternalGetVaultByAddress mocks base method.
+func (m *MockRepository) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InternalGetVaultByAddress", ctx, pubkey)
+	ret0, _ := ret[0].(*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InternalGetVaultByAddress indicates an expected call of InternalGetVaultByAddress.
+func (mr *MockRepositoryMockRecorder) InternalGetVaultByAddress(ctx, pubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InternalGetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).InternalGetVaultByAddress), ctx, pubkey)
 }
 
 // UpsertPositions mocks base method.

@@ -14,6 +14,8 @@ import (
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 
+	"gorm.io/plugin/dbresolver"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 )
 
@@ -95,6 +97,14 @@ func (s sourceReferenceDo) Debug() *sourceReferenceDo {
 
 func (s sourceReferenceDo) WithContext(ctx context.Context) *sourceReferenceDo {
 	return s.withDO(s.DO.WithContext(ctx))
+}
+
+func (s sourceReferenceDo) ReadDB() *sourceReferenceDo {
+	return s.Clauses(dbresolver.Read)
+}
+
+func (s sourceReferenceDo) WriteDB() *sourceReferenceDo {
+	return s.Clauses(dbresolver.Write)
 }
 
 func (s sourceReferenceDo) Clauses(conds ...clause.Expression) *sourceReferenceDo {
@@ -296,6 +306,10 @@ func (s sourceReferenceDo) ScanByPage(result interface{}, offset int, limit int)
 
 	err = s.Offset(offset).Limit(limit).Scan(result)
 	return
+}
+
+func (s sourceReferenceDo) Scan(result interface{}) (err error) {
+	return s.DO.Scan(result)
 }
 
 func (s *sourceReferenceDo) withDO(do gen.Dao) *sourceReferenceDo {

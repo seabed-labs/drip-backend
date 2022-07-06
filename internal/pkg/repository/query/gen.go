@@ -67,34 +67,34 @@ func (q *Query) clone(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
-	Position            positionDo
-	ProtoConfig         protoConfigDo
-	SchemaMigration     schemaMigrationDo
-	SourceReference     sourceReferenceDo
-	Token               tokenDo
-	TokenAccountBalance tokenAccountBalanceDo
-	TokenPair           tokenPairDo
-	TokenPrice          tokenPriceDo
-	TokenSwap           tokenSwapDo
-	UserPosition        userPositionDo
-	Vault               vaultDo
-	VaultPeriod         vaultPeriodDo
+	Position            *positionDo
+	ProtoConfig         *protoConfigDo
+	SchemaMigration     *schemaMigrationDo
+	SourceReference     *sourceReferenceDo
+	Token               *tokenDo
+	TokenAccountBalance *tokenAccountBalanceDo
+	TokenPair           *tokenPairDo
+	TokenPrice          *tokenPriceDo
+	TokenSwap           *tokenSwapDo
+	UserPosition        *userPositionDo
+	Vault               *vaultDo
+	VaultPeriod         *vaultPeriodDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Position:            *q.Position.WithContext(ctx),
-		ProtoConfig:         *q.ProtoConfig.WithContext(ctx),
-		SchemaMigration:     *q.SchemaMigration.WithContext(ctx),
-		SourceReference:     *q.SourceReference.WithContext(ctx),
-		Token:               *q.Token.WithContext(ctx),
-		TokenAccountBalance: *q.TokenAccountBalance.WithContext(ctx),
-		TokenPair:           *q.TokenPair.WithContext(ctx),
-		TokenPrice:          *q.TokenPrice.WithContext(ctx),
-		TokenSwap:           *q.TokenSwap.WithContext(ctx),
-		UserPosition:        *q.UserPosition.WithContext(ctx),
-		Vault:               *q.Vault.WithContext(ctx),
-		VaultPeriod:         *q.VaultPeriod.WithContext(ctx),
+		Position:            q.Position.WithContext(ctx),
+		ProtoConfig:         q.ProtoConfig.WithContext(ctx),
+		SchemaMigration:     q.SchemaMigration.WithContext(ctx),
+		SourceReference:     q.SourceReference.WithContext(ctx),
+		Token:               q.Token.WithContext(ctx),
+		TokenAccountBalance: q.TokenAccountBalance.WithContext(ctx),
+		TokenPair:           q.TokenPair.WithContext(ctx),
+		TokenPrice:          q.TokenPrice.WithContext(ctx),
+		TokenSwap:           q.TokenSwap.WithContext(ctx),
+		UserPosition:        q.UserPosition.WithContext(ctx),
+		Vault:               q.Vault.WithContext(ctx),
+		VaultPeriod:         q.VaultPeriod.WithContext(ctx),
 	}
 }
 

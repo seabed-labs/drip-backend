@@ -65,6 +65,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /admin/vault/{pubkeyPath}/enable:
+    put:
+      summary: Enable a vault
+      description: Enable the specified vault
+      parameters:
+        - $ref: "#/components/parameters/pubkeyPath"
+        - $ref: "#/components/parameters/tokenId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/adminVault'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /protoconfigs:
     get:
       summary: Get Proto Configs
@@ -303,6 +336,18 @@ paths:
 
 components:
   parameters:
+    tokenId:
+      name: token-id
+      in: header
+      schema:
+        type: string
+      required: true
+    pubkeyPath:
+      name: pubkeyPath
+      in: path
+      required: true
+      schema:
+        type: string
     vault:
       name: vault
       in: query
@@ -391,6 +436,56 @@ components:
       properties:
         error:
           type: string
+
+    adminVault:
+      description: Internal vault schema.
+      type: object
+      required:
+        - pubkey
+        - protoConfig
+        - tokenAMint
+        - tokenBMint
+        - tokenAAccount
+        - tokenBAccount
+        - treasuryTokenBAccount
+        - lastDcaPeriod
+        - dripAmount
+        - dcaActivationTimestamp
+        - enabled
+      properties:
+        pubkey:
+          type: string
+          example: "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV"
+        protoConfig:
+          type: string
+          example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+        tokenAAccount:
+          type: string
+          example: "6PmcdLzbELLxaPc3Fq6FjiSj7wtjA4MEt1UCZBnHh6tw"
+        tokenBAccount:
+          type: string
+          example: "5q7HLgfvxmkqAK6QaEFYrNmvKvzQZjWJzjwRu4toi9Sw"
+        treasuryTokenBAccount:
+          type: string
+          example: "CrVdqMmYCbBs8zG2rmwdWgmsSArKTbMUv3qvTz8J6YWC"
+        tokenAMint:
+          type: string
+          example: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq"
+        tokenBMint:
+          type: string
+          example: "ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8"
+        lastDcaPeriod:
+          type: string
+          example: "123"
+        dripAmount:
+          type: string
+          example: "123"
+        dcaActivationTimestamp:
+          type: string
+          example: "1652747980"
+          description: unix timestamp
+        enabled:
+          type: boolean
 
     listVaults:
       type: array

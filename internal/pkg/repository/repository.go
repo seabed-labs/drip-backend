@@ -43,12 +43,32 @@ type Repository interface {
 	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
 	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
 	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
+
+	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
+	EnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
 }
 
 type repositoryImpl struct {
 	client solana.Solana
 	repo   *query.Query
 	db     *sqlx.DB
+}
+
+func (d repositoryImpl) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
+	return d.repo.
+		Vault.WithContext(ctx).
+		Where(d.repo.Vault.Pubkey.Eq(pubkey)).
+		First()
+}
+
+func (d repositoryImpl) EnableVault(ctx context.Context, vaultPubkey string) (*model.Vault, error) {
+	var res model.Vault
+	_, err := d.repo.Vault.
+		WithContext(ctx).
+		Returning(&res, res.GetAllColumns()...).
+		Where(d.repo.Vault.Pubkey.Eq(vaultPubkey)).
+		Update(d.repo.Vault.Enabled, true)
+	return &res, err
 }
 
 func NewRepository(

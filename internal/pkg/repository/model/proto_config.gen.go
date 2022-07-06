@@ -4,6 +4,8 @@
 
 package model
 
+import "reflect"
+
 const TableNameProtoConfig = "proto_config"
 
 // ProtoConfig mapped from table <proto_config>
@@ -17,4 +19,16 @@ type ProtoConfig struct {
 // TableName ProtoConfig's table name
 func (*ProtoConfig) TableName() string {
 	return TableNameProtoConfig
+}
+
+func (t ProtoConfig) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
 }

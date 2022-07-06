@@ -5,6 +5,7 @@
 package model
 
 import (
+	"reflect"
 	"time"
 )
 
@@ -20,11 +21,23 @@ type Vault struct {
 	LastDcaPeriod          uint64    `gorm:"column:last_dca_period;type:numeric;not null" json:"lastDcaPeriod" db:"last_dca_period"`
 	DripAmount             uint64    `gorm:"column:drip_amount;type:numeric;not null" json:"dripAmount" db:"drip_amount"`
 	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" db:"dca_activation_timestamp"`
-	Enabled                bool      `gorm:"column:enabled;type:bool;not null;default:false" json:"enabled" db:"enabled"`
+	Enabled                bool      `gorm:"column:enabled;type:bool;not null" json:"enabled" db:"enabled"`
 	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 }
 
 // TableName Vault's table name
 func (*Vault) TableName() string {
 	return TableNameVault
+}
+
+func (t Vault) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
 }

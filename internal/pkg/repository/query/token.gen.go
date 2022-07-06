@@ -14,6 +14,8 @@ import (
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 
+	"gorm.io/plugin/dbresolver"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 )
 
@@ -105,6 +107,14 @@ func (t tokenDo) Debug() *tokenDo {
 
 func (t tokenDo) WithContext(ctx context.Context) *tokenDo {
 	return t.withDO(t.DO.WithContext(ctx))
+}
+
+func (t tokenDo) ReadDB() *tokenDo {
+	return t.Clauses(dbresolver.Read)
+}
+
+func (t tokenDo) WriteDB() *tokenDo {
+	return t.Clauses(dbresolver.Write)
 }
 
 func (t tokenDo) Clauses(conds ...clause.Expression) *tokenDo {
@@ -306,6 +316,10 @@ func (t tokenDo) ScanByPage(result interface{}, offset int, limit int) (count in
 
 	err = t.Offset(offset).Limit(limit).Scan(result)
 	return
+}
+
+func (t tokenDo) Scan(result interface{}) (err error) {
+	return t.DO.Scan(result)
 }
 
 func (t *tokenDo) withDO(do gen.Dao) *tokenDo {
