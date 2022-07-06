@@ -7,6 +7,8 @@ package model
 import (
 	"reflect"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 const TableNameVault = "vault"
@@ -22,7 +24,7 @@ type Vault struct {
 	DripAmount             uint64    `gorm:"column:drip_amount;type:numeric;not null" json:"dripAmount" db:"drip_amount"`
 	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" db:"dca_activation_timestamp"`
 	Enabled                bool      `gorm:"column:enabled;type:bool;not null" json:"enabled" db:"enabled"`
-	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
+	TokenPairID            uuid.UUID `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 }
 
 // TableName Vault's table name

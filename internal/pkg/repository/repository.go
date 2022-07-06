@@ -3,17 +3,13 @@ package repository
 import (
 	"context"
 
-	"github.com/google/uuid"
-
-	"github.com/lib/pq"
-
-	"github.com/jmoiron/sqlx"
-
-	"gorm.io/gorm/clause"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
+	"github.com/gofrs/uuid"
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"gorm.io/gorm/clause"
 )
 
 type TokenSwapWithLiquidityRatio struct {
@@ -38,10 +34,10 @@ type Repository interface {
 	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
 	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
-	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
+	GetTokenPairByID(ctx context.Context, id uuid.UUID) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
-	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
+	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []uuid.UUID) ([]TokenSwapWithLiquidityRatio, error)
 	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
 
 	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
@@ -147,9 +143,9 @@ func (d repositoryImpl) GetTokenPair(ctx context.Context, tokenA string, tokenB 
 		First()
 }
 
-func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model.TokenPair, error) {
+func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id uuid.UUID) (*model.TokenPair, error) {
 	return d.repo.TokenPair.WithContext(ctx).
-		Where(d.repo.TokenPair.ID.Eq(id)).
+		Where(d.repo.TokenPair.ID.Eq(id.String())).
 		First()
 }
 
@@ -172,15 +168,10 @@ func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string)
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
+func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []uuid.UUID) ([]TokenSwapWithLiquidityRatio, error) {
 	var tokenSwaps []TokenSwapWithLiquidityRatio
 	// TODO(Mocha): No clue how to do this in gorm-gen
 	if len(tokenPairIDs) > 0 {
-		var temp []uuid.UUID
-		for _, tokenPairID := range tokenPairIDs {
-			tokenPairUUID, _ := uuid.Parse(tokenPairID)
-			temp = append(temp, tokenPairUUID)
-		}
 		// We should sort by liquidity ratio ascending, so that the largest ratio is at the end of the list
 		if err := d.db.SelectContext(ctx,
 			&tokenSwaps,
@@ -197,7 +188,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 				AND vault.enabled = true
 				AND token_swap.token_pair_id=ANY($1)
 				ORDER BY token_swap.token_pair_id desc, liquidity_ratio asc;`,
-			pq.Array(temp),
+			pq.Array(tokenPairIDs),
 		); err != nil {
 			return nil, err
 		}

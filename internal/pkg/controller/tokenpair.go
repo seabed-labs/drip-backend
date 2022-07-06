@@ -23,7 +23,7 @@ func (h Handler) GetTokenpairs(c echo.Context, params Swagger.GetTokenpairsParam
 			Id     string `json:"id"`
 			TokenA string `json:"tokenA"`
 			TokenB string `json:"tokenB"`
-		}{Id: tokenPair.ID, TokenA: tokenPair.TokenA, TokenB: tokenPair.TokenB},
+		}{Id: tokenPair.ID.String(), TokenA: tokenPair.TokenA, TokenB: tokenPair.TokenB},
 		)
 	}
 	return c.JSON(http.StatusOK, res)

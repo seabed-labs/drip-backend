@@ -10,7 +10,7 @@ import (
 	"github.com/dcaf-protocol/drip/internal/pkg/repository"
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 	"github.com/gagliardetto/solana-go/programs/token"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/shopspring/decimal"
 )
 
@@ -55,8 +55,9 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
+	id, _ := uuid.NewV4()
 	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
-		ID:            uuid.New().String(),
+		ID:            id,
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
 		Authority:     tokenLPMint.MintAuthority.String(),
@@ -74,8 +75,9 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
+	id, _ = uuid.NewV4()
 	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
-		ID:            uuid.New().String(),
+		ID:            id,
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
 		Authority:     tokenLPMint.MintAuthority.String(),
@@ -232,8 +234,9 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		}); err != nil {
 		return err
 	}
+	id, _ := uuid.NewV4()
 	return p.repo.UpsertTokenPairs(ctx, &model.TokenPair{
-		ID:     uuid.New().String(),
+		ID:     id,
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
 	})

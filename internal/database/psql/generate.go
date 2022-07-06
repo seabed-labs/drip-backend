@@ -46,7 +46,7 @@ func GenerateModels(
 		FieldCoverable: true,
 		FieldSignable:  true,
 	})
-	// TODO(Mocha): map UUID
+	// TODO(Mocha): map uuid.UUID
 	dataMap := map[string]func(detailType string) (dataType string){
 		"numeric": func(detailType string) (dataType string) { return "uint64" },
 	}
@@ -72,6 +72,7 @@ func GenerateModels(
 	g.GenerateModel("vault",
 		gen.FieldType("last_dca_period", "uint64"),
 		gen.FieldType("drip_amount", "uint64"),
+		gen.FieldType("token_pair_id", "uuid.UUID"),
 	).AddMethod(ModelUtil{})
 
 	g.GenerateModel("vault_period",
@@ -86,6 +87,15 @@ func GenerateModels(
 		gen.FieldType("dca_period_id_before_deposit", "uint64"),
 		gen.FieldType("number_of_swaps", "uint64"),
 		gen.FieldType("periodic_drip_amount", "uint64"),
+	).AddMethod(ModelUtil{})
+
+	g.GenerateModel("token_pair",
+		gen.FieldType("id", "uuid.UUID"),
+	).AddMethod(ModelUtil{})
+
+	g.GenerateModel("token_swap",
+		gen.FieldType("id", "uuid.UUID"),
+		gen.FieldType("token_pair_id", "uuid.UUID"),
 	).AddMethod(ModelUtil{})
 
 	g.Execute()

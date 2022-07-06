@@ -33,7 +33,7 @@ func (h Handler) GetSwaps(c echo.Context, params Swagger.GetSwapsParams) error {
 			Authority:     tokenSwap.Authority,
 			FeeAccount:    tokenSwap.FeeAccount,
 			Mint:          tokenSwap.Mint,
-			Pair:          tokenSwap.TokenPairID,
+			Pair:          tokenSwap.TokenPairID.String(),
 			Pubkey:        tokenSwap.Pubkey,
 			TokenAAccount: tokenSwap.TokenAAccount,
 			TokenBAccount: tokenSwap.TokenBAccount,

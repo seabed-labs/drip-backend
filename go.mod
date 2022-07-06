@@ -9,6 +9,7 @@ require (
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/getkin/kin-openapi v0.94.0
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
@@ -23,6 +24,7 @@ require (
 	gorm.io/driver/postgres v1.3.4
 	gorm.io/gen v0.3.9
 	gorm.io/gorm v1.23.7
+	gorm.io/plugin/dbresolver v1.2.1
 )
 
 require (
@@ -73,7 +75,6 @@ require (
 	gorm.io/datatypes v1.0.7 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
 	gorm.io/hints v1.1.0 // indirect
-	gorm.io/plugin/dbresolver v1.2.1 // indirect
 )
 
 require (
