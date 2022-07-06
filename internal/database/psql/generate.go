@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"gorm.io/gen/field"
-
 	"github.com/iancoleman/strcase"
 
 	"github.com/sirupsen/logrus"
@@ -18,9 +16,7 @@ import (
 const modelDir = "./internal/pkg/repository/model"
 const queryDir = "./internal/pkg/repository/query"
 
-type ModelUtil struct {
-	fieldMap map[string]field.Expr
-}
+type ModelUtil struct{}
 
 func (t ModelUtil) GetAllColumns() []string {
 	var res []string
