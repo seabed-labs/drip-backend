@@ -42,7 +42,6 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
-	// TODO(Mocha): Return token swap with the most liquidity
 	tokenSwapsByTokenPairID := make(map[uuid.UUID]repository.TokenSwapWithLiquidityRatio)
 	for i := range tokenSwaps {
 		tokenSwap := tokenSwaps[i]
