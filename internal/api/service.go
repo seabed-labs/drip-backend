@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dcaf-protocol/drip/internal/configs"
-
 	"github.com/dcaf-protocol/drip/internal/pkg/controller"
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
@@ -16,6 +16,7 @@ import (
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
+	"google.golang.org/api/idtoken"
 )
 
 func APIServer(
@@ -47,6 +48,7 @@ func listenAndServe(
 	swaggerSpec.Servers = nil
 	e := echo.New()
 	e.Use(middleware.Recover())
+	e.Use(validateAccessToken(config.GoogleClientID))
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
 	swagger.RegisterHandlers(e, handler)
 	srv := &http.Server{
@@ -60,6 +62,27 @@ func listenAndServe(
 		}
 	}()
 	return srv, nil
+}
+
+// TODO(Mocha): Move this to a middleware folder
+func validateAccessToken(googleClientID string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if !strings.Contains(c.Request().RequestURI, "admin") {
+				return next(c)
+			}
+			accessToken := c.Request().Header.Get("token-id")
+			payload, err := idtoken.Validate(context.Background(), accessToken, googleClientID)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, swagger.ErrorResponse{Error: "invalid token-id"})
+			}
+			log.
+				WithField("email", payload.Claims["email"]).
+				WithField("name", payload.Claims["name"]).
+				Info("authorized")
+			return next(c)
+		}
+	}
 }
 
 func shutdown(

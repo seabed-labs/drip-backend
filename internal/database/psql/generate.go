@@ -2,6 +2,7 @@ package psql
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/iancoleman/strcase"
 
@@ -14,6 +15,20 @@ import (
 
 const modelDir = "./internal/pkg/repository/model"
 const queryDir = "./internal/pkg/repository/query"
+
+type ModelUtil struct{}
+
+func (t ModelUtil) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
+}
 
 func GenerateModels(
 	db *gorm.DB,
@@ -52,22 +67,26 @@ func GenerateModels(
 		gen.FieldType("granularity", "uint64"),
 		gen.FieldType("trigger_dca_spread", "uint16"),
 		gen.FieldType("base_withdrawal_spread", "uint16"),
-	)
+	).AddMethod(ModelUtil{})
+
 	g.GenerateModel("vault",
 		gen.FieldType("last_dca_period", "uint64"),
 		gen.FieldType("drip_amount", "uint64"),
-	)
+	).AddMethod(ModelUtil{})
+
 	g.GenerateModel("vault_period",
 		gen.FieldType("period_id", "uint64"),
 		gen.FieldType("dar", "uint64"),
 		gen.FieldType("twap", "decimal.Decimal"),
-	)
+	).AddMethod(ModelUtil{})
+
 	g.GenerateModel("position",
 		gen.FieldType("deposited_token_a_amount", "uint64"),
 		gen.FieldType("withdrawn_token_b_amount", "uint64"),
 		gen.FieldType("dca_period_id_before_deposit", "uint64"),
 		gen.FieldType("number_of_swaps", "uint64"),
 		gen.FieldType("periodic_drip_amount", "uint64"),
-	)
+	).AddMethod(ModelUtil{})
+
 	g.Execute()
 }

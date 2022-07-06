@@ -14,6 +14,8 @@ import (
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 
+	"gorm.io/plugin/dbresolver"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 )
 
@@ -111,6 +113,14 @@ func (v vaultPeriodDo) Debug() *vaultPeriodDo {
 
 func (v vaultPeriodDo) WithContext(ctx context.Context) *vaultPeriodDo {
 	return v.withDO(v.DO.WithContext(ctx))
+}
+
+func (v vaultPeriodDo) ReadDB() *vaultPeriodDo {
+	return v.Clauses(dbresolver.Read)
+}
+
+func (v vaultPeriodDo) WriteDB() *vaultPeriodDo {
+	return v.Clauses(dbresolver.Write)
 }
 
 func (v vaultPeriodDo) Clauses(conds ...clause.Expression) *vaultPeriodDo {
@@ -312,6 +322,10 @@ func (v vaultPeriodDo) ScanByPage(result interface{}, offset int, limit int) (co
 
 	err = v.Offset(offset).Limit(limit).Scan(result)
 	return
+}
+
+func (v vaultPeriodDo) Scan(result interface{}) (err error) {
+	return v.DO.Scan(result)
 }
 
 func (v *vaultPeriodDo) withDO(do gen.Dao) *vaultPeriodDo {

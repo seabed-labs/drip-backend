@@ -4,7 +4,11 @@
 
 package model
 
-import "github.com/shopspring/decimal"
+import (
+	"reflect"
+
+	"github.com/shopspring/decimal"
+)
 
 const TableNameVaultPeriod = "vault_period"
 
@@ -20,4 +24,16 @@ type VaultPeriod struct {
 // TableName VaultPeriod's table name
 func (*VaultPeriod) TableName() string {
 	return TableNameVaultPeriod
+}
+
+func (t VaultPeriod) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
 }

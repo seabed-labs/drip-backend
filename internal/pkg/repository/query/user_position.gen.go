@@ -14,6 +14,8 @@ import (
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 
+	"gorm.io/plugin/dbresolver"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 )
 
@@ -103,6 +105,14 @@ func (u userPositionDo) Debug() *userPositionDo {
 
 func (u userPositionDo) WithContext(ctx context.Context) *userPositionDo {
 	return u.withDO(u.DO.WithContext(ctx))
+}
+
+func (u userPositionDo) ReadDB() *userPositionDo {
+	return u.Clauses(dbresolver.Read)
+}
+
+func (u userPositionDo) WriteDB() *userPositionDo {
+	return u.Clauses(dbresolver.Write)
 }
 
 func (u userPositionDo) Clauses(conds ...clause.Expression) *userPositionDo {
@@ -304,6 +314,10 @@ func (u userPositionDo) ScanByPage(result interface{}, offset int, limit int) (c
 
 	err = u.Offset(offset).Limit(limit).Scan(result)
 	return
+}
+
+func (u userPositionDo) Scan(result interface{}) (err error) {
+	return u.DO.Scan(result)
 }
 
 func (u *userPositionDo) withDO(do gen.Dao) *userPositionDo {

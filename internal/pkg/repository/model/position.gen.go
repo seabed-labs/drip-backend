@@ -5,6 +5,7 @@
 package model
 
 import (
+	"reflect"
 	"time"
 )
 
@@ -27,4 +28,16 @@ type Position struct {
 // TableName Position's table name
 func (*Position) TableName() string {
 	return TableNamePosition
+}
+
+func (t Position) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
 }

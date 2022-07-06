@@ -14,6 +14,8 @@ import (
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 
+	"gorm.io/plugin/dbresolver"
+
 	"github.com/dcaf-protocol/drip/internal/pkg/repository/model"
 )
 
@@ -99,6 +101,14 @@ func (s schemaMigrationDo) Debug() *schemaMigrationDo {
 
 func (s schemaMigrationDo) WithContext(ctx context.Context) *schemaMigrationDo {
 	return s.withDO(s.DO.WithContext(ctx))
+}
+
+func (s schemaMigrationDo) ReadDB() *schemaMigrationDo {
+	return s.Clauses(dbresolver.Read)
+}
+
+func (s schemaMigrationDo) WriteDB() *schemaMigrationDo {
+	return s.Clauses(dbresolver.Write)
 }
 
 func (s schemaMigrationDo) Clauses(conds ...clause.Expression) *schemaMigrationDo {
@@ -300,6 +310,10 @@ func (s schemaMigrationDo) ScanByPage(result interface{}, offset int, limit int)
 
 	err = s.Offset(offset).Limit(limit).Scan(result)
 	return
+}
+
+func (s schemaMigrationDo) Scan(result interface{}) (err error) {
+	return s.DO.Scan(result)
 }
 
 func (s *schemaMigrationDo) withDO(do gen.Dao) *schemaMigrationDo {

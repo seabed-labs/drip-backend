@@ -22,6 +22,22 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Internal vault schema.
+type AdminVault struct {
+	// unix timestamp
+	DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
+	DripAmount             string `json:"dripAmount"`
+	Enabled                bool   `json:"enabled"`
+	LastDcaPeriod          string `json:"lastDcaPeriod"`
+	ProtoConfig            string `json:"protoConfig"`
+	Pubkey                 string `json:"pubkey"`
+	TokenAAccount          string `json:"tokenAAccount"`
+	TokenAMint             string `json:"tokenAMint"`
+	TokenBAccount          string `json:"tokenBAccount"`
+	TokenBMint             string `json:"tokenBMint"`
+	TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
+}
+
 // ErrorResponse defines model for errorResponse.
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -142,6 +158,9 @@ type Offset int
 // ProtoConfig defines model for protoConfig.
 type ProtoConfig string
 
+// PubkeyPath defines model for pubkeyPath.
+type PubkeyPath string
+
 // RequiredVault defines model for requiredVault.
 type RequiredVault string
 
@@ -154,6 +173,9 @@ type TokenA string
 // TokenB defines model for tokenB.
 type TokenB string
 
+// TokenId defines model for tokenId.
+type TokenId string
+
 // Token pair identifier.
 type TokenPair string
 
@@ -162,6 +184,11 @@ type Vault string
 
 // VaultPeriod defines model for vaultPeriod.
 type VaultPeriod string
+
+// PutAdminVaultPubkeyPathEnableParams defines parameters for PutAdminVaultPubkeyPathEnable.
+type PutAdminVaultPubkeyPathEnableParams struct {
+	TokenId TokenId `json:"token-id"`
+}
 
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
@@ -295,6 +322,9 @@ type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PutAdminVaultPubkeyPathEnable request
+	PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostMint request with any body
 	PostMintWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -330,6 +360,18 @@ type ClientInterface interface {
 
 func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutAdminVaultPubkeyPathEnableRequest(c.Server, pubkeyPath, params)
 	if err != nil {
 		return nil, err
 	}
@@ -495,6 +537,49 @@ func NewGetRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPutAdminVaultPubkeyPathEnableRequest generates requests for PutAdminVaultPubkeyPathEnable
+func NewPutAdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/admin/vault/%s/enable", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
 
 	return req, nil
 }
@@ -1108,6 +1193,9 @@ type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
 
+	// PutAdminVaultPubkeyPathEnable request
+	PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error)
+
 	// PostMint request with any body
 	PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
@@ -1157,6 +1245,31 @@ func (r GetResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutAdminVaultPubkeyPathEnableResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *AdminVault
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutAdminVaultPubkeyPathEnableResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutAdminVaultPubkeyPathEnableResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1410,6 +1523,15 @@ func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ..
 	return ParseGetResponse(rsp)
 }
 
+// PutAdminVaultPubkeyPathEnableWithResponse request returning *PutAdminVaultPubkeyPathEnableResponse
+func (c *ClientWithResponses) PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error) {
+	rsp, err := c.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutAdminVaultPubkeyPathEnableResponse(rsp)
+}
+
 // PostMintWithBodyWithResponse request with arbitrary body returning *PostMintResponse
 func (c *ClientWithResponses) PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error) {
 	rsp, err := c.PostMintWithBody(ctx, contentType, body, reqEditors...)
@@ -1528,6 +1650,53 @@ func ParseGetResponse(rsp *http.Response) (*GetResponse, error) {
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutAdminVaultPubkeyPathEnableResponse parses an HTTP response from a PutAdminVaultPubkeyPathEnableWithResponse call
+func ParsePutAdminVaultPubkeyPathEnableResponse(rsp *http.Response) (*PutAdminVaultPubkeyPathEnableResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutAdminVaultPubkeyPathEnableResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AdminVault
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
 
 	}
 
@@ -1925,6 +2094,9 @@ type ServerInterface interface {
 	// Health Check
 	// (GET /)
 	Get(ctx echo.Context) error
+	// Enable a vault
+	// (PUT /admin/vault/{pubkeyPath}/enable)
+	PutAdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPath, params PutAdminVaultPubkeyPathEnableParams) error
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
@@ -1968,6 +2140,44 @@ func (w *ServerInterfaceWrapper) Get(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.Get(ctx)
+	return err
+}
+
+// PutAdminVaultPubkeyPathEnable converts echo context to params.
+func (w *ServerInterfaceWrapper) PutAdminVaultPubkeyPathEnable(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "pubkeyPath" -------------
+	var pubkeyPath PubkeyPath
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pubkeyPath: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PutAdminVaultPubkeyPathEnableParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId TokenId
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params)
 	return err
 }
 
@@ -2218,6 +2428,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/", wrapper.Get)
+	router.PUT(baseURL+"/admin/vault/:pubkeyPath/enable", wrapper.PutAdminVaultPubkeyPathEnable)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
@@ -2234,49 +2445,52 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"AP//OiyqdL4zAAA=",
+	"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",
+	"N7XUOwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
