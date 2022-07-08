@@ -41,7 +41,6 @@ func TestHandler_PostMint(t *testing.T) {
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
 		})
-		assert.Error(t, err)
 		assert.NoError(t, err)
 		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(string(reqBody)))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
