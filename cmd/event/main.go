@@ -41,7 +41,7 @@ func getDependencies() []fx.Option {
 			processor.NewProcessor,
 		),
 		fx.Invoke(
-			event.EventServer,
+			event.Server,
 		),
 		fx.NopLogger,
 	}
