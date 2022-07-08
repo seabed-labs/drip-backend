@@ -51,7 +51,6 @@ func Server(
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
-	// TODO(Mocha): the program ID's should be in a config since they will change
 	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}

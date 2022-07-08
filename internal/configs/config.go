@@ -1,12 +1,15 @@
 package configs
 
 import (
+	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/drip"
+	ag_solanago "github.com/gagliardetto/solana-go"
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"
 )
 
 type AppConfig struct {
 	Environment    Environment `yaml:"environment" env:"ENV"`
+	DripProgramID  string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"GizNF1qvjrTwZy1sFpq5L9cnov2ZB19DAoLKEYCYapwH"`
 	GoogleClientID string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
 	Wallet         string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
 	Port           int         `yaml:"port"        env:"PORT"`
@@ -55,6 +58,10 @@ func NewAppConfig() (*AppConfig, error) {
 		return nil, err
 	}
 	log.Info("loaded drip-backend app configs")
+	drip.ProgramID = ag_solanago.MustPublicKeyFromBase58(config.DripProgramID)
+	log.
+		WithField("programID", drip.ProgramID.String()).
+		Info("set programID")
 	return &config, nil
 }
 
