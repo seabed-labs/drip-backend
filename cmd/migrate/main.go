@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/configs"
-	"github.com/dcaf-protocol/drip/internal/database/psql"
+	"github.com/dcaf-protocol/drip/pkg/configs"
+	psql2 "github.com/dcaf-protocol/drip/pkg/database/psql"
+
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -23,10 +24,10 @@ func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
 			configs.NewPSQLConfig,
-			psql.NewDatabase,
+			psql2.NewDatabase,
 		),
 		fx.Invoke(
-			psql.RunMigrations,
+			psql2.RunMigrations,
 		),
 		fx.NopLogger,
 	}

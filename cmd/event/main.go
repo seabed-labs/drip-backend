@@ -3,16 +3,14 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
+	"github.com/dcaf-protocol/drip/pkg/clients/solana"
+	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-protocol/drip/pkg/database/psql"
+	"github.com/dcaf-protocol/drip/pkg/event"
+	"github.com/dcaf-protocol/drip/pkg/processor"
+	"github.com/dcaf-protocol/drip/pkg/repository"
+	"github.com/dcaf-protocol/drip/pkg/repository/query"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/processor"
-
-	"github.com/dcaf-protocol/drip/internal/configs"
-	"github.com/dcaf-protocol/drip/internal/database/psql"
-	"github.com/dcaf-protocol/drip/internal/event"
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )

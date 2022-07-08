@@ -46,9 +46,8 @@ ENV=DEVNET go run main.go
 If an interface is changed, the associated mocks need to be re-generated.
 
 ```bash
-# ex: from inside drip-backend/internal/pkg/clients/solana
-mockgen -source=client.go -destination=mock.go
-
+# ex: from inside drip-backend/pkg/clients/solana
+./scripts/create-mocks.sh
 ```
 
 ## API Docs
@@ -119,7 +118,7 @@ go run cmd/codegen/main.go
 Run the following script
 
 ```bash
-go run cmd/event/main.go
+go run cmd/backfill/main.go
 ```
 
 > **_NOTE:_**  This backfills based on the content of `devnet.yaml`.

@@ -3,19 +3,14 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/internal/pkg/repository"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/repository/query"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/processor"
-
-	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
-
-	"github.com/dcaf-protocol/drip/internal/api"
-	"github.com/dcaf-protocol/drip/internal/pkg/controller"
-
-	"github.com/dcaf-protocol/drip/internal/configs"
-	"github.com/dcaf-protocol/drip/internal/database/psql"
+	"github.com/dcaf-protocol/drip/pkg/api"
+	"github.com/dcaf-protocol/drip/pkg/clients/solana"
+	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-protocol/drip/pkg/controller"
+	psql2 "github.com/dcaf-protocol/drip/pkg/database/psql"
+	"github.com/dcaf-protocol/drip/pkg/processor"
+	"github.com/dcaf-protocol/drip/pkg/repository"
+	"github.com/dcaf-protocol/drip/pkg/repository/query"
 
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -37,8 +32,8 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
-			psql.NewDatabase,
-			psql.NewGORMDatabase,
+			psql2.NewDatabase,
+			psql2.NewGORMDatabase,
 			query.Use,
 			solana.NewSolanaClient,
 			repository.NewRepository,
@@ -47,7 +42,7 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
-			psql.RunMigrations,
+			psql2.RunMigrations,
 			api.APIServer,
 		),
 		fx.NopLogger,
