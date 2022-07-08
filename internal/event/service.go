@@ -4,14 +4,13 @@ import (
 	"context"
 	"runtime/debug"
 
-	"github.com/gagliardetto/solana-go/programs/token"
-
 	"github.com/dcaf-protocol/drip/internal/configs"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/drip"
 	"github.com/dcaf-protocol/drip/internal/pkg/clients/solana/token_swap"
 	"github.com/dcaf-protocol/drip/internal/pkg/processor"
 	bin "github.com/gagliardetto/binary"
+	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
