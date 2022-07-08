@@ -7,7 +7,7 @@ on:
 env:
   PSQL_DBNAME: drip
   POSTGRES_USER: drip
-  POSTGRES_PASSWORD: postgres
+  POSTGRES_PASSWORD: drip
   PSQL_PORT: 5432
 
 jobs:
@@ -26,9 +26,9 @@ jobs:
         image: postgres
         # Provide the password for postgres
         env:
-          POSTGRES_DB: ${{ env.PSQL_DBNAME }}
-          POSTGRES_USER: ${{ env.PSQL_USER }}
-          POSTGRES_PASSWORD: ${{ env.PSQL_PASS }}
+          POSTGRES_DB: drip
+          POSTGRES_USER: drip
+          POSTGRES_PASSWORD: drip
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
