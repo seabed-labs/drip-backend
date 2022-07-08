@@ -151,7 +151,6 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	if err != nil {
 		return err
 	}
-	// TODO(Mocha): If exists - backfill vaultPeriods in goRoutine, if not exists - upsert
 	return p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),

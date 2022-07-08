@@ -34,7 +34,6 @@ type TriggerDCAConfig struct {
 	Swap               string `yaml:"swap"`
 }
 
-// TODO(mocha): sql dump the output of this
 func Backfill(
 	config *configs.AppConfig,
 	processor processor.Processor,

@@ -48,10 +48,7 @@ func getDependencies() []fx.Option {
 		fx.Invoke(
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			psql.RunMigrations,
-			//scripts.Backfill,
 			api.APIServer,
-			// TODO(mocha): this should run in it's own deployment
-			//event.NewDripProgramProcessor,
 		),
 		fx.NopLogger,
 	}

@@ -31,7 +31,6 @@ type Repository interface {
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
-	// TODO(Mocha): Need an internal get vault by address for disabled vaults
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
