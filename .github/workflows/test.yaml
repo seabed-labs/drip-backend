@@ -1,0 +1,70 @@
+name: Test
+
+on:
+  pull_request:
+  push: { branches: main }
+
+env:
+  PSQL_DBNAME: drip
+  POSTGRES_USER: drip
+  POSTGRES_PASSWORD: postgres
+  PSQL_PORT: 5432
+
+jobs:
+  # Label of the container job
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+    # Docker Hub image that `container-job` executes in
+    container: golang:1.18-alpine3.15
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: ${PSQL_DBNAME}
+          POSTGRES_USER: ${PSQL_USER}
+          POSTGRES_PASSWORD: ${PSQL_PASS}
+        ports:
+          - ${PSQL_PORT}:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # Downloads a copy of the code in your repository before running CI tests
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Cache go packages
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install Code Coverage
+        uses: amancevice/setup-code-climate@v0
+        with:
+          cc_test_reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+      - name: Code Coverage Before Build
+        run: cc-test-reporter before-build
+
+      - name: Run unit tests
+        run: go test -coverprofile ./c.out $(go list ./...) || exit $?
+
+      - name: Format Code Coverage File
+        run: cc-test-reporter format-coverage -t gocov --prefix github.com/dcaf-protocol/drip c.out
+
+      - name: Code Coverage After Build
+        if: ${{ github.event_name != 'pull_request' }}
+        run: cc-test-reporter after-build --prefix github.com/dcaf-protocol/drip --exit-code $?
