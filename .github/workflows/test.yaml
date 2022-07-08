@@ -16,7 +16,7 @@ jobs:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
-    container: golang:1.18-alpine3.15
+    container: golang:1.18
 
     # Service containers to run with `container-job`
     services:
@@ -42,6 +42,9 @@ jobs:
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v3
+
+      - name: install OS dependencies
+        run: apt-get update && apt-get install build-essential -y
 
       - name: Cache go packages
         uses: actions/cache@v2
