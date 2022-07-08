@@ -30,7 +30,7 @@ jobs:
           POSTGRES_USER: ${{ env.PSQL_USER }}
           POSTGRES_PASSWORD: ${{ env.PSQL_PASS }}
         ports:
-          - ${{ env.PSQL_PORT }}:5432
+          - 5432:5432
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
