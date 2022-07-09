@@ -3,65 +3,59 @@ package repository
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	model2 "github.com/dcaf-protocol/drip/pkg/repository/model"
+	"github.com/dcaf-protocol/drip/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/pkg/repository/query"
-
 	"github.com/google/uuid"
-
-	"github.com/lib/pq"
-
 	"github.com/jmoiron/sqlx"
-
+	"github.com/lib/pq"
 	"gorm.io/gorm/clause"
 )
 
 type TokenSwapWithLiquidityRatio struct {
-	model2.TokenSwap
+	model.TokenSwap
 	LiquidityRatio float64 `json:"liquidityRatio" db:"liquidity_ratio"`
 }
 
 type Repository interface {
-	UpsertProtoConfigs(context.Context, ...*model2.ProtoConfig) error
-	UpsertTokens(context.Context, ...*model2.Token) error
-	UpsertTokenPairs(context.Context, ...*model2.TokenPair) error
-	UpsertVaults(context.Context, ...*model2.Vault) error
-	UpsertVaultPeriods(context.Context, ...*model2.VaultPeriod) error
-	UpsertPositions(context.Context, ...*model2.Position) error
-	UpsertTokenSwaps(context.Context, ...*model2.TokenSwap) error
-	UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
+	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
+	UpsertTokens(context.Context, ...*model.Token) error
+	UpsertTokenPairs(context.Context, ...*model.TokenPair) error
+	UpsertVaults(context.Context, ...*model.Vault) error
+	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
+	UpsertPositions(context.Context, ...*model.Position) error
+	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
+	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
-	GetVaultByAddress(context.Context, string) (*model2.Vault, error)
-	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model2.Vault, error)
-	GetProtoConfigs(context.Context, *string, *string) ([]*model2.ProtoConfig, error)
-	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model2.VaultPeriod, error)
-	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model2.Token, error)
-	GetTokenPair(context.Context, string, string) (*model2.TokenPair, error)
-	GetTokenPairByID(context.Context, string) (*model2.TokenPair, error)
-	GetTokenPairs(context.Context, *string, *string) ([]*model2.TokenPair, error)
-	GetTokenSwaps(context.Context, []string) ([]*model2.TokenSwap, error)
+	GetVaultByAddress(context.Context, string) (*model.Vault, error)
+	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
+	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
+	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
+	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
+	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
+	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
+	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
+	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
 	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
-	GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
+	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
 
-	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)
-	EnableVault(ctx context.Context, pubkey string) (*model2.Vault, error)
+	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
+	EnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
 }
 
 type repositoryImpl struct {
-	client solana.Solana
-	repo   *query.Query
-	db     *sqlx.DB
+	repo *query.Query
+	db   *sqlx.DB
 }
 
-func (d repositoryImpl) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error) {
+func (d repositoryImpl) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
 	return d.repo.
 		Vault.WithContext(ctx).
 		Where(d.repo.Vault.Pubkey.Eq(pubkey)).
 		First()
 }
 
-func (d repositoryImpl) EnableVault(ctx context.Context, vaultPubkey string) (*model2.Vault, error) {
-	var res model2.Vault
+func (d repositoryImpl) EnableVault(ctx context.Context, vaultPubkey string) (*model.Vault, error) {
+	var res model.Vault
 	_, err := d.repo.Vault.
 		WithContext(ctx).
 		Returning(&res, res.GetAllColumns()...).
@@ -71,18 +65,16 @@ func (d repositoryImpl) EnableVault(ctx context.Context, vaultPubkey string) (*m
 }
 
 func NewRepository(
-	client solana.Solana,
 	repo *query.Query,
 	db *sqlx.DB,
 ) Repository {
 	return repositoryImpl{
-		client: client,
-		repo:   repo,
-		db:     db,
+		repo: repo,
+		db:   db,
 	}
 }
 
-func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model2.TokenSwap) error {
+func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error {
 	return d.repo.TokenSwap.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -92,7 +84,7 @@ func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*mod
 		Create(tokenSwaps...)
 }
 
-func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model2.TokenAccountBalance) error {
+func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccountBalance) error {
 	return d.repo.TokenAccountBalance.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -101,28 +93,28 @@ func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAcc
 		Create(tokenAccountBalances...)
 }
 
-func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model2.ProtoConfig) error {
+func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error {
 	return d.repo.ProtoConfig.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{UpdateAll: true}).
 		Create(protoConfigs...)
 }
 
-func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model2.Token) error {
+func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model.Token) error {
 	return d.repo.Token.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{UpdateAll: true}).
 		Create(tokens...)
 }
 
-func (d repositoryImpl) UpsertTokenPairs(ctx context.Context, tokenPairs ...*model2.TokenPair) error {
+func (d repositoryImpl) UpsertTokenPairs(ctx context.Context, tokenPairs ...*model.TokenPair) error {
 	return d.repo.TokenPair.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{DoNothing: true}).
 		Create(tokenPairs...)
 }
 
-func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model2.Vault) error {
+func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model.Vault) error {
 	return d.repo.Vault.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -131,28 +123,28 @@ func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model2.Vaul
 		Create(vaults...)
 }
 
-func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...*model2.VaultPeriod) error {
+func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...*model.VaultPeriod) error {
 	return d.repo.VaultPeriod.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(vaultPeriods...)
 }
 
-func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model2.Position) error {
+func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model.Position) error {
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
 }
 
-func (d repositoryImpl) GetTokenPair(ctx context.Context, tokenA string, tokenB string) (*model2.TokenPair, error) {
+func (d repositoryImpl) GetTokenPair(ctx context.Context, tokenA string, tokenB string) (*model.TokenPair, error) {
 	return d.repo.TokenPair.WithContext(ctx).
 		Where(d.repo.TokenPair.TokenA.Eq(tokenA)).
 		Where(d.repo.TokenPair.TokenB.Eq(tokenB)).
 		First()
 }
 
-func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model2.TokenPair, error) {
+func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model.TokenPair, error) {
 	return d.repo.TokenPair.WithContext(ctx).
 		Where(d.repo.TokenPair.ID.Eq(id)).
 		First()
 }
 
-func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model2.TokenPair, error) {
+func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.TokenPair, error) {
 	stmt := d.repo.TokenPair.WithContext(ctx)
 	if tokenAMint != nil {
 		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
@@ -163,7 +155,7 @@ func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, t
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string) ([]*model2.TokenSwap, error) {
+func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string) ([]*model.TokenSwap, error) {
 	stmt := d.repo.TokenSwap.WithContext(ctx)
 	if len(tokenPairID) > 0 {
 		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairID...))
@@ -222,7 +214,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 	return tokenSwaps, nil
 }
 
-func (d repositoryImpl) GetTokenSwapForTokenAccount(ctx context.Context, tokenAccount string) (*model2.TokenSwap, error) {
+func (d repositoryImpl) GetTokenSwapForTokenAccount(ctx context.Context, tokenAccount string) (*model.TokenSwap, error) {
 	return d.repo.
 		TokenSwap.
 		WithContext(ctx).
@@ -231,7 +223,7 @@ func (d repositoryImpl) GetTokenSwapForTokenAccount(ctx context.Context, tokenAc
 		First()
 }
 
-func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model2.Token, error) {
+func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model.Token, error) {
 	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
 	if tokenMint != nil {
 		if supportedTokenA {
@@ -251,7 +243,7 @@ func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tok
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model2.Token, error) {
+func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
 	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
 	if tokenBMint != nil {
 		stmt = stmt.
@@ -262,7 +254,7 @@ func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenB
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model2.Vault, error) {
+func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
 	stmt := d.repo.Vault.WithContext(ctx)
 	if tokenAMint != nil || tokenBMint != nil {
 		stmt = stmt.Join(d.repo.Vault, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
@@ -280,7 +272,7 @@ func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tok
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*model2.Vault, error) {
+func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
 	return d.repo.
 		Vault.WithContext(ctx).
 		Where(d.repo.Vault.Pubkey.Eq(address)).
@@ -288,7 +280,7 @@ func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (
 		First()
 }
 
-func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model2.ProtoConfig, error) {
+func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.ProtoConfig, error) {
 	stmt := d.repo.ProtoConfig.WithContext(ctx)
 	stmt = stmt.Join(d.repo.Vault, d.repo.ProtoConfig.Pubkey.EqCol(d.repo.Vault.ProtoConfig))
 
@@ -305,7 +297,7 @@ func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string,
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetVaultPeriods(ctx context.Context, vault string, limit int, offset int, vaultPeriod *string) ([]*model2.VaultPeriod, error) {
+func (d repositoryImpl) GetVaultPeriods(ctx context.Context, vault string, limit int, offset int, vaultPeriod *string) ([]*model.VaultPeriod, error) {
 	stmt := d.repo.
 		VaultPeriod.WithContext(ctx).
 		Join(d.repo.Vault, d.repo.VaultPeriod.Vault.EqCol(d.repo.Vault.Pubkey)).
