@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gagliardetto/solana-go"
+
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	"github.com/dcaf-protocol/drip/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/pkg/repository/query"
@@ -854,6 +856,117 @@ func TestUpsertPositions(t *testing.T) {
 			assert.Equal(t, position2.NumberOfSwaps, updatedPosition.NumberOfSwaps)
 			assert.Equal(t, position2.PeriodicDripAmount, updatedPosition.PeriodicDripAmount)
 			assert.NotEqual(t, updatedPosition.DepositTimestamp, time.Time{})
+		})
+	})
+}
+
+//nolint:funlen
+func TestUpsertTokenSwaps(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+
+		t.Run("should insert tokenSwap", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
+
+			tokenSwap := model.TokenSwap{
+				ID:            uuid.New().String(),
+				Pubkey:        solana.NewWallet().PublicKey().String(),
+				Mint:          solana.NewWallet().PublicKey().String(),
+				Authority:     "",
+				FeeAccount:    "",
+				TokenAAccount: solana.NewWallet().PublicKey().String(),
+				TokenBAccount: solana.NewWallet().PublicKey().String(),
+				TokenPairID:   seededTokenPair.tokenPairID,
+				TokenAMint:    seededTokenPair.tokenAPubkey,
+				TokenBMint:    seededTokenPair.tokenBPubkey,
+			}
+			err := newRepository.UpsertTokenSwaps(context.Background(), &tokenSwap)
+			assert.NoError(t, err)
+
+			var insertedTokenSwap model.TokenSwap
+			err = db.Get(&insertedTokenSwap, "select token_swap.* from token_swap where id=$1", tokenSwap.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenSwap.Pubkey, insertedTokenSwap.Pubkey)
+		})
+
+		t.Run("should insert multiple tokenSwaps", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenPair1 := seedTokenPair(t, db, seedTokenPairParams{})
+			seededTokenPair2 := seedTokenPair(t, db, seedTokenPairParams{})
+			tokenSwap1 := model.TokenSwap{
+				ID:            uuid.New().String(),
+				Pubkey:        solana.NewWallet().PublicKey().String(),
+				Mint:          solana.NewWallet().PublicKey().String(),
+				Authority:     solana.NewWallet().PublicKey().String(),
+				FeeAccount:    solana.NewWallet().PublicKey().String(),
+				TokenAAccount: solana.NewWallet().PublicKey().String(),
+				TokenBAccount: solana.NewWallet().PublicKey().String(),
+				TokenPairID:   seededTokenPair1.tokenPairID,
+				TokenAMint:    seededTokenPair1.tokenAPubkey,
+				TokenBMint:    seededTokenPair1.tokenBPubkey,
+			}
+			tokenSwap2 := model.TokenSwap{
+				ID:            uuid.New().String(),
+				Pubkey:        solana.NewWallet().PublicKey().String(),
+				Mint:          solana.NewWallet().PublicKey().String(),
+				Authority:     solana.NewWallet().PublicKey().String(),
+				FeeAccount:    solana.NewWallet().PublicKey().String(),
+				TokenAAccount: solana.NewWallet().PublicKey().String(),
+				TokenBAccount: solana.NewWallet().PublicKey().String(),
+				TokenPairID:   seededTokenPair2.tokenPairID,
+				TokenAMint:    seededTokenPair2.tokenAPubkey,
+				TokenBMint:    seededTokenPair2.tokenBPubkey,
+			}
+			err := newRepository.UpsertTokenSwaps(context.Background(), &tokenSwap1, &tokenSwap2)
+			assert.NoError(t, err)
+
+			var insertedTokenSwap model.TokenSwap
+			err = db.Get(&insertedTokenSwap, "select token_swap.* from token_swap where id=$1", tokenSwap1.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenSwap1.Pubkey, insertedTokenSwap.Pubkey)
+
+			err = db.Get(&insertedTokenSwap, "select token_swap.* from token_swap where id=$1", tokenSwap2.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenSwap2.Pubkey, insertedTokenSwap.Pubkey)
+		})
+
+		t.Run("should update tokenSwap if (swap, tokenAMint, tokenBMint) is violated", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenSwap := seedTokenSwap(t, db, seedTokenSwapParams{})
+			var seededTokenSwapModel model.TokenSwap
+			err := db.Get(&seededTokenSwapModel, "select token_swap.* from token_swap where id=$1", seededTokenSwap.tokenSwapID)
+			assert.NoError(t, err)
+
+			tokenSwap := model.TokenSwap{
+				ID:            seededTokenSwapModel.ID,
+				Pubkey:        seededTokenSwapModel.Pubkey,
+				Mint:          solana.NewWallet().PublicKey().String(),
+				Authority:     solana.NewWallet().PublicKey().String(),
+				FeeAccount:    solana.NewWallet().PublicKey().String(),
+				TokenAAccount: solana.NewWallet().PublicKey().String(),
+				TokenBAccount: solana.NewWallet().PublicKey().String(),
+				TokenPairID:   seededTokenSwapModel.TokenPairID,
+				TokenAMint:    seededTokenSwapModel.TokenAMint,
+				TokenBMint:    seededTokenSwapModel.TokenBMint,
+			}
+			err = newRepository.UpsertTokenSwaps(context.Background(), &tokenSwap)
+			assert.NoError(t, err)
+
+			var insertedTokenSwap model.TokenSwap
+			err = db.Get(&insertedTokenSwap, "select token_swap.* from token_swap where id=$1", tokenSwap.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenSwap.Pubkey, insertedTokenSwap.Pubkey)
+			assert.Equal(t, tokenSwap.Mint, insertedTokenSwap.Mint)
+			assert.Equal(t, tokenSwap.Authority, insertedTokenSwap.Authority)
+			assert.Equal(t, tokenSwap.FeeAccount, insertedTokenSwap.FeeAccount)
+			assert.Equal(t, tokenSwap.TokenAAccount, insertedTokenSwap.TokenAAccount)
+			assert.Equal(t, tokenSwap.TokenBAccount, insertedTokenSwap.TokenBAccount)
+			assert.Equal(t, tokenSwap.TokenAMint, insertedTokenSwap.TokenAMint)
+			assert.Equal(t, tokenSwap.TokenBMint, insertedTokenSwap.TokenBMint)
 		})
 	})
 }

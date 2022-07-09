@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gagliardetto/solana-go"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/test-go/testify/assert"
@@ -236,4 +238,44 @@ func seedPosition(t *testing.T, db *sqlx.DB, params seedPositionParams) seedPosi
 		seedVaultPeriodResult.positionPubkey, seedVaultPeriodResult.vaultPubkey, uuid.New().String(), 0, 0, time.Time{}, 0, 0, 0, false)
 	assert.NoError(t, err)
 	return seedVaultPeriodResult
+}
+
+type seedTokenSwapParams struct {
+	seedTokenPairParams
+	tokenSwapPubkey *string
+}
+
+type seedTokenSwapResult struct {
+	seedTokenPairResult
+	tokenSwapID     string
+	tokenSwapPubkey string
+}
+
+func seedTokenSwap(t *testing.T, db *sqlx.DB, params seedTokenSwapParams) seedTokenSwapResult {
+	seedTokenSwapResult := seedTokenSwapResult{
+		seedTokenPairResult: seedTokenPair(t, db, params.seedTokenPairParams),
+	}
+
+	if params.tokenSwapPubkey == nil {
+		seedTokenSwapResult.tokenSwapPubkey = solana.NewWallet().PublicKey().String()
+		seedTokenSwapResult.tokenSwapID = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+			token_swap(id, pubkey, mint, authority, fee_account, token_a_account, token_b_account, token_pair_id, token_a_mint, token_b_mint) 
+			values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			seedTokenSwapResult.tokenSwapID, seedTokenSwapResult.tokenSwapPubkey,
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String(),
+			seedTokenSwapResult.tokenPairID,
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String())
+		assert.NoError(t, err)
+	} else {
+		seedTokenSwapResult.tokenSwapPubkey = *params.tokenSwapPubkey
+		seedTokenSwapResult.tokenSwapID = uuid.New().String()
+	}
+	return seedTokenSwapResult
 }
