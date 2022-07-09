@@ -56,7 +56,6 @@ jobs:
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: golang:1.18
-    needs: [lint, build]
 
     # Service containers to run with `container-job`
     services:
