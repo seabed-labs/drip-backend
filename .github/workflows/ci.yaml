@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   pull_request:
@@ -11,12 +11,55 @@ env:
   PSQL_PORT: 5432
 
 jobs:
-  # Label of the container job
-  container-job:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.1
+
+      - name: Cache go packages
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        run: go build main.go
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18.1
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          only-new-issues: true
+          skip-go-installation: true
+
+  test:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
     container: golang:1.18
+    needs: [lint, build]
 
     # Service containers to run with `container-job`
     services:
