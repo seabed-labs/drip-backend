@@ -97,28 +97,21 @@ func TestUpsertProtoConfigs(t *testing.T) {
 			assert.Equal(t, protoConfig2.Pubkey, insertedConfig.Pubkey)
 		})
 
-		t.Run("should update proto config", func(t *testing.T) {
+		t.Run("should update protoConfig", func(t *testing.T) {
 			defer cleanup()
-
-			pubkey := uuid.New().String()[0:4]
-			_, err := db.Exec(
-				`insert into 
-    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
-							values($1, $2, $3, $4)`,
-				pubkey, 1, 2, 3)
-			assert.NoError(t, err)
+			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
 
 			protoConfig := model.ProtoConfig{
-				Pubkey:               pubkey,
+				Pubkey:               seededProtoConfig.protoConfigPubkey,
 				Granularity:          2,
 				TriggerDcaSpread:     4,
 				BaseWithdrawalSpread: 6,
 			}
-			err = newRepository.UpsertProtoConfigs(context.Background(), &protoConfig)
+			err := newRepository.UpsertProtoConfigs(context.Background(), &protoConfig)
 			assert.NoError(t, err)
 
 			var updatedProtoConfig model.ProtoConfig
-			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey)
+			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", seededProtoConfig.protoConfigPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, protoConfig.Pubkey, updatedProtoConfig.Pubkey)
 			assert.Equal(t, updatedProtoConfig.Granularity, uint64(2))
@@ -128,47 +121,33 @@ func TestUpsertProtoConfigs(t *testing.T) {
 
 		t.Run("should update many protoConfigs", func(t *testing.T) {
 			defer cleanup()
-
-			pubkey1 := uuid.New().String()[0:4]
-			_, err := db.Exec(
-				`insert into 
-    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
-							values($1, $2, $3, $4)`,
-				pubkey1, 1, 2, 3)
-			assert.NoError(t, err)
-
-			pubkey2 := uuid.New().String()[0:4]
-			_, err = db.Exec(
-				`insert into 
-    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
-							values($1, $2, $3, $4)`,
-				pubkey2, 4, 5, 6)
-			assert.NoError(t, err)
+			seededProtoConfig1 := seedProtoConfig(t, db, seedProtoConfigParams{})
+			seededProtoConfig2 := seedProtoConfig(t, db, seedProtoConfigParams{})
 
 			protoConfig1 := model.ProtoConfig{
-				Pubkey:               pubkey1,
+				Pubkey:               seededProtoConfig1.protoConfigPubkey,
 				Granularity:          7,
 				TriggerDcaSpread:     8,
 				BaseWithdrawalSpread: 9,
 			}
 			protoConfig2 := model.ProtoConfig{
-				Pubkey:               pubkey2,
+				Pubkey:               seededProtoConfig2.protoConfigPubkey,
 				Granularity:          10,
 				TriggerDcaSpread:     11,
 				BaseWithdrawalSpread: 12,
 			}
-			err = newRepository.UpsertProtoConfigs(context.Background(), &protoConfig1, &protoConfig2)
+			err := newRepository.UpsertProtoConfigs(context.Background(), &protoConfig1, &protoConfig2)
 			assert.NoError(t, err)
 
 			var updatedProtoConfig model.ProtoConfig
-			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey1)
+			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", seededProtoConfig1.protoConfigPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, protoConfig1.Pubkey, updatedProtoConfig.Pubkey)
 			assert.Equal(t, updatedProtoConfig.Granularity, uint64(7))
 			assert.Equal(t, updatedProtoConfig.TriggerDcaSpread, uint16(8))
 			assert.Equal(t, updatedProtoConfig.BaseWithdrawalSpread, uint16(9))
 
-			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey2)
+			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", seededProtoConfig2.protoConfigPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, protoConfig2.Pubkey, updatedProtoConfig.Pubkey)
 			assert.Equal(t, updatedProtoConfig.Granularity, uint64(10))
@@ -184,6 +163,8 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		repo *query.Query,
 		db *sqlx.DB,
 	) {
+		symbol1 := "btc"
+		symbol2 := "eth"
 		newRepository := repository.NewRepository(repo, db)
 		cleanup := func() {
 			_, err := db.Exec("DELETE from token")
@@ -195,10 +176,9 @@ func TestUpsertUpsertTokens(t *testing.T) {
 			defer cleanup()
 
 			pubkey := uuid.New().String()[0:4]
-			symbol := "btc"
 			token := model.Token{
 				Pubkey:   pubkey,
-				Symbol:   &symbol,
+				Symbol:   &symbol1,
 				Decimals: 0,
 				IconURL:  nil,
 			}
@@ -215,9 +195,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 			defer cleanup()
 
 			pubkey1 := uuid.New().String()[0:4]
-			symbol1 := "btc"
 			pubkey2 := uuid.New().String()[0:4]
-			symbol2 := "eth"
 			token1 := model.Token{
 				Pubkey:   pubkey1,
 				Symbol:   &symbol1,
@@ -254,10 +232,9 @@ func TestUpsertUpsertTokens(t *testing.T) {
 				pubkey, "btc", 2, nil)
 			assert.NoError(t, err)
 
-			symbol := "eth"
 			token := model.Token{
 				Pubkey:   pubkey,
-				Symbol:   &symbol,
+				Symbol:   &symbol2,
 				Decimals: 0,
 				IconURL:  nil,
 			}
@@ -268,7 +245,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", pubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, token.Pubkey, updatedToken.Pubkey)
-			assert.Equal(t, *updatedToken.Symbol, symbol)
+			assert.Equal(t, *updatedToken.Symbol, symbol2)
 		})
 
 		t.Run("should update many tokens", func(t *testing.T) {
@@ -279,7 +256,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 				`insert into 
     						token(pubkey, symbol, decimals, icon_url) 
 							values($1, $2, $3, $4)`,
-				pubkey1, "btc", 2, nil)
+				pubkey1, symbol1, 2, nil)
 			assert.NoError(t, err)
 
 			pubkey2 := uuid.New().String()[0:4]
@@ -287,17 +264,17 @@ func TestUpsertUpsertTokens(t *testing.T) {
 				`insert into 
     						token(pubkey, symbol, decimals, icon_url) 
 							values($1, $2, $3, $4)`,
-				pubkey2, "ltc", 2, nil)
+				pubkey2, symbol2, 2, nil)
 			assert.NoError(t, err)
 
-			symbol1 := "eth"
+			symbol1 := "sol"
 			token1 := model.Token{
 				Pubkey:   pubkey1,
 				Symbol:   &symbol1,
 				Decimals: 0,
 				IconURL:  nil,
 			}
-			symbol2 := "sol"
+			symbol2 := "ltc"
 			token2 := model.Token{
 				Pubkey:   pubkey2,
 				Symbol:   &symbol2,
@@ -458,42 +435,24 @@ func TestUpsertTokenPairs(t *testing.T) {
 
 		t.Run("should not update tokenPair if it already exists", func(t *testing.T) {
 			defer cleanup()
-			btcPubkey := uuid.New().String()
-			ethPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4),
-							    ($5, $6, $7, $8)`,
-				btcPubkey, "btc", 2, nil,
-				ethPubkey, "eth", 2, nil,
-			)
-			assert.NoError(t, err)
-			originalTokenPair := model.TokenPair{
-				ID:     uuid.New().String(),
-				TokenA: btcPubkey,
-				TokenB: ethPubkey,
-			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &originalTokenPair)
-			assert.NoError(t, err)
+			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
 
 			tokenPair := model.TokenPair{
 				ID:     uuid.New().String(),
-				TokenA: btcPubkey,
-				TokenB: ethPubkey,
+				TokenA: seededTokenPair.tokenAPubkey,
+				TokenB: seededTokenPair.tokenBPubkey,
 			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			err := newRepository.InsertTokenPairs(context.Background(), &tokenPair)
 			assert.NoError(t, err)
 
 			var insertedTokenPair model.TokenPair
-			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", originalTokenPair.ID)
+			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", seededTokenPair.tokenPairID)
 			assert.NoError(t, err)
-			assert.Equal(t, originalTokenPair.ID, insertedTokenPair.ID)
-			assert.Equal(t, originalTokenPair.TokenA, insertedTokenPair.TokenA)
-			assert.Equal(t, originalTokenPair.TokenB, insertedTokenPair.TokenB)
+			assert.Equal(t, seededTokenPair.tokenPairID, insertedTokenPair.ID)
+			assert.Equal(t, seededTokenPair.tokenAPubkey, insertedTokenPair.TokenA)
+			assert.Equal(t, seededTokenPair.tokenBPubkey, insertedTokenPair.TokenB)
 		})
 	})
 }
@@ -520,28 +479,7 @@ func TestUpsertVaults(t *testing.T) {
 		t.Run("should fail to insert vault when protoConfig is missing", func(t *testing.T) {
 			defer cleanup()
 
-			btcPubkey := uuid.New().String()
-			ethPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4),
-							    ($5, $6, $7, $8)`,
-				btcPubkey, "btc", 2, nil,
-				ethPubkey, "eth", 2, nil,
-			)
-			assert.NoError(t, err)
-
-			tokenPairID := uuid.New()
-			_, err = db.Exec(
-				`insert into 
-    						token_pair(id, token_a, token_b) 
-							values
-							    ($1, $2, $3)`,
-				tokenPairID.String(), btcPubkey, ethPubkey,
-			)
-			assert.NoError(t, err)
+			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
 
 			vault := model.Vault{
 				Pubkey:                 uuid.New().String(),
@@ -553,9 +491,9 @@ func TestUpsertVaults(t *testing.T) {
 				DripAmount:             0,
 				DcaActivationTimestamp: time.Time{},
 				Enabled:                false,
-				TokenPairID:            tokenPairID.String(),
+				TokenPairID:            seededTokenPair.tokenPairID,
 			}
-			err = newRepository.UpsertVaults(context.Background(), &vault)
+			err := newRepository.UpsertVaults(context.Background(), &vault)
 			assert.Error(t, err)
 		})
 
