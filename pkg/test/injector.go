@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"os"
 
 	"github.com/dcaf-protocol/drip/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/pkg/configs"
@@ -17,6 +18,10 @@ import (
 func InjectDependencies(
 	testCase interface{},
 ) {
+	err := os.Setenv("IS_TEST_DB", "true")
+	if err != nil {
+		panic("could not set IS_TEST_DB env var")
+	}
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	opts := []fx.Option{
 		fx.Provide(
