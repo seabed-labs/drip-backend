@@ -78,8 +78,7 @@ jobs:
           --health-retries 5
 
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
-      - name: Check out repository code
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: install OS dependencies
