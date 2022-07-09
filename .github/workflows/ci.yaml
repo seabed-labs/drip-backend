@@ -52,6 +52,7 @@ jobs:
           skip-go-installation: true
 
   test:
+    name: Test
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
     # Docker Hub image that `container-job` executes in
