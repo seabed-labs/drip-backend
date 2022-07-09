@@ -18,7 +18,6 @@ import (
 // TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
 // the db setup and migrations can be done once per file opposed to once per fn
 
-//UpsertPositions(context.Context, ...*model2.Position) error
 //UpsertTokenSwaps(context.Context, ...*model2.TokenSwap) error
 //UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
 
@@ -649,7 +648,6 @@ func TestUpsertVaultPeriod(t *testing.T) {
 						},
 						tokenPairID: &seededVaultPeriod1.tokenPairID,
 					},
-					protoConfigPubkey: &seededVaultPeriod1.protoConfigPubkey,
 				},
 				vaultPubkey: nil,
 			})
@@ -688,143 +686,174 @@ func TestUpsertPositions(t *testing.T) {
 	) {
 		newRepository := repository.NewRepository(repo, db)
 
-		t.Run("should fail to insert vaultPeriod when vault doesn't exist", func(t *testing.T) {
+		t.Run("should fail to insert position if vault doesn't exist", func(t *testing.T) {
 			defer truncateDB(t, db)
 
-			vaultPeriod := model.VaultPeriod{
-				Pubkey:   uuid.New().String(),
-				Vault:    uuid.New().String(),
-				PeriodID: 0,
-				Twap:     decimal.NewFromInt(0),
-				Dar:      0,
+			position := model.Position{
+				Pubkey:                   uuid.New().String(),
+				Vault:                    uuid.New().String(),
+				Authority:                uuid.New().String(),
+				DepositedTokenAAmount:    1,
+				WithdrawnTokenBAmount:    2,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 3,
+				NumberOfSwaps:            4,
+				PeriodicDripAmount:       5,
+				IsClosed:                 false,
 			}
-			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			err := newRepository.UpsertPositions(context.Background(), &position)
 			assert.Error(t, err)
 		})
 
-		t.Run("should insert vaultPeriod", func(t *testing.T) {
+		t.Run("should insert multiple positions", func(t *testing.T) {
 			defer truncateDB(t, db)
-
 			seededVault := seedVault(t, db, seedVaultParams{})
 
-			vaultPeriod := model.VaultPeriod{
-				Pubkey:   uuid.New().String(),
-				Vault:    seededVault.vaultPubkey,
-				PeriodID: 0,
-				Twap:     decimal.NewFromInt(0),
-				Dar:      0,
+			position1 := model.Position{
+				Pubkey:                   uuid.New().String(),
+				Vault:                    seededVault.vaultPubkey,
+				Authority:                uuid.New().String(),
+				DepositedTokenAAmount:    1,
+				WithdrawnTokenBAmount:    2,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 3,
+				NumberOfSwaps:            4,
+				PeriodicDripAmount:       5,
+				IsClosed:                 false,
 			}
-			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			position2 := model.Position{
+				Pubkey:                   uuid.New().String(),
+				Vault:                    seededVault.vaultPubkey,
+				Authority:                "",
+				DepositedTokenAAmount:    2,
+				WithdrawnTokenBAmount:    3,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 4,
+				NumberOfSwaps:            5,
+				PeriodicDripAmount:       6,
+				IsClosed:                 false,
+			}
+			err := newRepository.UpsertPositions(context.Background(), &position1, &position2)
 			assert.NoError(t, err)
+			var insertedPosition model.Position
+			err = db.Get(&insertedPosition, "select position.* from position where pubkey=$1", position1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, position1.Vault, insertedPosition.Vault)
+			assert.Equal(t, position1.DepositedTokenAAmount, insertedPosition.DepositedTokenAAmount)
+			assert.Equal(t, position1.WithdrawnTokenBAmount, insertedPosition.WithdrawnTokenBAmount)
+			assert.Equal(t, position1.DcaPeriodIDBeforeDeposit, insertedPosition.DcaPeriodIDBeforeDeposit)
+			assert.Equal(t, position1.NumberOfSwaps, insertedPosition.NumberOfSwaps)
+			assert.Equal(t, position1.PeriodicDripAmount, insertedPosition.PeriodicDripAmount)
+			assert.NotEqual(t, insertedPosition.DepositTimestamp, time.Time{})
 
-			var insertedVaultPeriod model.VaultPeriod
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod.Pubkey)
+			err = db.Get(&insertedPosition, "select position.* from position where pubkey=$1", position2.Pubkey)
 			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, position2.Vault, insertedPosition.Vault)
+			assert.Equal(t, position2.DepositedTokenAAmount, insertedPosition.DepositedTokenAAmount)
+			assert.Equal(t, position2.WithdrawnTokenBAmount, insertedPosition.WithdrawnTokenBAmount)
+			assert.Equal(t, position2.DcaPeriodIDBeforeDeposit, insertedPosition.DcaPeriodIDBeforeDeposit)
+			assert.Equal(t, position2.NumberOfSwaps, insertedPosition.NumberOfSwaps)
+			assert.Equal(t, position2.PeriodicDripAmount, insertedPosition.PeriodicDripAmount)
+			assert.NotEqual(t, insertedPosition.DepositTimestamp, time.Time{})
 		})
 
-		t.Run("should insert many vaultPeriods", func(t *testing.T) {
+		t.Run("should update position", func(t *testing.T) {
 			defer truncateDB(t, db)
+			seededPosition := seedPosition(t, db, seedPositionParams{})
 
-			seededVault := seedVault(t, db, seedVaultParams{})
-
-			vaultPeriod1 := model.VaultPeriod{
-				Pubkey:   uuid.New().String(),
-				Vault:    seededVault.vaultPubkey,
-				PeriodID: 0,
-				Twap:     decimal.NewFromInt(0),
-				Dar:      0,
+			position := model.Position{
+				Pubkey:                   seededPosition.positionPubkey,
+				Vault:                    seededPosition.vaultPubkey,
+				Authority:                uuid.New().String(),
+				DepositedTokenAAmount:    1,
+				WithdrawnTokenBAmount:    2,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 3,
+				NumberOfSwaps:            4,
+				PeriodicDripAmount:       5,
+				IsClosed:                 false,
 			}
-			vaultPeriod2 := model.VaultPeriod{
-				Pubkey:   uuid.New().String(),
-				Vault:    seededVault.vaultPubkey,
-				PeriodID: 1,
-				Twap:     decimal.NewFromInt(10),
-				Dar:      0,
-			}
-			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			err := newRepository.UpsertPositions(context.Background(), &position)
 			assert.NoError(t, err)
 
-			var insertedVaultPeriod model.VaultPeriod
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			var updatedPosition model.Position
+			err = db.Get(&updatedPosition, "select position.* from position where pubkey=$1", position.Pubkey)
 			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
-			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
-
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
-			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
-			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+			assert.Equal(t, position.Vault, updatedPosition.Vault)
+			assert.Equal(t, position.DepositedTokenAAmount, updatedPosition.DepositedTokenAAmount)
+			assert.Equal(t, position.WithdrawnTokenBAmount, updatedPosition.WithdrawnTokenBAmount)
+			assert.Equal(t, position.DcaPeriodIDBeforeDeposit, updatedPosition.DcaPeriodIDBeforeDeposit)
+			assert.Equal(t, position.NumberOfSwaps, updatedPosition.NumberOfSwaps)
+			assert.Equal(t, position.PeriodicDripAmount, updatedPosition.PeriodicDripAmount)
+			assert.NotEqual(t, updatedPosition.DepositTimestamp, time.Time{})
 		})
 
-		t.Run("should update vaultPeriod", func(t *testing.T) {
+		t.Run("should update many positions", func(t *testing.T) {
 			defer truncateDB(t, db)
-			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
-			vaultPeriod1 := model.VaultPeriod{
-				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
-				Vault:    seededVaultPeriod1.vaultPubkey,
-				PeriodID: 1,
-				Twap:     decimal.NewFromInt(0),
-				Dar:      0,
-			}
-			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1)
-			assert.NoError(t, err)
-
-			var insertedVaultPeriod model.VaultPeriod
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
-			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
-			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
-			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
-		})
-
-		t.Run("should update many vaultPeriods", func(t *testing.T) {
-			defer truncateDB(t, db)
-			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
-			vaultPeriod1 := model.VaultPeriod{
-				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
-				Vault:    seededVaultPeriod1.vaultPubkey,
-				PeriodID: 1,
-				Twap:     decimal.NewFromInt(0),
-				Dar:      0,
-			}
-
-			seededVaultPeriod2 := seedVaultPeriod(t, db, seedVaultPeriodParams{
+			seededPosition1 := seedPosition(t, db, seedPositionParams{})
+			seededPosition2 := seedPosition(t, db, seedPositionParams{
 				seedVaultParams: seedVaultParams{
+					seedProtoConfigParams: seedProtoConfigParams{protoConfigPubkey: &seededPosition1.protoConfigPubkey},
 					seedTokenPairParams: seedTokenPairParams{
 						seedTokensParams: seedTokensParams{
-							tokenAPubkey: &seededVaultPeriod1.tokenAPubkey,
-							tokenBPubkey: &seededVaultPeriod1.tokenBPubkey,
+							tokenAPubkey: &seededPosition1.tokenAPubkey,
+							tokenBPubkey: &seededPosition1.tokenBPubkey,
 						},
-						tokenPairID: &seededVaultPeriod1.tokenPairID,
+						tokenPairID: &seededPosition1.tokenPairID,
 					},
-					protoConfigPubkey: &seededVaultPeriod1.protoConfigPubkey,
+					tokenAAcount:    &seededPosition1.tokenAAcount,
+					tokenBAccount:   &seededPosition1.tokenBAccount,
+					treasuryAccount: &seededPosition1.treasuryAccount,
 				},
-				vaultPubkey: nil,
 			})
-			vaultPeriod2 := model.VaultPeriod{
-				Pubkey:   seededVaultPeriod2.vaultPeriodPubkey,
-				Vault:    seededVaultPeriod2.vaultPubkey,
-				PeriodID: 2,
-				Twap:     decimal.NewFromInt(10),
-				Dar:      0,
+			position1 := model.Position{
+				Pubkey:                   seededPosition1.positionPubkey,
+				Vault:                    seededPosition1.vaultPubkey,
+				Authority:                uuid.New().String(),
+				DepositedTokenAAmount:    1,
+				WithdrawnTokenBAmount:    2,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 3,
+				NumberOfSwaps:            4,
+				PeriodicDripAmount:       5,
+				IsClosed:                 false,
 			}
 
-			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			position2 := model.Position{
+				Pubkey:                   seededPosition2.positionPubkey,
+				Vault:                    seededPosition2.vaultPubkey,
+				Authority:                uuid.New().String(),
+				DepositedTokenAAmount:    2,
+				WithdrawnTokenBAmount:    3,
+				DepositTimestamp:         time.Now(),
+				DcaPeriodIDBeforeDeposit: 4,
+				NumberOfSwaps:            5,
+				PeriodicDripAmount:       6,
+				IsClosed:                 false,
+			}
+			err := newRepository.UpsertPositions(context.Background(), &position1, &position2)
 			assert.NoError(t, err)
 
-			var insertedVaultPeriod model.VaultPeriod
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			var updatedPosition model.Position
+			err = db.Get(&updatedPosition, "select position.* from position where pubkey=$1", position1.Pubkey)
 			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
-			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
-			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+			assert.Equal(t, position1.Vault, updatedPosition.Vault)
+			assert.Equal(t, position1.DepositedTokenAAmount, updatedPosition.DepositedTokenAAmount)
+			assert.Equal(t, position1.WithdrawnTokenBAmount, updatedPosition.WithdrawnTokenBAmount)
+			assert.Equal(t, position1.DcaPeriodIDBeforeDeposit, updatedPosition.DcaPeriodIDBeforeDeposit)
+			assert.Equal(t, position1.NumberOfSwaps, updatedPosition.NumberOfSwaps)
+			assert.Equal(t, position1.PeriodicDripAmount, updatedPosition.PeriodicDripAmount)
+			assert.NotEqual(t, updatedPosition.DepositTimestamp, time.Time{})
 
-			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
+			err = db.Get(&updatedPosition, "select position.* from position where pubkey=$1", position2.Pubkey)
 			assert.NoError(t, err)
-			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
-			assert.Equal(t, vaultPeriod2.PeriodID, uint64(2))
-			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+			assert.Equal(t, position2.Vault, updatedPosition.Vault)
+			assert.Equal(t, position2.DepositedTokenAAmount, updatedPosition.DepositedTokenAAmount)
+			assert.Equal(t, position2.WithdrawnTokenBAmount, updatedPosition.WithdrawnTokenBAmount)
+			assert.Equal(t, position2.DcaPeriodIDBeforeDeposit, updatedPosition.DcaPeriodIDBeforeDeposit)
+			assert.Equal(t, position2.NumberOfSwaps, updatedPosition.NumberOfSwaps)
+			assert.Equal(t, position2.PeriodicDripAmount, updatedPosition.PeriodicDripAmount)
+			assert.NotEqual(t, updatedPosition.DepositTimestamp, time.Time{})
 		})
 	})
 }
