@@ -20,7 +20,6 @@ import (
 // TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
 // the db setup and migrations can be done once per file opposed to once per fn
 
-//UpsertTokenSwaps(context.Context, ...*model2.TokenSwap) error
 //UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
 
 //GetVaultByAddress(context.Context, string) (*model2.Vault, error)
