@@ -54,13 +54,11 @@ func TestUpsertProtoConfigs(t *testing.T) {
 		}
 		cleanup()
 
-		t.Run("should insert proto config", func(t *testing.T) {
+		t.Run("should insert protoConfig", func(t *testing.T) {
 			defer cleanup()
 
-			pubkey := "123"
-
 			protoConfig := model.ProtoConfig{
-				Pubkey:               pubkey,
+				Pubkey:               uuid.New().String()[0:4],
 				Granularity:          1,
 				TriggerDcaSpread:     5,
 				BaseWithdrawalSpread: 10,
@@ -69,9 +67,37 @@ func TestUpsertProtoConfigs(t *testing.T) {
 			assert.NoError(t, err)
 
 			var insertedConfig model.ProtoConfig
-			err = db.Get(&insertedConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey)
+			err = db.Get(&insertedConfig, "select proto_config.* from proto_config where pubkey=$1", protoConfig.Pubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, protoConfig.Pubkey, insertedConfig.Pubkey)
+		})
+
+		t.Run("should insert many protoConfigs", func(t *testing.T) {
+			defer cleanup()
+
+			protoConfig1 := model.ProtoConfig{
+				Pubkey:               uuid.New().String()[0:4],
+				Granularity:          1,
+				TriggerDcaSpread:     5,
+				BaseWithdrawalSpread: 10,
+			}
+			protoConfig2 := model.ProtoConfig{
+				Pubkey:               uuid.New().String()[0:4],
+				Granularity:          1,
+				TriggerDcaSpread:     5,
+				BaseWithdrawalSpread: 10,
+			}
+			err := newRepository.UpsertProtoConfigs(context.Background(), &protoConfig1, &protoConfig2)
+			assert.NoError(t, err)
+
+			var insertedConfig model.ProtoConfig
+			err = db.Get(&insertedConfig, "select proto_config.* from proto_config where pubkey=$1", protoConfig1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, protoConfig1.Pubkey, insertedConfig.Pubkey)
+
+			err = db.Get(&insertedConfig, "select proto_config.* from proto_config where pubkey=$1", protoConfig2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, protoConfig2.Pubkey, insertedConfig.Pubkey)
 		})
 
 		t.Run("should update proto config", func(t *testing.T) {
@@ -101,6 +127,56 @@ func TestUpsertProtoConfigs(t *testing.T) {
 			assert.Equal(t, updatedProtoConfig.Granularity, uint64(2))
 			assert.Equal(t, updatedProtoConfig.TriggerDcaSpread, uint16(4))
 			assert.Equal(t, updatedProtoConfig.BaseWithdrawalSpread, uint16(6))
+		})
+
+		t.Run("should update many protoConfigs", func(t *testing.T) {
+			defer cleanup()
+
+			pubkey1 := uuid.New().String()[0:4]
+			_, err := db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				pubkey1, 1, 2, 3)
+			assert.NoError(t, err)
+
+			pubkey2 := uuid.New().String()[0:4]
+			_, err = db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				pubkey2, 4, 5, 6)
+			assert.NoError(t, err)
+
+			protoConfig1 := model.ProtoConfig{
+				Pubkey:               pubkey1,
+				Granularity:          7,
+				TriggerDcaSpread:     8,
+				BaseWithdrawalSpread: 9,
+			}
+			protoConfig2 := model.ProtoConfig{
+				Pubkey:               pubkey2,
+				Granularity:          10,
+				TriggerDcaSpread:     11,
+				BaseWithdrawalSpread: 12,
+			}
+			err = newRepository.UpsertProtoConfigs(context.Background(), &protoConfig1, &protoConfig2)
+			assert.NoError(t, err)
+
+			var updatedProtoConfig model.ProtoConfig
+			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey1)
+			assert.NoError(t, err)
+			assert.Equal(t, protoConfig1.Pubkey, updatedProtoConfig.Pubkey)
+			assert.Equal(t, updatedProtoConfig.Granularity, uint64(7))
+			assert.Equal(t, updatedProtoConfig.TriggerDcaSpread, uint16(8))
+			assert.Equal(t, updatedProtoConfig.BaseWithdrawalSpread, uint16(9))
+
+			err = db.Get(&updatedProtoConfig, "select proto_config.* from proto_config where pubkey=$1", pubkey2)
+			assert.NoError(t, err)
+			assert.Equal(t, protoConfig2.Pubkey, updatedProtoConfig.Pubkey)
+			assert.Equal(t, updatedProtoConfig.Granularity, uint64(10))
+			assert.Equal(t, updatedProtoConfig.TriggerDcaSpread, uint16(11))
+			assert.Equal(t, updatedProtoConfig.BaseWithdrawalSpread, uint16(12))
 		})
 	})
 }
