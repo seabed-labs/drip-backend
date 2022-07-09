@@ -4,12 +4,6 @@ on:
   pull_request:
   push: { branches: main }
 
-env:
-  PSQL_DBNAME: drip
-  POSTGRES_USER: drip
-  POSTGRES_PASSWORD: drip
-  PSQL_PORT: 5432
-
 jobs:
 
   build:
@@ -32,8 +26,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Build
+      - name: Build API Server
         run: go build main.go
+
+      - name: Build Event Server
+        run: go build cmd/event/main.go
 
   lint:
     name: Lint
@@ -106,6 +103,12 @@ jobs:
         run: cc-test-reporter before-build
 
       - name: Run unit tests
+        env:
+          PSQL_DBNAME: drip
+          PSQL_USER: drip
+          PSQL_PASS: drip
+          PSQL_PORT: 5432
+          PSQL_HOST: localhost
         run: go test -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Format Code Coverage File
