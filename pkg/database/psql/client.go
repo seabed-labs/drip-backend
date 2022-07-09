@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/dcaf-protocol/drip/pkg/configs"
 
 	"github.com/jmoiron/sqlx"
@@ -16,6 +18,18 @@ import (
 func NewDatabase(
 	config *configs.PSQLConfig,
 ) (*sqlx.DB, error) {
+	if config.IsTestDB {
+		db, err := sqlx.Connect("postgres", getConnectionString(config))
+		if err != nil {
+			return nil, err
+		}
+		config.DBName = "test_" + uuid.New().String()[0:4]
+		_, err = db.Exec("create database " + config.DBName)
+		if err != nil {
+			return nil, err
+		}
+		logrus.WithField("database", config.DBName).Info("created new DB")
+	}
 	return sqlx.Connect("postgres", getConnectionString(config))
 }
 
@@ -32,8 +46,9 @@ func (g gormLogger) Error(ctx context.Context, s string, i ...interface{}) { log
 func (g gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
 }
 
+// Dummy import to ensure that NewDatabase is called first
 func NewGORMDatabase(
-	config *configs.PSQLConfig,
+	config *configs.PSQLConfig, _ *sqlx.DB,
 ) (*gorm.DB, error) {
 	return gorm.Open(postgres.Open(getConnectionString(config)), &gorm.Config{Logger: gormLogger{}})
 }

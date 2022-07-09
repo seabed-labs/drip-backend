@@ -22,6 +22,7 @@ type PSQLConfig struct {
 	DBName   string `yaml:"psql_database" env:"PSQL_DBNAME"`
 	Port     int    `yaml:"psql_port" env:"PSQL_PORT"`
 	Host     string `yaml:"psql_host" env:"PSQL_HOST"`
+	IsTestDB bool   `yaml:"is_test_db" env:"IS_TEST_DB"`
 }
 
 type Environment string

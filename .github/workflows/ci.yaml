@@ -1,10 +1,12 @@
-name: Build, Test
+name: CI
+
 on:
   pull_request:
   push: { branches: main }
 
 jobs:
-  build_backend:
+
+  build:
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -24,8 +26,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Build
+      - name: Build API Server
         run: go build main.go
+
+      - name: Build Event Server
+        run: go build cmd/event/main.go
 
   lint:
     name: Lint
@@ -48,22 +53,37 @@ jobs:
 
   test:
     name: Test
+    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
-    needs: [build_backend]
+    # Docker Hub image that `container-job` executes in
+    container: golang:1.18
+
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: drip
+          POSTGRES_USER: drip
+          POSTGRES_PASSWORD: drip
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Install Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18.1
-
-      - name: Install Code Coverage
-        uses: amancevice/setup-code-climate@v0
-        with:
-          cc_test_reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+      - name: install OS dependencies
+        run: apt-get update && apt-get install build-essential -y
 
       - name: Cache go packages
         uses: actions/cache@v2
@@ -73,13 +93,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - name: Install Code Coverage
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: amancevice/setup-code-climate@v0
+        with:
+          cc_test_reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+
       - name: Code Coverage Before Build
+        if: ${{ github.event_name != 'pull_request' }}
         run: cc-test-reporter before-build
 
       - name: Run unit tests
+        env:
+          PSQL_DBNAME: drip
+          PSQL_USER: drip
+          PSQL_PASS: drip
+          PSQL_PORT: ${{ job.services.postgres.ports[5432] }}
+          PSQL_HOST: postgres
         run: go test -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Format Code Coverage File
+        if: ${{ github.event_name != 'pull_request' }}
         run: cc-test-reporter format-coverage -t gocov --prefix github.com/dcaf-protocol/drip c.out
 
       - name: Code Coverage After Build
