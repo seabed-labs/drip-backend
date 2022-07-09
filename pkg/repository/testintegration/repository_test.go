@@ -223,26 +223,19 @@ func TestUpsertUpsertTokens(t *testing.T) {
 
 		t.Run("should update token", func(t *testing.T) {
 			defer cleanup()
-
-			pubkey := uuid.New().String()[0:4]
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values($1, $2, $3, $4)`,
-				pubkey, "btc", 2, nil)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			token := model.Token{
-				Pubkey:   pubkey,
+				Pubkey:   seededTokens.tokenAPubkey,
 				Symbol:   &symbol2,
 				Decimals: 0,
 				IconURL:  nil,
 			}
-			err = newRepository.UpsertTokens(context.Background(), &token)
+			err := newRepository.UpsertTokens(context.Background(), &token)
 			assert.NoError(t, err)
 
 			var updatedToken model.Token
-			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", pubkey)
+			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", seededTokens.tokenAPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, token.Pubkey, updatedToken.Pubkey)
 			assert.Equal(t, *updatedToken.Symbol, symbol2)
@@ -250,47 +243,32 @@ func TestUpsertUpsertTokens(t *testing.T) {
 
 		t.Run("should update many tokens", func(t *testing.T) {
 			defer cleanup()
-
-			pubkey1 := uuid.New().String()[0:4]
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values($1, $2, $3, $4)`,
-				pubkey1, symbol1, 2, nil)
-			assert.NoError(t, err)
-
-			pubkey2 := uuid.New().String()[0:4]
-			_, err = db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values($1, $2, $3, $4)`,
-				pubkey2, symbol2, 2, nil)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			symbol1 := "sol"
 			token1 := model.Token{
-				Pubkey:   pubkey1,
+				Pubkey:   seededTokens.tokenAPubkey,
 				Symbol:   &symbol1,
 				Decimals: 0,
 				IconURL:  nil,
 			}
 			symbol2 := "ltc"
 			token2 := model.Token{
-				Pubkey:   pubkey2,
+				Pubkey:   seededTokens.tokenBPubkey,
 				Symbol:   &symbol2,
 				Decimals: 0,
 				IconURL:  nil,
 			}
-			err = newRepository.UpsertTokens(context.Background(), &token1, &token2)
+			err := newRepository.UpsertTokens(context.Background(), &token1, &token2)
 			assert.NoError(t, err)
 
 			var updatedToken model.Token
-			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", pubkey1)
+			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", seededTokens.tokenAPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, token1.Pubkey, updatedToken.Pubkey)
 			assert.Equal(t, *updatedToken.Symbol, symbol1)
 
-			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", pubkey2)
+			err = db.Get(&updatedToken, "select token.* from token where pubkey=$1", seededTokens.tokenBPubkey)
 			assert.NoError(t, err)
 			assert.Equal(t, token2.Pubkey, updatedToken.Pubkey)
 			assert.Equal(t, *updatedToken.Symbol, symbol2)
@@ -315,70 +293,43 @@ func TestUpsertTokenPairs(t *testing.T) {
 
 		t.Run("should fail to insert tokenPair if tokenA doesn't exit", func(t *testing.T) {
 			defer cleanup()
-			btcPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4)`,
-				btcPubkey, "btc", 2, nil,
-			)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
 				ID:     uuid.New().String(),
 				TokenA: uuid.New().String(),
-				TokenB: btcPubkey,
+				TokenB: seededTokens.tokenBPubkey,
 			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			err := newRepository.InsertTokenPairs(context.Background(), &tokenPair)
 			assert.Error(t, err)
 		})
 
 		t.Run("should fail to insert tokenPair if tokenB doesn't exit", func(t *testing.T) {
 			defer cleanup()
-			btcPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4)`,
-				btcPubkey, "btc", 2, nil,
-			)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
 				ID:     uuid.New().String(),
-				TokenA: btcPubkey,
+				TokenA: seededTokens.tokenAPubkey,
 				TokenB: uuid.New().String(),
 			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			err := newRepository.InsertTokenPairs(context.Background(), &tokenPair)
 			assert.Error(t, err)
 		})
 
 		t.Run("should insert tokenPair", func(t *testing.T) {
 			defer cleanup()
-			btcPubkey := uuid.New().String()
-			ethPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4),
-							    ($5, $6, $7, $8)`,
-				btcPubkey, "btc", 2, nil,
-				ethPubkey, "eth", 2, nil,
-			)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
 				ID:     uuid.New().String(),
-				TokenA: btcPubkey,
-				TokenB: ethPubkey,
+				TokenA: seededTokens.tokenAPubkey,
+				TokenB: seededTokens.tokenBPubkey,
 			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			err := newRepository.InsertTokenPairs(context.Background(), &tokenPair)
 			assert.NoError(t, err)
 
 			var insertedTokenPair model.TokenPair
@@ -391,32 +342,21 @@ func TestUpsertTokenPairs(t *testing.T) {
 
 		t.Run("should insert many tokenPairs", func(t *testing.T) {
 			defer cleanup()
-			btcPubkey := uuid.New().String()
-			ethPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4),
-							    ($5, $6, $7, $8)`,
-				btcPubkey, "btc", 2, nil,
-				ethPubkey, "eth", 2, nil,
-			)
-			assert.NoError(t, err)
+			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair1 := model.TokenPair{
 				ID:     uuid.New().String(),
-				TokenA: btcPubkey,
-				TokenB: ethPubkey,
+				TokenA: seededTokens.tokenAPubkey,
+				TokenB: seededTokens.tokenBPubkey,
 			}
 
 			tokenPair2 := model.TokenPair{
 				ID:     uuid.New().String(),
-				TokenA: ethPubkey,
-				TokenB: btcPubkey,
+				TokenA: seededTokens.tokenBPubkey,
+				TokenB: seededTokens.tokenAPubkey,
 			}
 
-			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair1, &tokenPair2)
+			err := newRepository.InsertTokenPairs(context.Background(), &tokenPair1, &tokenPair2)
 			assert.NoError(t, err)
 
 			var insertedTokenPair model.TokenPair
@@ -478,7 +418,6 @@ func TestUpsertVaults(t *testing.T) {
 
 		t.Run("should fail to insert vault when protoConfig is missing", func(t *testing.T) {
 			defer cleanup()
-
 			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
 
 			vault := model.Vault{
@@ -501,20 +440,6 @@ func TestUpsertVaults(t *testing.T) {
 			defer cleanup()
 
 			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
-
-			btcPubkey := uuid.New().String()
-			ethPubkey := uuid.New().String()
-			_, err := db.Exec(
-				`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4),
-							    ($5, $6, $7, $8)`,
-				btcPubkey, "btc", 2, nil,
-				ethPubkey, "eth", 2, nil,
-			)
-			assert.NoError(t, err)
-
 			vault := model.Vault{
 				Pubkey:                 uuid.New().String(),
 				ProtoConfig:            seededProtoConfig.protoConfigPubkey,
@@ -527,7 +452,7 @@ func TestUpsertVaults(t *testing.T) {
 				Enabled:                false,
 				TokenPairID:            uuid.New().String(),
 			}
-			err = newRepository.UpsertVaults(context.Background(), &vault)
+			err := newRepository.UpsertVaults(context.Background(), &vault)
 			assert.Error(t, err)
 		})
 
@@ -760,9 +685,11 @@ func TestUpsertVaultPeriod(t *testing.T) {
 			seededVaultPeriod2 := seedVaultPeriod(t, db, seedVaultPeriodParams{
 				seedVaultParams: seedVaultParams{
 					seedTokenPairParams: seedTokenPairParams{
-						tokenAPubkey: &seededVaultPeriod1.tokenAPubkey,
-						tokenBPubkey: &seededVaultPeriod1.tokenBPubkey,
-						tokenPairID:  &seededVaultPeriod1.tokenPairID,
+						seedTokensParams: seedTokensParams{
+							tokenAPubkey: &seededVaultPeriod1.tokenAPubkey,
+							tokenBPubkey: &seededVaultPeriod1.tokenBPubkey,
+						},
+						tokenPairID: &seededVaultPeriod1.tokenPairID,
 					},
 					protoConfigPubkey: &seededVaultPeriod1.protoConfigPubkey,
 				},
@@ -798,49 +725,65 @@ func TestUpsertVaultPeriod(t *testing.T) {
 /////////////////////////////////////////////////////////////////////////////
 // Helpers
 /////////////////////////////////////////////////////////////////////////////
-type seedTokenPairParams struct {
+type seedTokensParams struct {
 	tokenAPubkey *string
 	tokenBPubkey *string
-	tokenPairID  *string
+}
+
+type seedTokensResult struct {
+	tokenAPubkey string
+	tokenBPubkey string
+}
+
+//nolint:funlen
+func seedTokens(t *testing.T, db *sqlx.DB, params seedTokensParams) seedTokensResult {
+	seedTokensResult := seedTokensResult{}
+
+	if params.tokenAPubkey == nil {
+		seedTokensResult.tokenAPubkey = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+			seedTokensResult.tokenAPubkey, "btc", 8, nil,
+		)
+		assert.NoError(t, err)
+	} else {
+		seedTokensResult.tokenAPubkey = *params.tokenAPubkey
+	}
+
+	if params.tokenBPubkey == nil {
+		seedTokensResult.tokenBPubkey = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+			seedTokensResult.tokenBPubkey, "eth", 18, nil,
+		)
+		assert.NoError(t, err)
+	} else {
+		seedTokensResult.tokenBPubkey = *params.tokenBPubkey
+	}
+
+	return seedTokensResult
+}
+
+type seedTokenPairParams struct {
+	seedTokensParams
+	tokenPairID *string
 }
 
 type seedTokenPairResult struct {
-	tokenAPubkey string
-	tokenBPubkey string
-	tokenPairID  string
+	seedTokensResult
+	tokenPairID string
 }
 
 //nolint:funlen
 func seedTokenPair(t *testing.T, db *sqlx.DB, params seedTokenPairParams) seedTokenPairResult {
 	seedTokenPairResult := seedTokenPairResult{}
-
-	if params.tokenAPubkey == nil {
-		seedTokenPairResult.tokenAPubkey = uuid.New().String()
-		_, err := db.Exec(
-			`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4)`,
-			seedTokenPairResult.tokenAPubkey, "btc", 8, nil,
-		)
-		assert.NoError(t, err)
-	} else {
-		seedTokenPairResult.tokenAPubkey = *params.tokenAPubkey
-	}
-
-	if params.tokenBPubkey == nil {
-		seedTokenPairResult.tokenBPubkey = uuid.New().String()
-		_, err := db.Exec(
-			`insert into 
-    						token(pubkey, symbol, decimals, icon_url) 
-							values
-							    ($1, $2, $3, $4)`,
-			seedTokenPairResult.tokenBPubkey, "eth", 18, nil,
-		)
-		assert.NoError(t, err)
-	} else {
-		seedTokenPairResult.tokenBPubkey = *params.tokenBPubkey
-	}
+	seedTokenPairResult.seedTokensResult = seedTokens(t, db, params.seedTokensParams)
 
 	if params.tokenPairID == nil {
 		seedTokenPairResult.tokenPairID = uuid.New().String()
