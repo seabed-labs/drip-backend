@@ -17,9 +17,9 @@ type TokenSwapWithLiquidityRatio struct {
 }
 
 type Repository interface {
+	InsertTokenPairs(context.Context, ...*model.TokenPair) error
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
 	UpsertTokens(context.Context, ...*model.Token) error
-	UpsertTokenPairs(context.Context, ...*model.TokenPair) error
 	UpsertVaults(context.Context, ...*model.Vault) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
@@ -107,7 +107,7 @@ func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model.Token
 		Create(tokens...)
 }
 
-func (d repositoryImpl) UpsertTokenPairs(ctx context.Context, tokenPairs ...*model.TokenPair) error {
+func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*model.TokenPair) error {
 	return d.repo.TokenPair.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{DoNothing: true}).

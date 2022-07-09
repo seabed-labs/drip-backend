@@ -232,7 +232,7 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		}); err != nil {
 		return err
 	}
-	return p.repo.UpsertTokenPairs(ctx, &model2.TokenPair{
+	return p.repo.InsertTokenPairs(ctx, &model2.TokenPair{
 		ID:     uuid.New().String(),
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,

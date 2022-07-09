@@ -13,7 +13,6 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
-//UpsertTokenPairs(context.Context, ...*model2.TokenPair) error
 //UpsertVaults(context.Context, ...*model2.Vault) error
 //UpsertVaultPeriods(context.Context, ...*model2.VaultPeriod) error
 //UpsertPositions(context.Context, ...*model2.Position) error
@@ -187,6 +186,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		repo *query.Query,
 		db *sqlx.DB,
 	) {
+
 		newRepository := repository.NewRepository(repo, db)
 		cleanup := func() {
 			_, err := db.Exec("DELETE from token")
@@ -320,6 +320,183 @@ func TestUpsertUpsertTokens(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, token2.Pubkey, updatedToken.Pubkey)
 			assert.Equal(t, *updatedToken.Symbol, symbol2)
+		})
+	})
+}
+
+//nolint:funlen
+func TestUpsertTokenPairs(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+		cleanup := func() {
+			_, err := db.Exec("DELETE from token_pair")
+			assert.NoError(t, err)
+			_, err = db.Exec("DELETE from token")
+			assert.NoError(t, err)
+		}
+		cleanup()
+
+		t.Run("should fail to insert tokenPair if tokenA doesn't exit", func(t *testing.T) {
+			defer cleanup()
+			btcPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+				btcPubkey, "btc", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPair := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: uuid.New().String(),
+				TokenB: btcPubkey,
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			assert.Error(t, err)
+		})
+
+		t.Run("should fail to insert tokenPair if tokenB doesn't exit", func(t *testing.T) {
+			defer cleanup()
+			btcPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+				btcPubkey, "btc", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPair := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: btcPubkey,
+				TokenB: uuid.New().String(),
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			assert.Error(t, err)
+		})
+
+		t.Run("should insert tokenPair", func(t *testing.T) {
+			defer cleanup()
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPair := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: btcPubkey,
+				TokenB: ethPubkey,
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			assert.NoError(t, err)
+
+			var insertedTokenPair model.TokenPair
+			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", tokenPair.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenPair.ID, insertedTokenPair.ID)
+			assert.Equal(t, tokenPair.TokenA, insertedTokenPair.TokenA)
+			assert.Equal(t, tokenPair.TokenB, insertedTokenPair.TokenB)
+		})
+
+		t.Run("should insert many tokenPairs", func(t *testing.T) {
+			defer cleanup()
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPair1 := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: btcPubkey,
+				TokenB: ethPubkey,
+			}
+
+			tokenPair2 := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: ethPubkey,
+				TokenB: btcPubkey,
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair1, &tokenPair2)
+			assert.NoError(t, err)
+
+			var insertedTokenPair model.TokenPair
+			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", tokenPair1.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenPair1.ID, insertedTokenPair.ID)
+			assert.Equal(t, tokenPair1.TokenA, insertedTokenPair.TokenA)
+			assert.Equal(t, tokenPair1.TokenB, insertedTokenPair.TokenB)
+
+			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", tokenPair2.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenPair2.ID, insertedTokenPair.ID)
+			assert.Equal(t, tokenPair2.TokenA, insertedTokenPair.TokenA)
+			assert.Equal(t, tokenPair2.TokenB, insertedTokenPair.TokenB)
+		})
+
+		t.Run("should not update tokenPair if it already exists", func(t *testing.T) {
+			defer cleanup()
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+			originalTokenPair := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: btcPubkey,
+				TokenB: ethPubkey,
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &originalTokenPair)
+			assert.NoError(t, err)
+
+			tokenPair := model.TokenPair{
+				ID:     uuid.New().String(),
+				TokenA: btcPubkey,
+				TokenB: ethPubkey,
+			}
+
+			err = newRepository.InsertTokenPairs(context.Background(), &tokenPair)
+			assert.NoError(t, err)
+
+			var insertedTokenPair model.TokenPair
+			err = db.Get(&insertedTokenPair, "select token_pair.* from token_pair where id=$1", originalTokenPair.ID)
+			assert.NoError(t, err)
+			assert.Equal(t, originalTokenPair.ID, insertedTokenPair.ID)
+			assert.Equal(t, originalTokenPair.TokenA, insertedTokenPair.TokenA)
+			assert.Equal(t, originalTokenPair.TokenB, insertedTokenPair.TokenB)
 		})
 	})
 }
