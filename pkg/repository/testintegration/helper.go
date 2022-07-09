@@ -182,9 +182,9 @@ func seedVault(t *testing.T, db *sqlx.DB, params seedVaultParams) seedVaultResul
 	seedVaultResult.vaultPubkey = uuid.New().String()
 	_, err := db.Exec(
 		`insert into 
-    						vault(pubkey, proto_config, token_a_account, token_b_account, treasury_token_b_account, last_dca_period, drip_amount, dca_activation_timestamp, enabled, token_pair_id) 
-							values
-							    ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)`,
+			vault(pubkey, proto_config, token_a_account, token_b_account, treasury_token_b_account, last_dca_period, drip_amount, dca_activation_timestamp, enabled, token_pair_id) 
+			values
+				($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)`,
 		seedVaultResult.vaultPubkey, seedVaultResult.protoConfigPubkey, seedVaultResult.tokenAAcount, seedVaultResult.tokenBAccount, seedVaultResult.treasuryAccount, 0, 0, time.Time{}, false, seedVaultResult.tokenPairID,
 	)
 	assert.NoError(t, err)
@@ -217,7 +217,6 @@ func seedVaultPeriod(t *testing.T, db *sqlx.DB, params seedVaultPeriodParams) se
 
 type seedPositionParams struct {
 	seedVaultParams
-	positionPubkey *string
 }
 
 type seedPositionResult struct {
@@ -232,8 +231,8 @@ func seedPosition(t *testing.T, db *sqlx.DB, params seedPositionParams) seedPosi
 	seedVaultPeriodResult.positionPubkey = uuid.New().String()
 	_, err := db.Exec(
 		`insert into 
-    						position(pubkey, vault, authority, deposited_token_a_amount, withdrawn_token_b_amount, deposit_timestamp, dca_period_id_before_deposit, number_of_swaps, periodic_drip_amount, is_closed) 
-							values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			position(pubkey, vault, authority, deposited_token_a_amount, withdrawn_token_b_amount, deposit_timestamp, dca_period_id_before_deposit, number_of_swaps, periodic_drip_amount, is_closed) 
+			values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		seedVaultPeriodResult.positionPubkey, seedVaultPeriodResult.vaultPubkey, uuid.New().String(), 0, 0, time.Time{}, 0, 0, 0, false)
 	assert.NoError(t, err)
 	return seedVaultPeriodResult
