@@ -105,8 +105,8 @@ jobs:
           PSQL_DBNAME: drip
           PSQL_USER: drip
           PSQL_PASS: drip
-          PSQL_PORT: 5432
-          PSQL_HOST: localhost
+          PSQL_PORT: ${{ job.services.postgres.ports[5432] }}
+          PSQL_HOST: postgres
         run: go test -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Format Code Coverage File
