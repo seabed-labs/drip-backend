@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	"github.com/dcaf-protocol/drip/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/pkg/repository/query"
@@ -17,7 +19,6 @@ import (
 // TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
 // the db setup and migrations can be done once per file opposed to once per fn
 
-//UpsertVaultPeriods(context.Context, ...*model2.VaultPeriod) error
 //UpsertPositions(context.Context, ...*model2.Position) error
 //UpsertTokenSwaps(context.Context, ...*model2.TokenSwap) error
 //UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
@@ -795,6 +796,271 @@ func TestUpsertVaults(t *testing.T) {
 			assert.NotEqual(t, insertedVault.LastDcaPeriod, time.Time{})
 			assert.Equal(t, insertedVault.Enabled, true)
 		})
-
 	})
+}
+
+//nolint:funlen
+func TestUpsertVaultPeriod(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+		cleanup := func() {
+			_, err := db.Exec("truncate proto_config cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec("truncate token_pair cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec(" truncate token cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec(" truncate vault cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec(" truncate vault_period cascade")
+			assert.NoError(t, err)
+		}
+		cleanup()
+
+		t.Run("should fail to insert vaultPeriod when vault doesn't exist", func(t *testing.T) {
+			defer cleanup()
+
+			vaultPeriod := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    uuid.New().String(),
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			assert.Error(t, err)
+		})
+
+		t.Run("should insert vaultPeriod", func(t *testing.T) {
+			defer cleanup()
+
+			seededVault := seedVault(t, db, seedVaultParams{})
+
+			vaultPeriod := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod.Pubkey, insertedVaultPeriod.Pubkey)
+		})
+
+		t.Run("should insert many vaultPeriods", func(t *testing.T) {
+			defer cleanup()
+
+			seededVault := seedVault(t, db, seedVaultParams{})
+
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			vaultPeriod2 := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(10),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+		})
+
+		t.Run("should update vaultPeriod", func(t *testing.T) {
+			defer cleanup()
+			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod1.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+		})
+
+		t.Run("should update many vaultPeriods", func(t *testing.T) {
+			defer cleanup()
+			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod1.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+
+			seededVaultPeriod2 := seedVaultPeriod(t, db, seedVaultPeriodParams{
+				seedVaultParams: seedVaultParams{
+					protoConfigPubkey: &seededVaultPeriod1.protoConfigPubkey,
+					tokenAPubkey:      &seededVaultPeriod1.tokenAPubkey,
+					tokenBPubkey:      &seededVaultPeriod1.tokenBPubkey,
+					tokenPairID:       &seededVaultPeriod1.tokenPairID,
+				},
+				vaultPubkey: nil,
+			})
+			vaultPeriod2 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod2.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod2.vaultPubkey,
+				PeriodID: 2,
+				Twap:     decimal.NewFromInt(10),
+				Dar:      0,
+			}
+
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod2.PeriodID, uint64(2))
+			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+		})
+	})
+}
+
+type seedVaultParams struct {
+	protoConfigPubkey *string
+	tokenAPubkey      *string
+	tokenBPubkey      *string
+	tokenPairID       *string
+}
+type seedVaultResult struct {
+	protoConfigPubkey string
+	tokenAPubkey      string
+	tokenBPubkey      string
+	tokenPairID       string
+	vaultPubkey       string
+}
+
+//nolint:funlen
+func seedVault(t *testing.T, db *sqlx.DB, params seedVaultParams) seedVaultResult {
+	seedVaultResult := seedVaultResult{}
+	if params.protoConfigPubkey == nil {
+		seedVaultResult.protoConfigPubkey = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+			seedVaultResult.protoConfigPubkey, 1, 2, 3)
+		assert.NoError(t, err)
+	} else {
+		seedVaultResult.protoConfigPubkey = *params.protoConfigPubkey
+	}
+
+	if params.tokenAPubkey == nil {
+		seedVaultResult.tokenAPubkey = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+			seedVaultResult.tokenAPubkey, "btc", 8, nil,
+		)
+		assert.NoError(t, err)
+	} else {
+		seedVaultResult.tokenAPubkey = *params.tokenAPubkey
+	}
+
+	if params.tokenBPubkey == nil {
+		seedVaultResult.tokenBPubkey = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4)`,
+			seedVaultResult.tokenBPubkey, "eth", 18, nil,
+		)
+		assert.NoError(t, err)
+	} else {
+		seedVaultResult.tokenBPubkey = *params.tokenBPubkey
+	}
+
+	if params.tokenPairID == nil {
+		seedVaultResult.tokenPairID = uuid.New().String()
+		_, err := db.Exec(
+			`insert into 
+    						token_pair(id, token_a, token_b) 
+							values
+							    ($1, $2, $3)`,
+			seedVaultResult.tokenPairID, seedVaultResult.tokenAPubkey, seedVaultResult.tokenBPubkey,
+		)
+		assert.NoError(t, err)
+	} else {
+		seedVaultResult.tokenPairID = *params.tokenPairID
+	}
+
+	seedVaultResult.vaultPubkey = uuid.New().String()
+	tokenAccountPubkey := uuid.New().String()
+	_, err := db.Exec(
+		`insert into 
+    						vault(pubkey, proto_config, token_a_account, token_b_account, treasury_token_b_account, last_dca_period, drip_amount, dca_activation_timestamp, enabled, token_pair_id) 
+							values
+							    ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)`,
+		seedVaultResult.vaultPubkey, seedVaultResult.protoConfigPubkey, tokenAccountPubkey, tokenAccountPubkey, tokenAccountPubkey, 0, 0, time.Time{}, false, seedVaultResult.tokenPairID,
+	)
+	assert.NoError(t, err)
+	return seedVaultResult
+}
+
+type seedVaultPeriodParams struct {
+	seedVaultParams
+	vaultPubkey *string
+}
+
+type seedVaultPeriodResult struct {
+	seedVaultResult
+	vaultPeriodPubkey string
+}
+
+func seedVaultPeriod(t *testing.T, db *sqlx.DB, params seedVaultPeriodParams) seedVaultPeriodResult {
+	seedVaultPeriodResult := seedVaultPeriodResult{
+		seedVaultResult: seedVault(t, db, params.seedVaultParams),
+	}
+	seedVaultPeriodResult.vaultPeriodPubkey = uuid.New().String()
+	_, err := db.Exec(
+		`insert into 
+    						vault_period(pubkey, vault, period_id, twap, dar) 
+							values($1, $2, $3, $4, $5)`,
+		seedVaultPeriodResult.vaultPeriodPubkey, seedVaultPeriodResult.vaultPubkey, 0, 0, 0)
+	assert.NoError(t, err)
+	return seedVaultPeriodResult
 }
