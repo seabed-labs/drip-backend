@@ -215,6 +215,25 @@ func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1, arg2, arg3)
 }
 
+// InsertTokenPairs mocks base method.
+func (m *MockRepository) InsertTokenPairs(arg0 context.Context, arg1 ...*model.TokenPair) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InsertTokenPairs", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertTokenPairs indicates an expected call of InsertTokenPairs.
+func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
+}
+
 // InternalGetVaultByAddress mocks base method.
 func (m *MockRepository) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
 	m.ctrl.T.Helper()
@@ -285,25 +304,6 @@ func (mr *MockRepositoryMockRecorder) UpsertTokenAccountBalances(arg0 interface{
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertTokenAccountBalances", reflect.TypeOf((*MockRepository)(nil).UpsertTokenAccountBalances), varargs...)
-}
-
-// UpsertTokenPairs mocks base method.
-func (m *MockRepository) InsertTokenPairs(arg0 context.Context, arg1 ...*model.TokenPair) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "InsertTokenPairs", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpsertTokenPairs indicates an expected call of UpsertTokenPairs.
-func (mr *MockRepositoryMockRecorder) UpsertTokenPairs(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
 }
 
 // UpsertTokenSwaps mocks base method.
