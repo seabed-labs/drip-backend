@@ -5,14 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shopspring/decimal"
-
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	"github.com/dcaf-protocol/drip/pkg/repository/model"
 	"github.com/dcaf-protocol/drip/pkg/repository/query"
 	"github.com/dcaf-protocol/drip/pkg/test"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/shopspring/decimal"
 	"github.com/test-go/testify/assert"
 )
 
@@ -45,14 +44,9 @@ func TestUpsertProtoConfigs(t *testing.T) {
 		db *sqlx.DB,
 	) {
 		newRepository := repository.NewRepository(repo, db)
-		cleanup := func() {
-			_, err := db.Exec("DELETE from proto_config")
-			assert.NoError(t, err)
-		}
-		cleanup()
 
 		t.Run("should insert protoConfig", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			protoConfig := model.ProtoConfig{
 				Pubkey:               uuid.New().String()[0:4],
@@ -70,7 +64,7 @@ func TestUpsertProtoConfigs(t *testing.T) {
 		})
 
 		t.Run("should insert many protoConfigs", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			protoConfig1 := model.ProtoConfig{
 				Pubkey:               uuid.New().String()[0:4],
@@ -98,7 +92,7 @@ func TestUpsertProtoConfigs(t *testing.T) {
 		})
 
 		t.Run("should update protoConfig", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
 
 			protoConfig := model.ProtoConfig{
@@ -120,7 +114,7 @@ func TestUpsertProtoConfigs(t *testing.T) {
 		})
 
 		t.Run("should update many protoConfigs", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededProtoConfig1 := seedProtoConfig(t, db, seedProtoConfigParams{})
 			seededProtoConfig2 := seedProtoConfig(t, db, seedProtoConfigParams{})
 
@@ -166,14 +160,9 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		symbol1 := "btc"
 		symbol2 := "eth"
 		newRepository := repository.NewRepository(repo, db)
-		cleanup := func() {
-			_, err := db.Exec("DELETE from token")
-			assert.NoError(t, err)
-		}
-		cleanup()
 
 		t.Run("should insert token", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			pubkey := uuid.New().String()[0:4]
 			token := model.Token{
@@ -192,7 +181,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		})
 
 		t.Run("should insert many tokens", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			pubkey1 := uuid.New().String()[0:4]
 			pubkey2 := uuid.New().String()[0:4]
@@ -222,7 +211,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		})
 
 		t.Run("should update token", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			token := model.Token{
@@ -242,7 +231,7 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		})
 
 		t.Run("should update many tokens", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			symbol1 := "sol"
@@ -283,16 +272,9 @@ func TestUpsertTokenPairs(t *testing.T) {
 		db *sqlx.DB,
 	) {
 		newRepository := repository.NewRepository(repo, db)
-		cleanup := func() {
-			_, err := db.Exec("DELETE from token_pair")
-			assert.NoError(t, err)
-			_, err = db.Exec("DELETE from token")
-			assert.NoError(t, err)
-		}
-		cleanup()
 
 		t.Run("should fail to insert tokenPair if tokenA doesn't exit", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
@@ -306,7 +288,7 @@ func TestUpsertTokenPairs(t *testing.T) {
 		})
 
 		t.Run("should fail to insert tokenPair if tokenB doesn't exit", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
@@ -320,7 +302,7 @@ func TestUpsertTokenPairs(t *testing.T) {
 		})
 
 		t.Run("should insert tokenPair", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair := model.TokenPair{
@@ -341,7 +323,7 @@ func TestUpsertTokenPairs(t *testing.T) {
 		})
 
 		t.Run("should insert many tokenPairs", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokens := seedTokens(t, db, seedTokensParams{})
 
 			tokenPair1 := model.TokenPair{
@@ -374,7 +356,7 @@ func TestUpsertTokenPairs(t *testing.T) {
 		})
 
 		t.Run("should not update tokenPair if it already exists", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
 
@@ -404,20 +386,9 @@ func TestUpsertVaults(t *testing.T) {
 		db *sqlx.DB,
 	) {
 		newRepository := repository.NewRepository(repo, db)
-		cleanup := func() {
-			_, err := db.Exec("truncate proto_config cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec("truncate token_pair cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec(" truncate token cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec(" truncate vault cascade")
-			assert.NoError(t, err)
-		}
-		cleanup()
 
 		t.Run("should fail to insert vault when protoConfig is missing", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
 
 			vault := model.Vault{
@@ -437,7 +408,7 @@ func TestUpsertVaults(t *testing.T) {
 		})
 
 		t.Run("should fail to insert vault when token pair is missing", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
 			vault := model.Vault{
@@ -457,7 +428,7 @@ func TestUpsertVaults(t *testing.T) {
 		})
 
 		t.Run("should insert vault", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
 			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
@@ -485,7 +456,7 @@ func TestUpsertVaults(t *testing.T) {
 		})
 
 		t.Run("should insert many vaults", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededProtoConfig := seedProtoConfig(t, db, seedProtoConfigParams{})
 			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
@@ -530,7 +501,7 @@ func TestUpsertVaults(t *testing.T) {
 		})
 
 		t.Run("should update vault", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seedVault := seedVault(t, db, seedVaultParams{})
 			vault := model.Vault{
@@ -567,22 +538,9 @@ func TestUpsertVaultPeriod(t *testing.T) {
 		db *sqlx.DB,
 	) {
 		newRepository := repository.NewRepository(repo, db)
-		cleanup := func() {
-			_, err := db.Exec("truncate proto_config cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec("truncate token_pair cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec(" truncate token cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec(" truncate vault cascade")
-			assert.NoError(t, err)
-			_, err = db.Exec(" truncate vault_period cascade")
-			assert.NoError(t, err)
-		}
-		cleanup()
 
 		t.Run("should fail to insert vaultPeriod when vault doesn't exist", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			vaultPeriod := model.VaultPeriod{
 				Pubkey:   uuid.New().String(),
@@ -596,7 +554,7 @@ func TestUpsertVaultPeriod(t *testing.T) {
 		})
 
 		t.Run("should insert vaultPeriod", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededVault := seedVault(t, db, seedVaultParams{})
 
@@ -617,7 +575,7 @@ func TestUpsertVaultPeriod(t *testing.T) {
 		})
 
 		t.Run("should insert many vaultPeriods", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 
 			seededVault := seedVault(t, db, seedVaultParams{})
 
@@ -651,7 +609,7 @@ func TestUpsertVaultPeriod(t *testing.T) {
 		})
 
 		t.Run("should update vaultPeriod", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
 			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
 			vaultPeriod1 := model.VaultPeriod{
 				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
@@ -672,7 +630,156 @@ func TestUpsertVaultPeriod(t *testing.T) {
 		})
 
 		t.Run("should update many vaultPeriods", func(t *testing.T) {
-			defer cleanup()
+			defer truncateDB(t, db)
+			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod1.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+
+			seededVaultPeriod2 := seedVaultPeriod(t, db, seedVaultPeriodParams{
+				seedVaultParams: seedVaultParams{
+					seedTokenPairParams: seedTokenPairParams{
+						seedTokensParams: seedTokensParams{
+							tokenAPubkey: &seededVaultPeriod1.tokenAPubkey,
+							tokenBPubkey: &seededVaultPeriod1.tokenBPubkey,
+						},
+						tokenPairID: &seededVaultPeriod1.tokenPairID,
+					},
+					protoConfigPubkey: &seededVaultPeriod1.protoConfigPubkey,
+				},
+				vaultPubkey: nil,
+			})
+			vaultPeriod2 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod2.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod2.vaultPubkey,
+				PeriodID: 2,
+				Twap:     decimal.NewFromInt(10),
+				Dar:      0,
+			}
+
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod2.PeriodID, uint64(2))
+			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+		})
+	})
+}
+
+//nolint:funlen
+func TestUpsertPositions(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+
+		t.Run("should fail to insert vaultPeriod when vault doesn't exist", func(t *testing.T) {
+			defer truncateDB(t, db)
+
+			vaultPeriod := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    uuid.New().String(),
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			assert.Error(t, err)
+		})
+
+		t.Run("should insert vaultPeriod", func(t *testing.T) {
+			defer truncateDB(t, db)
+
+			seededVault := seedVault(t, db, seedVaultParams{})
+
+			vaultPeriod := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod.Pubkey, insertedVaultPeriod.Pubkey)
+		})
+
+		t.Run("should insert many vaultPeriods", func(t *testing.T) {
+			defer truncateDB(t, db)
+
+			seededVault := seedVault(t, db, seedVaultParams{})
+
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 0,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			vaultPeriod2 := model.VaultPeriod{
+				Pubkey:   uuid.New().String(),
+				Vault:    seededVault.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(10),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1, &vaultPeriod2)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod2.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod2.Twap, decimal.NewFromInt(10))
+		})
+
+		t.Run("should update vaultPeriod", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
+			vaultPeriod1 := model.VaultPeriod{
+				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,
+				Vault:    seededVaultPeriod1.vaultPubkey,
+				PeriodID: 1,
+				Twap:     decimal.NewFromInt(0),
+				Dar:      0,
+			}
+			err := newRepository.UpsertVaultPeriods(context.Background(), &vaultPeriod1)
+			assert.NoError(t, err)
+
+			var insertedVaultPeriod model.VaultPeriod
+			err = db.Get(&insertedVaultPeriod, "select vault_period.* from vault_period where pubkey=$1", vaultPeriod1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vaultPeriod1.Pubkey, insertedVaultPeriod.Pubkey)
+			assert.Equal(t, vaultPeriod1.PeriodID, uint64(1))
+			assert.Equal(t, vaultPeriod1.Twap, decimal.NewFromInt(0))
+		})
+
+		t.Run("should update many vaultPeriods", func(t *testing.T) {
+			defer truncateDB(t, db)
 			seededVaultPeriod1 := seedVaultPeriod(t, db, seedVaultPeriodParams{})
 			vaultPeriod1 := model.VaultPeriod{
 				Pubkey:   seededVaultPeriod1.vaultPeriodPubkey,

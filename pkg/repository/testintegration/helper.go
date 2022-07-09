@@ -9,8 +9,31 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
+func truncateDB(t *testing.T, db *sqlx.DB) {
+	_, err := db.Exec("truncate proto_config cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec("truncate token_pair cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate token cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate vault cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate vault_period cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate position cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate token_account_balance cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate token_price cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate token_swap cascade")
+	assert.NoError(t, err)
+	_, err = db.Exec(" truncate user_position cascade")
+	assert.NoError(t, err)
+}
+
 /////////////////////////////////////////////////////////////////////////////
-// Helpers
+// Seed
 /////////////////////////////////////////////////////////////////////////////
 type seedTokensParams struct {
 	tokenAPubkey *string
