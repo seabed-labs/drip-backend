@@ -1,7 +1,7 @@
     # drip-backend
 
-<a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/maintainability"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/maintainability" /></a>
-<a href="https://codeclimate.com/repos/626475a0ceebd6791a0001bb/test_coverage"><img src="https://api.codeclimate.com/v1/badges/b7d1181add6eb7f241ed/test_coverage" /></a>
+<a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/maintainability"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/maintainability" /></a>
+<a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/test_coverage"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/test_coverage" /></a>
 <a href="https://github.com/dcaf-labs/drip-backend/actions/workflows/deploy-devnet.yaml"><img src="https://github.com/dcaf-labs/drip-backend/actions/workflows/deploy-devnet.yaml/badge.svg?branch=main" /></a>
 <a href="https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml"><img src="https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml/badge.svg?branch=main" /> </a>
 
