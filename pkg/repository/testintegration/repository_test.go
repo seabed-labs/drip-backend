@@ -3,6 +3,7 @@ package testintegration
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	"github.com/dcaf-protocol/drip/pkg/repository/model"
@@ -13,12 +14,14 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
-//UpsertVaults(context.Context, ...*model2.Vault) error
+// TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
+// the db setup and migrations can be done once per file opposed to once per fn
+
 //UpsertVaultPeriods(context.Context, ...*model2.VaultPeriod) error
 //UpsertPositions(context.Context, ...*model2.Position) error
 //UpsertTokenSwaps(context.Context, ...*model2.TokenSwap) error
 //UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
-//
+
 //GetVaultByAddress(context.Context, string) (*model2.Vault, error)
 //GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model2.Vault, error)
 //GetProtoConfigs(context.Context, *string, *string) ([]*model2.ProtoConfig, error)
@@ -30,15 +33,9 @@ import (
 //GetTokenSwaps(context.Context, []string) ([]*model2.TokenSwap, error)
 //GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
 //GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
-//
+
 //InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)
 //EnableVault(ctx context.Context, pubkey string) (*model2.Vault, error)
-//originalBalance, err := solClient.GetBalance(context.Background(), walletProvider.Wallet.PublicKey(), rpc.CommitmentConfirmed)
-//assert.NoError(t, err)
-//balance, err := walletPkg.InitTestWallet(solClient, walletProvider)
-//assert.NoError(t, err)
-//assert.NotZero(t, balance)
-//assert.NotEqual(t, originalBalance, balance)
 
 //nolint:funlen
 func TestUpsertProtoConfigs(t *testing.T) {
@@ -186,7 +183,6 @@ func TestUpsertUpsertTokens(t *testing.T) {
 		repo *query.Query,
 		db *sqlx.DB,
 	) {
-
 		newRepository := repository.NewRepository(repo, db)
 		cleanup := func() {
 			_, err := db.Exec("DELETE from token")
@@ -498,5 +494,307 @@ func TestUpsertTokenPairs(t *testing.T) {
 			assert.Equal(t, originalTokenPair.TokenA, insertedTokenPair.TokenA)
 			assert.Equal(t, originalTokenPair.TokenB, insertedTokenPair.TokenB)
 		})
+	})
+}
+
+//nolint:funlen
+func TestUpsertVaults(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+		cleanup := func() {
+			_, err := db.Exec("truncate proto_config cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec("truncate token_pair cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec(" truncate token cascade")
+			assert.NoError(t, err)
+			_, err = db.Exec(" truncate vault cascade")
+			assert.NoError(t, err)
+		}
+		cleanup()
+
+		t.Run("should fail to insert vault when protoConfig is missing", func(t *testing.T) {
+			defer cleanup()
+
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err := db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPairID := uuid.New()
+			_, err = db.Exec(
+				`insert into 
+    						token_pair(id, token_a, token_b) 
+							values
+							    ($1, $2, $3)`,
+				tokenPairID.String(), btcPubkey, ethPubkey,
+			)
+			assert.NoError(t, err)
+
+			vault := model.Vault{
+				Pubkey:                 uuid.New().String(),
+				ProtoConfig:            uuid.New().String(),
+				TokenAAccount:          uuid.New().String(),
+				TokenBAccount:          uuid.New().String(),
+				TreasuryTokenBAccount:  uuid.New().String(),
+				LastDcaPeriod:          0,
+				DripAmount:             0,
+				DcaActivationTimestamp: time.Time{},
+				Enabled:                false,
+				TokenPairID:            tokenPairID.String(),
+			}
+			err = newRepository.UpsertVaults(context.Background(), &vault)
+			assert.Error(t, err)
+		})
+
+		t.Run("should fail to insert vault when token pair is missing", func(t *testing.T) {
+			defer cleanup()
+
+			pubkey := uuid.New().String()[0:4]
+			_, err := db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				pubkey, 1, 2, 3)
+			assert.NoError(t, err)
+
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err = db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			vault := model.Vault{
+				Pubkey:                 uuid.New().String(),
+				ProtoConfig:            pubkey,
+				TokenAAccount:          uuid.New().String(),
+				TokenBAccount:          uuid.New().String(),
+				TreasuryTokenBAccount:  uuid.New().String(),
+				LastDcaPeriod:          0,
+				DripAmount:             0,
+				DcaActivationTimestamp: time.Time{},
+				Enabled:                false,
+				TokenPairID:            uuid.New().String(),
+			}
+			err = newRepository.UpsertVaults(context.Background(), &vault)
+			assert.Error(t, err)
+		})
+
+		t.Run("should insert vault", func(t *testing.T) {
+			defer cleanup()
+
+			pubkey := uuid.New().String()[0:4]
+			_, err := db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				pubkey, 1, 2, 3)
+			assert.NoError(t, err)
+
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err = db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPairID := uuid.New()
+			_, err = db.Exec(
+				`insert into 
+    						token_pair(id, token_a, token_b) 
+							values
+							    ($1, $2, $3)`,
+				tokenPairID.String(), btcPubkey, ethPubkey,
+			)
+			assert.NoError(t, err)
+
+			vault := model.Vault{
+				Pubkey:                 uuid.New().String(),
+				ProtoConfig:            pubkey,
+				TokenAAccount:          uuid.New().String(),
+				TokenBAccount:          uuid.New().String(),
+				TreasuryTokenBAccount:  uuid.New().String(),
+				LastDcaPeriod:          0,
+				DripAmount:             0,
+				DcaActivationTimestamp: time.Time{},
+				Enabled:                false,
+				TokenPairID:            tokenPairID.String(),
+			}
+			err = newRepository.UpsertVaults(context.Background(), &vault)
+			assert.NoError(t, err)
+
+			var insertedVault model.Vault
+			err = db.Get(&insertedVault, "select vault.* from vault where pubkey=$1", vault.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vault.Pubkey, insertedVault.Pubkey)
+			assert.Equal(t, insertedVault.TokenPairID, tokenPairID.String())
+		})
+
+		t.Run("should insert many vaults", func(t *testing.T) {
+			defer cleanup()
+
+			pubkey := uuid.New().String()[0:4]
+			_, err := db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				pubkey, 1, 2, 3)
+			assert.NoError(t, err)
+
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err = db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPairID := uuid.New()
+			_, err = db.Exec(
+				`insert into 
+    						token_pair(id, token_a, token_b) 
+							values
+							    ($1, $2, $3)`,
+				tokenPairID.String(), btcPubkey, ethPubkey,
+			)
+			assert.NoError(t, err)
+
+			vault1 := model.Vault{
+				Pubkey:                 uuid.New().String(),
+				ProtoConfig:            pubkey,
+				TokenAAccount:          uuid.New().String(),
+				TokenBAccount:          uuid.New().String(),
+				TreasuryTokenBAccount:  uuid.New().String(),
+				LastDcaPeriod:          0,
+				DripAmount:             0,
+				DcaActivationTimestamp: time.Time{},
+				Enabled:                false,
+				TokenPairID:            tokenPairID.String(),
+			}
+			vault2 := model.Vault{
+				Pubkey:                 uuid.New().String(),
+				ProtoConfig:            pubkey,
+				TokenAAccount:          uuid.New().String(),
+				TokenBAccount:          uuid.New().String(),
+				TreasuryTokenBAccount:  uuid.New().String(),
+				LastDcaPeriod:          0,
+				DripAmount:             0,
+				DcaActivationTimestamp: time.Time{},
+				Enabled:                false,
+				TokenPairID:            tokenPairID.String(),
+			}
+			err = newRepository.UpsertVaults(context.Background(), &vault1, &vault2)
+			assert.NoError(t, err)
+
+			var insertedVault model.Vault
+			err = db.Get(&insertedVault, "select vault.* from vault where pubkey=$1", vault1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vault1.Pubkey, insertedVault.Pubkey)
+			assert.Equal(t, insertedVault.TokenPairID, tokenPairID.String())
+
+			err = db.Get(&insertedVault, "select vault.* from vault where pubkey=$1", vault2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vault2.Pubkey, insertedVault.Pubkey)
+			assert.Equal(t, insertedVault.TokenPairID, tokenPairID.String())
+		})
+
+		t.Run("should update vault", func(t *testing.T) {
+			defer cleanup()
+
+			protoConfigPubkey := uuid.New().String()[0:4]
+			_, err := db.Exec(
+				`insert into 
+    						proto_config(pubkey, granularity, trigger_dca_spread, base_withdrawal_spread) 
+							values($1, $2, $3, $4)`,
+				protoConfigPubkey, 1, 2, 3)
+			assert.NoError(t, err)
+
+			btcPubkey := uuid.New().String()
+			ethPubkey := uuid.New().String()
+			_, err = db.Exec(
+				`insert into 
+    						token(pubkey, symbol, decimals, icon_url) 
+							values
+							    ($1, $2, $3, $4),
+							    ($5, $6, $7, $8)`,
+				btcPubkey, "btc", 2, nil,
+				ethPubkey, "eth", 2, nil,
+			)
+			assert.NoError(t, err)
+
+			tokenPairID := uuid.New()
+			_, err = db.Exec(
+				`insert into 
+    						token_pair(id, token_a, token_b) 
+							values
+							    ($1, $2, $3)`,
+				tokenPairID.String(), btcPubkey, ethPubkey,
+			)
+			assert.NoError(t, err)
+
+			vaultPubkey := uuid.New().String()
+			tokenAccountPubkey := uuid.New().String()
+			_, err = db.Exec(
+				`insert into 
+    						vault(pubkey, proto_config, token_a_account, token_b_account, treasury_token_b_account, last_dca_period, drip_amount, dca_activation_timestamp, enabled, token_pair_id) 
+							values
+							    ($1, $2, $3, $4,$5, $6,$7,$8,$9,$10)`,
+				vaultPubkey, protoConfigPubkey, tokenAccountPubkey, tokenAccountPubkey, tokenAccountPubkey, 0, 0, time.Time{}, false, tokenPairID.String(),
+			)
+			assert.NoError(t, err)
+			vault := model.Vault{
+				Pubkey:                 vaultPubkey,
+				ProtoConfig:            protoConfigPubkey,
+				TokenAAccount:          tokenAccountPubkey,
+				TokenBAccount:          tokenAccountPubkey,
+				TreasuryTokenBAccount:  tokenAccountPubkey,
+				LastDcaPeriod:          1,
+				DripAmount:             100,
+				DcaActivationTimestamp: time.Now(),
+				Enabled:                true,
+				TokenPairID:            tokenPairID.String(),
+			}
+			err = newRepository.UpsertVaults(context.Background(), &vault)
+			assert.NoError(t, err)
+
+			var insertedVault model.Vault
+			err = db.Get(&insertedVault, "select vault.* from vault where pubkey=$1", vaultPubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, vault.Pubkey, insertedVault.Pubkey)
+			assert.Equal(t, insertedVault.LastDcaPeriod, uint64(1))
+			assert.Equal(t, insertedVault.DripAmount, uint64(100))
+			assert.NotEqual(t, insertedVault.LastDcaPeriod, time.Time{})
+			assert.Equal(t, insertedVault.Enabled, true)
+		})
+
 	})
 }
