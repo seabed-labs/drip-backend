@@ -1044,7 +1044,7 @@ func TestUpsertTokenAccountBalances(t *testing.T) {
 
 			tokenAccountBalance := model.TokenAccountBalance{
 				Pubkey: seededTokenAccountBalance.tokenAccountBalancePubkey,
-				Mint:   solana.NewWallet().PublicKey().String(),
+				Mint:   seededTokenAccountBalance.tokenAPubkey,
 				Owner:  solana.NewWallet().PublicKey().String(),
 				Amount: 1000,
 				State:  "initialized",
