@@ -279,3 +279,36 @@ func seedTokenSwap(t *testing.T, db *sqlx.DB, params seedTokenSwapParams) seedTo
 	}
 	return seedTokenSwapResult
 }
+
+type seedTokenAccountBalanceParams struct {
+	seedTokenPairParams
+	tokenAccountBalancePubkey *string
+}
+
+type seedTokenAccountBalanceResult struct {
+	seedTokenPairResult
+	tokenAccountBalancePubkey string
+}
+
+func seedTokenAccountBalance(t *testing.T, db *sqlx.DB, params seedTokenAccountBalanceParams) seedTokenAccountBalanceResult {
+	seedTokenAccountBalanceResult := seedTokenAccountBalanceResult{
+		seedTokenPairResult: seedTokenPair(t, db, params.seedTokenPairParams),
+	}
+
+	if params.tokenAccountBalancePubkey == nil {
+		seedTokenAccountBalanceResult.tokenAccountBalancePubkey = solana.NewWallet().PublicKey().String()
+		_, err := db.Exec(
+			`insert into 
+				token_account_balance(pubkey, mint, owner, amount, state) 
+				values($1, $2, $3, $4, $5)`,
+			seedTokenAccountBalanceResult.tokenAccountBalancePubkey,
+			solana.NewWallet().PublicKey().String(),
+			solana.NewWallet().PublicKey().String(),
+			9,
+			"initialized")
+		assert.NoError(t, err)
+	} else {
+		seedTokenAccountBalanceResult.tokenAccountBalancePubkey = *params.tokenAccountBalancePubkey
+	}
+	return seedTokenAccountBalanceResult
+}

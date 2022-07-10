@@ -20,8 +20,6 @@ import (
 // TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
 // the db setup and migrations can be done once per file opposed to once per fn
 
-//UpsertTokenAccountBalances(context.Context, ...*model2.TokenAccountBalance) error
-
 //GetVaultByAddress(context.Context, string) (*model2.Vault, error)
 //GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model2.Vault, error)
 //GetProtoConfigs(context.Context, *string, *string) ([]*model2.ProtoConfig, error)
@@ -966,6 +964,102 @@ func TestUpsertTokenSwaps(t *testing.T) {
 			assert.Equal(t, tokenSwap.TokenBAccount, insertedTokenSwap.TokenBAccount)
 			assert.Equal(t, tokenSwap.TokenAMint, insertedTokenSwap.TokenAMint)
 			assert.Equal(t, tokenSwap.TokenBMint, insertedTokenSwap.TokenBMint)
+		})
+	})
+}
+
+//nolint:funlen
+func TestUpsertTokenAccountBalances(t *testing.T) {
+	test.InjectDependencies(func(
+		repo *query.Query,
+		db *sqlx.DB,
+	) {
+		newRepository := repository.NewRepository(repo, db)
+
+		t.Run("should insert tokenAccountBalance", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
+
+			tokenAccountBalance := model.TokenAccountBalance{
+				Pubkey: solana.NewWallet().PublicKey().String(),
+				Mint:   seededTokenPair.tokenAPubkey,
+				Owner:  solana.NewWallet().PublicKey().String(),
+				Amount: 10,
+				State:  "initialized",
+			}
+			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance)
+			assert.NoError(t, err)
+
+			var insertedTokenAccountBalance model.TokenAccountBalance
+			err = db.Get(&insertedTokenAccountBalance, "select token_account_balance.* from token_account_balance where pubkey=$1", tokenAccountBalance.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenAccountBalance.Pubkey, insertedTokenAccountBalance.Pubkey)
+			assert.Equal(t, tokenAccountBalance.Mint, insertedTokenAccountBalance.Mint)
+			assert.Equal(t, tokenAccountBalance.Owner, insertedTokenAccountBalance.Owner)
+			assert.Equal(t, tokenAccountBalance.Amount, insertedTokenAccountBalance.Amount)
+			assert.Equal(t, tokenAccountBalance.State, insertedTokenAccountBalance.State)
+		})
+
+		t.Run("should insert multiple tokenAccountBalances", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenPair := seedTokenPair(t, db, seedTokenPairParams{})
+			tokenAccountBalance1 := model.TokenAccountBalance{
+				Pubkey: solana.NewWallet().PublicKey().String(),
+				Mint:   seededTokenPair.tokenAPubkey,
+				Owner:  solana.NewWallet().PublicKey().String(),
+				Amount: 10,
+				State:  "initialized",
+			}
+			tokenAccountBalance2 := model.TokenAccountBalance{
+				Pubkey: solana.NewWallet().PublicKey().String(),
+				Mint:   seededTokenPair.tokenBPubkey,
+				Owner:  solana.NewWallet().PublicKey().String(),
+				Amount: 6,
+				State:  "initialized",
+			}
+			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance1, &tokenAccountBalance2)
+			assert.NoError(t, err)
+
+			var insertedTokenAccountBalance model.TokenAccountBalance
+			err = db.Get(&insertedTokenAccountBalance, "select token_account_balance.* from token_account_balance where pubkey=$1", tokenAccountBalance1.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenAccountBalance1.Pubkey, insertedTokenAccountBalance.Pubkey)
+			assert.Equal(t, tokenAccountBalance1.Mint, insertedTokenAccountBalance.Mint)
+			assert.Equal(t, tokenAccountBalance1.Owner, insertedTokenAccountBalance.Owner)
+			assert.Equal(t, tokenAccountBalance1.Amount, insertedTokenAccountBalance.Amount)
+			assert.Equal(t, tokenAccountBalance1.State, insertedTokenAccountBalance.State)
+
+			err = db.Get(&insertedTokenAccountBalance, "select token_account_balance.* from token_account_balance where pubkey=$1", tokenAccountBalance2.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenAccountBalance2.Pubkey, insertedTokenAccountBalance.Pubkey)
+			assert.Equal(t, tokenAccountBalance2.Mint, insertedTokenAccountBalance.Mint)
+			assert.Equal(t, tokenAccountBalance2.Owner, insertedTokenAccountBalance.Owner)
+			assert.Equal(t, tokenAccountBalance2.Amount, insertedTokenAccountBalance.Amount)
+			assert.Equal(t, tokenAccountBalance2.State, insertedTokenAccountBalance.State)
+		})
+
+		t.Run("should update tokenAccountBalance", func(t *testing.T) {
+			defer truncateDB(t, db)
+			seededTokenAccountBalance := seedTokenAccountBalance(t, db, seedTokenAccountBalanceParams{})
+
+			tokenAccountBalance := model.TokenAccountBalance{
+				Pubkey: seededTokenAccountBalance.tokenAccountBalancePubkey,
+				Mint:   solana.NewWallet().PublicKey().String(),
+				Owner:  solana.NewWallet().PublicKey().String(),
+				Amount: 1000,
+				State:  "initialized",
+			}
+			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance)
+			assert.NoError(t, err)
+
+			var insertedTokenAccountBalance model.TokenAccountBalance
+			err = db.Get(&insertedTokenAccountBalance, "select token_account_balance.* from token_account_balance where pubkey=$1", tokenAccountBalance.Pubkey)
+			assert.NoError(t, err)
+			assert.Equal(t, tokenAccountBalance.Pubkey, insertedTokenAccountBalance.Pubkey)
+			assert.Equal(t, tokenAccountBalance.Mint, insertedTokenAccountBalance.Mint)
+			assert.Equal(t, tokenAccountBalance.Owner, insertedTokenAccountBalance.Owner)
+			assert.Equal(t, tokenAccountBalance.Amount, insertedTokenAccountBalance.Amount)
+			assert.Equal(t, tokenAccountBalance.State, insertedTokenAccountBalance.State)
 		})
 	})
 }
