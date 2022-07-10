@@ -302,7 +302,7 @@ func seedTokenAccountBalance(t *testing.T, db *sqlx.DB, params seedTokenAccountB
 				token_account_balance(pubkey, mint, owner, amount, state) 
 				values($1, $2, $3, $4, $5)`,
 			seedTokenAccountBalanceResult.tokenAccountBalancePubkey,
-			solana.NewWallet().PublicKey().String(),
+			seedTokenAccountBalanceResult.tokenAPubkey,
 			solana.NewWallet().PublicKey().String(),
 			9,
 			"initialized")
