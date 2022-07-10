@@ -24,7 +24,8 @@ func TestSolanaClient(t *testing.T) {
 	client, err := NewSolanaClient(&config)
 	assert.NoError(t, err)
 
-	rpcClient := rpc.New(getURL(configs.DevnetEnv))
+	// Genesys go devnet RPC doesn't support airdrops for some reason
+	rpcClient := rpc.New(rpc.DevNet_RPC)
 	_, err = rpcClient.RequestAirdrop(
 		context.Background(), client.GetWalletPubKey(), 100000000, "confirmed")
 	assert.NoError(t, err)
@@ -63,7 +64,7 @@ func TestSolanaClient(t *testing.T) {
 	t.Run("getURL should return correct RPC url", func(t *testing.T) {
 		assert.Equal(t, getURL(configs.NilEnv), rpc.LocalNet_RPC)
 		assert.Equal(t, getURL(configs.LocalnetEnv), rpc.LocalNet_RPC)
-		assert.Equal(t, getURL(configs.DevnetEnv), rpc.DevNet_RPC)
+		assert.Equal(t, getURL(configs.DevnetEnv), "https://devnet.genesysgo.net")
 		assert.Equal(t, getURL(configs.MainnetEnv), "https://ssc-dao.genesysgo.net")
 	})
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/dcaf-protocol/drip/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/pkg/clients/solana/drip"
 	"github.com/dcaf-protocol/drip/pkg/clients/solana/token_swap"
@@ -109,14 +111,38 @@ func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address st
 }
 
 func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
-	if isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address); !isTokenSwapTokenAccount {
+	isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address)
+	isUserPositionNFTTokenAccount, _ := p.IsUserPositionTokenAccount(ctx, tokenAccount.Mint.String())
+	if !isTokenSwapTokenAccount && !isUserPositionNFTTokenAccount {
 		return nil
+	}
+	if isUserPositionNFTTokenAccount {
+		logrus.
+			WithField("mint", tokenAccount.Mint.String()).
+			Info("recording user position token swap/creation")
 	}
 	state := "initialized"
 	if tokenAccount.State == token.Uninitialized {
 		state = "uninitialized"
 	} else if tokenAccount.State == token.Frozen {
 		state = "frozen"
+	}
+
+	var tokenMint token.Mint
+	if err := p.client.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
+		return err
+	}
+	// TODO(Mocha): If this is a drip nft token, we can decorate the symbol with a deterministic name
+	// with tokenA, tokenB, start, end
+	tokenModel := model2.Token{
+		Pubkey:   tokenAccount.Mint.String(),
+		Symbol:   nil,
+		Decimals: int16(tokenMint.Decimals),
+		IconURL:  nil,
+	}
+	if err := p.repo.UpsertTokens(ctx, &tokenModel); err != nil {
+		logrus.WithError(err).Error("failed to upsert tokens")
+		return err
 	}
 	return p.repo.UpsertTokenAccountBalances(ctx, &model2.TokenAccountBalance{
 		Pubkey: address,
@@ -245,6 +271,17 @@ func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccount string) 
 		return false, err
 	}
 	if tokenSwap == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (p impl) IsUserPositionTokenAccount(ctx context.Context, mint string) (bool, error) {
+	position, err := p.repo.GetPositionByNFTMint(ctx, mint)
+	if err != nil {
+		return false, err
+	}
+	if position == nil {
 		return false, nil
 	}
 	return true, nil

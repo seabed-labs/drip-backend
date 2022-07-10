@@ -107,7 +107,7 @@ func (d DripProgramProcessor) Backfill(ctx context.Context, programID string, pr
 func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
-	log.Infof("received drip account update")
+	//log.Infof("received drip account update")
 	defer func() {
 		if r := recover(); r != nil {
 			log.WithField("stack", debug.Stack()).Errorf("panic in processEvent")
@@ -115,7 +115,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	}()
 	var vaultPeriod drip2.VaultPeriod
 	if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err == nil {
-		log.Infof("decoded as vaultPeriod")
+		//log.Infof("decoded as vaultPeriod")
 		if err := d.processor.UpsertVaultPeriodByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert vaultPeriod")
 		}
@@ -123,7 +123,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	}
 	var position drip2.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
-		log.Infof("decoded as position")
+		//log.Infof("decoded as position")
 		if err := d.processor.UpsertPositionByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert position")
 		}
@@ -131,7 +131,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	}
 	var vault drip2.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
-		log.Infof("decoded as vault")
+		//log.Infof("decoded as vault")
 		if err := d.processor.UpsertVaultByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert vault")
 		}
@@ -139,7 +139,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 	}
 	var protoConfig drip2.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
-		log.Infof("decoded as protoConfig")
+		//log.Infof("decoded as protoConfig")
 		if err := d.processor.UpsertProtoConfigByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert protoConfig")
 		}
@@ -151,7 +151,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
-	log.Infof("received token swap account update")
+	//log.Infof("received token swap account update")
 	defer func() {
 		if r := recover(); r != nil {
 			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
@@ -160,7 +160,7 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 	var tokenSwap token_swap2.TokenSwap
 	err := bin.NewBinDecoder(data).Decode(&tokenSwap)
 	if err == nil {
-		log.Infof("decoded as tokenSwap")
+		//log.Infof("decoded as tokenSwap")
 		if err := d.processor.UpsertTokenSwapByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert tokenSwap")
 		}
@@ -172,22 +172,19 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
-	// log.Infof("received token swap account update")
 	defer func() {
 		if r := recover(); r != nil {
-			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
+			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenEvent")
 		}
 	}()
 	var tokenAccount token.Account
 	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
 	if err == nil {
-		// log.Infof("decoded as tokenAccount")
 		if err := d.processor.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
-			log.WithError(err).Error("failed to upsert tokenSwap")
+			log.WithError(err).Error("failed to upsert tokenAccountBalance")
 		}
 		return
 	}
-	// Don't log the failure, it's too noisy
 }
 
 func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
