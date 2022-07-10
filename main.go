@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/pkg/middleware"
+
 	"github.com/dcaf-protocol/drip/pkg/api"
 	"github.com/dcaf-protocol/drip/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/pkg/configs"
@@ -37,6 +39,7 @@ func getDependencies() []fx.Option {
 			query.Use,
 			solana.NewSolanaClient,
 			repository.NewRepository,
+			middleware.NewHandler,
 			controller.NewHandler,
 			processor.NewProcessor,
 		),

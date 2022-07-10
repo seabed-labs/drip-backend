@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
+
+	middleware2 "github.com/dcaf-protocol/drip/pkg/middleware"
 
 	"github.com/dcaf-protocol/drip/pkg/configs"
 	"github.com/dcaf-protocol/drip/pkg/controller"
@@ -17,19 +18,19 @@ import (
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
-	"google.golang.org/api/idtoken"
 )
 
 func APIServer(
 	lc fx.Lifecycle,
-	api *controller.Handler,
 	config *configs.AppConfig,
+	middlewareHandler *middleware2.Handler,
+	apiHandler *controller.Handler,
 ) {
 	var httpSrv *http.Server
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			var err error
-			httpSrv, err = listenAndServe(api, config)
+			httpSrv, err = listenAndServe(config, middlewareHandler, apiHandler)
 			return err
 		},
 		OnStop: func(ctx context.Context) error {
@@ -39,8 +40,9 @@ func APIServer(
 }
 
 func listenAndServe(
-	handler *controller.Handler,
 	config *configs.AppConfig,
+	middlewareHandler *middleware2.Handler,
+	apiHandler *controller.Handler,
 ) (*http.Server, error) {
 	swaggerSpec, err := swagger.GetSwagger()
 	if err != nil {
@@ -49,9 +51,9 @@ func listenAndServe(
 	swaggerSpec.Servers = nil
 	e := echo.New()
 	e.Use(middleware.Recover())
-	e.Use(validateAccessToken(config.GoogleClientID))
+	e.Use(middlewareHandler.ValidateAccessToken)
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
-	swagger.RegisterHandlers(e, handler)
+	swagger.RegisterHandlers(e, apiHandler)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: cors.AllowAll().Handler(e),
@@ -63,27 +65,6 @@ func listenAndServe(
 		}
 	}()
 	return srv, nil
-}
-
-// TODO(Mocha): Move this to a middleware folder
-func validateAccessToken(googleClientID string) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			if !strings.Contains(c.Request().RequestURI, "admin") {
-				return next(c)
-			}
-			accessToken := c.Request().Header.Get("token-id")
-			payload, err := idtoken.Validate(context.Background(), accessToken, googleClientID)
-			if err != nil {
-				return c.JSON(http.StatusUnauthorized, swagger.ErrorResponse{Error: "invalid token-id"})
-			}
-			log.
-				WithField("email", payload.Claims["email"]).
-				WithField("name", payload.Claims["name"]).
-				Info("authorized")
-			return next(c)
-		}
-	}
 }
 
 func shutdown(
