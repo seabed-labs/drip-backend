@@ -502,29 +502,41 @@ func TestUpsertVaults(t *testing.T) {
 			defer truncateDB(t, db)
 
 			seedVault := seedVault(t, db, seedVaultParams{})
+			var seededVaultModel model.Vault
+			err := db.Get(&seededVaultModel, "select vault.* from vault where pubkey=$1", seedVault.vaultPubkey)
+			assert.NoError(t, err)
+
 			vault := model.Vault{
 				Pubkey:                 seedVault.vaultPubkey,
-				ProtoConfig:            seedVault.protoConfigPubkey,
-				TokenAAccount:          seedVault.tokenAAcount,
-				TokenBAccount:          seedVault.tokenBAccount,
-				TreasuryTokenBAccount:  seedVault.treasuryAccount,
+				ProtoConfig:            solana.NewWallet().PublicKey().String(),
+				TokenAAccount:          solana.NewWallet().PublicKey().String(),
+				TokenBAccount:          solana.NewWallet().PublicKey().String(),
+				TreasuryTokenBAccount:  solana.NewWallet().PublicKey().String(),
 				LastDcaPeriod:          1,
 				DripAmount:             100,
 				DcaActivationTimestamp: time.Now(),
-				Enabled:                true,
-				TokenPairID:            seedVault.tokenPairID,
+				Enabled:                !seededVaultModel.Enabled,
+				TokenPairID:            uuid.New().String(),
 			}
-			err := newRepository.UpsertVaults(context.Background(), &vault)
+			err = newRepository.UpsertVaults(context.Background(), &vault)
 			assert.NoError(t, err)
 
 			var insertedVault model.Vault
 			err = db.Get(&insertedVault, "select vault.* from vault where pubkey=$1", seedVault.vaultPubkey)
 			assert.NoError(t, err)
-			assert.Equal(t, vault.Pubkey, insertedVault.Pubkey)
-			assert.Equal(t, insertedVault.LastDcaPeriod, uint64(1))
-			assert.Equal(t, insertedVault.DripAmount, uint64(100))
-			assert.NotEqual(t, insertedVault.LastDcaPeriod, time.Time{})
-			assert.Equal(t, insertedVault.Enabled, true)
+			// fields that should be updated
+			assert.Equal(t, insertedVault.LastDcaPeriod, vault.LastDcaPeriod)
+			assert.Equal(t, insertedVault.DripAmount, vault.DripAmount)
+			assert.NotEqual(t, insertedVault.LastDcaPeriod, vault.DcaActivationTimestamp)
+
+			// fields that should not be updated
+			assert.Equal(t, insertedVault.Pubkey, seededVaultModel.Pubkey)
+			assert.Equal(t, insertedVault.ProtoConfig, seededVaultModel.ProtoConfig)
+			assert.Equal(t, insertedVault.TokenAAccount, seededVaultModel.TokenAAccount)
+			assert.Equal(t, insertedVault.TokenBAccount, seededVaultModel.TokenBAccount)
+			assert.Equal(t, insertedVault.TreasuryTokenBAccount, seededVaultModel.TreasuryTokenBAccount)
+			assert.Equal(t, insertedVault.Enabled, seededVaultModel.Enabled)
+			assert.Equal(t, insertedVault.TokenPairID, seededVaultModel.TokenPairID)
 		})
 	})
 }

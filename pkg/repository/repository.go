@@ -37,6 +37,7 @@ type Repository interface {
 	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
 	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
 	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
+	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 
 	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
 	EnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
@@ -45,6 +46,16 @@ type Repository interface {
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
+	// The position_authority is the nft mint
+	return d.repo.Position.
+		WithContext(ctx).
+		Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		Where(d.repo.Position.Authority.Eq(nftMint)).
+		First()
 }
 
 func (d repositoryImpl) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
@@ -115,10 +126,12 @@ func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*mod
 }
 
 func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model.Vault) error {
+	// Insert new vaults or update select fields on updates
 	return d.repo.Vault.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
-			UpdateAll: true,
+			Columns:   []clause.Column{{Name: "pubkey"}},
+			DoUpdates: clause.AssignmentColumns([]string{"last_dca_period", "drip_amount", "dca_activation_timestamp"}),
 		}).
 		Create(vaults...)
 }
