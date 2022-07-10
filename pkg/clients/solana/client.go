@@ -252,6 +252,7 @@ func (s impl) ProgramSubscribe(
 						"event": program,
 					}).
 					Error("failed to get next msg from event ws")
+				// TODO(Mocha): need to handle the case where this fails
 				client, err = ws.Connect(ctx, url)
 				if err != nil {
 					log.
@@ -379,7 +380,7 @@ func (s impl) signAndBroadcast(
 func getURL(env configs.Environment) string {
 	switch env {
 	case configs.DevnetEnv:
-		return rpc.DevNet_RPC
+		return "https://devnet.genesysgo.net"
 	case configs.MainnetEnv:
 		return "https://ssc-dao.genesysgo.net"
 	case configs.NilEnv:
@@ -394,7 +395,7 @@ func getURL(env configs.Environment) string {
 func getWSURL(env configs.Environment) string {
 	switch env {
 	case configs.DevnetEnv:
-		return rpc.DevNet_WS
+		return "wss://devnet.genesysgo.net"
 	case configs.MainnetEnv:
 		return "wss://ssc-dao.genesysgo.net"
 	case configs.NilEnv:
