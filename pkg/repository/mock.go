@@ -50,6 +50,21 @@ func (mr *MockRepositoryMockRecorder) EnableVault(ctx, pubkey interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableVault", reflect.TypeOf((*MockRepository)(nil).EnableVault), ctx, pubkey)
 }
 
+// GetPositionByNFTMint mocks base method.
+func (m *MockRepository) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPositionByNFTMint", ctx, nftMint)
+	ret0, _ := ret[0].(*model.Position)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPositionByNFTMint indicates an expected call of GetPositionByNFTMint.
+func (mr *MockRepositoryMockRecorder) GetPositionByNFTMint(ctx, nftMint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPositionByNFTMint", reflect.TypeOf((*MockRepository)(nil).GetPositionByNFTMint), ctx, nftMint)
+}
+
 // GetProtoConfigs mocks base method.
 func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
