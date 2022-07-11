@@ -15,8 +15,6 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
-const defaultLimit = 500
-
 type Handler struct {
 	googleClientID string
 	repo           repository.Repository
