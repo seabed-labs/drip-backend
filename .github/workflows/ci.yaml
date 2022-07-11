@@ -113,7 +113,7 @@ jobs:
         run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Generate Code Coverage HTMl Report
-        run: go tool cover -html=c.out -o=coverage/c.html
+        run: go tool cover -html=c.out -o=c.html
 
       - name: Upload Code Coverage HTML Report to Github
         uses: actions/upload-artifact@v3
