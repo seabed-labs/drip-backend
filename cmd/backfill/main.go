@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-protocol/drip/pkg/service/processor"
+
 	"github.com/dcaf-protocol/drip/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/pkg/configs"
 	psql2 "github.com/dcaf-protocol/drip/pkg/database/psql"
-	"github.com/dcaf-protocol/drip/pkg/processor"
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	"github.com/dcaf-protocol/drip/pkg/repository/query"
 

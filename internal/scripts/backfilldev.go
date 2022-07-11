@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	configs2 "github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/processor"
+	"github.com/dcaf-protocol/drip/pkg/service/processor"
 
+	configs2 "github.com/dcaf-protocol/drip/pkg/configs"
 	"github.com/ilyakaznacheev/cleanenv"
 
 	"github.com/sirupsen/logrus"

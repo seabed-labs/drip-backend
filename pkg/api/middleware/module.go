@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/dcaf-protocol/drip/pkg/clients/solana"
 	"github.com/dcaf-protocol/drip/pkg/configs"
 	"github.com/dcaf-protocol/drip/pkg/repository"
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/api/idtoken"
 )
 

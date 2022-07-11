@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	middleware2 "github.com/dcaf-protocol/drip/pkg/middleware"
+	middleware2 "github.com/dcaf-protocol/drip/pkg/api/middleware"
+	controller "github.com/dcaf-protocol/drip/pkg/api/routes"
 
 	"github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/controller"
-
 	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
