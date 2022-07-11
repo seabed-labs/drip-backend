@@ -22,20 +22,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Internal vault schema.
+// AdminVault defines model for adminVault.
 type AdminVault struct {
-	// unix timestamp
-	DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
-	DripAmount             string `json:"dripAmount"`
-	Enabled                bool   `json:"enabled"`
-	LastDcaPeriod          string `json:"lastDcaPeriod"`
-	ProtoConfig            string `json:"protoConfig"`
-	Pubkey                 string `json:"pubkey"`
-	TokenAAccount          string `json:"tokenAAccount"`
-	TokenAMint             string `json:"tokenAMint"`
-	TokenBAccount          string `json:"tokenBAccount"`
-	TokenBMint             string `json:"tokenBMint"`
-	TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
+	// Embedded struct due to allOf(#/components/schemas/vault)
+	Vault `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // ErrorResponse defines model for errorResponse.
@@ -43,94 +35,46 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// ListPositions defines model for listPositions.
-type ListPositions []struct {
-	Authority                string `json:"authority"`
-	DcaPeriodIdBeforeDeposit int    `json:"dcaPeriodIdBeforeDeposit"`
-	DepositTimestamp         string `json:"depositTimestamp"`
-	DepositedTokenAAmount    int    `json:"depositedTokenAAmount"`
-	IsClosed                 bool   `json:"isClosed"`
-	NumberOfSwaps            int    `json:"numberOfSwaps"`
-	PeriodicDripAmount       int    `json:"periodicDripAmount"`
-	Pubkey                   string `json:"pubkey"`
-	Vault                    string `json:"vault"`
-	WithdrawnTokenBAmount    int    `json:"withdrawnTokenBAmount"`
+// ExpandedAdminVault defines model for expandedAdminVault.
+type ExpandedAdminVault struct {
+	// Embedded struct due to allOf(#/components/schemas/vault)
+	Vault `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	TokenAAccountValue         *TokenAccountBalance `json:"TokenAAccountValue,omitempty"`
+	TokenBAccountValue         *TokenAccountBalance `json:"TokenBAccountValue,omitempty"`
+	TreasuryTokenBAccountValue *TokenAccountBalance `json:"TreasuryTokenBAccountValue,omitempty"`
+	Enabled                    *bool                `json:"enabled,omitempty"`
+	ProtoConfigValue           *ProtoConfig         `json:"protoConfigValue,omitempty"`
+	TokenAMintValue            *Token               `json:"tokenAMintValue,omitempty"`
+	TokenBMintValue            *Token               `json:"tokenBMintValue,omitempty"`
 }
+
+// ListExpandedAdminVaults defines model for listExpandedAdminVaults.
+type ListExpandedAdminVaults []ExpandedAdminVault
+
+// ListPositions defines model for listPositions.
+type ListPositions []Position
 
 // ListProtoConfigs defines model for listProtoConfigs.
-type ListProtoConfigs []struct {
-	BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
-	Granularity          int    `json:"granularity"`
-	Pubkey               string `json:"pubkey"`
-	TriggerDcaSpread     int    `json:"triggerDcaSpread"`
-}
+type ListProtoConfigs []ProtoConfig
 
 // ListSwapConfigs defines model for listSwapConfigs.
-type ListSwapConfigs []struct {
-	Swap               string `json:"swap"`
-	SwapAuthority      string `json:"swapAuthority"`
-	SwapFeeAccount     string `json:"swapFeeAccount"`
-	SwapTokenAAccount  string `json:"swapTokenAAccount"`
-	SwapTokenBAccount  string `json:"swapTokenBAccount"`
-	SwapTokenMint      string `json:"swapTokenMint"`
-	TokenAMint         string `json:"tokenAMint"`
-	TokenBMint         string `json:"tokenBMint"`
-	Vault              string `json:"vault"`
-	VaultProtoConfig   string `json:"vaultProtoConfig"`
-	VaultTokenAAccount string `json:"vaultTokenAAccount"`
-	VaultTokenBAccount string `json:"vaultTokenBAccount"`
-}
+type ListSwapConfigs []SwapConfig
 
 // ListTokenPairs defines model for listTokenPairs.
-type ListTokenPairs []struct {
-	Id     string `json:"id"`
-	TokenA string `json:"tokenA"`
-	TokenB string `json:"tokenB"`
-}
+type ListTokenPairs []TokenPair
 
 // ListTokenSwaps defines model for listTokenSwaps.
-type ListTokenSwaps []struct {
-	Authority  string `json:"authority"`
-	FeeAccount string `json:"feeAccount"`
-	Mint       string `json:"mint"`
-
-	// token pair reference identifier
-	Pair          string `json:"pair"`
-	Pubkey        string `json:"pubkey"`
-	TokenAAccount string `json:"tokenAAccount"`
-	TokenBAccount string `json:"tokenBAccount"`
-}
+type ListTokenSwaps []TokenSwap
 
 // ListTokens defines model for listTokens.
-type ListTokens []struct {
-	Decimals int    `json:"decimals"`
-	Pubkey   string `json:"pubkey"`
-	Symbol   string `json:"symbol"`
-}
+type ListTokens []Token
 
 // ListVaultPeriods defines model for listVaultPeriods.
-type ListVaultPeriods []struct {
-	Dar      string `json:"dar"`
-	PeriodId string `json:"periodId"`
-	Pubkey   string `json:"pubkey"`
-	Twap     string `json:"twap"`
-	Vault    string `json:"vault"`
-}
+type ListVaultPeriods []VaultPeriod
 
 // ListVaults defines model for listVaults.
-type ListVaults []struct {
-	// unix timestamp
-	DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
-	DripAmount             string `json:"dripAmount"`
-	LastDcaPeriod          string `json:"lastDcaPeriod"`
-	ProtoConfig            string `json:"protoConfig"`
-	Pubkey                 string `json:"pubkey"`
-	TokenAAccount          string `json:"tokenAAccount"`
-	TokenAMint             string `json:"tokenAMint"`
-	TokenBAccount          string `json:"tokenBAccount"`
-	TokenBMint             string `json:"tokenBMint"`
-	TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
-}
+type ListVaults []Vault
 
 // MintRequest defines model for mintRequest.
 type MintRequest struct {
@@ -149,98 +93,208 @@ type PingResponse struct {
 	Message string `json:"message"`
 }
 
-// Limit defines model for limit.
-type Limit int
-
-// Offset defines model for offset.
-type Offset int
+// Position defines model for position.
+type Position struct {
+	Authority                string `json:"authority"`
+	DcaPeriodIdBeforeDeposit int    `json:"dcaPeriodIdBeforeDeposit"`
+	DepositTimestamp         string `json:"depositTimestamp"`
+	DepositedTokenAAmount    int    `json:"depositedTokenAAmount"`
+	IsClosed                 bool   `json:"isClosed"`
+	NumberOfSwaps            int    `json:"numberOfSwaps"`
+	PeriodicDripAmount       int    `json:"periodicDripAmount"`
+	Pubkey                   string `json:"pubkey"`
+	Vault                    string `json:"vault"`
+	WithdrawnTokenBAmount    int    `json:"withdrawnTokenBAmount"`
+}
 
 // ProtoConfig defines model for protoConfig.
-type ProtoConfig string
+type ProtoConfig struct {
+	BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
+	Granularity          int    `json:"granularity"`
+	Pubkey               string `json:"pubkey"`
+	TriggerDcaSpread     int    `json:"triggerDcaSpread"`
+}
 
-// PubkeyPath defines model for pubkeyPath.
-type PubkeyPath string
+// SwapConfig defines model for swapConfig.
+type SwapConfig struct {
+	Swap               string `json:"swap"`
+	SwapAuthority      string `json:"swapAuthority"`
+	SwapFeeAccount     string `json:"swapFeeAccount"`
+	SwapTokenAAccount  string `json:"swapTokenAAccount"`
+	SwapTokenBAccount  string `json:"swapTokenBAccount"`
+	SwapTokenMint      string `json:"swapTokenMint"`
+	TokenAMint         string `json:"tokenAMint"`
+	TokenBMint         string `json:"tokenBMint"`
+	Vault              string `json:"vault"`
+	VaultProtoConfig   string `json:"vaultProtoConfig"`
+	VaultTokenAAccount string `json:"vaultTokenAAccount"`
+	VaultTokenBAccount string `json:"vaultTokenBAccount"`
+}
 
-// RequiredVault defines model for requiredVault.
-type RequiredVault string
+// Token defines model for token.
+type Token struct {
+	Decimals int    `json:"decimals"`
+	Pubkey   string `json:"pubkey"`
+	Symbol   string `json:"symbol"`
+}
 
-// RequiredWallet defines model for requiredWallet.
-type RequiredWallet string
+// TokenAccountBalance defines model for tokenAccountBalance.
+type TokenAccountBalance struct {
+	Amount int    `json:"amount"`
+	Mint   string `json:"mint"`
+	Owner  string `json:"owner"`
+	Pubkey string `json:"pubkey"`
+	State  string `json:"state"`
+}
 
-// TokenA defines model for tokenA.
-type TokenA string
+// TokenPair defines model for tokenPair.
+type TokenPair struct {
+	Id     string `json:"id"`
+	TokenA string `json:"tokenA"`
+	TokenB string `json:"tokenB"`
+}
 
-// TokenB defines model for tokenB.
-type TokenB string
+// TokenSwap defines model for tokenSwap.
+type TokenSwap struct {
+	Authority  string `json:"authority"`
+	FeeAccount string `json:"feeAccount"`
+	Mint       string `json:"mint"`
 
-// TokenId defines model for tokenId.
-type TokenId string
-
-// Token pair identifier.
-type TokenPair string
+	// token pair reference identifier
+	Pair          string `json:"pair"`
+	Pubkey        string `json:"pubkey"`
+	TokenAAccount string `json:"tokenAAccount"`
+	TokenBAccount string `json:"tokenBAccount"`
+}
 
 // Vault defines model for vault.
-type Vault string
+type Vault struct {
+	// unix timestamp
+	DcaActivationTimestamp string `json:"dcaActivationTimestamp"`
+	DripAmount             string `json:"dripAmount"`
+	LastDcaPeriod          string `json:"lastDcaPeriod"`
+	ProtoConfig            string `json:"protoConfig"`
+	Pubkey                 string `json:"pubkey"`
+	TokenAAccount          string `json:"tokenAAccount"`
+	TokenAMint             string `json:"tokenAMint"`
+	TokenBAccount          string `json:"tokenBAccount"`
+	TokenBMint             string `json:"tokenBMint"`
+	TreasuryTokenBAccount  string `json:"treasuryTokenBAccount"`
+}
 
 // VaultPeriod defines model for vaultPeriod.
-type VaultPeriod string
+type VaultPeriod struct {
+	Dar      string `json:"dar"`
+	PeriodId string `json:"periodId"`
+	Pubkey   string `json:"pubkey"`
+	Twap     string `json:"twap"`
+	Vault    string `json:"vault"`
+}
+
+// ExpandAdminVaultsQueryParam defines model for expandAdminVaultsQueryParam.
+type ExpandAdminVaultsQueryParam []string
+
+// GoogleTokenIdHeaderParam defines model for googleTokenIdHeaderParam.
+type GoogleTokenIdHeaderParam string
+
+// LimitQueryParam defines model for limitQueryParam.
+type LimitQueryParam int
+
+// OffsetQueryParam defines model for offsetQueryParam.
+type OffsetQueryParam int
+
+// ProtoConfigQueryParam defines model for protoConfigQueryParam.
+type ProtoConfigQueryParam string
+
+// PubkeyPathParam defines model for pubkeyPathParam.
+type PubkeyPathParam string
+
+// RequiredVaultQueryParam defines model for requiredVaultQueryParam.
+type RequiredVaultQueryParam string
+
+// RequiredWalletQueryParam defines model for requiredWalletQueryParam.
+type RequiredWalletQueryParam string
+
+// TokenAQueryParam defines model for tokenAQueryParam.
+type TokenAQueryParam string
+
+// TokenBQueryParam defines model for tokenBQueryParam.
+type TokenBQueryParam string
+
+// Token pair identifier.
+type TokenPairQueryParam string
+
+// VaultPeriodQueryParam defines model for vaultPeriodQueryParam.
+type VaultPeriodQueryParam string
+
+// VaultQueryParam defines model for vaultQueryParam.
+type VaultQueryParam string
 
 // PutAdminVaultPubkeyPathEnableParams defines parameters for PutAdminVaultPubkeyPathEnable.
 type PutAdminVaultPubkeyPathEnableParams struct {
-	TokenId TokenId `json:"token-id"`
+	TokenId GoogleTokenIdHeaderParam `json:"token-id"`
 }
+
+// GetAdminVaultsParams defines parameters for GetAdminVaults.
+type GetAdminVaultsParams struct {
+	Expand  *ExpandAdminVaultsQueryParam `json:"expand,omitempty"`
+	TokenId GoogleTokenIdHeaderParam     `json:"token-id"`
+}
+
+// GetAdminVaultsParamsExpand defines parameters for GetAdminVaults.
+type GetAdminVaultsParamsExpand string
 
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
 
 // GetPositionsParams defines parameters for GetPositions.
 type GetPositionsParams struct {
-	Wallet RequiredWallet `json:"Wallet"`
+	Wallet RequiredWalletQueryParam `json:"Wallet"`
 }
 
 // GetProtoconfigsParams defines parameters for GetProtoconfigs.
 type GetProtoconfigsParams struct {
-	TokenA *TokenA `json:"tokenA,omitempty"`
-	TokenB *TokenB `json:"tokenB,omitempty"`
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
 // GetSwapConfigsParams defines parameters for GetSwapConfigs.
 type GetSwapConfigsParams struct {
-	Vault *Vault `json:"vault,omitempty"`
+	Vault *VaultQueryParam `json:"vault,omitempty"`
 }
 
 // GetSwapsParams defines parameters for GetSwaps.
 type GetSwapsParams struct {
-	TokenPair *TokenPair `json:"tokenPair,omitempty"`
+	TokenPair *TokenPairQueryParam `json:"tokenPair,omitempty"`
 }
 
 // GetTokenpairsParams defines parameters for GetTokenpairs.
 type GetTokenpairsParams struct {
-	TokenA *TokenA `json:"tokenA,omitempty"`
-	TokenB *TokenB `json:"tokenB,omitempty"`
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
 // GetTokensParams defines parameters for GetTokens.
 type GetTokensParams struct {
-	TokenA *TokenA `json:"tokenA,omitempty"`
-	TokenB *TokenB `json:"tokenB,omitempty"`
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
 // GetVaultperiodsParams defines parameters for GetVaultperiods.
 type GetVaultperiodsParams struct {
-	Vault       RequiredVault `json:"vault"`
-	VaultPeriod *VaultPeriod  `json:"vaultPeriod,omitempty"`
-	Offset      *Offset       `json:"offset,omitempty"`
-	Limit       *Limit        `json:"limit,omitempty"`
+	Vault       RequiredVaultQueryParam `json:"vault"`
+	VaultPeriod *VaultPeriodQueryParam  `json:"vaultPeriod,omitempty"`
+	Offset      *OffsetQueryParam       `json:"offset,omitempty"`
+	Limit       *LimitQueryParam        `json:"limit,omitempty"`
 }
 
 // GetVaultsParams defines parameters for GetVaults.
 type GetVaultsParams struct {
-	TokenA *TokenA `json:"tokenA,omitempty"`
-	TokenB *TokenB `json:"tokenB,omitempty"`
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 
 	// Vault proto config public key.
-	ProtoConfig *ProtoConfig `json:"protoConfig,omitempty"`
+	ProtoConfig *ProtoConfigQueryParam `json:"protoConfig,omitempty"`
 }
 
 // PostMintJSONRequestBody defines body for PostMint for application/json ContentType.
@@ -323,7 +377,10 @@ type ClientInterface interface {
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PutAdminVaultPubkeyPathEnable request
-	PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAdminVaults request
+	GetAdminVaults(ctx context.Context, params *GetAdminVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostMint request with any body
 	PostMintWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -370,8 +427,20 @@ func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.
 	return c.Client.Do(req)
 }
 
-func (c *Client) PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *Client) PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPutAdminVaultPubkeyPathEnableRequest(c.Server, pubkeyPath, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetAdminVaults(ctx context.Context, params *GetAdminVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAdminVaultsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -542,7 +611,7 @@ func NewGetRequest(server string) (*http.Request, error) {
 }
 
 // NewPutAdminVaultPubkeyPathEnableRequest generates requests for PutAdminVaultPubkeyPathEnable
-func NewPutAdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams) (*http.Request, error) {
+func NewPutAdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -568,6 +637,62 @@ func NewPutAdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPat
 	}
 
 	req, err := http.NewRequest("PUT", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
+
+	return req, nil
+}
+
+// NewGetAdminVaultsRequest generates requests for GetAdminVaults
+func NewGetAdminVaultsRequest(server string, params *GetAdminVaultsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/admin/vaults")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Expand != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "expand", runtime.ParamLocationQuery, *params.Expand); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1194,7 +1319,10 @@ type ClientWithResponsesInterface interface {
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
 
 	// PutAdminVaultPubkeyPathEnable request
-	PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error)
+	PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error)
+
+	// GetAdminVaults request
+	GetAdminVaultsWithResponse(ctx context.Context, params *GetAdminVaultsParams, reqEditors ...RequestEditorFn) (*GetAdminVaultsResponse, error)
 
 	// PostMint request with any body
 	PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
@@ -1270,6 +1398,30 @@ func (r PutAdminVaultPubkeyPathEnableResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PutAdminVaultPubkeyPathEnableResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetAdminVaultsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListExpandedAdminVaults
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAdminVaultsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAdminVaultsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1524,12 +1676,21 @@ func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ..
 }
 
 // PutAdminVaultPubkeyPathEnableWithResponse request returning *PutAdminVaultPubkeyPathEnableResponse
-func (c *ClientWithResponses) PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPath, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error) {
+func (c *ClientWithResponses) PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error) {
 	rsp, err := c.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParsePutAdminVaultPubkeyPathEnableResponse(rsp)
+}
+
+// GetAdminVaultsWithResponse request returning *GetAdminVaultsResponse
+func (c *ClientWithResponses) GetAdminVaultsWithResponse(ctx context.Context, params *GetAdminVaultsParams, reqEditors ...RequestEditorFn) (*GetAdminVaultsResponse, error) {
+	rsp, err := c.GetAdminVaults(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAdminVaultsResponse(rsp)
 }
 
 // PostMintWithBodyWithResponse request with arbitrary body returning *PostMintResponse
@@ -1690,6 +1851,46 @@ func ParsePutAdminVaultPubkeyPathEnableResponse(rsp *http.Response) (*PutAdminVa
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAdminVaultsResponse parses an HTTP response from a GetAdminVaultsWithResponse call
+func ParseGetAdminVaultsResponse(rsp *http.Response) (*GetAdminVaultsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAdminVaultsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListExpandedAdminVaults
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest ErrorResponse
@@ -2096,7 +2297,10 @@ type ServerInterface interface {
 	Get(ctx echo.Context) error
 	// Enable a vault
 	// (PUT /admin/vault/{pubkeyPath}/enable)
-	PutAdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPath, params PutAdminVaultPubkeyPathEnableParams) error
+	PutAdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPathParam, params PutAdminVaultPubkeyPathEnableParams) error
+	// Get All Vaults
+	// (GET /admin/vaults)
+	GetAdminVaults(ctx echo.Context, params GetAdminVaultsParams) error
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
@@ -2147,7 +2351,7 @@ func (w *ServerInterfaceWrapper) Get(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) PutAdminVaultPubkeyPathEnable(ctx echo.Context) error {
 	var err error
 	// ------------- Path parameter "pubkeyPath" -------------
-	var pubkeyPath PubkeyPath
+	var pubkeyPath PubkeyPathParam
 
 	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
 	if err != nil {
@@ -2160,7 +2364,7 @@ func (w *ServerInterfaceWrapper) PutAdminVaultPubkeyPathEnable(ctx echo.Context)
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "token-id" -------------
 	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
-		var TokenId TokenId
+		var TokenId GoogleTokenIdHeaderParam
 		n := len(valueList)
 		if n != 1 {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
@@ -2178,6 +2382,43 @@ func (w *ServerInterfaceWrapper) PutAdminVaultPubkeyPathEnable(ctx echo.Context)
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params)
+	return err
+}
+
+// GetAdminVaults converts echo context to params.
+func (w *ServerInterfaceWrapper) GetAdminVaults(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAdminVaultsParams
+	// ------------- Optional query parameter "expand" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "expand", ctx.QueryParams(), &params.Expand)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter expand: %s", err))
+	}
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId GoogleTokenIdHeaderParam
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetAdminVaults(ctx, params)
 	return err
 }
 
@@ -2429,6 +2670,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.PUT(baseURL+"/admin/vault/:pubkeyPath/enable", wrapper.PutAdminVaultPubkeyPathEnable)
+	router.GET(baseURL+"/admin/vaults", wrapper.GetAdminVaults)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
@@ -2445,52 +2687,57 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"N7XUOwAA",
+	"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",
+	"qPGJOnBs28IUKtxZdPv/DwAA//+AFfpwgEIAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

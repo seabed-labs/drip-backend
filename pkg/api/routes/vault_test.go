@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	model2 "github.com/dcaf-protocol/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	model2 "github.com/dcaf-labs/drip/pkg/repository/model"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"

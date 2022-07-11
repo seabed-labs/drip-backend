@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/configs"
 
 	"github.com/iancoleman/strcase"
 

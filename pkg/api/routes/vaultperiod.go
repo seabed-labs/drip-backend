@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )

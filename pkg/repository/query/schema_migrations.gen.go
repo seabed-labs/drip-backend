@@ -7,7 +7,7 @@ package query
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

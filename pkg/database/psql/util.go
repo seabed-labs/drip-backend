@@ -3,7 +3,7 @@ package psql
 import (
 	"fmt"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/configs"
 )
 
 func getConnectionString(config *configs.PSQLConfig) string {

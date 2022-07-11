@@ -4,12 +4,12 @@ import (
 	"context"
 	"runtime/debug"
 
-	"github.com/dcaf-protocol/drip/pkg/service/processor"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	drip2 "github.com/dcaf-protocol/drip/pkg/clients/solana/drip"
-	token_swap2 "github.com/dcaf-protocol/drip/pkg/clients/solana/token_swap"
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/clients/solana"
+	drip2 "github.com/dcaf-labs/drip/pkg/clients/solana/drip"
+	token_swap2 "github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
+	"github.com/dcaf-labs/drip/pkg/configs"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"

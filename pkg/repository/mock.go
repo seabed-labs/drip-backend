@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/dcaf-protocol/drip/pkg/repository/model"
+	model "github.com/dcaf-labs/drip/pkg/repository/model"
 	gomock "github.com/golang/mock/gomock"
 )
 

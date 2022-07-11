@@ -5,7 +5,6 @@ on:
   push: { branches: main }
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -123,8 +122,8 @@ jobs:
 
       - name: Format Code Coverage File
         if: ${{ github.event_name != 'pull_request' }}
-        run: cc-test-reporter format-coverage -t gocov --prefix github.com/dcaf-protocol/drip c.out
+        run: cc-test-reporter format-coverage -t gocov --prefix github.com/dcaf-labs/drip c.out
 
       - name: Code Coverage After Build
         if: ${{ github.event_name != 'pull_request' }}
-        run: cc-test-reporter after-build --prefix github.com/dcaf-protocol/drip --exit-code $?
+        run: cc-test-reporter after-build --prefix github.com/dcaf-labs/drip --exit-code $?

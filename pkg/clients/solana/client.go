@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/configs"
 
 	bin "github.com/gagliardetto/binary"
 

@@ -1,4 +1,4 @@
-module github.com/dcaf-protocol/drip
+module github.com/dcaf-labs/drip
 
 // +heroku goVersion go1.18
 go 1.18

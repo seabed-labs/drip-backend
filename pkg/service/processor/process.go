@@ -6,11 +6,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/pkg/clients/solana/drip"
-	"github.com/dcaf-protocol/drip/pkg/clients/solana/token_swap"
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	model2 "github.com/dcaf-protocol/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/clients/solana/drip"
+	"github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	model2 "github.com/dcaf-labs/drip/pkg/repository/model"
 
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"

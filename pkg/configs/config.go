@@ -1,7 +1,7 @@
 package configs
 
 import (
-	"github.com/dcaf-protocol/drip/pkg/clients/solana/drip"
+	"github.com/dcaf-labs/drip/pkg/clients/solana/drip"
 	ag_solanago "github.com/gagliardetto/solana-go"
 	"github.com/ilyakaznacheev/cleanenv"
 	log "github.com/sirupsen/logrus"

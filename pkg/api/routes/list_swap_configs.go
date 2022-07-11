@@ -3,10 +3,10 @@ package controller
 import (
 	"net/http"
 
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	"github.com/dcaf-protocol/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )

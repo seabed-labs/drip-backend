@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana/token_swap"
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
+	"github.com/dcaf-labs/drip/pkg/configs"
 
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"

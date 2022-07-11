@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/configs"
 
 	"github.com/labstack/echo/v4"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 

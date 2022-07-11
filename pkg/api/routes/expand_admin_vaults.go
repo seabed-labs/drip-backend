@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h Handler) GetPositions(ctx echo.Context, params Swagger.GetPositionsParams) error {
+func (h Handler) GetAdminVaults(ctx echo.Context, params Swagger.GetAdminVaultsParams) error {
 	//TODO implement me
 	panic("implement me")
 }

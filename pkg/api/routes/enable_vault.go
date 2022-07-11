@@ -6,13 +6,13 @@ import (
 
 	"gorm.io/gorm"
 
-	Swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
 func (h Handler) PutAdminVaultPubkeyPathEnable(
-	c echo.Context, pubkeyPath Swagger.PubkeyPath, params Swagger.PutAdminVaultPubkeyPathEnableParams,
+	c echo.Context, pubkeyPath Swagger.PubkeyPathParam, _ Swagger.PutAdminVaultPubkeyPathEnableParams,
 ) error {
 	_, err := h.repo.InternalGetVaultByAddress(c.Request().Context(), string(pubkeyPath))
 	if errors.Is(err, gorm.ErrRecordNotFound) {

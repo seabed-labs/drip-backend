@@ -4,14 +4,14 @@ import (
 	"context"
 	"os"
 
-	controller "github.com/dcaf-protocol/drip/pkg/api/routes"
-	"github.com/dcaf-protocol/drip/pkg/service/processor"
+	controller "github.com/dcaf-labs/drip/pkg/api/routes"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
 
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/database/psql"
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	"github.com/dcaf-protocol/drip/pkg/repository/query"
+	"github.com/dcaf-labs/drip/pkg/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/database/psql"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	"github.com/dcaf-labs/drip/pkg/repository/query"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )

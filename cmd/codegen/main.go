@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
-	psql2 "github.com/dcaf-protocol/drip/pkg/database/psql"
+	"github.com/dcaf-labs/drip/pkg/configs"
+	psql2 "github.com/dcaf-labs/drip/pkg/database/psql"
 
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"

@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	swagger "github.com/dcaf-protocol/drip/pkg/swagger"
+	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/dcaf-protocol/drip/pkg/clients/solana"
-	"github.com/dcaf-protocol/drip/pkg/configs"
-	"github.com/dcaf-protocol/drip/pkg/repository"
+	"github.com/dcaf-labs/drip/pkg/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/gorilla/schema"
 )
 

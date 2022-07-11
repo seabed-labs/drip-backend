@@ -7,10 +7,10 @@ import (
 
 	"github.com/gagliardetto/solana-go"
 
-	"github.com/dcaf-protocol/drip/pkg/repository"
-	"github.com/dcaf-protocol/drip/pkg/repository/model"
-	"github.com/dcaf-protocol/drip/pkg/repository/query"
-	"github.com/dcaf-protocol/drip/pkg/test"
+	"github.com/dcaf-labs/drip/pkg/repository"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/repository/query"
+	"github.com/dcaf-labs/drip/pkg/test"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/shopspring/decimal"

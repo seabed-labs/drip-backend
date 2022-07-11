@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
-	"github.com/dcaf-protocol/drip/pkg/repository/model"
-	"github.com/dcaf-protocol/drip/pkg/repository/query"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/repository/query"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
