@@ -110,7 +110,7 @@ jobs:
           PSQL_PASS: drip
           PSQL_PORT: ${{ job.services.postgres.ports[5432] }}
           PSQL_HOST: postgres
-          run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...)
+        run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Generate Code Coverage HTMl Report
         run: go tool cover -html=c.out -o=coverage/c.html
