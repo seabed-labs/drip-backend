@@ -110,7 +110,16 @@ jobs:
           PSQL_PASS: drip
           PSQL_PORT: ${{ job.services.postgres.ports[5432] }}
           PSQL_HOST: postgres
-        run: go test -coverprofile ./c.out $(go list ./...) || exit $?
+          run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...)
+
+      - name: Generate Code Coverage HTMl Report
+        run: go tool cover -html=c.out -o=coverage/c.html
+
+      - name: Upload Code Coverage HTML Report to Github
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: c.html
 
       - name: Format Code Coverage File
         if: ${{ github.event_name != 'pull_request' }}
