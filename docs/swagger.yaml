@@ -1,10 +1,12 @@
 openapi: 3.0.0
 info:
   title: Drip Backend
-  description: Drip backend service.
+  description: | 
+    Drip backend service.
+    All API's have a IP rate limit of 10 requests per second.
   contact:
-    email: dcafmocha@protonmail.com
-    name: Dcaf Mocha
+    email: mocha@dcaf.so
+    name: Mocha
   version: 1.0.0
 
 paths:
