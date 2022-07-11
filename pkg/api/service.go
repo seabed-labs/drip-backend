@@ -51,6 +51,7 @@ func listenAndServe(
 	e := echo.New()
 	e.Use(middleware.Recover())
 	e.Use(middlewareHandler.ValidateAccessToken)
+	e.Use(middlewareHandler.RateLimit)
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
 	swagger.RegisterHandlers(e, apiHandler)
 	srv := &http.Server{
