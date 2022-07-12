@@ -476,11 +476,11 @@ components:
               $ref: "#/components/schemas/token"
             tokenBMintValue:
               $ref: "#/components/schemas/token"
-            TokenAAccountValue:
+            tokenAAccountValue:
               $ref: "#/components/schemas/tokenAccountBalance"
-            TokenBAccountValue:
+            tokenBAccountValue:
               $ref: "#/components/schemas/tokenAccountBalance"
-            TreasuryTokenBAccountValue:
+            treasuryTokenBAccountValue:
               $ref: "#/components/schemas/tokenAccountBalance"
 
     listExpandedAdminVaults:
@@ -613,7 +613,7 @@ components:
           type: string
           example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
         granularity:
-          type: integer
+          type: string
           example: 60
         triggerDcaSpread:
           type: integer
@@ -694,8 +694,8 @@ components:
           type: string
           example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
         amount:
-          type: integer
-          example: 10000
+          type: string
+          example: "10000"
         state:
           # TODO(Mocha): Should be enum
           type: string

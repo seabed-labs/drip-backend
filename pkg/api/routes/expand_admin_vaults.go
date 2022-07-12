@@ -156,7 +156,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 				// TODO(Mocha): unsafe cast
 				res[i].ProtoConfigValue = &Swagger.ProtoConfig{
 					BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
-					Granularity:          int(protoConfig.Granularity),
+					Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
 					Pubkey:               protoConfig.Pubkey,
 					TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
 				}
@@ -207,7 +207,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 				}
 				// TODO(Mocha): Unsafe cast
 				res[i].TokenAAccountValue = &Swagger.TokenAccountBalance{
-					Amount: int(tokenAccountBalance.Amount),
+					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
 					Pubkey: tokenAccountBalance.Pubkey,
@@ -226,7 +226,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 				}
 				// TODO(Mocha): Unsafe cast
 				res[i].TokenBAccountValue = &Swagger.TokenAccountBalance{
-					Amount: int(tokenAccountBalance.Amount),
+					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
 					Pubkey: tokenAccountBalance.Pubkey,
@@ -245,7 +245,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 				}
 				// TODO(Mocha): Unsafe cast
 				res[i].TreasuryTokenBAccountValue = &Swagger.TokenAccountBalance{
-					Amount: int(tokenAccountBalance.Amount),
+					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
 					Pubkey: tokenAccountBalance.Pubkey,

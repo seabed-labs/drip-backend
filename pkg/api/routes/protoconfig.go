@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
@@ -23,15 +24,10 @@ func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsP
 
 	for i := range protoConfigModels {
 		protoConfig := protoConfigModels[i]
-		res = append(res, struct {
-			BaseWithdrawalSpread int    `json:"baseWithdrawalSpread"`
-			Granularity          int    `json:"granularity"`
-			Pubkey               string `json:"pubkey"`
-			TriggerDcaSpread     int    `json:"triggerDcaSpread"`
-		}{
+		res = append(res, Swagger.ProtoConfig{
 			Pubkey:               protoConfig.Pubkey,
 			BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
-			Granularity:          int(protoConfig.Granularity),
+			Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
 			TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
 		},
 		)
