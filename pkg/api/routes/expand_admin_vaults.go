@@ -161,7 +161,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
 				}
 			}
-			break
 		case string(tokenAMintValue):
 			for i := range res {
 				token, ok := tokensByPubkey[res[i].TokenAMint]
@@ -179,7 +178,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					Symbol:   token.Symbol,
 				}
 			}
-			break
 		case string(tokenBMintValue):
 			for i := range res {
 				token, ok := tokensByPubkey[res[i].TokenBMint]
@@ -197,7 +195,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					Symbol:   token.Symbol,
 				}
 			}
-			break
 		case string(tokenAAccountValue):
 			for i := range res {
 				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TokenAAccount]
@@ -217,7 +214,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					State:  tokenAccountBalance.State,
 				}
 			}
-			break
 		case string(tokenBAccountValue):
 			for i := range res {
 				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TokenBAccount]
@@ -237,7 +233,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					State:  tokenAccountBalance.State,
 				}
 			}
-			break
 		case string(treasuryTokenBAccountValue):
 			for i := range res {
 				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TreasuryTokenBAccount]
@@ -257,7 +252,6 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					State:  tokenAccountBalance.State,
 				}
 			}
-			break
 		}
 	}
 
