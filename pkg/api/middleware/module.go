@@ -1,10 +1,8 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
@@ -13,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
-	"google.golang.org/api/idtoken"
 )
 
 type Handler struct {
@@ -44,19 +41,19 @@ func NewHandler(
 func (h *Handler) ValidateAccessToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		return next(c)
-		if !strings.Contains(c.Request().RequestURI, "admin") {
-			return next(c)
-		}
-		accessToken := c.Request().Header.Get("token-id")
-		payload, err := idtoken.Validate(context.Background(), accessToken, h.googleClientID)
-		if err != nil {
-			return c.JSON(http.StatusUnauthorized, swagger.ErrorResponse{Error: "invalid token-id"})
-		}
-		logrus.
-			WithField("email", payload.Claims["email"]).
-			WithField("name", payload.Claims["name"]).
-			Info("authorized")
-		return next(c)
+		//if !strings.Contains(c.Request().RequestURI, "admin") {
+		//	return next(c)
+		//}
+		//accessToken := c.Request().Header.Get("token-id")
+		//payload, err := idtoken.Validate(context.Background(), accessToken, h.googleClientID)
+		//if err != nil {
+		//	return c.JSON(http.StatusUnauthorized, swagger.ErrorResponse{Error: "invalid token-id"})
+		//}
+		//logrus.
+		//	WithField("email", payload.Claims["email"]).
+		//	WithField("name", payload.Claims["name"]).
+		//	Info("authorized")
+		//return next(c)
 	}
 }
 
