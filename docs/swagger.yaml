@@ -37,7 +37,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/adminVault"
+                $ref: "#/components/schemas/vault"
         "400":
           description: Bad Request
           content:
@@ -457,15 +457,6 @@ components:
   schemas:
     #    DATA MODELS
 
-    adminVault:
-      description: Internal vault schema.
-      allOf:
-        - $ref: "#/components/schemas/vault"
-        - type: object
-          properties:
-            enabled:
-              type: boolean
-
     errorResponse:
       required:
         - error
@@ -479,8 +470,6 @@ components:
         - $ref: "#/components/schemas/vault"
         - type: object
           properties:
-            enabled:
-              type: boolean
             protoConfigValue:
               $ref: "#/components/schemas/protoConfig"
             tokenAMintValue:
@@ -826,6 +815,8 @@ components:
           type: string
           example: "1652747980"
           description: unix timestamp
+        enabled:
+          type: boolean
 
     vaultPeriod:
       type: object
