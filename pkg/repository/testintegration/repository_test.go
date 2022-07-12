@@ -32,8 +32,8 @@ import (
 //GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
 //GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
 
-//InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)
-//EnableVault(ctx context.Context, pubkey string) (*model2.Vault, error)
+//AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)
+//AdminEnableVault(ctx context.Context, pubkey string) (*model2.Vault, error)
 
 //nolint:funlen
 func TestUpsertProtoConfigs(t *testing.T) {

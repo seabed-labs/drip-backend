@@ -24,8 +24,8 @@ type Processor interface {
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokenAccountBalanceByAddress(context.Context, string) error
-	UpsertTokenAccountBalance(context.Context, string, token.Account) error
+	UpsertTokenAccountBalanceByAddress(context.Context, string, bool) error
+	UpsertTokenAccountBalance(context.Context, string, token.Account, bool) error
 }
 
 type impl struct {
@@ -93,27 +93,28 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	}
 
 	// Upsert balances
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String(), true); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String(), true); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
+func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string, forceInsert bool) error {
 	var tokenAccount token.Account
 	if err := p.client.GetAccount(ctx, address, &tokenAccount); err != nil {
 		return err
 	}
-	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
+	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount, forceInsert)
 }
 
-func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
+func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account, forceInsert bool) error {
 	isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address)
 	isUserPositionNFTTokenAccount, _ := p.IsUserPositionTokenAccount(ctx, tokenAccount.Mint.String())
-	if !isTokenSwapTokenAccount && !isUserPositionNFTTokenAccount {
+	isVaultTokenAccount, _ := p.IsVaultTokenAccount(ctx, address)
+	if !isTokenSwapTokenAccount && !isUserPositionNFTTokenAccount && !isVaultTokenAccount {
 		return nil
 	}
 	if isUserPositionNFTTokenAccount {
@@ -178,7 +179,8 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	if err != nil {
 		return err
 	}
-	return p.repo.UpsertVaults(ctx, &model2.Vault{
+
+	if err := p.repo.UpsertVaults(ctx, &model2.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
@@ -189,7 +191,20 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		DcaActivationTimestamp: time.Unix(vaultAccount.DcaActivationTimestamp, 0),
 		Enabled:                false,
 		TokenPairID:            tokenPair.ID,
-	})
+	}); err != nil {
+		return err
+	}
+
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String(), true); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenBAccount.String(), true); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String(), true); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error {
@@ -282,6 +297,17 @@ func (p impl) IsUserPositionTokenAccount(ctx context.Context, mint string) (bool
 		return false, err
 	}
 	if position == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (p impl) IsVaultTokenAccount(ctx context.Context, pubkey string) (bool, error) {
+	vaults, err := p.repo.AdminGetVaultsByTokenAccountAddress(ctx, pubkey)
+	if err != nil && err.Error() != "record not found" {
+		return false, err
+	}
+	if len(vaults) == 0 {
 		return false, nil
 	}
 	return true, nil

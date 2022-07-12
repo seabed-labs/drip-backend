@@ -66,6 +66,9 @@ paths:
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
         - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
+        - $ref: '#/components/parameters/enabledQueryParam'
+        - $ref: "#/components/parameters/offsetQueryParam"
+        - $ref: "#/components/parameters/limitQueryParam"
       responses:
         "200":
           description: OK
@@ -349,6 +352,12 @@ paths:
 
 components:
   parameters:
+    enabledQueryParam:
+      name: enabled
+      in: query
+      schema:
+        type: boolean
+
     expandAdminVaultsQueryParam:
       name: expand
       in: query
@@ -362,9 +371,9 @@ components:
               "protoConfigValue",
               "tokenAMintValue",
               "tokenBMintValue",
-              "TokenAAccountValue",
-              "TokenBAccountValue",
-              "TreasuryTokenBAccountValue",
+              "tokenAAccountValue",
+              "tokenBAccountValue",
+              "treasuryTokenBAccountValue",
             ]
 
     googleTokenIdHeaderParam:
@@ -758,7 +767,6 @@ components:
       type: object
       required:
         - pubkey
-        - symbol
         - decimals
         - iconUrl
       properties:

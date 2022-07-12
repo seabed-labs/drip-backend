@@ -35,19 +35,64 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// EnableVault mocks base method.
-func (m *MockRepository) EnableVault(ctx context.Context, pubkey string) (*model.Vault, error) {
+// AdminEnableVault mocks base method.
+func (m *MockRepository) AdminEnableVault(ctx context.Context, pubkey string) (*model.Vault, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EnableVault", ctx, pubkey)
+	ret := m.ctrl.Call(m, "AdminEnableVault", ctx, pubkey)
 	ret0, _ := ret[0].(*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// EnableVault indicates an expected call of EnableVault.
-func (mr *MockRepositoryMockRecorder) EnableVault(ctx, pubkey interface{}) *gomock.Call {
+// AdminEnableVault indicates an expected call of AdminEnableVault.
+func (mr *MockRepositoryMockRecorder) AdminEnableVault(ctx, pubkey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnableVault", reflect.TypeOf((*MockRepository)(nil).EnableVault), ctx, pubkey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminEnableVault", reflect.TypeOf((*MockRepository)(nil).AdminEnableVault), ctx, pubkey)
+}
+
+// AdminGetVaultByAddress mocks base method.
+func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminGetVaultByAddress", ctx, pubkey)
+	ret0, _ := ret[0].(*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaultByAddress indicates an expected call of AdminGetVaultByAddress.
+func (mr *MockRepositoryMockRecorder) AdminGetVaultByAddress(ctx, pubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultByAddress), ctx, pubkey)
+}
+
+// AdminGetVaults mocks base method.
+func (m *MockRepository) AdminGetVaults(ctx context.Context, enabled *bool, limit, offset *int) ([]*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminGetVaults", ctx, enabled, limit, offset)
+	ret0, _ := ret[0].([]*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaults indicates an expected call of AdminGetVaults.
+func (mr *MockRepositoryMockRecorder) AdminGetVaults(ctx, enabled, limit, offset interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaults", reflect.TypeOf((*MockRepository)(nil).AdminGetVaults), ctx, enabled, limit, offset)
+}
+
+// AdminGetVaultsByTokenAccountAddress mocks base method.
+func (m *MockRepository) AdminGetVaultsByTokenAccountAddress(ctx context.Context, pubkey string) ([]*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminGetVaultsByTokenAccountAddress", ctx, pubkey)
+	ret0, _ := ret[0].([]*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaultsByTokenAccountAddress indicates an expected call of AdminGetVaultsByTokenAccountAddress.
+func (mr *MockRepositoryMockRecorder) AdminGetVaultsByTokenAccountAddress(ctx, pubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByTokenAccountAddress", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByTokenAccountAddress), ctx, pubkey)
 }
 
 // GetPositionByNFTMint mocks base method.
@@ -78,6 +123,36 @@ func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *strin
 func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0, arg1, arg2)
+}
+
+// GetProtoConfigsByPubkeys mocks base method.
+func (m *MockRepository) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProtoConfigsByPubkeys", ctx, pubkeys)
+	ret0, _ := ret[0].([]*model.ProtoConfig)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProtoConfigsByPubkeys indicates an expected call of GetProtoConfigsByPubkeys.
+func (mr *MockRepositoryMockRecorder) GetProtoConfigsByPubkeys(ctx, pubkeys interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigsByPubkeys", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigsByPubkeys), ctx, pubkeys)
+}
+
+// GetTokenAccountBalancesByIDS mocks base method.
+func (m *MockRepository) GetTokenAccountBalancesByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenAccountBalance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokenAccountBalancesByIDS", arg0, arg1)
+	ret0, _ := ret[0].([]*model.TokenAccountBalance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenAccountBalancesByIDS indicates an expected call of GetTokenAccountBalancesByIDS.
+func (mr *MockRepositoryMockRecorder) GetTokenAccountBalancesByIDS(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenAccountBalancesByIDS", reflect.TypeOf((*MockRepository)(nil).GetTokenAccountBalancesByIDS), arg0, arg1)
 }
 
 // GetTokenPair mocks base method.
@@ -125,6 +200,21 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairs", reflect.TypeOf((*MockRepository)(nil).GetTokenPairs), arg0, arg1, arg2)
 }
 
+// GetTokenPairsByIDS mocks base method.
+func (m *MockRepository) GetTokenPairsByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenPair, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokenPairsByIDS", arg0, arg1)
+	ret0, _ := ret[0].([]*model.TokenPair)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenPairsByIDS indicates an expected call of GetTokenPairsByIDS.
+func (mr *MockRepositoryMockRecorder) GetTokenPairsByIDS(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairsByIDS", reflect.TypeOf((*MockRepository)(nil).GetTokenPairsByIDS), arg0, arg1)
+}
+
 // GetTokenSwapForTokenAccount mocks base method.
 func (m *MockRepository) GetTokenSwapForTokenAccount(arg0 context.Context, arg1 string) (*model.TokenSwap, error) {
 	m.ctrl.T.Helper()
@@ -168,6 +258,21 @@ func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tok
 func (mr *MockRepositoryMockRecorder) GetTokenSwapsSortedByLiquidity(ctx, tokenPairIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsSortedByLiquidity", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsSortedByLiquidity), ctx, tokenPairIDs)
+}
+
+// GetTokensByMints mocks base method.
+func (m *MockRepository) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokensByMints", ctx, mints)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokensByMints indicates an expected call of GetTokensByMints.
+func (mr *MockRepositoryMockRecorder) GetTokensByMints(ctx, mints interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensByMints", reflect.TypeOf((*MockRepository)(nil).GetTokensByMints), ctx, mints)
 }
 
 // GetTokensWithSupportedTokenPair mocks base method.
@@ -247,21 +352,6 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
-}
-
-// InternalGetVaultByAddress mocks base method.
-func (m *MockRepository) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InternalGetVaultByAddress", ctx, pubkey)
-	ret0, _ := ret[0].(*model.Vault)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// InternalGetVaultByAddress indicates an expected call of InternalGetVaultByAddress.
-func (mr *MockRepositoryMockRecorder) InternalGetVaultByAddress(ctx, pubkey interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InternalGetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).InternalGetVaultByAddress), ctx, pubkey)
 }
 
 // UpsertPositions mocks base method.

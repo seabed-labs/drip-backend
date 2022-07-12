@@ -39,13 +39,71 @@ type Repository interface {
 	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 
-	InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
-	EnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
+	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
+	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
+	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
+	GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
+
+	AdminEnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
+	AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
+	AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error)
+	AdminGetVaultsByTokenAccountAddress(ctx context.Context, pubkey string) ([]*model.Vault, error)
 }
 
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func (d repositoryImpl) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
+	stmt := d.repo.ProtoConfig.
+		WithContext(ctx)
+	if len(pubkeys) > 0 {
+		stmt = stmt.Where(d.repo.ProtoConfig.Pubkey.In(pubkeys...))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
+	stmt := d.repo.Token.
+		WithContext(ctx)
+	if len(mints) > 0 {
+		stmt = stmt.Where(d.repo.Token.Pubkey.In(mints...))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokenAccountBalancesByIDS(ctx context.Context, tokenAccountPubkeys []string) ([]*model.TokenAccountBalance, error) {
+	stmt := d.repo.TokenAccountBalance.
+		WithContext(ctx)
+	if len(tokenAccountPubkeys) > 0 {
+		stmt = stmt.Where(d.repo.TokenAccountBalance.Pubkey.In(tokenAccountPubkeys...))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []string) ([]*model.TokenPair, error) {
+	stmt := d.repo.TokenPair.
+		WithContext(ctx)
+	if len(tokenPairIds) > 0 {
+		stmt = stmt.Where(d.repo.TokenPair.ID.In(tokenPairIds...))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error) {
+	stmt := d.repo.Vault.
+		WithContext(ctx)
+	if enabled != nil {
+		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*enabled))
+	}
+	if limit != nil && *limit > 0 {
+		stmt = stmt.Limit(*limit)
+	}
+	if offset != nil && *offset > 0 {
+		stmt = stmt.Offset(*offset)
+	}
+	return stmt.Find()
 }
 
 func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
@@ -58,14 +116,23 @@ func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string
 		First()
 }
 
-func (d repositoryImpl) InternalGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
+func (d repositoryImpl) AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
 	return d.repo.
 		Vault.WithContext(ctx).
 		Where(d.repo.Vault.Pubkey.Eq(pubkey)).
 		First()
 }
 
-func (d repositoryImpl) EnableVault(ctx context.Context, vaultPubkey string) (*model.Vault, error) {
+func (d repositoryImpl) AdminGetVaultsByTokenAccountAddress(ctx context.Context, tokenAccountPubkey string) ([]*model.Vault, error) {
+	return d.repo.
+		Vault.WithContext(ctx).
+		Or(d.repo.Vault.TokenAAccount.Eq(tokenAccountPubkey)).
+		Or(d.repo.Vault.TokenBAccount.Eq(tokenAccountPubkey)).
+		Or(d.repo.Vault.TreasuryTokenBAccount.Eq(tokenAccountPubkey)).
+		Find()
+}
+
+func (d repositoryImpl) AdminEnableVault(ctx context.Context, vaultPubkey string) (*model.Vault, error) {
 	var res model.Vault
 	_, err := d.repo.Vault.
 		WithContext(ctx).

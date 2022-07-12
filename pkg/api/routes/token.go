@@ -29,16 +29,11 @@ func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error
 	}
 	for i := range tokens {
 		token := tokens[i]
-		symbol := ""
-		if token.Symbol != nil {
-			symbol = *token.Symbol
-		}
-		res = append(res, struct {
-			Decimals int    `json:"decimals"`
-			Pubkey   string `json:"pubkey"`
-			Symbol   string `json:"symbol"`
-		}{Decimals: int(token.Decimals), Pubkey: token.Pubkey, Symbol: symbol},
-		)
+		res = append(res, Swagger.Token{
+			Decimals: int(token.Decimals),
+			Pubkey:   token.Pubkey,
+			Symbol:   token.Symbol,
+		})
 	}
 	return c.JSON(http.StatusOK, res)
 }

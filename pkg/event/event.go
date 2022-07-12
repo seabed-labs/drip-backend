@@ -180,7 +180,7 @@ func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
 	var tokenAccount token.Account
 	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
 	if err == nil {
-		if err := d.processor.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
+		if err := d.processor.UpsertTokenAccountBalance(ctx, address, tokenAccount, false); err != nil {
 			log.WithError(err).Error("failed to upsert tokenAccountBalance")
 		}
 		return
