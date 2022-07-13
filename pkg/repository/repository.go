@@ -103,6 +103,7 @@ func (d repositoryImpl) AdminGetVaults(ctx context.Context, enabled *bool, limit
 	if offset != nil && *offset > 0 {
 		stmt = stmt.Offset(*offset)
 	}
+	stmt = stmt.Order(d.repo.Vault.Pubkey)
 	return stmt.Find()
 }
 
