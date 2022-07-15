@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/repository"
@@ -110,4 +111,5 @@ func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[
 			}
 		}
 	}
+	return nil, fmt.Errorf("failed to get token swap")
 }
