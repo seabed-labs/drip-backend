@@ -196,6 +196,9 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	var vaultWhitelists []*model.VaultWhitelist
 	for i := range vaultAccount.WhitelistedSwaps {
 		whitelistedSwap := vaultAccount.WhitelistedSwaps[i]
+		if whitelistedSwap.IsZero() {
+			continue
+		}
 		if err := p.UpsertTokenSwapByAddress(ctx, whitelistedSwap.String()); err != nil {
 			logrus.
 				WithField("token_swap", whitelistedSwap.String()).
