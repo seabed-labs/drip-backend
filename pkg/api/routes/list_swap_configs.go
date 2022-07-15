@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -31,11 +31,25 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		}
 	}
 	var tokenPairIDS []string
+	var vaultPubkeys []string
 	for i := range vaults {
 		vault := vaults[i]
 		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
+		vaultPubkeys = append(vaultPubkeys, vault.Pubkey)
 	}
-
+	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
+	if err != nil {
+		logrus.WithError(err).Errorf("failed to get vault whitelists")
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+	}
+	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
+	for i := range vaultWhitelists {
+		vaultWhitelist := vaultWhitelists[i]
+		if _, ok := vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey]; !ok {
+			vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = []*model.VaultWhitelist{}
+		}
+		vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = append(vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey], vaultWhitelist)
+	}
 	tokenSwaps, err := h.repo.GetTokenSwapsSortedByLiquidity(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get token swaps")
@@ -43,36 +57,23 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 	}
 
 	// TODO(Mocha): Return token swap with the most liquidity
-	tokenSwapsByTokenPairID := make(map[string]repository.TokenSwapWithLiquidityRatio)
+	tokenSwapsByTokenPairID := make(map[string][]*repository.TokenSwapWithLiquidityRatio)
 	for i := range tokenSwaps {
 		tokenSwap := tokenSwaps[i]
-		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = tokenSwap
+		if _, ok := tokenSwapsByTokenPairID[tokenSwap.TokenPairID]; !ok {
+			tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = []*repository.TokenSwapWithLiquidityRatio{}
+		}
+		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = append(tokenSwapsByTokenPairID[tokenSwap.TokenPairID], &tokenSwap)
 	}
 
 	for i := range vaults {
 		vault := vaults[i]
-		tokenSwap, ok := tokenSwapsByTokenPairID[vault.TokenPairID]
-		if !ok {
-			logrus.
-				WithField("vault", vault.Pubkey).
-				WithField("TokenPairID", vault.TokenPairID).
-				Infof("skipping vault swap config, missing swap")
-			continue
+		tokenSwap, err := findTokenSwapForVault(vault, vaultWhitelistsByVaultPubkey, tokenSwapsByTokenPairID)
+		if err != nil {
+			logrus.WithError(err).Errorf("failed to get token swap for vault")
+			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 		}
-		res = append(res, struct {
-			Swap               string `json:"swap"`
-			SwapAuthority      string `json:"swapAuthority"`
-			SwapFeeAccount     string `json:"swapFeeAccount"`
-			SwapTokenAAccount  string `json:"swapTokenAAccount"`
-			SwapTokenBAccount  string `json:"swapTokenBAccount"`
-			SwapTokenMint      string `json:"swapTokenMint"`
-			TokenAMint         string `json:"tokenAMint"`
-			TokenBMint         string `json:"tokenBMint"`
-			Vault              string `json:"vault"`
-			VaultProtoConfig   string `json:"vaultProtoConfig"`
-			VaultTokenAAccount string `json:"vaultTokenAAccount"`
-			VaultTokenBAccount string `json:"vaultTokenBAccount"`
-		}{
+		res = append(res, Swagger.SwapConfig{
 			Swap:               tokenSwap.Pubkey,
 			SwapAuthority:      tokenSwap.Authority,
 			SwapFeeAccount:     tokenSwap.FeeAccount,
@@ -88,4 +89,27 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		})
 	}
 	return c.JSON(http.StatusOK, res)
+}
+
+func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithLiquidityRatio) (*repository.TokenSwapWithLiquidityRatio, error) {
+	tokenSwaps, ok := tokenSwapsByTokenPairID[vault.TokenPairID]
+	if !ok {
+		logrus.
+			WithField("vault", vault.Pubkey).
+			WithField("TokenPairID", vault.TokenPairID).
+			Infof("skipping vault swap config, missing swap")
+	}
+	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
+	if !ok || len(vaultWhitelists) == 0 {
+		return tokenSwaps[0], nil
+	} else {
+		for _, tokenSwap := range tokenSwaps {
+			for _, vaultWhitelist := range vaultWhitelists {
+				if vaultWhitelist.TokenSwapPubkey == tokenSwap.Pubkey {
+					return tokenSwap, nil
+				}
+			}
+		}
+	}
+	return nil, fmt.Errorf("failed to get token swap")
 }

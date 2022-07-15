@@ -21,12 +21,14 @@ type Repository interface {
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
 	UpsertTokens(context.Context, ...*model.Token) error
 	UpsertVaults(context.Context, ...*model.Vault) error
+	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
+	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
 	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
@@ -53,6 +55,27 @@ type Repository interface {
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func (d repositoryImpl) GetVaultWhitelistsByVaultAddress(ctx context.Context, vaultPubkeys []string) ([]*model.VaultWhitelist, error) {
+	if len(vaultPubkeys) == 0 {
+		return nil, nil
+	}
+	return d.repo.VaultWhitelist.
+		WithContext(ctx).
+		Where(d.repo.VaultWhitelist.VaultPubkey.In(vaultPubkeys...)).
+		Find()
+}
+
+func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model.VaultWhitelist) error {
+	// Insert new vault whitelists or do no thing
+	return d.repo.VaultWhitelist.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "vault_pubkey"}, {Name: "token_swap_pubkey"}},
+			DoNothing: true,
+		}).
+		Create(vaultWhiteLists...)
 }
 
 func (d repositoryImpl) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
@@ -253,7 +276,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 			tokenPairUUID, _ := uuid.Parse(tokenPairID)
 			temp = append(temp, tokenPairUUID)
 		}
-		// We should sort by liquidity ratio ascending, so that the largest ratio is at the end of the list
+		// We should sort by liquidity ratio descending, so that the largest ratio is at the beginning of the list
 		if err := d.db.SelectContext(ctx,
 			&tokenSwaps,
 			`SELECT token_swap.*, token_account_b_balance.amount/token_account_a_balance.amount as liquidity_ratio
@@ -268,7 +291,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 				AND token_account_b_balance.amount != 0
 				AND vault.enabled = true
 				AND token_swap.token_pair_id=ANY($1)
-				ORDER BY token_swap.token_pair_id desc, liquidity_ratio asc;`,
+				ORDER BY token_swap.token_pair_id desc, liquidity_ratio desc;`,
 			pq.Array(temp),
 		); err != nil {
 			return nil, err
@@ -287,7 +310,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 				WHERE token_account_a_balance.amount != 0
 				AND token_account_b_balance.amount != 0
 				AND vault.enabled = true
-				ORDER BY liquidity_ratio asc;`,
+				ORDER BY liquidity_ratio desc;`,
 		); err != nil {
 			return nil, err
 		}

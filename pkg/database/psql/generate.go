@@ -14,8 +14,8 @@ import (
 	"gorm.io/gen"
 )
 
-const modelDir = "./internal/pkg/repository/model"
-const queryDir = "./internal/pkg/repository/query"
+const modelDir = "./pkg/repository/model"
+const queryDir = "./pkg/repository/query"
 
 type ModelUtil struct{}
 

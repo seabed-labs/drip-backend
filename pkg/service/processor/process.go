@@ -4,17 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/clients/solana/drip"
 	"github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
 	"github.com/dcaf-labs/drip/pkg/repository"
-	model2 "github.com/dcaf-labs/drip/pkg/repository/model"
-
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"github.com/sirupsen/logrus"
 )
 
 type Processor interface {
@@ -58,7 +56,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokenSwaps(ctx, &model2.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -77,7 +75,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokenSwaps(ctx, &model2.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -135,7 +133,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	}
 	// TODO(Mocha): If this is a drip nft token, we can decorate the symbol with a deterministic name
 	// with tokenA, tokenB, start, end
-	tokenModel := model2.Token{
+	tokenModel := model.Token{
 		Pubkey:   tokenAccount.Mint.String(),
 		Symbol:   nil,
 		Decimals: int16(tokenMint.Decimals),
@@ -145,7 +143,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 		logrus.WithError(err).Error("failed to upsert tokens")
 		return err
 	}
-	return p.repo.UpsertTokenAccountBalances(ctx, &model2.TokenAccountBalance{
+	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
 		Pubkey: address,
 		Mint:   tokenAccount.Mint.String(),
 		Owner:  tokenAccount.Owner.String(),
@@ -159,7 +157,7 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 	if err := p.client.GetAccount(ctx, address, &protoConfig); err != nil {
 		return err
 	}
-	return p.repo.UpsertProtoConfigs(ctx, &model2.ProtoConfig{
+	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
 		Pubkey:               address,
 		Granularity:          protoConfig.Granularity,
 		TriggerDcaSpread:     protoConfig.TriggerDcaSpread,
@@ -180,7 +178,7 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 
-	if err := p.repo.UpsertVaults(ctx, &model2.Vault{
+	if err := p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
@@ -195,6 +193,30 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 
+	var vaultWhitelists []*model.VaultWhitelist
+	for i := range vaultAccount.WhitelistedSwaps {
+		whitelistedSwap := vaultAccount.WhitelistedSwaps[i]
+		if whitelistedSwap.IsZero() {
+			continue
+		}
+		if err := p.UpsertTokenSwapByAddress(ctx, whitelistedSwap.String()); err != nil {
+			logrus.
+				WithField("token_swap", whitelistedSwap.String()).
+				WithError(err).
+				Error("failed to insert token_swap by address")
+		}
+		vaultWhitelists = append(vaultWhitelists, &model.VaultWhitelist{
+			ID:              uuid.New().String(),
+			VaultPubkey:     address,
+			TokenSwapPubkey: whitelistedSwap.String(),
+		})
+	}
+	if err := p.repo.UpsertVaultWhitelists(ctx, vaultWhitelists...); err != nil {
+		logrus.
+			WithField("vault", address).
+			WithError(err).
+			Error("failed to insert vaultWhitelists")
+	}
 	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String(), true); err != nil {
 		return err
 	}
@@ -215,7 +237,7 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	if _, err := p.ensureVault(ctx, position.Vault.String()); err != nil {
 		return err
 	}
-	return p.repo.UpsertPositions(ctx, &model2.Position{
+	return p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,
 		Vault:                    position.Vault.String(),
 		Authority:                position.PositionAuthority.String(),
@@ -241,7 +263,7 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 	if _, err := p.ensureVault(ctx, vaultPeriodAccount.Vault.String()); err != nil {
 		return err
 	}
-	return p.repo.UpsertVaultPeriods(ctx, &model2.VaultPeriod{
+	return p.repo.UpsertVaultPeriods(ctx, &model.VaultPeriod{
 		Pubkey:   address,
 		Vault:    vaultPeriodAccount.Vault.String(),
 		PeriodID: vaultPeriodAccount.PeriodId,
@@ -260,12 +282,12 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		return err
 	}
 	if err := p.repo.UpsertTokens(ctx,
-		&model2.Token{
+		&model.Token{
 			Pubkey:   tokenAAMint,
 			Symbol:   nil,
 			Decimals: int16(tokenA.Decimals),
 			IconURL:  nil,
-		}, &model2.Token{
+		}, &model.Token{
 			Pubkey:   tokenBMint,
 			Symbol:   nil,
 			Decimals: int16(tokenB.Decimals),
@@ -273,7 +295,7 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		}); err != nil {
 		return err
 	}
-	return p.repo.InsertTokenPairs(ctx, &model2.TokenPair{
+	return p.repo.InsertTokenPairs(ctx, &model.TokenPair{
 		ID:     uuid.New().String(),
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
@@ -314,7 +336,7 @@ func (p impl) IsVaultTokenAccount(ctx context.Context, pubkey string) (bool, err
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
-func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model2.TokenPair, error) {
+func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
 	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
 	if err != nil && err.Error() == "record not found" {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
@@ -327,7 +349,7 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 }
 
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
-func (p impl) ensureVault(ctx context.Context, address string) (*model2.Vault, error) {
+func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
 	vault, err := p.repo.GetVaultByAddress(ctx, address)
 	if err != nil && err.Error() == "record not found" {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {

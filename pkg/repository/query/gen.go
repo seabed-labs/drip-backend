@@ -26,6 +26,7 @@ func Use(db *gorm.DB) *Query {
 		UserPosition:        newUserPosition(db),
 		Vault:               newVault(db),
 		VaultPeriod:         newVaultPeriod(db),
+		VaultWhitelist:      newVaultWhitelist(db),
 	}
 }
 
@@ -44,6 +45,7 @@ type Query struct {
 	UserPosition        userPosition
 	Vault               vault
 	VaultPeriod         vaultPeriod
+	VaultWhitelist      vaultWhitelist
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -63,6 +65,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		UserPosition:        q.UserPosition.clone(db),
 		Vault:               q.Vault.clone(db),
 		VaultPeriod:         q.VaultPeriod.clone(db),
+		VaultWhitelist:      q.VaultWhitelist.clone(db),
 	}
 }
 
@@ -79,6 +82,7 @@ type queryCtx struct {
 	UserPosition        *userPositionDo
 	Vault               *vaultDo
 	VaultPeriod         *vaultPeriodDo
+	VaultWhitelist      *vaultWhitelistDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -95,6 +99,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		UserPosition:        q.UserPosition.WithContext(ctx),
 		Vault:               q.Vault.WithContext(ctx),
 		VaultPeriod:         q.VaultPeriod.WithContext(ctx),
+		VaultWhitelist:      q.VaultWhitelist.WithContext(ctx),
 	}
 }
 
