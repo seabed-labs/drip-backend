@@ -4,6 +4,8 @@ import (
 	"context"
 	"runtime/debug"
 
+	solana2 "github.com/gagliardetto/solana-go"
+
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
@@ -105,6 +107,9 @@ func (d DripProgramProcessor) Backfill(ctx context.Context, programID string, pr
 }
 
 func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
 	//log.Infof("received drip account update")
@@ -149,6 +154,9 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 }
 
 func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
 	//log.Infof("received token swap account update")
@@ -170,6 +178,9 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 }
 
 func (d DripProgramProcessor) processTokenEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
 	defer func() {
