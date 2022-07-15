@@ -7,8 +7,6 @@ package query
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/repository/model"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -17,6 +15,8 @@ import (
 	"gorm.io/gen/field"
 
 	"gorm.io/plugin/dbresolver"
+
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 )
 
 func newProtoConfig(db *gorm.DB) protoConfig {

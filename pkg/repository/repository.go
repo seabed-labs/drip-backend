@@ -21,6 +21,7 @@ type Repository interface {
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
 	UpsertTokens(context.Context, ...*model.Token) error
 	UpsertVaults(context.Context, ...*model.Vault) error
+	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
@@ -53,6 +54,17 @@ type Repository interface {
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model.VaultWhitelist) error {
+	// Insert new vault whitelists or do no thing
+	return d.repo.VaultWhitelist.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "vault_pubkey"}, {Name: "token_swap_pubkey"}},
+			DoNothing: true,
+		}).
+		Create(vaultWhiteLists...)
 }
 
 func (d repositoryImpl) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {

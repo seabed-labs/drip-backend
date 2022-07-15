@@ -468,6 +468,25 @@ func (mr *MockRepositoryMockRecorder) UpsertVaultPeriods(arg0 interface{}, arg1 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaultPeriods", reflect.TypeOf((*MockRepository)(nil).UpsertVaultPeriods), varargs...)
 }
 
+// UpsertVaultWhitelists mocks base method.
+func (m *MockRepository) UpsertVaultWhitelists(arg0 context.Context, arg1 ...*model.VaultWhitelist) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertVaultWhitelists", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertVaultWhitelists indicates an expected call of UpsertVaultWhitelists.
+func (mr *MockRepositoryMockRecorder) UpsertVaultWhitelists(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaultWhitelists", reflect.TypeOf((*MockRepository)(nil).UpsertVaultWhitelists), varargs...)
+}
+
 // UpsertVaults mocks base method.
 func (m *MockRepository) UpsertVaults(arg0 context.Context, arg1 ...*model.Vault) error {
 	m.ctrl.T.Helper()

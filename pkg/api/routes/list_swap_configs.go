@@ -5,7 +5,6 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -59,20 +58,8 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 				Infof("skipping vault swap config, missing swap")
 			continue
 		}
-		res = append(res, struct {
-			Swap               string `json:"swap"`
-			SwapAuthority      string `json:"swapAuthority"`
-			SwapFeeAccount     string `json:"swapFeeAccount"`
-			SwapTokenAAccount  string `json:"swapTokenAAccount"`
-			SwapTokenBAccount  string `json:"swapTokenBAccount"`
-			SwapTokenMint      string `json:"swapTokenMint"`
-			TokenAMint         string `json:"tokenAMint"`
-			TokenBMint         string `json:"tokenBMint"`
-			Vault              string `json:"vault"`
-			VaultProtoConfig   string `json:"vaultProtoConfig"`
-			VaultTokenAAccount string `json:"vaultTokenAAccount"`
-			VaultTokenBAccount string `json:"vaultTokenBAccount"`
-		}{
+
+		res = append(res, Swagger.SwapConfig{
 			Swap:               tokenSwap.Pubkey,
 			SwapAuthority:      tokenSwap.Authority,
 			SwapFeeAccount:     tokenSwap.FeeAccount,
