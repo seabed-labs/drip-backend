@@ -320,6 +320,21 @@ func (mr *MockRepositoryMockRecorder) GetVaultPeriods(arg0, arg1, arg2, arg3, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultPeriods", reflect.TypeOf((*MockRepository)(nil).GetVaultPeriods), arg0, arg1, arg2, arg3, arg4)
 }
 
+// GetVaultWhitelistsByVaultAddress mocks base method.
+func (m *MockRepository) GetVaultWhitelistsByVaultAddress(arg0 context.Context, arg1 []string) ([]*model.VaultWhitelist, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVaultWhitelistsByVaultAddress", arg0, arg1)
+	ret0, _ := ret[0].([]*model.VaultWhitelist)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVaultWhitelistsByVaultAddress indicates an expected call of GetVaultWhitelistsByVaultAddress.
+func (mr *MockRepositoryMockRecorder) GetVaultWhitelistsByVaultAddress(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultWhitelistsByVaultAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultWhitelistsByVaultAddress), arg0, arg1)
+}
+
 // GetVaultsWithFilter mocks base method.
 func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
