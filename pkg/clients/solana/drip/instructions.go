@@ -5,7 +5,6 @@ package drip
 import (
 	"bytes"
 	"fmt"
-
 	ag_spew "github.com/davecgh/go-spew/spew"
 	ag_binary "github.com/gagliardetto/binary"
 	ag_solanago "github.com/gagliardetto/solana-go"
@@ -13,7 +12,7 @@ import (
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
-var ProgramID ag_solanago.PublicKey
+var ProgramID ag_solanago.PublicKey = ag_solanago.MustPublicKeyFromBase58("4VBtW5cjQJk8tme9fXMiok6xAfDSwv5Qp7LN6arWEP7x")
 
 func SetProgramID(pubkey ag_solanago.PublicKey) {
 	ProgramID = pubkey

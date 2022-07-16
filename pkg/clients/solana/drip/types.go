@@ -40,28 +40,6 @@ func (obj *DepositParams) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err 
 	return nil
 }
 
-type InitializeVaultParams struct {
-	WhitelistedSwaps []ag_solanago.PublicKey
-}
-
-func (obj InitializeVaultParams) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
-	// Serialize `WhitelistedSwaps` param:
-	err = encoder.Encode(obj.WhitelistedSwaps)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (obj *InitializeVaultParams) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
-	// Deserialize `WhitelistedSwaps`:
-	err = decoder.Decode(&obj.WhitelistedSwaps)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 type InitializeVaultPeriodParams struct {
 	PeriodId uint64
 }
@@ -88,6 +66,7 @@ type InitVaultProtoConfigParams struct {
 	Granularity          uint64
 	TriggerDcaSpread     uint16
 	BaseWithdrawalSpread uint16
+	Admin                ag_solanago.PublicKey
 }
 
 func (obj InitVaultProtoConfigParams) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -103,6 +82,11 @@ func (obj InitVaultProtoConfigParams) MarshalWithEncoder(encoder *ag_binary.Enco
 	}
 	// Serialize `BaseWithdrawalSpread` param:
 	err = encoder.Encode(obj.BaseWithdrawalSpread)
+	if err != nil {
+		return err
+	}
+	// Serialize `Admin` param:
+	err = encoder.Encode(obj.Admin)
 	if err != nil {
 		return err
 	}
@@ -122,6 +106,33 @@ func (obj *InitVaultProtoConfigParams) UnmarshalWithDecoder(decoder *ag_binary.D
 	}
 	// Deserialize `BaseWithdrawalSpread`:
 	err = decoder.Decode(&obj.BaseWithdrawalSpread)
+	if err != nil {
+		return err
+	}
+	// Deserialize `Admin`:
+	err = decoder.Decode(&obj.Admin)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type InitializeVaultParams struct {
+	WhitelistedSwaps []ag_solanago.PublicKey
+}
+
+func (obj InitializeVaultParams) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
+	// Serialize `WhitelistedSwaps` param:
+	err = encoder.Encode(obj.WhitelistedSwaps)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (obj *InitializeVaultParams) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err error) {
+	// Deserialize `WhitelistedSwaps`:
+	err = decoder.Decode(&obj.WhitelistedSwaps)
 	if err != nil {
 		return err
 	}
