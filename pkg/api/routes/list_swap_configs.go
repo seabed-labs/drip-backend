@@ -71,7 +71,7 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		tokenSwap, err := findTokenSwapForVault(vault, vaultWhitelistsByVaultPubkey, tokenSwapsByTokenPairID)
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to get token swap for vault")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+			continue
 		}
 		res = append(res, Swagger.SwapConfig{
 			Swap:               tokenSwap.Pubkey,
@@ -99,17 +99,40 @@ func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[
 			WithField("TokenPairID", vault.TokenPairID).
 			Infof("skipping vault swap config, missing swap")
 	}
+	var eligibleSwaps []*repository.TokenSwapWithLiquidityRatio
 	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
 	if !ok || len(vaultWhitelists) == 0 {
-		return tokenSwaps[0], nil
+		eligibleSwaps = tokenSwaps
 	} else {
 		for _, tokenSwap := range tokenSwaps {
 			for _, vaultWhitelist := range vaultWhitelists {
 				if vaultWhitelist.TokenSwapPubkey == tokenSwap.Pubkey {
-					return tokenSwap, nil
+					eligibleSwaps = append(eligibleSwaps, tokenSwap)
 				}
 			}
 		}
 	}
-	return nil, fmt.Errorf("failed to get token swap")
+
+	// TODO(Mocha): Take into account swap fees
+	if len(eligibleSwaps) == 0 {
+		return nil, fmt.Errorf("failed to get token_swap")
+	}
+	bestSwap := eligibleSwaps[0]
+	bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
+	for _, eligibleSwap := range eligibleSwaps {
+		swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
+		if swapDeltaB > bestSwapDeltaB {
+			bestSwap = eligibleSwap
+			bestSwapDeltaB = swapDeltaB
+		}
+	}
+
+	return bestSwap, nil
+}
+
+// Calculates DeltaB from (reserveA + deltaA) * (reserveB - deltaB) = reserveA*reserveB =  k
+// deltaB = reserveB - ((reserveA * reserveB) / (reservaA + deltaA))
+// to be used to MAXIMIZE delta b across all swaps
+func evaluateTokenSwap(deltaA, reserveA, reserveB uint64) uint64 {
+	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
 }

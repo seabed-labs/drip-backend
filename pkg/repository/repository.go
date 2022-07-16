@@ -13,7 +13,9 @@ import (
 
 type TokenSwapWithLiquidityRatio struct {
 	model.TokenSwap
-	LiquidityRatio float64 `json:"liquidityRatio" db:"liquidity_ratio"`
+	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
+	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
+	//LiquidityRatio      bin.Float128 `json:"liquidityRatio" db:"liquidity_ratio"`
 }
 
 type Repository interface {
@@ -279,7 +281,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 		// We should sort by liquidity ratio descending, so that the largest ratio is at the beginning of the list
 		if err := d.db.SelectContext(ctx,
 			&tokenSwaps,
-			`SELECT token_swap.*, token_account_b_balance.amount/token_account_a_balance.amount as liquidity_ratio
+			`SELECT token_swap.*, token_account_a_balance.amount as token_account_a_balance_amount, token_account_b_balance.amount as token_account_b_balance_amount
 				FROM token_swap
 				JOIN vault
 				ON vault.token_pair_id = token_swap.token_pair_id
@@ -291,7 +293,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 				AND token_account_b_balance.amount != 0
 				AND vault.enabled = true
 				AND token_swap.token_pair_id=ANY($1)
-				ORDER BY token_swap.token_pair_id desc, liquidity_ratio desc;`,
+				ORDER BY token_swap.token_pair_id desc;`,
 			pq.Array(temp),
 		); err != nil {
 			return nil, err
@@ -299,7 +301,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 	} else {
 		if err := d.db.SelectContext(ctx,
 			&tokenSwaps,
-			`SELECT token_swap.*, token_account_b_balance.amount/token_account_a_balance.amount as liquidity_ratio
+			`SELECT token_swap.*, token_account_a_balance.amount as token_account_a_balance_amount, token_account_b_balance.amount as token_account_b_balance_amount
 				FROM token_swap
 				JOIN vault
 				ON vault.token_pair_id = token_swap.token_pair_id
@@ -309,8 +311,7 @@ func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, toke
 				ON token_account_b_balance.pubkey = token_swap.token_b_account
 				WHERE token_account_a_balance.amount != 0
 				AND token_account_b_balance.amount != 0
-				AND vault.enabled = true
-				ORDER BY liquidity_ratio desc;`,
+				AND vault.enabled = true;`,
 		); err != nil {
 			return nil, err
 		}
