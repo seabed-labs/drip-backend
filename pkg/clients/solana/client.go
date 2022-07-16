@@ -22,7 +22,7 @@ import (
 
 type Solana interface {
 	MintToWallet(context.Context, string, string, uint64) (string, error)
-	signAndBroadcast(context.Context, ...solana.Instruction) (string, error)
+	signAndBroadcast(context.Context, rpc.CommitmentType, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	GetAccount(context.Context, string, interface{}) error
 	GetAccounts(context.Context, []string, func(string, []byte)) error
@@ -220,7 +220,7 @@ func (s impl) MintToWallet(
 		return "", err
 	}
 	instructions = append(instructions, tx)
-	return s.signAndBroadcast(ctx, instructions...)
+	return s.signAndBroadcast(ctx, rpc.CommitmentFinalized, instructions...)
 }
 
 func (s impl) ProgramSubscribe(
@@ -334,9 +334,9 @@ func (s impl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {
 }
 
 func (s impl) signAndBroadcast(
-	ctx context.Context, instructions ...solana.Instruction,
+	ctx context.Context, commitment rpc.CommitmentType, instructions ...solana.Instruction,
 ) (string, error) {
-	recent, err := s.client.GetRecentBlockhash(ctx, rpc.CommitmentConfirmed)
+	recent, err := s.client.GetRecentBlockhash(ctx, commitment)
 	if err != nil {
 		return "", err
 	}
@@ -367,7 +367,7 @@ func (s impl) signAndBroadcast(
 	logrus.WithFields(logFields).Info("signed transaction")
 
 	txHash, err := s.client.SendTransactionWithOpts(
-		ctx, tx, false, rpc.CommitmentConfirmed,
+		ctx, tx, false, commitment,
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to send transaction, err %s", err)
