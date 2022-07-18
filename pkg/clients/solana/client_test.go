@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
 	"github.com/dcaf-labs/drip/pkg/configs"
-
+	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/test-go/testify/assert"
@@ -84,7 +83,7 @@ func TestSolanaClient(t *testing.T) {
 		timeout := time.Second * 5
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		offset, err := client.GetProgramAccounts(ctx, token_swap.ProgramID.String())
+		offset, err := client.GetProgramAccounts(ctx, tokenswap.ProgramID.String())
 		fmt.Println(len(offset))
 		assert.NoError(t, err)
 		assert.NotZero(t, offset)

@@ -11,7 +11,14 @@
 - install all packages
 
 ```bash
+# Add to ZSHRC
+export GOPRIVATE=github.com/dcaf-labs/solana-go-clients
 go get -u ./...
+```
+Add the following to ~/.gitconfig
+```txt
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
 ```
 
 - setup a `.env` file
