@@ -6,15 +6,12 @@ import (
 	"fmt"
 
 	"github.com/dcaf-labs/drip/pkg/configs"
-
 	bin "github.com/gagliardetto/binary"
-
-	"github.com/gagliardetto/solana-go/rpc/ws"
-
 	"github.com/gagliardetto/solana-go"
 	associatedtokenaccount "github.com/gagliardetto/solana-go/programs/associated-token-account"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/gagliardetto/solana-go/rpc/ws"
 	"github.com/mr-tron/base58"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"

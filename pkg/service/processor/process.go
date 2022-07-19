@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/clients/solana/drip"
-	"github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -42,7 +42,7 @@ func NewProcessor(
 }
 
 func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) error {
-	var tokenSwap token_swap.TokenSwap
+	var tokenSwap tokenswap.TokenSwap
 	if err := p.client.GetAccount(ctx, address, &tokenSwap); err != nil {
 		return err
 	}

@@ -17,7 +17,7 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/lib/pq v1.10.2
 	github.com/shopspring/decimal v1.3.1
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
 	google.golang.org/api v0.86.0
 	gorm.io/driver/postgres v1.3.4
@@ -29,6 +29,7 @@ require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/dcaf-labs/solana-go-clients v0.0.0-20220718230302-c0c931c67f32 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect

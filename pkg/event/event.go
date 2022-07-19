@@ -4,15 +4,13 @@ import (
 	"context"
 	"runtime/debug"
 
-	solana2 "github.com/gagliardetto/solana-go"
-
-	"github.com/dcaf-labs/drip/pkg/service/processor"
-
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	drip2 "github.com/dcaf-labs/drip/pkg/clients/solana/drip"
-	token_swap2 "github.com/dcaf-labs/drip/pkg/clients/solana/token_swap"
 	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
+	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	bin "github.com/gagliardetto/binary"
+	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -53,13 +51,13 @@ func Server(
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
-	if err := d.client.ProgramSubscribe(ctx, drip2.ProgramID.String(), d.processDripEvent); err != nil {
+	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
 	}
-	go d.Backfill(context.Background(), drip2.ProgramID.String(), d.processDripEvent)
+	go d.Backfill(context.Background(), drip.ProgramID.String(), d.processDripEvent)
 
 	for _, swapProgram := range []string{
-		token_swap2.ProgramID.String(),
+		tokenswap.ProgramID.String(),
 		"9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP", // orca swap v2
 		"DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1", // orca swap v1
 		"SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr",  // Saros AMM
@@ -118,7 +116,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 			log.WithField("stack", debug.Stack()).Errorf("panic in processEvent")
 		}
 	}()
-	var vaultPeriod drip2.VaultPeriod
+	var vaultPeriod drip.VaultPeriod
 	if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err == nil {
 		//log.Infof("decoded as vaultPeriod")
 		if err := d.processor.UpsertVaultPeriodByAddress(ctx, address); err != nil {
@@ -126,7 +124,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var position drip2.Position
+	var position drip.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		//log.Infof("decoded as position")
 		if err := d.processor.UpsertPositionByAddress(ctx, address); err != nil {
@@ -134,7 +132,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var vault drip2.Vault
+	var vault drip.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		//log.Infof("decoded as vault")
 		if err := d.processor.UpsertVaultByAddress(ctx, address); err != nil {
@@ -142,7 +140,7 @@ func (d DripProgramProcessor) processDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var protoConfig drip2.VaultProtoConfig
+	var protoConfig drip.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
 		//log.Infof("decoded as protoConfig")
 		if err := d.processor.UpsertProtoConfigByAddress(ctx, address); err != nil {
@@ -165,7 +163,7 @@ func (d DripProgramProcessor) processTokenSwapEvent(address string, data []byte)
 			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
 		}
 	}()
-	var tokenSwap token_swap2.TokenSwap
+	var tokenSwap tokenswap.TokenSwap
 	err := bin.NewBinDecoder(data).Decode(&tokenSwap)
 	if err == nil {
 		//log.Infof("decoded as tokenSwap")
