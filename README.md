@@ -4,7 +4,10 @@
 <a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/test_coverage"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/test_coverage" /></a>
 <a href="https://github.com/dcaf-labs/drip-backend/actions/workflows/deploy-devnet.yaml"><img src="https://github.com/dcaf-labs/drip-backend/actions/workflows/deploy-devnet.yaml/badge.svg?branch=main" /></a>
 <a href="https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml"><img src="https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml/badge.svg?branch=main" /> </a>
+##  Devnet
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg)](https://betteruptime.com/?utm_source=status_badge)
 
+## Mainnet
 ## Setup
 
 - install go 1.18
