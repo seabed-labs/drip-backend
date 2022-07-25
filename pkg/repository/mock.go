@@ -246,10 +246,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwaps(arg0, arg1 interface{}) *gom
 }
 
 // GetTokenSwapsSortedByLiquidity mocks base method.
-func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
+func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenSwapsSortedByLiquidity", ctx, tokenPairIDs)
-	ret0, _ := ret[0].([]TokenSwapWithLiquidityRatio)
+	ret := m.ctrl.Call(m, "GetTokenSwapsWithBalance", ctx, tokenPairIDs)
+	ret0, _ := ret[0].([]TokenSwapWithBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -257,7 +257,7 @@ func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tok
 // GetTokenSwapsSortedByLiquidity indicates an expected call of GetTokenSwapsSortedByLiquidity.
 func (mr *MockRepositoryMockRecorder) GetTokenSwapsSortedByLiquidity(ctx, tokenPairIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsSortedByLiquidity", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsSortedByLiquidity), ctx, tokenPairIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsWithBalance", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsSortedByLiquidity), ctx, tokenPairIDs)
 }
 
 // GetTokensByMints mocks base method.

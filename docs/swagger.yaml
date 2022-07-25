@@ -723,9 +723,6 @@ components:
             - whirlpool
             - tokenVaultA
             - tokenVaultB
-            - tickArray0
-            - tickArray1
-            - tickArray2
             - oracle
 
           properties:
@@ -738,15 +735,6 @@ components:
             tokenVaultB:
               type: string
               example: "2wMQTELEgEcK7V3gwZBH58WvGcRZsyaWNpebqyFugGKe"
-            tickArray0:
-              type: string
-              example: "26DuMu6Q7Zq9QpWiToQcPjTApZcfQMexytu26DU1yb2Z"
-            tickArray1:
-              type: string
-              example: "26DuMu6Q7Zq9QpWiToQcPjTApZcfQMexytu26DU1yb2Z"
-            tickArray2:
-              type: string
-              example: "26DuMu6Q7Zq9QpWiToQcPjTApZcfQMexytu26DU1yb2Z"
             oracle:
               type: string
               example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"

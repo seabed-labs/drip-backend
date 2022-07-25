@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type TokenSwapWithLiquidityRatio struct {
+type TokenSwapWithBalance struct {
 	model.TokenSwap
 	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
 	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
@@ -41,7 +41,8 @@ type Repository interface {
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
-	GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
+	GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
+	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error)
 	GetTokenSwapForTokenAccount(context.Context, string) (*model.TokenSwap, error)
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 
@@ -61,11 +62,18 @@ type repositoryImpl struct {
 	db   *sqlx.DB
 }
 
+func (d repositoryImpl) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
+	stmt := d.repo.OrcaWhirlpool.
+		WithContext(ctx).
+		Where(d.repo.OrcaWhirlpool.TokenPairID.In(tokenPairIDs...))
+	return stmt.Find()
+}
+
 func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model.OrcaWhirlpool) error {
 	return d.repo.OrcaWhirlpool.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "pubkey"}, {Name: "token_mint_a"}, {Name: "token_mint_b"}},
+			Columns:   []clause.Column{{Name: "pubkey"}},
 			UpdateAll: true,
 		}).
 		Create(whirlpools...)
@@ -281,8 +289,8 @@ func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string)
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
-	var tokenSwaps []TokenSwapWithLiquidityRatio
+func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error) {
+	var tokenSwaps []TokenSwapWithBalance
 	// TODO(Mocha): No clue how to do this in gorm-gen
 	if len(tokenPairIDs) > 0 {
 		var temp []uuid.UUID

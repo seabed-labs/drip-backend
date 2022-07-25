@@ -20,6 +20,7 @@ type OrcaWhirlpool struct {
 	TokenVaultA                string          `gorm:"column:token_vault_a;not null" json:"tokenVaultA" db:"token_vault_a"`
 	TokenMintB                 string          `gorm:"column:token_mint_b;not null" json:"tokenMintB" db:"token_mint_b"`
 	TokenVaultB                string          `gorm:"column:token_vault_b;not null" json:"tokenVaultB" db:"token_vault_b"`
+	Oracle                     string          `gorm:"column:oracle;not null" json:"oracle" db:"oracle"`
 	TickSpacing                int32           `gorm:"column:tick_spacing;not null" json:"tickSpacing" db:"tick_spacing"`
 	FeeRate                    int32           `gorm:"column:fee_rate;not null" json:"feeRate" db:"fee_rate"`
 	ProtocolFeeRate            int32           `gorm:"column:protocol_fee_rate;not null" json:"protocolFeeRate" db:"protocol_fee_rate"`

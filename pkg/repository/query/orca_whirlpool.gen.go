@@ -33,6 +33,7 @@ func newOrcaWhirlpool(db *gorm.DB) orcaWhirlpool {
 	_orcaWhirlpool.TokenVaultA = field.NewString(tableName, "token_vault_a")
 	_orcaWhirlpool.TokenMintB = field.NewString(tableName, "token_mint_b")
 	_orcaWhirlpool.TokenVaultB = field.NewString(tableName, "token_vault_b")
+	_orcaWhirlpool.Oracle = field.NewString(tableName, "oracle")
 	_orcaWhirlpool.TickSpacing = field.NewInt32(tableName, "tick_spacing")
 	_orcaWhirlpool.FeeRate = field.NewInt32(tableName, "fee_rate")
 	_orcaWhirlpool.ProtocolFeeRate = field.NewInt32(tableName, "protocol_fee_rate")
@@ -61,6 +62,7 @@ type orcaWhirlpool struct {
 	TokenVaultA                field.String
 	TokenMintB                 field.String
 	TokenVaultB                field.String
+	Oracle                     field.String
 	TickSpacing                field.Int32
 	FeeRate                    field.Int32
 	ProtocolFeeRate            field.Int32
@@ -95,6 +97,7 @@ func (o *orcaWhirlpool) updateTableName(table string) *orcaWhirlpool {
 	o.TokenVaultA = field.NewString(table, "token_vault_a")
 	o.TokenMintB = field.NewString(table, "token_mint_b")
 	o.TokenVaultB = field.NewString(table, "token_vault_b")
+	o.Oracle = field.NewString(table, "oracle")
 	o.TickSpacing = field.NewInt32(table, "tick_spacing")
 	o.FeeRate = field.NewInt32(table, "fee_rate")
 	o.ProtocolFeeRate = field.NewInt32(table, "protocol_fee_rate")
@@ -131,13 +134,14 @@ func (o *orcaWhirlpool) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (o *orcaWhirlpool) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 18)
+	o.fieldMap = make(map[string]field.Expr, 19)
 	o.fieldMap["pubkey"] = o.Pubkey
 	o.fieldMap["whirlpools_config"] = o.WhirlpoolsConfig
 	o.fieldMap["token_mint_a"] = o.TokenMintA
 	o.fieldMap["token_vault_a"] = o.TokenVaultA
 	o.fieldMap["token_mint_b"] = o.TokenMintB
 	o.fieldMap["token_vault_b"] = o.TokenVaultB
+	o.fieldMap["oracle"] = o.Oracle
 	o.fieldMap["tick_spacing"] = o.TickSpacing
 	o.fieldMap["fee_rate"] = o.FeeRate
 	o.fieldMap["protocol_fee_rate"] = o.ProtocolFeeRate

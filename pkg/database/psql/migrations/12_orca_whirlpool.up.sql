@@ -6,6 +6,7 @@ CREATE TABLE "orca_whirlpool" (
     "token_vault_a" varchar(255) NOT NULL,
     "token_mint_b" varchar(255) NOT NULL,
     "token_vault_b" varchar(255) NOT NULL,
+    "oracle" varchar(255) NOT NULL,
 
     "tick_spacing" integer NOT NULL,
     "fee_rate" integer NOT NULL,

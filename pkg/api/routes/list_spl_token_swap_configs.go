@@ -50,18 +50,18 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 		}
 		vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = append(vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey], vaultWhitelist)
 	}
-	tokenSwaps, err := h.repo.GetTokenSwapsSortedByLiquidity(c.Request().Context(), tokenPairIDS)
+	tokenSwaps, err := h.repo.GetTokenSwapsWithBalance(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get token swaps")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
 	// TODO(Mocha): Return token swap with the most liquidity
-	tokenSwapsByTokenPairID := make(map[string][]*repository.TokenSwapWithLiquidityRatio)
+	tokenSwapsByTokenPairID := make(map[string][]*repository.TokenSwapWithBalance)
 	for i := range tokenSwaps {
 		tokenSwap := tokenSwaps[i]
 		if _, ok := tokenSwapsByTokenPairID[tokenSwap.TokenPairID]; !ok {
-			tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = []*repository.TokenSwapWithLiquidityRatio{}
+			tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = []*repository.TokenSwapWithBalance{}
 		}
 		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = append(tokenSwapsByTokenPairID[tokenSwap.TokenPairID], &tokenSwap)
 	}
@@ -93,7 +93,7 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 	return c.JSON(http.StatusOK, res)
 }
 
-func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithLiquidityRatio) (*repository.TokenSwapWithLiquidityRatio, error) {
+func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithBalance) (*repository.TokenSwapWithBalance, error) {
 	tokenSwaps, ok := tokenSwapsByTokenPairID[vault.TokenPairID]
 	if !ok {
 		logrus.
@@ -101,7 +101,7 @@ func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[
 			WithField("TokenPairID", vault.TokenPairID).
 			Infof("skipping vault swap config, missing swap")
 	}
-	var eligibleSwaps []*repository.TokenSwapWithLiquidityRatio
+	var eligibleSwaps []*repository.TokenSwapWithBalance
 	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
 	if !ok || len(vaultWhitelists) == 0 {
 		eligibleSwaps = tokenSwaps

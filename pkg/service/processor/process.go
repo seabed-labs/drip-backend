@@ -11,6 +11,7 @@ import (
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
+	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -46,6 +47,7 @@ func NewProcessor(
 
 func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) error {
 	var orcaWhirlpool whirlpool.Whirlpool
+	whirlpoolPubkey := solana2.MustPublicKeyFromBase58(address)
 	if err := p.client.GetAccount(ctx, address, &orcaWhirlpool); err != nil {
 		return err
 	}
@@ -62,10 +64,14 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	sqrtPrice, _ := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
 	feeGrowthGlobalA, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
 	feeGrowthGlobalB, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
+	oracle, _, _ := solana2.FindProgramAddress([][]byte{
+		[]byte("oracle"),
+		whirlpoolPubkey[:],
+	}, drip.ProgramID)
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
 		&model.OrcaWhirlpool{
-			Pubkey:                     address,
+			Pubkey:                     whirlpoolPubkey.String(),
 			WhirlpoolsConfig:           orcaWhirlpool.WhirlpoolsConfig.String(),
 			TokenMintA:                 orcaWhirlpool.TokenMintA.String(),
 			TokenVaultA:                orcaWhirlpool.TokenVaultA.String(),
@@ -83,6 +89,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
 			TokenPairID:                tokenPair.ID,
+			Oracle:                     oracle.String(),
 		},
 	); err != nil {
 		return err
