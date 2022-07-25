@@ -139,6 +139,6 @@ func findOrcaWhirlpoolForVault(
 // Calculates DeltaB from (reserveA + deltaA) * (reserveB - deltaB) = reserveA*reserveB =  k
 // deltaB = reserveB - ((reserveA * reserveB) / (reservaA + deltaA))
 // to be used to MAXIMIZE delta b across all swaps
-func evaluateOrcaWhirlpool(deltaA, reserveA, reserveB uint64) uint64 {
-	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
-}
+//func evaluateOrcaWhirlpool(deltaA, reserveA, reserveB uint64) uint64 {
+//	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
+//}
