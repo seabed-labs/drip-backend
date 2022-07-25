@@ -65,7 +65,6 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
 		&model.OrcaWhirlpool{
-			ID:                         uuid.New().String(),
 			Pubkey:                     address,
 			WhirlpoolsConfig:           orcaWhirlpool.WhirlpoolsConfig.String(),
 			TokenMintA:                 orcaWhirlpool.TokenMintA.String(),
@@ -84,7 +83,6 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
 			TokenPairID:                tokenPair.ID,
-			AToB:                       true,
 		},
 	); err != nil {
 		return err

@@ -36,17 +36,15 @@ func newOrcaWhirlpool(db *gorm.DB) orcaWhirlpool {
 	_orcaWhirlpool.TickSpacing = field.NewInt32(tableName, "tick_spacing")
 	_orcaWhirlpool.FeeRate = field.NewInt32(tableName, "fee_rate")
 	_orcaWhirlpool.ProtocolFeeRate = field.NewInt32(tableName, "protocol_fee_rate")
+	_orcaWhirlpool.TickCurrentIndex = field.NewInt32(tableName, "tick_current_index")
 	_orcaWhirlpool.ProtocolFeeOwedA = field.NewUint64(tableName, "protocol_fee_owed_a")
 	_orcaWhirlpool.ProtocolFeeOwedB = field.NewUint64(tableName, "protocol_fee_owed_b")
 	_orcaWhirlpool.RewardLastUpdatedTimestamp = field.NewUint64(tableName, "reward_last_updated_timestamp")
-	_orcaWhirlpool.TickCurrentIndex = field.NewInt32(tableName, "tick_current_index")
 	_orcaWhirlpool.Liquidity = field.NewUint64(tableName, "liquidity")
 	_orcaWhirlpool.SqrtPrice = field.NewUint64(tableName, "sqrt_price")
 	_orcaWhirlpool.FeeGrowthGlobalA = field.NewUint64(tableName, "fee_growth_global_a")
 	_orcaWhirlpool.FeeGrowthGlobalB = field.NewUint64(tableName, "fee_growth_global_b")
 	_orcaWhirlpool.TokenPairID = field.NewString(tableName, "token_pair_id")
-	_orcaWhirlpool.ID = field.NewString(tableName, "id")
-	_orcaWhirlpool.AToB = field.NewBool(tableName, "a_to_b")
 
 	_orcaWhirlpool.fillFieldMap()
 
@@ -66,17 +64,15 @@ type orcaWhirlpool struct {
 	TickSpacing                field.Int32
 	FeeRate                    field.Int32
 	ProtocolFeeRate            field.Int32
+	TickCurrentIndex           field.Int32
 	ProtocolFeeOwedA           field.Uint64
 	ProtocolFeeOwedB           field.Uint64
 	RewardLastUpdatedTimestamp field.Uint64
-	TickCurrentIndex           field.Int32
 	Liquidity                  field.Uint64
 	SqrtPrice                  field.Uint64
 	FeeGrowthGlobalA           field.Uint64
 	FeeGrowthGlobalB           field.Uint64
 	TokenPairID                field.String
-	ID                         field.String
-	AToB                       field.Bool
 
 	fieldMap map[string]field.Expr
 }
@@ -102,17 +98,15 @@ func (o *orcaWhirlpool) updateTableName(table string) *orcaWhirlpool {
 	o.TickSpacing = field.NewInt32(table, "tick_spacing")
 	o.FeeRate = field.NewInt32(table, "fee_rate")
 	o.ProtocolFeeRate = field.NewInt32(table, "protocol_fee_rate")
+	o.TickCurrentIndex = field.NewInt32(table, "tick_current_index")
 	o.ProtocolFeeOwedA = field.NewUint64(table, "protocol_fee_owed_a")
 	o.ProtocolFeeOwedB = field.NewUint64(table, "protocol_fee_owed_b")
 	o.RewardLastUpdatedTimestamp = field.NewUint64(table, "reward_last_updated_timestamp")
-	o.TickCurrentIndex = field.NewInt32(table, "tick_current_index")
 	o.Liquidity = field.NewUint64(table, "liquidity")
 	o.SqrtPrice = field.NewUint64(table, "sqrt_price")
 	o.FeeGrowthGlobalA = field.NewUint64(table, "fee_growth_global_a")
 	o.FeeGrowthGlobalB = field.NewUint64(table, "fee_growth_global_b")
 	o.TokenPairID = field.NewString(table, "token_pair_id")
-	o.ID = field.NewString(table, "id")
-	o.AToB = field.NewBool(table, "a_to_b")
 
 	o.fillFieldMap()
 
@@ -137,7 +131,7 @@ func (o *orcaWhirlpool) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (o *orcaWhirlpool) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 20)
+	o.fieldMap = make(map[string]field.Expr, 18)
 	o.fieldMap["pubkey"] = o.Pubkey
 	o.fieldMap["whirlpools_config"] = o.WhirlpoolsConfig
 	o.fieldMap["token_mint_a"] = o.TokenMintA
@@ -147,17 +141,15 @@ func (o *orcaWhirlpool) fillFieldMap() {
 	o.fieldMap["tick_spacing"] = o.TickSpacing
 	o.fieldMap["fee_rate"] = o.FeeRate
 	o.fieldMap["protocol_fee_rate"] = o.ProtocolFeeRate
+	o.fieldMap["tick_current_index"] = o.TickCurrentIndex
 	o.fieldMap["protocol_fee_owed_a"] = o.ProtocolFeeOwedA
 	o.fieldMap["protocol_fee_owed_b"] = o.ProtocolFeeOwedB
 	o.fieldMap["reward_last_updated_timestamp"] = o.RewardLastUpdatedTimestamp
-	o.fieldMap["tick_current_index"] = o.TickCurrentIndex
 	o.fieldMap["liquidity"] = o.Liquidity
 	o.fieldMap["sqrt_price"] = o.SqrtPrice
 	o.fieldMap["fee_growth_global_a"] = o.FeeGrowthGlobalA
 	o.fieldMap["fee_growth_global_b"] = o.FeeGrowthGlobalB
 	o.fieldMap["token_pair_id"] = o.TokenPairID
-	o.fieldMap["id"] = o.ID
-	o.fieldMap["a_to_b"] = o.AToB
 }
 
 func (o orcaWhirlpool) clone(db *gorm.DB) orcaWhirlpool {

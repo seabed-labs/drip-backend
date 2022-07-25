@@ -7,15 +7,14 @@ CREATE TABLE "orca_whirlpool" (
     "token_mint_b" varchar(255) NOT NULL,
     "token_vault_b" varchar(255) NOT NULL,
 
-    "tick_spacing" smallint NOT NULL,
-    "fee_rate" smallint NOT NULL,
-    "protocol_fee_rate" smallint NOT NULL,
-
-    "protocol_fee_owed_a" bigint NOT NULL,
-    "protocol_fee_owed_b" bigint NOT NULL,
-    "reward_last_updated_timestamp" bigint NOT NULL,
+    "tick_spacing" integer NOT NULL,
+    "fee_rate" integer NOT NULL,
+    "protocol_fee_rate" integer NOT NULL,
     "tick_current_index" integer NOT NULL,
 
+    "protocol_fee_owed_a" numeric NOT NULL,
+    "protocol_fee_owed_b" numeric NOT NULL,
+    "reward_last_updated_timestamp" numeric NOT NULL,
     "liquidity" numeric NOT NULL,
     "sqrt_price" numeric NOT NULL,
     "fee_growth_global_a" numeric NOT NULL,
