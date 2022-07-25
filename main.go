@@ -45,7 +45,7 @@ func getDependencies() []fx.Option {
 		fx.Invoke(
 			// func() { log.SetFormatter(&log.JSONFormatter{}) },
 			psql2.RunMigrations,
-			api.APIServer,
+			api.StartServer,
 		),
 		fx.NopLogger,
 	}

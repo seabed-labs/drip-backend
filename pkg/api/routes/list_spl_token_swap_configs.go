@@ -11,8 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsParams) error {
-	var res Swagger.ListSwapConfigs
+func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltokenswapconfigsParams) error {
+	var res Swagger.ListSplTokenSwapConfigs
 
 	var vaults []*model.Vault
 	if params.Vault != nil {
@@ -73,19 +73,21 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 			logrus.WithError(err).Errorf("failed to get token swap for vault")
 			continue
 		}
-		res = append(res, Swagger.SwapConfig{
-			Swap:               tokenSwap.Pubkey,
-			SwapAuthority:      tokenSwap.Authority,
-			SwapFeeAccount:     tokenSwap.FeeAccount,
-			SwapTokenAAccount:  tokenSwap.TokenAAccount,
-			SwapTokenBAccount:  tokenSwap.TokenBAccount,
-			SwapTokenMint:      tokenSwap.Mint,
-			TokenAMint:         tokenSwap.TokenAMint,
-			TokenBMint:         tokenSwap.TokenBMint,
-			Vault:              vault.Pubkey,
-			VaultProtoConfig:   vault.ProtoConfig,
-			VaultTokenAAccount: vault.TokenAAccount,
-			VaultTokenBAccount: vault.TokenBAccount,
+		res = append(res, Swagger.SplTokenSwapConfig{
+			Swap:              tokenSwap.Pubkey,
+			SwapAuthority:     tokenSwap.Authority,
+			SwapFeeAccount:    tokenSwap.FeeAccount,
+			SwapTokenAAccount: tokenSwap.TokenAAccount,
+			SwapTokenBAccount: tokenSwap.TokenBAccount,
+			SwapTokenMint:     tokenSwap.Mint,
+			DripCommon: Swagger.DripCommon{
+				TokenAMint:         tokenSwap.TokenAMint,
+				TokenBMint:         tokenSwap.TokenBMint,
+				Vault:              vault.Pubkey,
+				VaultProtoConfig:   vault.ProtoConfig,
+				VaultTokenAAccount: vault.TokenAAccount,
+				VaultTokenBAccount: vault.TokenBAccount,
+			},
 		})
 	}
 	return c.JSON(http.StatusOK, res)

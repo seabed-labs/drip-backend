@@ -15,8 +15,9 @@ type TokenSwapWithLiquidityRatio struct {
 	model.TokenSwap
 	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
 	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
-	//LiquidityRatio      bin.Float128 `json:"liquidityRatio" db:"liquidity_ratio"`
 }
+
+// TODO(Mocha): clean this up, likely as seperate repo files
 
 type Repository interface {
 	InsertTokenPairs(context.Context, ...*model.TokenPair) error
@@ -27,6 +28,7 @@ type Repository interface {
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
+	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
@@ -57,6 +59,16 @@ type Repository interface {
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model.OrcaWhirlpool) error {
+	return d.repo.OrcaWhirlpool.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "pubkey"}, {Name: "token_mint_a"}, {Name: "token_mint_b"}},
+			UpdateAll: true,
+		}).
+		Create(whirlpools...)
 }
 
 func (d repositoryImpl) GetVaultWhitelistsByVaultAddress(ctx context.Context, vaultPubkeys []string) ([]*model.VaultWhitelist, error) {

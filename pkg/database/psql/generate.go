@@ -89,5 +89,15 @@ func GenerateModels(
 		gen.FieldType("periodic_drip_amount", "uint64"),
 	).AddMethod(ModelUtil{})
 
+	g.GenerateModel("orca_whirlpool",
+		gen.FieldType("protocol_fee_owed_a", "decimal.Decimal"),
+		gen.FieldType("protocol_fee_owed_b", "decimal.Decimal"),
+		gen.FieldType("reward_last_updated_timestamp", "decimal.Decimal"),
+		gen.FieldType("liquidity", "decimal.Decimal"),
+		gen.FieldType("sqrt_price", "decimal.Decimal"),
+		gen.FieldType("fee_growth_global_a", "decimal.Decimal"),
+		gen.FieldType("fee_growth_global_b", "decimal.Decimal"),
+	).AddMethod(ModelUtil{})
+
 	g.Execute()
 }

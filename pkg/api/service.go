@@ -6,23 +6,22 @@ import (
 	"net/http"
 	"time"
 
-	middleware2 "github.com/dcaf-labs/drip/pkg/api/middleware"
+	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
-
 	"github.com/dcaf-labs/drip/pkg/configs"
 	swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
 
-func APIServer(
+func StartServer(
 	lc fx.Lifecycle,
 	config *configs.AppConfig,
-	middlewareHandler *middleware2.Handler,
+	middlewareHandler *middleware.Handler,
 	apiHandler *controller.Handler,
 ) {
 	var httpSrv *http.Server
@@ -40,7 +39,7 @@ func APIServer(
 
 func listenAndServe(
 	config *configs.AppConfig,
-	middlewareHandler *middleware2.Handler,
+	middlewareHandler *middleware.Handler,
 	apiHandler *controller.Handler,
 ) (*http.Server, error) {
 	swaggerSpec, err := swagger.GetSwagger()
@@ -49,7 +48,7 @@ func listenAndServe(
 	}
 	swaggerSpec.Servers = nil
 	e := echo.New()
-	e.Use(middleware.Recover())
+	e.Use(echoMiddleware.Recover())
 	e.Use(middlewareHandler.ValidateAccessToken)
 	e.Use(middlewareHandler.RateLimit)
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))

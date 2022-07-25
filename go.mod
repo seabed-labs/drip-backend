@@ -6,8 +6,8 @@ go 1.18
 replace github.com/dfuse-io/logging => github.com/streamingfast/logging v0.0.0-20210109005628-b97a57253f70
 
 require (
+	github.com/dcaf-labs/solana-go-clients v0.0.0-20220725174303-d48d42b12f47
 	github.com/deepmap/oapi-codegen v1.10.1
-	github.com/gagliardetto/gofuzz v1.2.2
 	github.com/getkin/kin-openapi v0.94.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/mock v1.6.0
@@ -17,19 +17,19 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/lib/pq v1.10.2
 	github.com/shopspring/decimal v1.3.1
-	github.com/stretchr/testify v1.8.0
 	github.com/test-go/testify v1.1.4
+	github.com/ulule/limiter/v3 v3.10.0
 	google.golang.org/api v0.86.0
 	gorm.io/driver/postgres v1.3.4
 	gorm.io/gen v0.3.9
 	gorm.io/gorm v1.23.7
+	gorm.io/plugin/dbresolver v1.2.1
 )
 
 require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/dcaf-labs/solana-go-clients v0.0.0-20220718230302-c0c931c67f32 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
@@ -58,7 +58,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/ulule/limiter/v3 v3.10.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
@@ -76,7 +75,6 @@ require (
 	gorm.io/datatypes v1.0.7 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
 	gorm.io/hints v1.1.0 // indirect
-	gorm.io/plugin/dbresolver v1.2.1 // indirect
 )
 
 require (
@@ -85,12 +83,12 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/aybabtme/rgbterm v0.0.0-20170906152045-cc83f3b3ce59 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
-	github.com/davecgh/go-spew v1.1.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gagliardetto/binary v0.6.1
 	github.com/gagliardetto/solana-go v1.4.0
-	github.com/gagliardetto/treeout v0.1.4
+	github.com/gagliardetto/treeout v0.1.4 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gorilla/schema v1.2.0
 	github.com/ilyakaznacheev/cleanenv v1.2.6
