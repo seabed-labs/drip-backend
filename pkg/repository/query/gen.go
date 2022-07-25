@@ -14,6 +14,7 @@ import (
 func Use(db *gorm.DB) *Query {
 	return &Query{
 		db:                  db,
+		OrcaWhirlpool:       newOrcaWhirlpool(db),
 		Position:            newPosition(db),
 		ProtoConfig:         newProtoConfig(db),
 		SchemaMigration:     newSchemaMigration(db),
@@ -33,6 +34,7 @@ func Use(db *gorm.DB) *Query {
 type Query struct {
 	db *gorm.DB
 
+	OrcaWhirlpool       orcaWhirlpool
 	Position            position
 	ProtoConfig         protoConfig
 	SchemaMigration     schemaMigration
@@ -53,6 +55,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:                  db,
+		OrcaWhirlpool:       q.OrcaWhirlpool.clone(db),
 		Position:            q.Position.clone(db),
 		ProtoConfig:         q.ProtoConfig.clone(db),
 		SchemaMigration:     q.SchemaMigration.clone(db),
@@ -70,6 +73,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
+	OrcaWhirlpool       *orcaWhirlpoolDo
 	Position            *positionDo
 	ProtoConfig         *protoConfigDo
 	SchemaMigration     *schemaMigrationDo
@@ -87,6 +91,7 @@ type queryCtx struct {
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		OrcaWhirlpool:       q.OrcaWhirlpool.WithContext(ctx),
 		Position:            q.Position.WithContext(ctx),
 		ProtoConfig:         q.ProtoConfig.WithContext(ctx),
 		SchemaMigration:     q.SchemaMigration.WithContext(ctx),

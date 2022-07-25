@@ -22,6 +22,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// DripCommon defines model for dripCommon.
+type DripCommon struct {
+	TokenAMint         string `json:"tokenAMint"`
+	TokenBMint         string `json:"tokenBMint"`
+	Vault              string `json:"vault"`
+	VaultProtoConfig   string `json:"vaultProtoConfig"`
+	VaultTokenAAccount string `json:"vaultTokenAAccount"`
+	VaultTokenBAccount string `json:"vaultTokenBAccount"`
+}
+
 // ErrorResponse defines model for errorResponse.
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -43,14 +53,17 @@ type ExpandedAdminVault struct {
 // ListExpandedAdminVaults defines model for listExpandedAdminVaults.
 type ListExpandedAdminVaults []ExpandedAdminVault
 
+// ListOrcaWhirlpoolConfigs defines model for listOrcaWhirlpoolConfigs.
+type ListOrcaWhirlpoolConfigs []OrcaWhirlpoolConfig
+
 // ListPositions defines model for listPositions.
 type ListPositions []Position
 
 // ListProtoConfigs defines model for listProtoConfigs.
 type ListProtoConfigs []ProtoConfig
 
-// ListSwapConfigs defines model for listSwapConfigs.
-type ListSwapConfigs []SwapConfig
+// ListSplTokenSwapConfigs defines model for listSplTokenSwapConfigs.
+type ListSplTokenSwapConfigs []SplTokenSwapConfig
 
 // ListTokenPairs defines model for listTokenPairs.
 type ListTokenPairs []TokenPair
@@ -77,6 +90,17 @@ type MintRequest struct {
 // MintResponse defines model for mintResponse.
 type MintResponse struct {
 	TxHash string `json:"txHash"`
+}
+
+// OrcaWhirlpoolConfig defines model for orcaWhirlpoolConfig.
+type OrcaWhirlpoolConfig struct {
+	// Embedded struct due to allOf(#/components/schemas/dripCommon)
+	DripCommon `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	Oracle      string `json:"oracle"`
+	TokenVaultA string `json:"tokenVaultA"`
+	TokenVaultB string `json:"tokenVaultB"`
+	Whirlpool   string `json:"whirlpool"`
 }
 
 // PingResponse defines model for pingResponse.
@@ -106,20 +130,17 @@ type ProtoConfig struct {
 	TriggerDcaSpread     int    `json:"triggerDcaSpread"`
 }
 
-// SwapConfig defines model for swapConfig.
-type SwapConfig struct {
-	Swap               string `json:"swap"`
-	SwapAuthority      string `json:"swapAuthority"`
-	SwapFeeAccount     string `json:"swapFeeAccount"`
-	SwapTokenAAccount  string `json:"swapTokenAAccount"`
-	SwapTokenBAccount  string `json:"swapTokenBAccount"`
-	SwapTokenMint      string `json:"swapTokenMint"`
-	TokenAMint         string `json:"tokenAMint"`
-	TokenBMint         string `json:"tokenBMint"`
-	Vault              string `json:"vault"`
-	VaultProtoConfig   string `json:"vaultProtoConfig"`
-	VaultTokenAAccount string `json:"vaultTokenAAccount"`
-	VaultTokenBAccount string `json:"vaultTokenBAccount"`
+// SplTokenSwapConfig defines model for splTokenSwapConfig.
+type SplTokenSwapConfig struct {
+	// Embedded struct due to allOf(#/components/schemas/dripCommon)
+	DripCommon `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	Swap              string `json:"swap"`
+	SwapAuthority     string `json:"swapAuthority"`
+	SwapFeeAccount    string `json:"swapFeeAccount"`
+	SwapTokenAAccount string `json:"swapTokenAAccount"`
+	SwapTokenBAccount string `json:"swapTokenBAccount"`
+	SwapTokenMint     string `json:"swapTokenMint"`
 }
 
 // Token defines model for token.
@@ -245,6 +266,11 @@ type GetAdminVaultsParamsExpand string
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
 
+// GetOrcawhirlpoolconfigsParams defines parameters for GetOrcawhirlpoolconfigs.
+type GetOrcawhirlpoolconfigsParams struct {
+	Vault *VaultQueryParam `json:"vault,omitempty"`
+}
+
 // GetPositionsParams defines parameters for GetPositions.
 type GetPositionsParams struct {
 	Wallet RequiredWalletQueryParam `json:"Wallet"`
@@ -256,8 +282,8 @@ type GetProtoconfigsParams struct {
 	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
-// GetSwapConfigsParams defines parameters for GetSwapConfigs.
-type GetSwapConfigsParams struct {
+// GetSpltokenswapconfigsParams defines parameters for GetSpltokenswapconfigs.
+type GetSpltokenswapconfigsParams struct {
 	Vault *VaultQueryParam `json:"vault,omitempty"`
 }
 
@@ -385,17 +411,20 @@ type ClientInterface interface {
 
 	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetOrcawhirlpoolconfigs request
+	GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetPositions request
 	GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetProtoconfigs request
 	GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetSpltokenswapconfigs request
+	GetSpltokenswapconfigs(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetSwapConfigs request
-	GetSwapConfigs(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetSwaps request
 	GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -473,6 +502,18 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrcawhirlpoolconfigsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetPositionsRequest(c.Server, params)
 	if err != nil {
@@ -497,8 +538,8 @@ func (c *Client) GetProtoconfigs(ctx context.Context, params *GetProtoconfigsPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSwaggerJsonRequest(c.Server)
+func (c *Client) GetSpltokenswapconfigs(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSpltokenswapconfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -509,8 +550,8 @@ func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSwapConfigs(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSwapConfigsRequest(c.Server, params)
+func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSwaggerJsonRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -795,6 +836,53 @@ func NewPostMintRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
+// NewGetOrcawhirlpoolconfigsRequest generates requests for GetOrcawhirlpoolconfigs
+func NewGetOrcawhirlpoolconfigsRequest(server string, params *GetOrcawhirlpoolconfigsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/orcawhirlpoolconfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Vault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetPositionsRequest generates requests for GetPositions
 func NewGetPositionsRequest(server string, params *GetPositionsParams) (*http.Request, error) {
 	var err error
@@ -901,8 +989,8 @@ func NewGetProtoconfigsRequest(server string, params *GetProtoconfigsParams) (*h
 	return req, nil
 }
 
-// NewGetSwaggerJsonRequest generates requests for GetSwaggerJson
-func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
+// NewGetSpltokenswapconfigsRequest generates requests for GetSpltokenswapconfigs
+func NewGetSpltokenswapconfigsRequest(server string, params *GetSpltokenswapconfigsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -910,34 +998,7 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/swagger.json")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetSwapConfigsRequest generates requests for GetSwapConfigs
-func NewGetSwapConfigsRequest(server string, params *GetSwapConfigsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/swapConfigs")
+	operationPath := fmt.Sprintf("/spltokenswapconfigs")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -966,6 +1027,33 @@ func NewGetSwapConfigsRequest(server string, params *GetSwapConfigsParams) (*htt
 	}
 
 	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSwaggerJsonRequest generates requests for GetSwaggerJson
+func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/swagger.json")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1375,17 +1463,20 @@ type ClientWithResponsesInterface interface {
 
 	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
+	// GetOrcawhirlpoolconfigs request
+	GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error)
+
 	// GetPositions request
 	GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error)
 
 	// GetProtoconfigs request
 	GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
 
+	// GetSpltokenswapconfigs request
+	GetSpltokenswapconfigsWithResponse(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetSpltokenswapconfigsResponse, error)
+
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
-
-	// GetSwapConfigs request
-	GetSwapConfigsWithResponse(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*GetSwapConfigsResponse, error)
 
 	// GetSwaps request
 	GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error)
@@ -1498,6 +1589,30 @@ func (r PostMintResponse) StatusCode() int {
 	return 0
 }
 
+type GetOrcawhirlpoolconfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListOrcaWhirlpoolConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrcawhirlpoolconfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrcawhirlpoolconfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetPositionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1546,6 +1661,30 @@ func (r GetProtoconfigsResponse) StatusCode() int {
 	return 0
 }
 
+type GetSpltokenswapconfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListSplTokenSwapConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSpltokenswapconfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSpltokenswapconfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetSwaggerJsonResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1562,30 +1701,6 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetSwapConfigsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListSwapConfigs
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetSwapConfigsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetSwapConfigsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1756,6 +1871,15 @@ func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body Pos
 	return ParsePostMintResponse(rsp)
 }
 
+// GetOrcawhirlpoolconfigsWithResponse request returning *GetOrcawhirlpoolconfigsResponse
+func (c *ClientWithResponses) GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error) {
+	rsp, err := c.GetOrcawhirlpoolconfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrcawhirlpoolconfigsResponse(rsp)
+}
+
 // GetPositionsWithResponse request returning *GetPositionsResponse
 func (c *ClientWithResponses) GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error) {
 	rsp, err := c.GetPositions(ctx, params, reqEditors...)
@@ -1774,6 +1898,15 @@ func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, p
 	return ParseGetProtoconfigsResponse(rsp)
 }
 
+// GetSpltokenswapconfigsWithResponse request returning *GetSpltokenswapconfigsResponse
+func (c *ClientWithResponses) GetSpltokenswapconfigsWithResponse(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetSpltokenswapconfigsResponse, error) {
+	rsp, err := c.GetSpltokenswapconfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSpltokenswapconfigsResponse(rsp)
+}
+
 // GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
 func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error) {
 	rsp, err := c.GetSwaggerJson(ctx, reqEditors...)
@@ -1781,15 +1914,6 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
-}
-
-// GetSwapConfigsWithResponse request returning *GetSwapConfigsResponse
-func (c *ClientWithResponses) GetSwapConfigsWithResponse(ctx context.Context, params *GetSwapConfigsParams, reqEditors ...RequestEditorFn) (*GetSwapConfigsResponse, error) {
-	rsp, err := c.GetSwapConfigs(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetSwapConfigsResponse(rsp)
 }
 
 // GetSwapsWithResponse request returning *GetSwapsResponse
@@ -1990,6 +2114,46 @@ func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	return response, nil
 }
 
+// ParseGetOrcawhirlpoolconfigsResponse parses an HTTP response from a GetOrcawhirlpoolconfigsWithResponse call
+func ParseGetOrcawhirlpoolconfigsResponse(rsp *http.Response) (*GetOrcawhirlpoolconfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrcawhirlpoolconfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListOrcaWhirlpoolConfigs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetPositionsResponse parses an HTTP response from a GetPositionsWithResponse call
 func ParseGetPositionsResponse(rsp *http.Response) (*GetPositionsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2070,6 +2234,46 @@ func ParseGetProtoconfigsResponse(rsp *http.Response) (*GetProtoconfigsResponse,
 	return response, nil
 }
 
+// ParseGetSpltokenswapconfigsResponse parses an HTTP response from a GetSpltokenswapconfigsWithResponse call
+func ParseGetSpltokenswapconfigsResponse(rsp *http.Response) (*GetSpltokenswapconfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSpltokenswapconfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListSplTokenSwapConfigs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetSwaggerJsonResponse parses an HTTP response from a GetSwaggerJsonWithResponse call
 func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2090,46 +2294,6 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetSwapConfigsResponse parses an HTTP response from a GetSwapConfigsWithResponse call
-func ParseGetSwapConfigsResponse(rsp *http.Response) (*GetSwapConfigsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetSwapConfigsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListSwapConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
 
 	}
 
@@ -2350,18 +2514,21 @@ type ServerInterface interface {
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
+	// Get Orca Whirlpool Swap Configs
+	// (GET /orcawhirlpoolconfigs)
+	GetOrcawhirlpoolconfigs(ctx echo.Context, params GetOrcawhirlpoolconfigsParams) error
 	// Get User Positions
 	// (GET /positions)
 	GetPositions(ctx echo.Context, params GetPositionsParams) error
 	// Get Proto Configs
 	// (GET /protoconfigs)
 	GetProtoconfigs(ctx echo.Context, params GetProtoconfigsParams) error
+	// Get Token Swaps Configs
+	// (GET /spltokenswapconfigs)
+	GetSpltokenswapconfigs(ctx echo.Context, params GetSpltokenswapconfigsParams) error
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
-	// Get Token Swaps Configs
-	// (GET /swapConfigs)
-	GetSwapConfigs(ctx echo.Context, params GetSwapConfigsParams) error
 	// Get Token Swaps
 	// (GET /swaps)
 	GetSwaps(ctx echo.Context, params GetSwapsParams) error
@@ -2498,6 +2665,24 @@ func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 	return err
 }
 
+// GetOrcawhirlpoolconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetOrcawhirlpoolconfigs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrcawhirlpoolconfigsParams
+	// ------------- Optional query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetOrcawhirlpoolconfigs(ctx, params)
+	return err
+}
+
 // GetPositions converts echo context to params.
 func (w *ServerInterfaceWrapper) GetPositions(ctx echo.Context) error {
 	var err error
@@ -2541,21 +2726,12 @@ func (w *ServerInterfaceWrapper) GetProtoconfigs(ctx echo.Context) error {
 	return err
 }
 
-// GetSwaggerJson converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetSwaggerJson(ctx)
-	return err
-}
-
-// GetSwapConfigs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSwapConfigs(ctx echo.Context) error {
+// GetSpltokenswapconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSpltokenswapconfigs(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetSwapConfigsParams
+	var params GetSpltokenswapconfigsParams
 	// ------------- Optional query parameter "vault" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
@@ -2564,7 +2740,16 @@ func (w *ServerInterfaceWrapper) GetSwapConfigs(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetSwapConfigs(ctx, params)
+	err = w.Handler.GetSpltokenswapconfigs(ctx, params)
+	return err
+}
+
+// GetSwaggerJson converts echo context to params.
+func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetSwaggerJson(ctx)
 	return err
 }
 
@@ -2739,10 +2924,11 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.PUT(baseURL+"/admin/vault/:pubkeyPath/enable", wrapper.PutAdminVaultPubkeyPathEnable)
 	router.GET(baseURL+"/admin/vaults", wrapper.GetAdminVaults)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
+	router.GET(baseURL+"/orcawhirlpoolconfigs", wrapper.GetOrcawhirlpoolconfigs)
 	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
+	router.GET(baseURL+"/spltokenswapconfigs", wrapper.GetSpltokenswapconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
-	router.GET(baseURL+"/swapConfigs", wrapper.GetSwapConfigs)
 	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
@@ -2754,58 +2940,62 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/wUAAP//6w+Eg+dCAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

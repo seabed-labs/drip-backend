@@ -95,6 +95,21 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultsByTokenAccountAddress(ctx, p
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByTokenAccountAddress", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByTokenAccountAddress), ctx, pubkey)
 }
 
+// GetOrcaWhirlpoolsByTokenPairIDs mocks base method.
+func (m *MockRepository) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolsByTokenPairIDs", ctx, tokenPairIDs)
+	ret0, _ := ret[0].([]*model.OrcaWhirlpool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrcaWhirlpoolsByTokenPairIDs indicates an expected call of GetOrcaWhirlpoolsByTokenPairIDs.
+func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolsByTokenPairIDs(ctx, tokenPairIDs interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolsByTokenPairIDs", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolsByTokenPairIDs), ctx, tokenPairIDs)
+}
+
 // GetPositionByNFTMint mocks base method.
 func (m *MockRepository) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	m.ctrl.T.Helper()
@@ -245,19 +260,19 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwaps(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwaps", reflect.TypeOf((*MockRepository)(nil).GetTokenSwaps), arg0, arg1)
 }
 
-// GetTokenSwapsSortedByLiquidity mocks base method.
-func (m *MockRepository) GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error) {
+// GetTokenSwapsWithBalance mocks base method.
+func (m *MockRepository) GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenSwapsSortedByLiquidity", ctx, tokenPairIDs)
-	ret0, _ := ret[0].([]TokenSwapWithLiquidityRatio)
+	ret := m.ctrl.Call(m, "GetTokenSwapsWithBalance", ctx, tokenPairIDs)
+	ret0, _ := ret[0].([]TokenSwapWithBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetTokenSwapsSortedByLiquidity indicates an expected call of GetTokenSwapsSortedByLiquidity.
-func (mr *MockRepositoryMockRecorder) GetTokenSwapsSortedByLiquidity(ctx, tokenPairIDs interface{}) *gomock.Call {
+// GetTokenSwapsWithBalance indicates an expected call of GetTokenSwapsWithBalance.
+func (mr *MockRepositoryMockRecorder) GetTokenSwapsWithBalance(ctx, tokenPairIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsSortedByLiquidity", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsSortedByLiquidity), ctx, tokenPairIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsWithBalance", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsWithBalance), ctx, tokenPairIDs)
 }
 
 // GetTokensByMints mocks base method.
@@ -367,6 +382,25 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
+}
+
+// UpsertOrcaWhirlpools mocks base method.
+func (m *MockRepository) UpsertOrcaWhirlpools(arg0 context.Context, arg1 ...*model.OrcaWhirlpool) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertOrcaWhirlpools", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertOrcaWhirlpools indicates an expected call of UpsertOrcaWhirlpools.
+func (mr *MockRepositoryMockRecorder) UpsertOrcaWhirlpools(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertOrcaWhirlpools", reflect.TypeOf((*MockRepository)(nil).UpsertOrcaWhirlpools), varargs...)
 }
 
 // UpsertPositions mocks base method.

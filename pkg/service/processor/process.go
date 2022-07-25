@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
@@ -9,6 +10,8 @@ import (
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
+	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
+	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -21,6 +24,7 @@ type Processor interface {
 	UpsertPositionByAddress(context.Context, string) error
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
+	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
 	UpsertTokenAccountBalanceByAddress(context.Context, string, bool) error
 	UpsertTokenAccountBalance(context.Context, string, token.Account, bool) error
@@ -39,6 +43,65 @@ func NewProcessor(
 		repo:   repo,
 		client: client,
 	}
+}
+
+func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) error {
+	var orcaWhirlpool whirlpool.Whirlpool
+	whirlpoolPubkey := solana2.MustPublicKeyFromBase58(address)
+	if err := p.client.GetAccount(ctx, address, &orcaWhirlpool); err != nil {
+		return err
+	}
+
+	tokenPair, err := p.ensureTokenPair(ctx, orcaWhirlpool.TokenMintA.String(), orcaWhirlpool.TokenMintB.String())
+	if err != nil {
+		return err
+	}
+
+	protocolFeeOwedA, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
+	protocolFeeOwedB, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
+	rewardLastUpdatedTimestamp, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
+	liquidity, _ := decimal.NewFromString(orcaWhirlpool.Liquidity.String())
+	sqrtPrice, _ := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
+	feeGrowthGlobalA, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
+	feeGrowthGlobalB, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
+	oracle, _, _ := solana2.FindProgramAddress([][]byte{
+		[]byte("oracle"),
+		whirlpoolPubkey[:],
+	}, drip.ProgramID)
+
+	if err := p.repo.UpsertOrcaWhirlpools(ctx,
+		&model.OrcaWhirlpool{
+			Pubkey:                     whirlpoolPubkey.String(),
+			WhirlpoolsConfig:           orcaWhirlpool.WhirlpoolsConfig.String(),
+			TokenMintA:                 orcaWhirlpool.TokenMintA.String(),
+			TokenVaultA:                orcaWhirlpool.TokenVaultA.String(),
+			TokenMintB:                 orcaWhirlpool.TokenMintB.String(),
+			TokenVaultB:                orcaWhirlpool.TokenVaultB.String(),
+			TickSpacing:                int32(orcaWhirlpool.TickSpacing),
+			FeeRate:                    int32(orcaWhirlpool.FeeRate),
+			ProtocolFeeRate:            int32(orcaWhirlpool.ProtocolFeeRate),
+			ProtocolFeeOwedA:           protocolFeeOwedA,
+			ProtocolFeeOwedB:           protocolFeeOwedB,
+			RewardLastUpdatedTimestamp: rewardLastUpdatedTimestamp,
+			TickCurrentIndex:           orcaWhirlpool.TickCurrentIndex,
+			Liquidity:                  liquidity,
+			SqrtPrice:                  sqrtPrice,
+			FeeGrowthGlobalA:           feeGrowthGlobalA,
+			FeeGrowthGlobalB:           feeGrowthGlobalB,
+			TokenPairID:                tokenPair.ID,
+			Oracle:                     oracle.String(),
+		},
+	); err != nil {
+		return err
+	}
+
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String(), true); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String(), true); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) error {

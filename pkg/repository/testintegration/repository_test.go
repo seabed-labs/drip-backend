@@ -29,7 +29,7 @@ import (
 //GetTokenPairByID(context.Context, string) (*model2.TokenPair, error)
 //GetTokenPairs(context.Context, *string, *string) ([]*model2.TokenPair, error)
 //GetTokenSwaps(context.Context, []string) ([]*model2.TokenSwap, error)
-//GetTokenSwapsSortedByLiquidity(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithLiquidityRatio, error)
+//GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 //GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
 
 //AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)

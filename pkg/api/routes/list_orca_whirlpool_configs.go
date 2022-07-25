@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsParams) error {
-	var res Swagger.ListSwapConfigs
+func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcawhirlpoolconfigsParams) error {
+	var res Swagger.ListOrcaWhirlpoolConfigs
 
+	// TODO(Mocha): Refactor this and a the token swap config controller
 	var vaults []*model.Vault
 	if params.Vault != nil {
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
@@ -30,6 +30,7 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get vaults"})
 		}
 	}
+
 	var tokenPairIDS []string
 	var vaultPubkeys []string
 	for i := range vaults {
@@ -50,89 +51,94 @@ func (h Handler) GetSwapConfigs(c echo.Context, params Swagger.GetSwapConfigsPar
 		}
 		vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = append(vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey], vaultWhitelist)
 	}
-	tokenSwaps, err := h.repo.GetTokenSwapsSortedByLiquidity(c.Request().Context(), tokenPairIDS)
+
+	orcaWhirlpools, err := h.repo.GetOrcaWhirlpoolsByTokenPairIDs(c.Request().Context(), tokenPairIDS)
 	if err != nil {
-		logrus.WithError(err).Errorf("failed to get token swaps")
+		logrus.WithError(err).Errorf("failed to get orca whirlpools")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
 	}
 
-	// TODO(Mocha): Return token swap with the most liquidity
-	tokenSwapsByTokenPairID := make(map[string][]*repository.TokenSwapWithLiquidityRatio)
-	for i := range tokenSwaps {
-		tokenSwap := tokenSwaps[i]
-		if _, ok := tokenSwapsByTokenPairID[tokenSwap.TokenPairID]; !ok {
-			tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = []*repository.TokenSwapWithLiquidityRatio{}
+	orcaWhirlpoolsByTokenPairID := make(map[string][]*model.OrcaWhirlpool)
+	for i := range orcaWhirlpools {
+		orcaWhirlpool := orcaWhirlpools[i]
+		if _, ok := orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID]; !ok {
+			orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID] = []*model.OrcaWhirlpool{}
 		}
-		tokenSwapsByTokenPairID[tokenSwap.TokenPairID] = append(tokenSwapsByTokenPairID[tokenSwap.TokenPairID], &tokenSwap)
+		orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID] = append(orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID], orcaWhirlpool)
 	}
 
 	for i := range vaults {
 		vault := vaults[i]
-		tokenSwap, err := findTokenSwapForVault(vault, vaultWhitelistsByVaultPubkey, tokenSwapsByTokenPairID)
+		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID)
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to get token swap for vault")
 			continue
 		}
-		res = append(res, Swagger.SwapConfig{
-			Swap:               tokenSwap.Pubkey,
-			SwapAuthority:      tokenSwap.Authority,
-			SwapFeeAccount:     tokenSwap.FeeAccount,
-			SwapTokenAAccount:  tokenSwap.TokenAAccount,
-			SwapTokenBAccount:  tokenSwap.TokenBAccount,
-			SwapTokenMint:      tokenSwap.Mint,
-			TokenAMint:         tokenSwap.TokenAMint,
-			TokenBMint:         tokenSwap.TokenBMint,
-			Vault:              vault.Pubkey,
-			VaultProtoConfig:   vault.ProtoConfig,
-			VaultTokenAAccount: vault.TokenAAccount,
-			VaultTokenBAccount: vault.TokenBAccount,
+		res = append(res, Swagger.OrcaWhirlpoolConfig{
+			Oracle:      orcaWhirlpool.Oracle,
+			TokenVaultA: orcaWhirlpool.TokenVaultA,
+			TokenVaultB: orcaWhirlpool.TokenVaultB,
+			Whirlpool:   orcaWhirlpool.Pubkey,
+			DripCommon: Swagger.DripCommon{
+				TokenAMint:         orcaWhirlpool.TokenMintA,
+				TokenBMint:         orcaWhirlpool.TokenMintB,
+				Vault:              vault.Pubkey,
+				VaultProtoConfig:   vault.ProtoConfig,
+				VaultTokenAAccount: vault.TokenAAccount,
+				VaultTokenBAccount: vault.TokenBAccount,
+			},
 		})
 	}
 	return c.JSON(http.StatusOK, res)
 }
 
-func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithLiquidityRatio) (*repository.TokenSwapWithLiquidityRatio, error) {
-	tokenSwaps, ok := tokenSwapsByTokenPairID[vault.TokenPairID]
+func findOrcaWhirlpoolForVault(
+	vault *model.Vault,
+	vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist,
+	orcaWhirlpoolsByTokenPairID map[string][]*model.OrcaWhirlpool,
+) (*model.OrcaWhirlpool, error) {
+	orcaWhirlpools, ok := orcaWhirlpoolsByTokenPairID[vault.TokenPairID]
 	if !ok {
 		logrus.
 			WithField("vault", vault.Pubkey).
 			WithField("TokenPairID", vault.TokenPairID).
 			Infof("skipping vault swap config, missing swap")
 	}
-	var eligibleSwaps []*repository.TokenSwapWithLiquidityRatio
+	var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
 	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
 	if !ok || len(vaultWhitelists) == 0 {
-		eligibleSwaps = tokenSwaps
+		elgibleOrcaWhirlpools = orcaWhirlpools
 	} else {
-		for _, tokenSwap := range tokenSwaps {
+		for _, tokenSwap := range orcaWhirlpools {
 			for _, vaultWhitelist := range vaultWhitelists {
 				if vaultWhitelist.TokenSwapPubkey == tokenSwap.Pubkey {
-					eligibleSwaps = append(eligibleSwaps, tokenSwap)
+					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, tokenSwap)
 				}
 			}
 		}
 	}
 
-	// TODO(Mocha): Take into account swap fees
-	if len(eligibleSwaps) == 0 {
-		return nil, fmt.Errorf("failed to get token_swap")
+	if len(elgibleOrcaWhirlpools) == 0 {
+		return nil, fmt.Errorf("failed to get orcaWhirlpool")
 	}
-	bestSwap := eligibleSwaps[0]
-	bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
-	for _, eligibleSwap := range eligibleSwaps {
-		swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
-		if swapDeltaB > bestSwapDeltaB {
-			bestSwap = eligibleSwap
-			bestSwapDeltaB = swapDeltaB
-		}
-	}
+	//// TODO(Mocha): Figure how to get deltaB for an orca whirlpool
 
-	return bestSwap, nil
+	//bestSwap := eligibleSwaps[0]
+	//bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
+	//for _, eligibleSwap := range eligibleSwaps {
+	//	swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
+	//	if swapDeltaB > bestSwapDeltaB {
+	//		bestSwap = eligibleSwap
+	//		bestSwapDeltaB = swapDeltaB
+	//	}
+	//}
+
+	return elgibleOrcaWhirlpools[0], nil
 }
 
 // Calculates DeltaB from (reserveA + deltaA) * (reserveB - deltaB) = reserveA*reserveB =  k
 // deltaB = reserveB - ((reserveA * reserveB) / (reservaA + deltaA))
 // to be used to MAXIMIZE delta b across all swaps
-func evaluateTokenSwap(deltaA, reserveA, reserveB uint64) uint64 {
-	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
-}
+//func evaluateOrcaWhirlpool(deltaA, reserveA, reserveB uint64) uint64 {
+//	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
+//}
