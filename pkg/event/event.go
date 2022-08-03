@@ -59,22 +59,22 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	//"PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP",  // Penguin Swap
 
 	// Track Drip accounts
-	//if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
-	//	return err
-	//}
-	//go d.Backfill(context.Background(), drip.ProgramID.String(), d.processDripEvent)
-	//
-	//// Track token_swap program accounts
-	//if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
-	//	return err
-	//}
-	//go d.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processTokenSwapEvent)
-	//
-	//// Track orca_whirlpool program accounts
-	//// TODO(Mocha): remove processor
-	//if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processWhirlpoolEvent); err != nil {
-	//	return err
-	//}
+	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
+		return err
+	}
+	go d.Backfill(context.Background(), drip.ProgramID.String(), d.processDripEvent)
+
+	// Track token_swap program accounts
+	if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processTokenSwapEvent); err != nil {
+		return err
+	}
+	go d.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processTokenSwapEvent)
+
+	// Track orca_whirlpool program accounts
+	// TODO(Mocha): remove processor
+	if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processWhirlpoolEvent); err != nil {
+		return err
+	}
 	go d.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processWhirlpoolEvent)
 
 	// Track Balance Updates Live
