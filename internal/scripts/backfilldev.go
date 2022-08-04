@@ -2,13 +2,10 @@ package scripts
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 
 	configs2 "github.com/dcaf-labs/drip/pkg/configs"
-	"github.com/ilyakaznacheev/cleanenv"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,23 +36,55 @@ func Backfill(
 	config *configs2.AppConfig,
 	processor processor.Processor,
 ) error {
-	if !configs2.IsDev(config.Environment) {
-		logrus.WithField("environment", config.Environment).Infof("skipping backfill")
-		return nil
-	}
-	logrus.Infof("backfilling devnet vaults")
-	configFileName := "./internal/scripts/devnet.yaml"
-	configFileName = fmt.Sprintf("%s/%s", configs2.GetProjectRoot(), configFileName)
-	var vaultConfigs Config
-	if err := cleanenv.ReadConfig(configFileName, &vaultConfigs); err != nil {
-		return err
-	}
-	backfillTokenPairs(vaultConfigs, processor)
-	backfillTokenSwaps(vaultConfigs, processor)
-	backfillProtoConfigs(vaultConfigs, processor)
-	backfillVaults(vaultConfigs, processor)
+	//if !configs2.IsDev(config.Environment) {
+	//	logrus.WithField("environment", config.Environment).Infof("skipping backfill")
+	//	return nil
+	//}
+	//logrus.Infof("backfilling devnet vaults")
+	//configFileName := "./internal/scripts/devnet.yaml"
+	//configFileName = fmt.Sprintf("%s/%s", configs2.GetProjectRoot(), configFileName)
+	//var vaultConfigs Config
+	//if err := cleanenv.ReadConfig(configFileName, &vaultConfigs); err != nil {
+	//	return err
+	//}
+	//backfillTokenPairs(vaultConfigs, processor)
+	//backfillTokenSwaps(vaultConfigs, processor)
+	//backfillProtoConfigs(vaultConfigs, processor)
+	//backfillVaults(vaultConfigs, processor)
 	//backfillTokens(repo, client, vaultConfigs)
 	//backfillVaultPeriods(repo, client, vaultConfigs, vaultMap)
+	for _, address := range []string{
+		"2w9DNJRFGmvN2wuVi3CtLT49cM8DWdKfzAGas1XDw3Ve",
+		"Dr75jCuqpkYCGs4ATp2v31sU6bzDKoCdxJNvxXUUgb4S",
+	} {
+		log := logrus.WithField("address", address)
+		if err := processor.UpsertWhirlpoolByAddress(context.Background(), address); err != nil {
+			log.WithError(err).Error("failed to backfill whirlpool")
+		}
+	}
+
+	for _, address := range []string{
+		"FcbTUmkEuizRjnr17iggHon9rAc2FeQ8uMdjxWBgFb58",
+		"Evy3P7kFy6epfbY3QZmwWiqWj1veZ87LQoCEWYzb3vW7",
+	} {
+		log := logrus.WithField("address", address)
+		if err := processor.UpsertTokenSwapByAddress(context.Background(), address); err != nil {
+			log.WithError(err).Error("failed to backfill spl token swap")
+		}
+	}
+
+	for _, address := range []string{
+		"GHyHWLdLCRkYrXwxaxVrG5LEnkPEP9xVHqXPv3QMYMVZ",
+		"HrQ5YfEWtsc4zNxQqv6dKT8136nsSfDpXWeXnn76xBGs",
+		"8RVA7nF7xmieAV5mJSM7CHGegdm68ZqghvZBGfN9K4mY",
+		"A6yjGfL4qC2y9KXpJGd6eEwHuXoyUsr2QSfBvPNFQDb6",
+	} {
+		log := logrus.WithField("address", address)
+		if err := processor.UpsertVaultByAddress(context.Background(), address); err != nil {
+			log.WithError(err).Error("failed to backfill vault")
+		}
+	}
+
 	logrus.Infof("done backfilling")
 	return nil
 }

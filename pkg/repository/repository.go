@@ -73,7 +73,7 @@ func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...
 	return d.repo.OrcaWhirlpool.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "pubkey"}},
+			Columns:   []clause.Column{{Name: "pubkey"}, {Name: "token_pair_id"}},
 			UpdateAll: true,
 		}).
 		Create(whirlpools...)

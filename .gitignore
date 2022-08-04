@@ -17,3 +17,5 @@
 .idea/
 .DS_Store
 build/.docker/
+
+node_modules/

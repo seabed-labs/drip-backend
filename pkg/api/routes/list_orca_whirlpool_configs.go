@@ -71,7 +71,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 		vault := vaults[i]
 		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID)
 		if err != nil {
-			logrus.WithError(err).Errorf("failed to get token swap for vault")
+			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
 			continue
 		}
 		res = append(res, Swagger.OrcaWhirlpoolConfig{

@@ -9,7 +9,7 @@ import (
 
 type AppConfig struct {
 	Environment    Environment `yaml:"environment" env:"ENV"`
-	DripProgramID  string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"4VBtW5cjQJk8tme9fXMiok6xAfDSwv5Qp7LN6arWEP7x"`
+	DripProgramID  string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
 	GoogleClientID string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
 	Wallet         string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
 	Port           int         `yaml:"port"        env:"PORT"`

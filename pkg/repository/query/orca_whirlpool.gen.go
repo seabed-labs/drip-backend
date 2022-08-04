@@ -46,6 +46,7 @@ func newOrcaWhirlpool(db *gorm.DB) orcaWhirlpool {
 	_orcaWhirlpool.FeeGrowthGlobalA = field.NewUint64(tableName, "fee_growth_global_a")
 	_orcaWhirlpool.FeeGrowthGlobalB = field.NewUint64(tableName, "fee_growth_global_b")
 	_orcaWhirlpool.TokenPairID = field.NewString(tableName, "token_pair_id")
+	_orcaWhirlpool.ID = field.NewString(tableName, "id")
 
 	_orcaWhirlpool.fillFieldMap()
 
@@ -75,6 +76,7 @@ type orcaWhirlpool struct {
 	FeeGrowthGlobalA           field.Uint64
 	FeeGrowthGlobalB           field.Uint64
 	TokenPairID                field.String
+	ID                         field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -110,6 +112,7 @@ func (o *orcaWhirlpool) updateTableName(table string) *orcaWhirlpool {
 	o.FeeGrowthGlobalA = field.NewUint64(table, "fee_growth_global_a")
 	o.FeeGrowthGlobalB = field.NewUint64(table, "fee_growth_global_b")
 	o.TokenPairID = field.NewString(table, "token_pair_id")
+	o.ID = field.NewString(table, "id")
 
 	o.fillFieldMap()
 
@@ -134,7 +137,7 @@ func (o *orcaWhirlpool) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (o *orcaWhirlpool) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 19)
+	o.fieldMap = make(map[string]field.Expr, 20)
 	o.fieldMap["pubkey"] = o.Pubkey
 	o.fieldMap["whirlpools_config"] = o.WhirlpoolsConfig
 	o.fieldMap["token_mint_a"] = o.TokenMintA
@@ -154,6 +157,7 @@ func (o *orcaWhirlpool) fillFieldMap() {
 	o.fieldMap["fee_growth_global_a"] = o.FeeGrowthGlobalA
 	o.fieldMap["fee_growth_global_b"] = o.FeeGrowthGlobalB
 	o.fieldMap["token_pair_id"] = o.TokenPairID
+	o.fieldMap["id"] = o.ID
 }
 
 func (o orcaWhirlpool) clone(db *gorm.DB) orcaWhirlpool {
