@@ -14,7 +14,6 @@ import (
 	"github.com/gagliardetto/solana-go/rpc/ws"
 	"github.com/mr-tron/base58"
 	"github.com/sirupsen/logrus"
-	log "github.com/sirupsen/logrus"
 )
 
 type Solana interface {
@@ -54,11 +53,11 @@ func createClient(
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
-		log.WithError(err).Fatalf("failed to get clients version info")
+		logrus.WithError(err).Fatalf("failed to get clients version info")
 		return impl{}, err
 	}
-	log.
-		WithFields(log.Fields{
+	logrus.
+		WithFields(logrus.Fields{
 			"version": resp.SolanaCore,
 			"url":     url,
 		}).
@@ -74,7 +73,7 @@ func createClient(
 		return impl{}, err
 	}
 	solanaClient.wallet = solWallet
-	log.
+	logrus.
 		WithFields(logrus.Fields{"publicKey": solanaClient.GetWalletPubKey()}).
 		Infof("loaded wallet")
 
@@ -243,18 +242,18 @@ func (s impl) ProgramSubscribe(
 			msg, err := sub.Recv()
 			// TODO(Mocha): This err block is super ugly
 			if err != nil {
-				log.
+				logrus.
 					WithError(err).
-					WithFields(log.Fields{
+					WithFields(logrus.Fields{
 						"event": program,
 					}).
 					Error("failed to get next msg from event ws")
 				// TODO(Mocha): need to handle the case where this fails
 				client, err = ws.Connect(ctx, url)
 				if err != nil {
-					log.
+					logrus.
 						WithError(err).
-						WithFields(log.Fields{
+						WithFields(logrus.Fields{
 							"event": program,
 						}).
 						Error("failed to get new ws client")
@@ -266,9 +265,9 @@ func (s impl) ProgramSubscribe(
 					nil,
 				)
 				if err != nil {
-					log.
+					logrus.
 						WithError(err).
-						WithFields(log.Fields{
+						WithFields(logrus.Fields{
 							"event": program,
 						}).
 						Error("failed to get new program websocket subscription")
@@ -276,8 +275,8 @@ func (s impl) ProgramSubscribe(
 				continue
 			}
 			if msg.Value.Account == nil || msg.Value.Account.Data == nil {
-				log.
-					WithFields(log.Fields{
+				logrus.
+					WithFields(logrus.Fields{
 						"event": program,
 					}).
 					Warning("event ws msg account or account data is nil")
@@ -285,8 +284,8 @@ func (s impl) ProgramSubscribe(
 			}
 			decodedBinary := msg.Value.Account.Data.GetBinary()
 			if decodedBinary == nil {
-				log.
-					WithFields(log.Fields{
+				logrus.
+					WithFields(logrus.Fields{
 						"event": program,
 					}).
 					Warning("event ws msg decoded binary is nil")

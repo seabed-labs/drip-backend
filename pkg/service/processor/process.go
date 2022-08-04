@@ -57,6 +57,11 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
+	inverseTokenPair, err := p.ensureTokenPair(ctx, orcaWhirlpool.TokenMintB.String(), orcaWhirlpool.TokenMintA.String())
+	if err != nil {
+		return err
+	}
+
 	protocolFeeOwedA, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
 	protocolFeeOwedB, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
 	rewardLastUpdatedTimestamp, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
@@ -71,6 +76,8 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
 		&model.OrcaWhirlpool{
+			ID:                         uuid.New().String(),
+			TokenPairID:                tokenPair.ID,
 			Pubkey:                     whirlpoolPubkey.String(),
 			WhirlpoolsConfig:           orcaWhirlpool.WhirlpoolsConfig.String(),
 			TokenMintA:                 orcaWhirlpool.TokenMintA.String(),
@@ -88,7 +95,30 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			SqrtPrice:                  sqrtPrice,
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
-			TokenPairID:                tokenPair.ID,
+			Oracle:                     oracle.String(),
+		},
+		// The only inverse is the token pair ID
+		// For token swap it makes sense to inverse the mints, but for whirlpool it doesn't
+		&model.OrcaWhirlpool{
+			ID:                         uuid.New().String(),
+			TokenPairID:                inverseTokenPair.ID,
+			Pubkey:                     whirlpoolPubkey.String(),
+			WhirlpoolsConfig:           orcaWhirlpool.WhirlpoolsConfig.String(),
+			TokenMintA:                 orcaWhirlpool.TokenMintA.String(),
+			TokenVaultA:                orcaWhirlpool.TokenVaultA.String(),
+			TokenMintB:                 orcaWhirlpool.TokenMintB.String(),
+			TokenVaultB:                orcaWhirlpool.TokenVaultB.String(),
+			TickSpacing:                int32(orcaWhirlpool.TickSpacing),
+			FeeRate:                    int32(orcaWhirlpool.FeeRate),
+			ProtocolFeeRate:            int32(orcaWhirlpool.ProtocolFeeRate),
+			ProtocolFeeOwedA:           protocolFeeOwedA,
+			ProtocolFeeOwedB:           protocolFeeOwedB,
+			RewardLastUpdatedTimestamp: rewardLastUpdatedTimestamp,
+			TickCurrentIndex:           orcaWhirlpool.TickCurrentIndex,
+			Liquidity:                  liquidity,
+			SqrtPrice:                  sqrtPrice,
+			FeeGrowthGlobalA:           feeGrowthGlobalA,
+			FeeGrowthGlobalB:           feeGrowthGlobalB,
 			Oracle:                     oracle.String(),
 		},
 	); err != nil {
