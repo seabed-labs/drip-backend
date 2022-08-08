@@ -54,8 +54,7 @@ func Backfill(
 	//backfillTokens(repo, client, vaultConfigs)
 	//backfillVaultPeriods(repo, client, vaultConfigs, vaultMap)
 	for _, address := range []string{
-		"2w9DNJRFGmvN2wuVi3CtLT49cM8DWdKfzAGas1XDw3Ve",
-		"Dr75jCuqpkYCGs4ATp2v31sU6bzDKoCdxJNvxXUUgb4S",
+		"5fkps3wttvX3ysprtWzLRuxajSkmdxEa12Ys8E4bMTPh",
 	} {
 		log := logrus.WithField("address", address)
 		if err := processor.UpsertWhirlpoolByAddress(context.Background(), address); err != nil {
@@ -64,8 +63,7 @@ func Backfill(
 	}
 
 	for _, address := range []string{
-		"FcbTUmkEuizRjnr17iggHon9rAc2FeQ8uMdjxWBgFb58",
-		"Evy3P7kFy6epfbY3QZmwWiqWj1veZ87LQoCEWYzb3vW7",
+		"3MiLbpHuKHDEnMUNpDPhJmMQPzcJL2Gp8kQdGMRHPcwP",
 	} {
 		log := logrus.WithField("address", address)
 		if err := processor.UpsertTokenSwapByAddress(context.Background(), address); err != nil {
@@ -74,10 +72,12 @@ func Backfill(
 	}
 
 	for _, address := range []string{
-		"GHyHWLdLCRkYrXwxaxVrG5LEnkPEP9xVHqXPv3QMYMVZ",
-		"HrQ5YfEWtsc4zNxQqv6dKT8136nsSfDpXWeXnn76xBGs",
-		"8RVA7nF7xmieAV5mJSM7CHGegdm68ZqghvZBGfN9K4mY",
-		"A6yjGfL4qC2y9KXpJGd6eEwHuXoyUsr2QSfBvPNFQDb6",
+		"7ZrPseXCAEtXEbPvxWtmiQN1V3bkh9ASdBBejWQmEEM",
+		"uN35hnMJ2FhNUr5BsRSmcThNLwvUiehxLTSFf3U1K2T",
+		"7NvMKgnmnDghw1wxN3qpL4SsMtntkSbbdUYNe4Wd1w6C",
+		"8GjJiNGbBCbHQ5pVnvQWzyeKX8VHNafcCHpfbAYgkWjV",
+		"BLvwjMfheNN4JkRtWZSaM5mdx8ork8Wmii6DL2k5xqG2",
+		"58wurDwfH9KbzVX9RLCcAajhaS2Txrns2k6SNXH2LGED",
 	} {
 		log := logrus.WithField("address", address)
 		if err := processor.UpsertVaultByAddress(context.Background(), address); err != nil {

@@ -72,7 +72,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	oracle, _, _ := solana2.FindProgramAddress([][]byte{
 		[]byte("oracle"),
 		whirlpoolPubkey[:],
-	}, drip.ProgramID)
+	}, whirlpool.ProgramID)
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
 		&model.OrcaWhirlpool{
