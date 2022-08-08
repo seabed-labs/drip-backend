@@ -89,54 +89,54 @@ func Backfill(
 	return nil
 }
 
-func backfillVaults(
-	vaultConfigs Config,
-	processor processor.Processor,
-) {
-	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
-		log := logrus.WithField("address", vaultConfig.Vault)
-		if err := processor.UpsertVaultByAddress(context.Background(), vaultConfig.Vault); err != nil {
-			log.WithError(err).Error("failed to backfill vault")
-		}
-		log.Info("backfilled vault")
-	}
-}
-
-func backfillTokenPairs(
-	vaultConfigs Config, processor processor.Processor,
-) {
-	ctx := context.Background()
-	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
-		log := logrus.WithField("address", vaultConfig.Vault)
-		if err := processor.UpsertTokenPair(ctx, vaultConfig.TokenAMint, vaultConfig.TokenBMint); err != nil {
-			log.WithError(err).Error("failed to backfill token pair")
-		}
-		log.Info("backfilled tokenPair")
-	}
-}
-
-func backfillTokenSwaps(
-	vaultConfigs Config, processor processor.Processor,
-) {
-	ctx := context.Background()
-	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
-		log := logrus.WithField("address", vaultConfig.Vault)
-		if err := processor.UpsertTokenSwapByAddress(ctx, vaultConfig.Swap); err != nil {
-			log.WithError(err).Error("failed to backfill vault")
-		}
-		log.Info("backfilled tokenSwap")
-	}
-}
-
-func backfillProtoConfigs(
-	vaultConfigs Config, processor processor.Processor,
-) {
-	ctx := context.Background()
-	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
-		log := logrus.WithField("address", vaultConfig.Vault)
-		if err := processor.UpsertProtoConfigByAddress(ctx, vaultConfig.VaultProtoConfig); err != nil {
-			log.WithError(err).Error("failed to backfill vault")
-		}
-		log.Info("backfilled protoConfig")
-	}
-}
+//func backfillVaults(
+//	vaultConfigs Config,
+//	processor processor.Processor,
+//) {
+//	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
+//		log := logrus.WithField("address", vaultConfig.Vault)
+//		if err := processor.UpsertVaultByAddress(context.Background(), vaultConfig.Vault); err != nil {
+//			log.WithError(err).Error("failed to backfill vault")
+//		}
+//		log.Info("backfilled vault")
+//	}
+//}
+//
+//func backfillTokenPairs(
+//	vaultConfigs Config, processor processor.Processor,
+//) {
+//	ctx := context.Background()
+//	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
+//		log := logrus.WithField("address", vaultConfig.Vault)
+//		if err := processor.UpsertTokenPair(ctx, vaultConfig.TokenAMint, vaultConfig.TokenBMint); err != nil {
+//			log.WithError(err).Error("failed to backfill token pair")
+//		}
+//		log.Info("backfilled tokenPair")
+//	}
+//}
+//
+//func backfillTokenSwaps(
+//	vaultConfigs Config, processor processor.Processor,
+//) {
+//	ctx := context.Background()
+//	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
+//		log := logrus.WithField("address", vaultConfig.Vault)
+//		if err := processor.UpsertTokenSwapByAddress(ctx, vaultConfig.Swap); err != nil {
+//			log.WithError(err).Error("failed to backfill vault")
+//		}
+//		log.Info("backfilled tokenSwap")
+//	}
+//}
+//
+//func backfillProtoConfigs(
+//	vaultConfigs Config, processor processor.Processor,
+//) {
+//	ctx := context.Background()
+//	for _, vaultConfig := range vaultConfigs.TriggerDCAConfigs {
+//		log := logrus.WithField("address", vaultConfig.Vault)
+//		if err := processor.UpsertProtoConfigByAddress(ctx, vaultConfig.VaultProtoConfig); err != nil {
+//			log.WithError(err).Error("failed to backfill vault")
+//		}
+//		log.Info("backfilled protoConfig")
+//	}
+//}
