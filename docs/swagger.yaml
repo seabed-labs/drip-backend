@@ -376,6 +376,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/drip/positionmetadata:
+    get:
+      summary: Get Drip V1 Position Metadata
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/positionMetadata"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
 components:
   parameters:
     enabledQueryParam:
@@ -631,6 +654,37 @@ components:
           example: 40
         isClosed:
           type: boolean
+
+    positionMetadata:
+      type: object
+      required:
+        - name
+        - symbol
+        - description
+        - image
+        - external_url
+        - collection
+      properties:
+        name:
+          type: string
+        symbol:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        external_url:
+          type: string
+        collection:
+          type: object
+          required:
+            - name
+            - family
+          properties:
+            name:
+              type: string
+            family:
+              type: string
 
     protoConfig:
       type: object
