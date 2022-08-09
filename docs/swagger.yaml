@@ -385,7 +385,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/positionMetadata"
+                $ref: "#/components/schemas/tokenMetadata"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/drip/{pubkeyPath}/tokenmetadata:
+    get:
+      summary: Get TokenMetadata for Devnet Mints.
+      parameters:
+        - $ref: "#/components/parameters/pubkeyPathParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tokenMetadata"
         "400":
           description: Bad Request
           content:
@@ -655,7 +680,7 @@ components:
         isClosed:
           type: boolean
 
-    positionMetadata:
+    tokenMetadata:
       type: object
       required:
         - name

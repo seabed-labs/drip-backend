@@ -8,7 +8,7 @@ import (
 )
 
 func (h Handler) GetV1DripPositionmetadata(c echo.Context) error {
-	res := Swagger.PositionMetadata{
+	res := Swagger.TokenMetadata{
 		Collection: struct {
 			Family string `json:"family"`
 			Name   string `json:"name"`
