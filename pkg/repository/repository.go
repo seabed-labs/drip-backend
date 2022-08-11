@@ -184,7 +184,7 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 		WithContext(ctx).
 		Returning(&res, res.GetAllColumns()...).
 		Where(d.repo.Vault.Pubkey.Eq(vaultPubkey)).
-		Update(d.repo.Vault.Enabled, true)
+		Update(d.repo.Vault.Enabled, enabled)
 	return &res, err
 }
 
