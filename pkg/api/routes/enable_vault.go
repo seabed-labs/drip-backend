@@ -18,7 +18,15 @@ func (h Handler) PutAdminVaultPubkeyPathEnable(
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid vault pubkey"})
 	}
-	vault, err := h.repo.AdminEnableVault(c.Request().Context(), string(pubkeyPath))
+	vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(pubkeyPath))
+	if err != nil {
+		logrus.
+			WithError(err).
+			WithField("vault", string(pubkeyPath)).
+			Error("failed to get vault")
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "something went wrong"})
+	}
+	updatedVault, err := h.repo.AdminSetVaultEnabled(c.Request().Context(), string(pubkeyPath), !vault.Enabled)
 	if err != nil {
 		logrus.
 			WithError(err).
@@ -26,5 +34,5 @@ func (h Handler) PutAdminVaultPubkeyPathEnable(
 			Error("failed to enable vault")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "something went wrong"})
 	}
-	return c.JSON(http.StatusOK, vault)
+	return c.JSON(http.StatusOK, updatedVault)
 }

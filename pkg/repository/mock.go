@@ -35,21 +35,6 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
-// AdminEnableVault mocks base method.
-func (m *MockRepository) AdminEnableVault(ctx context.Context, pubkey string) (*model.Vault, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AdminEnableVault", ctx, pubkey)
-	ret0, _ := ret[0].(*model.Vault)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AdminEnableVault indicates an expected call of AdminEnableVault.
-func (mr *MockRepositoryMockRecorder) AdminEnableVault(ctx, pubkey interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminEnableVault", reflect.TypeOf((*MockRepository)(nil).AdminEnableVault), ctx, pubkey)
-}
-
 // AdminGetVaultByAddress mocks base method.
 func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
 	m.ctrl.T.Helper()
@@ -93,6 +78,21 @@ func (m *MockRepository) AdminGetVaultsByTokenAccountAddress(ctx context.Context
 func (mr *MockRepositoryMockRecorder) AdminGetVaultsByTokenAccountAddress(ctx, pubkey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByTokenAccountAddress", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByTokenAccountAddress), ctx, pubkey)
+}
+
+// AdminSetVaultEnabled mocks base method.
+func (m *MockRepository) AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminSetVaultEnabled", ctx, pubkey, enabled)
+	ret0, _ := ret[0].(*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminSetVaultEnabled indicates an expected call of AdminSetVaultEnabled.
+func (mr *MockRepositoryMockRecorder) AdminSetVaultEnabled(ctx, pubkey, enabled interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminSetVaultEnabled", reflect.TypeOf((*MockRepository)(nil).AdminSetVaultEnabled), ctx, pubkey, enabled)
 }
 
 // GetOrcaWhirlpoolsByTokenPairIDs mocks base method.

@@ -26,8 +26,8 @@ paths:
     put:
       tags:
         - admin
-      summary: Enable a vault
-      description: Enable the specified vault
+      summary: Toggle the 'enabled' flag on a vault
+      description: Enable/disable the specified vault
       parameters:
         - $ref: "#/components/parameters/pubkeyPathParam"
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"

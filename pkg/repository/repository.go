@@ -51,7 +51,7 @@ type Repository interface {
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 	GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
-	AdminEnableVault(ctx context.Context, pubkey string) (*model.Vault, error)
+	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error)
 	AdminGetVaultsByTokenAccountAddress(ctx context.Context, pubkey string) ([]*model.Vault, error)
@@ -178,7 +178,7 @@ func (d repositoryImpl) AdminGetVaultsByTokenAccountAddress(ctx context.Context,
 		Find()
 }
 
-func (d repositoryImpl) AdminEnableVault(ctx context.Context, vaultPubkey string) (*model.Vault, error) {
+func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey string, enabled bool) (*model.Vault, error) {
 	var res model.Vault
 	_, err := d.repo.Vault.
 		WithContext(ctx).

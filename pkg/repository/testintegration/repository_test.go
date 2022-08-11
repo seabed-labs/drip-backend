@@ -33,7 +33,7 @@ import (
 //GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
 
 //AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model2.Vault, error)
-//AdminEnableVault(ctx context.Context, pubkey string) (*model2.Vault, error)
+//AdminSetVaultEnabled(ctx context.Context, pubkey string) (*model2.Vault, error)
 
 //nolint:funlen
 func TestUpsertProtoConfigs(t *testing.T) {
