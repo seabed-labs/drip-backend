@@ -31,6 +31,7 @@ func newProtoConfig(db *gorm.DB) protoConfig {
 	_protoConfig.Granularity = field.NewUint64(tableName, "granularity")
 	_protoConfig.TriggerDcaSpread = field.NewInt16(tableName, "trigger_dca_spread")
 	_protoConfig.BaseWithdrawalSpread = field.NewInt16(tableName, "base_withdrawal_spread")
+	_protoConfig.Admin = field.NewString(tableName, "admin")
 
 	_protoConfig.fillFieldMap()
 
@@ -45,6 +46,7 @@ type protoConfig struct {
 	Granularity          field.Uint64
 	TriggerDcaSpread     field.Int16
 	BaseWithdrawalSpread field.Int16
+	Admin                field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +67,7 @@ func (p *protoConfig) updateTableName(table string) *protoConfig {
 	p.Granularity = field.NewUint64(table, "granularity")
 	p.TriggerDcaSpread = field.NewInt16(table, "trigger_dca_spread")
 	p.BaseWithdrawalSpread = field.NewInt16(table, "base_withdrawal_spread")
+	p.Admin = field.NewString(table, "admin")
 
 	p.fillFieldMap()
 
@@ -89,11 +92,12 @@ func (p *protoConfig) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (p *protoConfig) fillFieldMap() {
-	p.fieldMap = make(map[string]field.Expr, 4)
+	p.fieldMap = make(map[string]field.Expr, 5)
 	p.fieldMap["pubkey"] = p.Pubkey
 	p.fieldMap["granularity"] = p.Granularity
 	p.fieldMap["trigger_dca_spread"] = p.TriggerDcaSpread
 	p.fieldMap["base_withdrawal_spread"] = p.BaseWithdrawalSpread
+	p.fieldMap["admin"] = p.Admin
 }
 
 func (p protoConfig) clone(db *gorm.DB) protoConfig {
