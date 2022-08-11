@@ -6,7 +6,7 @@ go 1.18
 replace github.com/dfuse-io/logging => github.com/streamingfast/logging v0.0.0-20210109005628-b97a57253f70
 
 require (
-	github.com/dcaf-labs/solana-go-clients v0.0.0-20220725174303-d48d42b12f47
+	github.com/dcaf-labs/solana-go-clients v0.0.0-20220811054428-8df41470c520
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/getkin/kin-openapi v0.94.0
 	github.com/golang-migrate/migrate/v4 v4.15.2

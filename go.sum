@@ -382,10 +382,10 @@ github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CL
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dcaf-labs/solana-go-clients v0.0.0-20220718230302-c0c931c67f32 h1:xtqtQ6pnqxAY8xL2oSKY+zB8rbqmiyB0NniP+8L5wmA=
-github.com/dcaf-labs/solana-go-clients v0.0.0-20220718230302-c0c931c67f32/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220725174303-d48d42b12f47 h1:0jXhdOlgHAMwk6mSVVAzNwyLvra27/6hGqTp8+ZOgyw=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220725174303-d48d42b12f47/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220811054428-8df41470c520 h1:8A824ubbpxbPtppat+8GVzQ/MufPel4BQYM5Rly7b8s=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220811054428-8df41470c520/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d/go.mod h1:tmAIfUFEirG/Y8jhZ9M+h36obRZAk/1fcSpXwAVlfqE=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=

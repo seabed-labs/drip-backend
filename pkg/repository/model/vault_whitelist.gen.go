@@ -8,9 +8,9 @@ const TableNameVaultWhitelist = "vault_whitelist"
 
 // VaultWhitelist mapped from table <vault_whitelist>
 type VaultWhitelist struct {
-	ID              string `gorm:"column:id;primaryKey" json:"id" db:"id"`
-	VaultPubkey     string `gorm:"column:vault_pubkey;not null" json:"vaultPubkey" db:"vault_pubkey"`
-	TokenSwapPubkey string `gorm:"column:token_swap_pubkey;not null" json:"tokenSwapPubkey" db:"token_swap_pubkey"`
+	ID              string `gorm:"column:id;type:uuid;primaryKey" json:"id" db:"id"`
+	VaultPubkey     string `gorm:"column:vault_pubkey;type:varchar;not null" json:"vaultPubkey" db:"vault_pubkey"`
+	TokenSwapPubkey string `gorm:"column:token_swap_pubkey;type:varchar;not null" json:"tokenSwapPubkey" db:"token_swap_pubkey"`
 }
 
 // TableName VaultWhitelist's table name

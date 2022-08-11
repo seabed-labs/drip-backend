@@ -23,6 +23,7 @@ type Vault struct {
 	DcaActivationTimestamp time.Time `gorm:"column:dca_activation_timestamp;type:timestamp;not null" json:"dcaActivationTimestamp" db:"dca_activation_timestamp"`
 	Enabled                bool      `gorm:"column:enabled;type:bool;not null" json:"enabled" db:"enabled"`
 	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
+	MaxSlippageBps         int32     `gorm:"column:max_slippage_bps;type:int4;not null" json:"maxSlippageBps" db:"max_slippage_bps"`
 }
 
 // TableName Vault's table name

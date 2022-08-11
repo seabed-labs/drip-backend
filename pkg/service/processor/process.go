@@ -252,9 +252,10 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 	}
 	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
 		Pubkey:               address,
+		Admin:                protoConfig.Admin.String(),
 		Granularity:          protoConfig.Granularity,
-		TriggerDcaSpread:     protoConfig.TriggerDcaSpread,
-		BaseWithdrawalSpread: protoConfig.BaseWithdrawalSpread,
+		TriggerDcaSpread:     protoConfig.TokenADripTriggerSpread,
+		BaseWithdrawalSpread: protoConfig.TokenBWithdrawalSpread,
 	})
 }
 
@@ -277,11 +278,12 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
 		TokenBAccount:          vaultAccount.TokenBAccount.String(),
 		TreasuryTokenBAccount:  vaultAccount.TreasuryTokenBAccount.String(),
-		LastDcaPeriod:          vaultAccount.LastDcaPeriod,
+		LastDcaPeriod:          vaultAccount.LastDripPeriod,
 		DripAmount:             vaultAccount.DripAmount,
-		DcaActivationTimestamp: time.Unix(vaultAccount.DcaActivationTimestamp, 0),
+		DcaActivationTimestamp: time.Unix(vaultAccount.DripActivationTimestamp, 0),
 		Enabled:                false,
 		TokenPairID:            tokenPair.ID,
+		MaxSlippageBps:         int32(vaultAccount.MaxSlippageBps),
 	}); err != nil {
 		return err
 	}
@@ -337,7 +339,7 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 		DepositedTokenAAmount:    position.DepositedTokenAAmount,
 		WithdrawnTokenBAmount:    position.WithdrawnTokenBAmount,
 		DepositTimestamp:         time.Unix(position.DepositTimestamp, 0),
-		DcaPeriodIDBeforeDeposit: position.DcaPeriodIdBeforeDeposit,
+		DcaPeriodIDBeforeDeposit: position.DripPeriodIdBeforeDeposit,
 		NumberOfSwaps:            position.NumberOfSwaps,
 		PeriodicDripAmount:       position.PeriodicDripAmount,
 		IsClosed:                 position.IsClosed,
