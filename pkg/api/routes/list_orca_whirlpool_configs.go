@@ -71,7 +71,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 
 	for i := range vaults {
 		vault := vaults[i]
-		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID)
+		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID, h.env)
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
 			continue
