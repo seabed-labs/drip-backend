@@ -451,9 +451,6 @@ type ClientInterface interface {
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetV1DripPositionmetadata request
-	GetV1DripPositionmetadata(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -622,18 +619,6 @@ func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEdit
 
 func (c *Client) GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1DripPositionPubkeyPathMetadataRequest(c.Server, pubkeyPath)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetV1DripPositionmetadata(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetV1DripPositionmetadataRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -1328,33 +1313,6 @@ func NewGetV1DripPositionPubkeyPathMetadataRequest(server string, pubkeyPath Pub
 	return req, nil
 }
 
-// NewGetV1DripPositionmetadataRequest generates requests for GetV1DripPositionmetadata
-func NewGetV1DripPositionmetadataRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/drip/positionmetadata")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewGetV1DripPubkeyPathTokenmetadataRequest generates requests for GetV1DripPubkeyPathTokenmetadata
 func NewGetV1DripPubkeyPathTokenmetadataRequest(server string, pubkeyPath PubkeyPathParam) (*http.Request, error) {
 	var err error
@@ -1642,9 +1600,6 @@ type ClientWithResponsesInterface interface {
 
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPositionPubkeyPathMetadataResponse, error)
-
-	// GetV1DripPositionmetadata request
-	GetV1DripPositionmetadataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1DripPositionmetadataResponse, error)
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPubkeyPathTokenmetadataResponse, error)
@@ -1965,30 +1920,6 @@ func (r GetV1DripPositionPubkeyPathMetadataResponse) StatusCode() int {
 	return 0
 }
 
-type GetV1DripPositionmetadataResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *TokenMetadata
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetV1DripPositionmetadataResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetV1DripPositionmetadataResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type GetV1DripPubkeyPathTokenmetadataResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2184,15 +2115,6 @@ func (c *ClientWithResponses) GetV1DripPositionPubkeyPathMetadataWithResponse(ct
 		return nil, err
 	}
 	return ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp)
-}
-
-// GetV1DripPositionmetadataWithResponse request returning *GetV1DripPositionmetadataResponse
-func (c *ClientWithResponses) GetV1DripPositionmetadataWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1DripPositionmetadataResponse, error) {
-	rsp, err := c.GetV1DripPositionmetadata(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetV1DripPositionmetadataResponse(rsp)
 }
 
 // GetV1DripPubkeyPathTokenmetadataWithResponse request returning *GetV1DripPubkeyPathTokenmetadataResponse
@@ -2721,46 +2643,6 @@ func ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp *http.Response) (*GetV
 	return response, nil
 }
 
-// ParseGetV1DripPositionmetadataResponse parses an HTTP response from a GetV1DripPositionmetadataWithResponse call
-func ParseGetV1DripPositionmetadataResponse(rsp *http.Response) (*GetV1DripPositionmetadataResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetV1DripPositionmetadataResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest TokenMetadata
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetV1DripPubkeyPathTokenmetadataResponse parses an HTTP response from a GetV1DripPubkeyPathTokenmetadataWithResponse call
 func ParseGetV1DripPubkeyPathTokenmetadataResponse(rsp *http.Response) (*GetV1DripPubkeyPathTokenmetadataResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2922,9 +2804,6 @@ type ServerInterface interface {
 	// Get Drip Position Metadata
 	// (GET /v1/drip/position/{pubkeyPath}/metadata)
 	GetV1DripPositionPubkeyPathMetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
-	// Get Drip V1 Position Metadata
-	// (GET /v1/drip/positionmetadata)
-	GetV1DripPositionmetadata(ctx echo.Context) error
 	// Get TokenMetadata for Devnet Mints.
 	// (GET /v1/drip/{pubkeyPath}/tokenmetadata)
 	GetV1DripPubkeyPathTokenmetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
@@ -3227,15 +3106,6 @@ func (w *ServerInterfaceWrapper) GetV1DripPositionPubkeyPathMetadata(ctx echo.Co
 	return err
 }
 
-// GetV1DripPositionmetadata converts echo context to params.
-func (w *ServerInterfaceWrapper) GetV1DripPositionmetadata(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetV1DripPositionmetadata(ctx)
-	return err
-}
-
 // GetV1DripPubkeyPathTokenmetadata converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1DripPubkeyPathTokenmetadata(ctx echo.Context) error {
 	var err error
@@ -3364,7 +3234,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/v1/drip/position/:pubkeyPath/metadata", wrapper.GetV1DripPositionPubkeyPathMetadata)
-	router.GET(baseURL+"/v1/drip/positionmetadata", wrapper.GetV1DripPositionmetadata)
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
 	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
@@ -3430,10 +3299,9 @@ var swaggerSpec = []string{
 	"RCa2sEcjjuFH3BVwkvDRT/u81qGguq8kqlW4lBxyRvnHB1NejfsX15Jyzf9Ej5XxnTBuBTyq3OzntaNa",
 	"lDN+u0fCbtPfpWnO6euFU7/d4OyA7jBtJ6lpJHDSh/rG673zyWeUn24HgS8mvuj/G/T3+cNU5+y/ZblA",
 	"ItbuMolGR8x/Z5wPfAD0Rb3rqLeX2p56CWiXlHH/arZ9Me1Kpu1Itkyzsu7DFjl8NWYG6gvjAv44XcfI",
-	"2W+Ujrddh9rEd993fSaBwmWUXxxKyiF2wbxXuhAQIIdT17PIPHLnS/P/RM2P05eUH/IjTNZX0ODQdRTq",
-	"+OVJ/q3RaC83dipRh0sLUqGDLEpudqwCrkGd4+fVsRmR/3MDu5Z+YuSAKbLYEtnl87k8aRwc5nePd09/",
-	"jihB0sT/tZt/y61x6Nv4L8NIahj+j3Md5bY3g9+qu4in+//XtuByH/6PmP09dP0ianKiDl3HsTGFqnAU",
-	"3dv/BQAA//+crvrn8FAAAA==",
+	"2W+Ujrddh9rEd993fSaBwmWUXxxKyiF2wbxXuhAQYIBTISoxQV/Bp0PXUajjF5n+rQ5pLze2Ma3DpQWp",
+	"0EEWJTc7VnkbSef4hW1sUPS/ON+19GOjA6bIYktk94/nQuU4OMzvnvCd/iJNgrjJ/8GTf8vFYejz6C/D",
+	"SGoY/u8zHeW2N4PfunqPp/v/V2Z4uQ//d6z+Hrp+ETU5UYeu49iYQlU4iu7t/wIAAP//PJTuzvNOAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
