@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/configs"
+
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
@@ -96,6 +98,7 @@ func findOrcaWhirlpoolForVault(
 	vault *model.Vault,
 	vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist,
 	orcaWhirlpoolsByTokenPairID map[string][]*model.OrcaWhirlpool,
+	env configs.Environment,
 ) (*model.OrcaWhirlpool, error) {
 	orcaWhirlpools, ok := orcaWhirlpoolsByTokenPairID[vault.TokenPairID]
 	if !ok {
@@ -104,6 +107,19 @@ func findOrcaWhirlpoolForVault(
 			WithField("TokenPairID", vault.TokenPairID).
 			Infof("skipping vault swap config, missing swap")
 	}
+	// TODO: Remove
+	if env == configs.MainnetEnv {
+		var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
+		for _, orcaWhirlpool := range orcaWhirlpools {
+			if orcaWhirlpool.Pubkey == "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ" ||
+				orcaWhirlpool.Pubkey == "ErSQss3jrqDpQoLEYvo6onzjsi6zm4Sjpoz1pjqz2o6D" ||
+				orcaWhirlpool.Pubkey == "E5KuHFnU2VuuZFKeghbTLazgxeni4dhQ7URE4oBtJju2" {
+				elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, orcaWhirlpool)
+			}
+		}
+		return elgibleOrcaWhirlpools[0], nil
+	}
+
 	var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
 	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
 	if !ok || len(vaultWhitelists) == 0 {
@@ -121,21 +137,21 @@ func findOrcaWhirlpoolForVault(
 	if len(elgibleOrcaWhirlpools) == 0 {
 		return nil, fmt.Errorf("failed to get orcaWhirlpool")
 	}
-	//// TODO(Mocha): Figure how to get deltaB for an orca whirlpool
-
-	//bestSwap := eligibleSwaps[0]
-	//bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
-	//for _, eligibleSwap := range eligibleSwaps {
-	//	swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
-	//	if swapDeltaB > bestSwapDeltaB {
-	//		bestSwap = eligibleSwap
-	//		bestSwapDeltaB = swapDeltaB
-	//	}
-	//}
 
 	return elgibleOrcaWhirlpools[0], nil
 }
 
+//// TODO(Mocha): Figure how to get deltaB for an orca whirlpool
+
+//bestSwap := eligibleSwaps[0]
+//bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
+//for _, eligibleSwap := range eligibleSwaps {
+//	swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
+//	if swapDeltaB > bestSwapDeltaB {
+//		bestSwap = eligibleSwap
+//		bestSwapDeltaB = swapDeltaB
+//	}
+//}
 // Calculates DeltaB from (reserveA + deltaA) * (reserveB - deltaB) = reserveA*reserveB =  k
 // deltaB = reserveB - ((reserveA * reserveB) / (reservaA + deltaA))
 // to be used to MAXIMIZE delta b across all swaps
