@@ -156,8 +156,6 @@ func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string
 	// The position_authority is the nft mint
 	return d.repo.Position.
 		WithContext(ctx).
-		Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault)).
-		Where(d.repo.Vault.Enabled.Is(true)).
 		Where(d.repo.Position.Authority.Eq(nftMint)).
 		First()
 }

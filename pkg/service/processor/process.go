@@ -445,12 +445,12 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
 func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
-	vault, err := p.repo.GetVaultByAddress(ctx, address)
+	vault, err := p.repo.AdminGetVaultByAddress(ctx, address)
 	if err != nil && err.Error() == "record not found" {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			return nil, err
 		}
-		return p.repo.GetVaultByAddress(ctx, address)
+		return p.repo.AdminGetVaultByAddress(ctx, address)
 	}
 	return vault, err
 }

@@ -399,6 +399,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/drip/position/{pubkeyPath}/metadata:
+    get:
+      summary: Get Drip Position Metadata
+      parameters:
+        - $ref: "#/components/parameters/pubkeyPathParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tokenMetadata"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
   /v1/drip/{pubkeyPath}/tokenmetadata:
     get:
       summary: Get TokenMetadata for Devnet Mints.
