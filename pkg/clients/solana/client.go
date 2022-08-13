@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
+	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 
 	"github.com/dcaf-labs/drip/pkg/configs"
 	bin "github.com/gagliardetto/binary"
@@ -25,6 +28,9 @@ type Solana interface {
 	GetProgramAccounts(context.Context, string) ([]string, error)
 	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
 	ProgramSubscribe(context.Context, string, func(string, []byte)) error
+
+	GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error)
+	GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error)
 
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
@@ -109,6 +115,48 @@ func (s impl) GetAccounts(ctx context.Context, addresses []string, decode func(s
 		decode(addresses[i], val.Data.GetBinary())
 	}
 	return nil
+}
+
+func (s impl) GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error) {
+	var tokenMint token.Mint
+	err := s.GetAccount(ctx, mintAddress, &tokenMint)
+	return tokenMint, err
+}
+
+func (s impl) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error) {
+	var tokenMetadata token_metadata.Metadata
+
+	tokenMetadataAddress, err := getTokenMetadataAddress(mintAddress)
+	if err != nil {
+		return tokenMetadata, err
+	}
+
+	resp, err := s.client.GetAccountInfoWithOpts(
+		ctx,
+		solana.MustPublicKeyFromBase58(tokenMetadataAddress),
+		&rpc.GetAccountInfoOpts{
+			Encoding:   solana.EncodingBase64,
+			Commitment: "confirmed",
+			DataSlice:  nil,
+		})
+	if err != nil {
+		logrus.
+			WithError(err).
+			WithField("address", tokenMetadataAddress).
+			Errorf("couldn't get acount info")
+		return tokenMetadata, err
+	}
+	decoder := bin.NewBorshDecoder(resp.Value.Data.GetBinary())
+	if err := tokenMetadata.UnmarshalWithDecoder(decoder); err != nil {
+		return tokenMetadata, err
+	}
+	if _, err := json.MarshalIndent(tokenMetadata, "", "  "); err != nil {
+		return tokenMetadata, err
+	}
+	tokenMetadata.Data.Name = strings.Trim(tokenMetadata.Data.Name, "\u0000")
+	tokenMetadata.Data.Symbol = strings.Trim(tokenMetadata.Data.Symbol, "\u0000")
+	tokenMetadata.Data.Uri = strings.Trim(tokenMetadata.Data.Uri, "\u0000")
+	return tokenMetadata, nil
 }
 
 func (s impl) GetAccount(ctx context.Context, address string, v interface{}) error {
@@ -371,6 +419,20 @@ func (s impl) signAndBroadcast(
 	logFields["txHash"] = txHash
 
 	return txHash.String(), nil
+}
+
+func getTokenMetadataAddress(
+	mint string,
+) (string, error) {
+	addr, _, err := solana.FindProgramAddress(
+		[][]byte{
+			[]byte("metadata"),
+			solana.TokenMetadataProgramID.Bytes(),
+			solana.MustPublicKeyFromBase58(mint).Bytes(),
+		},
+		solana.TokenMetadataProgramID,
+	)
+	return addr.String(), err
 }
 
 func getURL(env configs.Environment) string {

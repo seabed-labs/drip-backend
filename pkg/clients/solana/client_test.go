@@ -90,19 +90,20 @@ func TestSolanaClient(t *testing.T) {
 		assert.True(t, len(offset) > 4500)
 	})
 
-	//t.Run("GetA should return token accounts", func(t *testing.T) {
-	//	res, err := client.GetUserBalances(context.Background(), "DG43NUhq6gxUAcNGCJ45zCrBHgPDNNjMovocPHdHUqUD")
-	//	assert.NoError(t, err)
-	//	assert.NotNil(t, res)
-	//	assert.NotNil(t, res.Value)
-	//	assert.NotEmpty(t, res.Value)
-	//	for _, a := range res.Value {
-	//		rpc.mustJSONToInterface(mustAnyToJSON(out))
-	//		//var tokenAccount token.Account
-	//		//tokenAccount.
-	//		//err := bin.NewBinDecoder(a.Account.Data.GetBinary()).Decode(&tokenAccount)
-	//		//assert.NoError(t, err)
-	//		//fmt.Println(tokenAccount)
-	//	}
-	//})
+	t.Run("GetTokenMetadataAccount should return token metadata for mint with valid token metadata account", func(t *testing.T) {
+		tokenMetadata, err := client.GetTokenMetadataAccount(context.Background(), "2CsU92EN1AwEcJdWaVDa9n9o6AFB5nVBozEXZWDJcDj6")
+		assert.NoError(t, err)
+		assert.Equal(t, tokenMetadata.Data.Symbol, "DP")
+		assert.Equal(t, tokenMetadata.Data.Name, "Drip Position")
+	})
+
+	t.Run("GetTokenMetadataAccount should return err for mint without token metadata account", func(t *testing.T) {
+		_, err := client.GetTokenMetadataAccount(context.Background(), "2Kp1LB7Jo5RAt5gnisbtpu9tvK24WtV9zo9tZHKqFGqL")
+		assert.Error(t, err)
+	})
+
+	t.Run("GetTokenMetadataAccount should return err for non-mint address", func(t *testing.T) {
+		_, err := client.GetTokenMetadataAccount(context.Background(), "F1E3YejjuQ87d73enFG1w2toeeR4igZq8eQum1UgqGeF")
+		assert.Error(t, err)
+	})
 }

@@ -26,8 +26,8 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokenAccountBalanceByAddress(context.Context, string, bool) error
-	UpsertTokenAccountBalance(context.Context, string, token.Account, bool) error
+	UpsertTokenAccountBalanceByAddress(context.Context, string) error
+	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 }
 
 type impl struct {
@@ -125,10 +125,10 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
 		return err
 	}
 	return nil
@@ -184,24 +184,24 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	}
 
 	// Upsert balances
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string, forceInsert bool) error {
+func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
 	var tokenAccount token.Account
 	if err := p.client.GetAccount(ctx, address, &tokenAccount); err != nil {
 		return err
 	}
-	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount, forceInsert)
+	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
 }
 
-func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account, forceInsert bool) error {
+func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
 	isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address)
 	isUserPositionNFTTokenAccount, _ := p.IsUserPositionTokenAccount(ctx, tokenAccount.Mint.String())
 	isVaultTokenAccount, _ := p.IsVaultTokenAccount(ctx, address)
@@ -224,16 +224,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	if err := p.client.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
 		return err
 	}
-	// TODO(Mocha): If this is a drip nft token, we can decorate the symbol with a deterministic name
-	// with tokenA, tokenB, start, end
-	tokenModel := model.Token{
-		Pubkey:   tokenAccount.Mint.String(),
-		Symbol:   nil,
-		Decimals: int16(tokenMint.Decimals),
-		IconURL:  nil,
-	}
-	if err := p.repo.UpsertTokens(ctx, &tokenModel); err != nil {
-		logrus.WithError(err).Error("failed to upsert tokens")
+	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
 		return err
 	}
 	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
@@ -243,6 +234,24 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 		Amount: tokenAccount.Amount,
 		State:  state,
 	})
+}
+
+func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
+	tokenMint, err := p.client.GetTokenMint(ctx, mintAddress)
+	if err != nil {
+		return err
+	}
+	tokenMetadataAccount, err := p.client.GetTokenMetadataAccount(ctx, mintAddress)
+	if err != nil {
+		return err
+	}
+	tokenModel := model.Token{
+		Pubkey:   mintAddress,
+		Symbol:   &tokenMetadataAccount.Data.Symbol,
+		Decimals: int16(tokenMint.Decimals),
+		IconURL:  nil,
+	}
+	return p.repo.UpsertTokens(ctx, &tokenModel)
 }
 
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
@@ -312,13 +321,13 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 			WithError(err).
 			Error("failed to insert vaultWhitelists")
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenBAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenBAccount.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String()); err != nil {
 		return err
 	}
 	return nil
@@ -376,18 +385,10 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	if err := p.client.GetAccount(ctx, tokenBMint, &tokenB); err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokens(ctx,
-		&model.Token{
-			Pubkey:   tokenAAMint,
-			Symbol:   nil,
-			Decimals: int16(tokenA.Decimals),
-			IconURL:  nil,
-		}, &model.Token{
-			Pubkey:   tokenBMint,
-			Symbol:   nil,
-			Decimals: int16(tokenB.Decimals),
-			IconURL:  nil,
-		}); err != nil {
+	if err := p.UpsertTokenByAddress(ctx, tokenAAMint); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenByAddress(ctx, tokenBMint); err != nil {
 		return err
 	}
 	return p.repo.InsertTokenPairs(ctx, &model.TokenPair{
