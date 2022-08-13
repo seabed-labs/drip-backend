@@ -11,6 +11,8 @@ func (h Handler) GetV1DripPubkeyPathTokenmetadata(c echo.Context, pubkeyPath Swa
 	switch pubkeyPath {
 	// USDT
 	case "8ULDKGmKJJaZa32eiL36ARr6cFaZaoAXAosWeg5r17ra":
+		fallthrough
+	case "8Tq1poiHWnJvN1QbUJXGHqvsMvH6MPmjMzjJRP1KSpYY":
 		return c.JSON(http.StatusOK, Swagger.TokenMetadata{
 			Collection: struct {
 				Family string `json:"family"`
@@ -27,6 +29,8 @@ func (h Handler) GetV1DripPubkeyPathTokenmetadata(c echo.Context, pubkeyPath Swa
 		})
 	// BTC
 	case "5nY3xT4PJe7NU41zqBx5UACHDckrimmfwznv4uLenrQg":
+		fallthrough
+	case "7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M":
 		return c.JSON(http.StatusOK, Swagger.TokenMetadata{
 			Collection: struct {
 				Family string `json:"family"`
@@ -44,5 +48,4 @@ func (h Handler) GetV1DripPubkeyPathTokenmetadata(c echo.Context, pubkeyPath Swa
 	default:
 		return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid mint"})
 	}
-
 }
