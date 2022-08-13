@@ -8,7 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
+	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	solana "github.com/gagliardetto/solana-go"
+	token "github.com/gagliardetto/solana-go/programs/token"
 	rpc "github.com/gagliardetto/solana-go/rpc"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -92,6 +94,36 @@ func (m *MockSolana) GetProgramAccounts(arg0 context.Context, arg1 string) ([]st
 func (mr *MockSolanaMockRecorder) GetProgramAccounts(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProgramAccounts", reflect.TypeOf((*MockSolana)(nil).GetProgramAccounts), arg0, arg1)
+}
+
+// GetTokenMetadataAccount mocks base method.
+func (m *MockSolana) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokenMetadataAccount", ctx, mintAddress)
+	ret0, _ := ret[0].(token_metadata.Metadata)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenMetadataAccount indicates an expected call of GetTokenMetadataAccount.
+func (mr *MockSolanaMockRecorder) GetTokenMetadataAccount(ctx, mintAddress interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenMetadataAccount", reflect.TypeOf((*MockSolana)(nil).GetTokenMetadataAccount), ctx, mintAddress)
+}
+
+// GetTokenMint mocks base method.
+func (m *MockSolana) GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTokenMint", ctx, mintAddress)
+	ret0, _ := ret[0].(token.Mint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenMint indicates an expected call of GetTokenMint.
+func (mr *MockSolanaMockRecorder) GetTokenMint(ctx, mintAddress interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenMint", reflect.TypeOf((*MockSolana)(nil).GetTokenMint), ctx, mintAddress)
 }
 
 // GetUserBalances mocks base method.

@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -26,8 +27,8 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokenAccountBalanceByAddress(context.Context, string, bool) error
-	UpsertTokenAccountBalance(context.Context, string, token.Account, bool) error
+	UpsertTokenAccountBalanceByAddress(context.Context, string) error
+	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 }
 
 type impl struct {
@@ -125,10 +126,10 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
 		return err
 	}
 	return nil
@@ -184,34 +185,26 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	}
 
 	// Upsert balances
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string, forceInsert bool) error {
+func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
 	var tokenAccount token.Account
 	if err := p.client.GetAccount(ctx, address, &tokenAccount); err != nil {
 		return err
 	}
-	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount, forceInsert)
+	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
 }
 
-func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account, forceInsert bool) error {
-	isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address)
-	isUserPositionNFTTokenAccount, _ := p.IsUserPositionTokenAccount(ctx, tokenAccount.Mint.String())
-	isVaultTokenAccount, _ := p.IsVaultTokenAccount(ctx, address)
-	if !isTokenSwapTokenAccount && !isUserPositionNFTTokenAccount && !isVaultTokenAccount {
+func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
+	if !p.shouldIngestTokenBalance(ctx, tokenAccount, address) {
 		return nil
-	}
-	if isUserPositionNFTTokenAccount {
-		logrus.
-			WithField("mint", tokenAccount.Mint.String()).
-			Info("recording user position token swap/creation")
 	}
 	state := "initialized"
 	if tokenAccount.State == token.Uninitialized {
@@ -222,19 +215,10 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 
 	var tokenMint token.Mint
 	if err := p.client.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
-		return err
+		return fmt.Errorf("failed to GetAccount %s, err: %w", tokenAccount.Mint.String(), err)
 	}
-	// TODO(Mocha): If this is a drip nft token, we can decorate the symbol with a deterministic name
-	// with tokenA, tokenB, start, end
-	tokenModel := model.Token{
-		Pubkey:   tokenAccount.Mint.String(),
-		Symbol:   nil,
-		Decimals: int16(tokenMint.Decimals),
-		IconURL:  nil,
-	}
-	if err := p.repo.UpsertTokens(ctx, &tokenModel); err != nil {
-		logrus.WithError(err).Error("failed to upsert tokens")
-		return err
+	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
+		return fmt.Errorf("failed to UpsertTokenByAddress %s, err: %w", tokenAccount.Mint.String(), err)
 	}
 	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
 		Pubkey: address,
@@ -243,6 +227,32 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 		Amount: tokenAccount.Amount,
 		State:  state,
 	})
+}
+
+func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
+	tokenMint, err := p.client.GetTokenMint(ctx, mintAddress)
+	if err != nil {
+		return fmt.Errorf("failed to GetTokenMin %s, err: %w", mintAddress, err)
+	}
+	tokenMetadataAccount, err := p.client.GetTokenMetadataAccount(ctx, mintAddress)
+	if err != nil {
+		if err.Error() != solana.ErrNotFound {
+			return fmt.Errorf("failed to GetTokenMetadataAccount for mint %s, err: %w", mintAddress, err)
+		}
+		tokenModel := model.Token{
+			Pubkey:   mintAddress,
+			Decimals: int16(tokenMint.Decimals),
+		}
+		return p.repo.UpsertTokens(ctx, &tokenModel)
+	}
+	tokenModel := model.Token{
+		Pubkey:   mintAddress,
+		Symbol:   &tokenMetadataAccount.Data.Symbol,
+		Decimals: int16(tokenMint.Decimals),
+		IconURL:  nil, // TODO(Mocha): fetch the image via the URI if the URI is present
+	}
+	return p.repo.UpsertTokens(ctx, &tokenModel)
+
 }
 
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
@@ -294,12 +304,6 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		if whitelistedSwap.IsZero() {
 			continue
 		}
-		if err := p.UpsertTokenSwapByAddress(ctx, whitelistedSwap.String()); err != nil {
-			logrus.
-				WithField("token_swap", whitelistedSwap.String()).
-				WithError(err).
-				Error("failed to insert token_swap by address")
-		}
 		vaultWhitelists = append(vaultWhitelists, &model.VaultWhitelist{
 			ID:              uuid.New().String(),
 			VaultPubkey:     address,
@@ -312,13 +316,13 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 			WithError(err).
 			Error("failed to insert vaultWhitelists")
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenAAccount.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenBAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TokenBAccount.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String(), true); err != nil {
+	if err := p.UpsertTokenAccountBalanceByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String()); err != nil {
 		return err
 	}
 	return nil
@@ -376,18 +380,10 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	if err := p.client.GetAccount(ctx, tokenBMint, &tokenB); err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokens(ctx,
-		&model.Token{
-			Pubkey:   tokenAAMint,
-			Symbol:   nil,
-			Decimals: int16(tokenA.Decimals),
-			IconURL:  nil,
-		}, &model.Token{
-			Pubkey:   tokenBMint,
-			Symbol:   nil,
-			Decimals: int16(tokenB.Decimals),
-			IconURL:  nil,
-		}); err != nil {
+	if err := p.UpsertTokenByAddress(ctx, tokenAAMint); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenByAddress(ctx, tokenBMint); err != nil {
 		return err
 	}
 	return p.repo.InsertTokenPairs(ctx, &model.TokenPair{
@@ -397,43 +393,67 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	})
 }
 
-func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccount string) (bool, error) {
-	tokenSwap, err := p.repo.GetTokenSwapForTokenAccount(ctx, tokenAccount)
-	if err != nil {
-		return false, err
+func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account, tokenAccountAddress string) bool {
+	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
+		return true
 	}
-	if tokenSwap == nil {
-		return false, nil
-	}
-	return true, nil
+	return false
 }
 
-func (p impl) IsUserPositionTokenAccount(ctx context.Context, mint string) (bool, error) {
-	position, err := p.repo.GetPositionByNFTMint(ctx, mint)
+func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.GetTokenSwapByAddress(ctx, tokenAccountOwner)
 	if err != nil {
-		return false, err
+		return false
 	}
-	if position == nil {
-		return false, nil
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
+			logrus.WithError(err).Error("failed to query for token swap")
+		}
+		return false
 	}
-	return true, nil
+	return true
 }
 
-func (p impl) IsVaultTokenAccount(ctx context.Context, pubkey string) (bool, error) {
-	vaults, err := p.repo.AdminGetVaultsByTokenAccountAddress(ctx, pubkey)
-	if err != nil && err.Error() != "record not found" {
-		return false, err
+func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.GetOrcaWhirlpoolByAddress(ctx, tokenAccountOwner)
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
+			logrus.WithError(err).Error("failed to query for whirlpool")
+		}
+		return false
 	}
-	if len(vaults) == 0 {
-		return false, nil
+	return true
+}
+
+func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.AdminGetVaultByAddress(ctx, tokenAccountOwner)
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
+			logrus.WithError(err).Error("failed to query for vault")
+		}
+		return false
 	}
-	return true, nil
+	return true
+}
+
+func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool {
+	_, err := p.repo.GetPositionByNFTMint(ctx, mint)
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
+			logrus.WithError(err).Error("failed to query for position")
+		}
+		return false
+	}
+	return true
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
 func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
 	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
-	if err != nil && err.Error() == "record not found" {
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
 			return nil, err
 		}
@@ -446,7 +466,7 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
 func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
 	vault, err := p.repo.AdminGetVaultByAddress(ctx, address)
-	if err != nil && err.Error() == "record not found" {
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			return nil, err
 		}

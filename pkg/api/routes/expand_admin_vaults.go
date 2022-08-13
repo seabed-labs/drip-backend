@@ -130,7 +130,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 		tokensByPubkey[token.Pubkey] = token
 	}
 
-	protoConfigs, err := h.repo.GetProtoConfigsByPubkeys(c.Request().Context(), protoConfigPubkeys)
+	protoConfigs, err := h.repo.GetProtoConfigsByAddresses(c.Request().Context(), protoConfigPubkeys)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get protoConfigs")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})

@@ -388,6 +388,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220812052441-3d67a07ba1de h1:Mys6FrZ+czo6+BAo2nbMZDegpSHGPoMGabXmisht77o=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220812052441-3d67a07ba1de/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746 h1:eKU/trAhFQa4stQNlVoIoJ+y9PiJSdze2NTXA4tGxk0=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d/go.mod h1:tmAIfUFEirG/Y8jhZ9M+h36obRZAk/1fcSpXwAVlfqE=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=
@@ -468,6 +470,8 @@ github.com/gagliardetto/binary v0.6.1/go.mod h1:aOfYkc20U0deHaHn/LVZXiqlkDbFAX0F
 github.com/gagliardetto/gofuzz v1.2.2 h1:XL/8qDMzcgvR4+CyRQW9UGdwPRPMHVJfqQ/uMvSUuQw=
 github.com/gagliardetto/gofuzz v1.2.2/go.mod h1:bkH/3hYLZrMLbfYWA0pWzXmi5TTRZnu4pMGZBkqMKvY=
 github.com/gagliardetto/hashsearch v0.0.0-20191005111333-09dd671e19f9/go.mod h1:513DXpQPzeRo7d4dsCP3xO3XI8hgvruMl9njxyQeraQ=
+github.com/gagliardetto/metaplex-go v0.2.1 h1:NMBsgJe3I2avKZ39dfYQvXsGsr2BxUgARkA9LZ6szBg=
+github.com/gagliardetto/metaplex-go v0.2.1/go.mod h1:6ZLYBvlWcXktXQ/QcBJYRzKgK7Q3WgiGD7BjE7Zxpw4=
 github.com/gagliardetto/solana-go v1.4.0 h1:B6O4F7ZyOHLmZTF0jvJQZohriVwo15vo5XKJQWMbbWM=
 github.com/gagliardetto/solana-go v1.4.0/go.mod h1:NFuoDwHPvw858ZMHUJr6bkhN8qHt4x6e+U3EYHxAwNY=
 github.com/gagliardetto/treeout v0.1.4 h1:ozeYerrLCmCubo1TcIjFiOWTTGteOOHND1twdFpgwaw=
