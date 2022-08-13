@@ -33,6 +33,7 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/dave/jennifer v1.4.1 // indirect
 	github.com/gagliardetto/anchor-go v0.3.1 // indirect
+	github.com/gagliardetto/metaplex-go v0.2.1 // indirect
 	github.com/gagliardetto/utilz v0.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
