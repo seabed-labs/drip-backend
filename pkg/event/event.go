@@ -52,12 +52,6 @@ func Server(
 }
 
 func (d DripProgramProcessor) start(ctx context.Context) error {
-	// These "token swaps" have potentially different interfaces then the token_swap program
-	//"9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP", // orca swap v2
-	//"DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1", // orca swap v1
-	//"SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr",  // Saros AMM
-	//"PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP",  // Penguin Swap
-
 	// Track Drip accounts
 	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processDripEvent); err != nil {
 		return err
@@ -71,7 +65,6 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	go d.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processTokenSwapEvent)
 
 	// Track orca_whirlpool program accounts
-	// TODO(Mocha): remove processor
 	if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processWhirlpoolEvent); err != nil {
 		return err
 	}
