@@ -31,7 +31,6 @@ type Repository interface {
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
-	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
@@ -49,17 +48,38 @@ type Repository interface {
 	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
 	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
-	GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
+	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
-	AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error)
-	AdminGetVaultsByTokenAccountAddress(ctx context.Context, pubkey string) ([]*model.Vault, error)
+
+	GetVaultByAddress(context.Context, string) (*model.Vault, error)
+	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
+	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
+	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
 }
 
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func NewRepository(
+	repo *query.Query,
+	db *sqlx.DB,
+) Repository {
+	return repositoryImpl{
+		repo: repo,
+		db:   db,
+	}
+}
+
+func (d repositoryImpl) GetTokenSwapByAddress(ctx context.Context, address string) (*model.TokenSwap, error) {
+	return d.repo.TokenSwap.WithContext(ctx).Where(d.repo.TokenSwap.Pubkey.Eq(address)).First()
+}
+
+func (d repositoryImpl) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
+	return d.repo.OrcaWhirlpool.WithContext(ctx).Where(d.repo.OrcaWhirlpool.Pubkey.Eq(address)).First()
 }
 
 func (d repositoryImpl) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
@@ -100,7 +120,7 @@ func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLis
 		Create(vaultWhiteLists...)
 }
 
-func (d repositoryImpl) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
+func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
 	stmt := d.repo.ProtoConfig.
 		WithContext(ctx)
 	if len(pubkeys) > 0 {
@@ -184,16 +204,6 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 		Where(d.repo.Vault.Pubkey.Eq(vaultPubkey)).
 		Update(d.repo.Vault.Enabled, enabled)
 	return &res, err
-}
-
-func NewRepository(
-	repo *query.Query,
-	db *sqlx.DB,
-) Repository {
-	return repositoryImpl{
-		repo: repo,
-		db:   db,
-	}
 }
 
 func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error {

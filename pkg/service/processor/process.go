@@ -18,6 +18,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const ErrNotFound = "record not found"
+
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
@@ -202,16 +204,8 @@ func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address st
 }
 
 func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
-	isTokenSwapTokenAccount, _ := p.IsTokenSwapTokenAccount(ctx, address)
-	isUserPositionNFTTokenAccount, _ := p.IsUserPositionTokenAccount(ctx, tokenAccount.Mint.String())
-	isVaultTokenAccount, _ := p.IsVaultTokenAccount(ctx, address)
-	if !isTokenSwapTokenAccount && !isUserPositionNFTTokenAccount && !isVaultTokenAccount {
+	if !p.shouldIngestTokenBalance(ctx, tokenAccount, address) {
 		return nil
-	}
-	if isUserPositionNFTTokenAccount {
-		logrus.
-			WithField("mint", tokenAccount.Mint.String()).
-			Info("recording user position token swap/creation")
 	}
 	state := "initialized"
 	if tokenAccount.State == token.Uninitialized {
@@ -303,12 +297,6 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		if whitelistedSwap.IsZero() {
 			continue
 		}
-		if err := p.UpsertTokenSwapByAddress(ctx, whitelistedSwap.String()); err != nil {
-			logrus.
-				WithField("token_swap", whitelistedSwap.String()).
-				WithError(err).
-				Error("failed to insert token_swap by address")
-		}
 		vaultWhitelists = append(vaultWhitelists, &model.VaultWhitelist{
 			ID:              uuid.New().String(),
 			VaultPubkey:     address,
@@ -398,43 +386,67 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	})
 }
 
-func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccount string) (bool, error) {
-	tokenSwap, err := p.repo.GetTokenSwapForTokenAccount(ctx, tokenAccount)
-	if err != nil {
-		return false, err
+func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account, tokenAccountAddress string) bool {
+	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
+		return true
 	}
-	if tokenSwap == nil {
-		return false, nil
-	}
-	return true, nil
+	return false
 }
 
-func (p impl) IsUserPositionTokenAccount(ctx context.Context, mint string) (bool, error) {
-	position, err := p.repo.GetPositionByNFTMint(ctx, mint)
+func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.GetTokenSwapByAddress(ctx, tokenAccountOwner)
 	if err != nil {
-		return false, err
+		return false
 	}
-	if position == nil {
-		return false, nil
+	if err != nil && err.Error() != ErrNotFound {
+		if err.Error() != ErrNotFound {
+			logrus.WithError(err).Error("failed to query for token swap")
+		}
+		return false
 	}
-	return true, nil
+	return true
 }
 
-func (p impl) IsVaultTokenAccount(ctx context.Context, pubkey string) (bool, error) {
-	vaults, err := p.repo.AdminGetVaultsByTokenAccountAddress(ctx, pubkey)
-	if err != nil && err.Error() != "record not found" {
-		return false, err
+func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.GetOrcaWhirlpoolByAddress(ctx, tokenAccountOwner)
+	if err != nil && err.Error() != ErrNotFound {
+		if err.Error() != ErrNotFound {
+			logrus.WithError(err).Error("failed to query for whirlpool")
+		}
+		return false
 	}
-	if len(vaults) == 0 {
-		return false, nil
+	return true
+}
+
+func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
+	_, err := p.repo.AdminGetVaultByAddress(ctx, tokenAccountOwner)
+	if err != nil && err.Error() != ErrNotFound {
+		if err.Error() != ErrNotFound {
+			logrus.WithError(err).Error("failed to query for vault")
+		}
+		return false
 	}
-	return true, nil
+	return true
+}
+
+func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool {
+	_, err := p.repo.GetPositionByNFTMint(ctx, mint)
+	if err != nil {
+		if err.Error() != ErrNotFound {
+			logrus.WithError(err).Error("failed to query for position")
+		}
+		return false
+	}
+	return true
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
 func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
 	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
-	if err != nil && err.Error() == "record not found" {
+	if err != nil && err.Error() == ErrNotFound {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
 			return nil, err
 		}
@@ -447,7 +459,7 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
 func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
 	vault, err := p.repo.AdminGetVaultByAddress(ctx, address)
-	if err != nil && err.Error() == "record not found" {
+	if err != nil && err.Error() == ErrNotFound {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			return nil, err
 		}

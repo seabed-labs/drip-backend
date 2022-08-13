@@ -143,7 +143,7 @@ func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface
 // GetProtoConfigsByPubkeys mocks base method.
 func (m *MockRepository) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProtoConfigsByPubkeys", ctx, pubkeys)
+	ret := m.ctrl.Call(m, "GetProtoConfigsByAddresses", ctx, pubkeys)
 	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -152,7 +152,7 @@ func (m *MockRepository) GetProtoConfigsByPubkeys(ctx context.Context, pubkeys [
 // GetProtoConfigsByPubkeys indicates an expected call of GetProtoConfigsByPubkeys.
 func (mr *MockRepositoryMockRecorder) GetProtoConfigsByPubkeys(ctx, pubkeys interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigsByPubkeys", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigsByPubkeys), ctx, pubkeys)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigsByAddresses", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigsByPubkeys), ctx, pubkeys)
 }
 
 // GetTokenAccountBalancesByIDS mocks base method.
