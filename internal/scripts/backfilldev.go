@@ -53,7 +53,6 @@ func Backfill(
 	//backfillVaults(vaultConfigs, processor)
 	//backfillTokens(repo, client, vaultConfigs)
 	//backfillVaultPeriods(repo, client, vaultConfigs, vaultMap)
-	processor.UpsertVaultByAddress(context.Background(), "G94ANtDfv4xcaA1pnjq7xysxRE8woc9eBuZGWV8hGaMV")
 	for _, address := range []string{
 		"5fkps3wttvX3ysprtWzLRuxajSkmdxEa12Ys8E4bMTPh",
 	} {
