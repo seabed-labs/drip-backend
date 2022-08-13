@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -17,8 +18,6 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
 )
-
-const ErrNotFound = "record not found"
 
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
@@ -216,10 +215,10 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 
 	var tokenMint token.Mint
 	if err := p.client.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
-		return err
+		return fmt.Errorf("failed to GetAccount %s, err: %w", tokenAccount.Mint.String(), err)
 	}
 	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
-		return err
+		return fmt.Errorf("failed to UpsertTokenByAddress %s, err: %w", tokenAccount.Mint.String(), err)
 	}
 	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
 		Pubkey: address,
@@ -233,19 +232,27 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
 	tokenMint, err := p.client.GetTokenMint(ctx, mintAddress)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to GetTokenMin %s, err: %w", mintAddress, err)
 	}
 	tokenMetadataAccount, err := p.client.GetTokenMetadataAccount(ctx, mintAddress)
 	if err != nil {
-		return err
+		if err.Error() != solana.ErrNotFound {
+			return fmt.Errorf("failed to GetTokenMetadataAccount for mint %s, err: %w", mintAddress, err)
+		}
+		tokenModel := model.Token{
+			Pubkey:   mintAddress,
+			Decimals: int16(tokenMint.Decimals),
+		}
+		return p.repo.UpsertTokens(ctx, &tokenModel)
 	}
 	tokenModel := model.Token{
 		Pubkey:   mintAddress,
 		Symbol:   &tokenMetadataAccount.Data.Symbol,
 		Decimals: int16(tokenMint.Decimals),
-		IconURL:  nil,
+		IconURL:  nil, // TODO(Mocha): fetch the image via the URI if the URI is present
 	}
 	return p.repo.UpsertTokens(ctx, &tokenModel)
+
 }
 
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
@@ -401,8 +408,8 @@ func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner str
 	if err != nil {
 		return false
 	}
-	if err != nil && err.Error() != ErrNotFound {
-		if err.Error() != ErrNotFound {
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
 			logrus.WithError(err).Error("failed to query for token swap")
 		}
 		return false
@@ -412,8 +419,8 @@ func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner str
 
 func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
 	_, err := p.repo.GetOrcaWhirlpoolByAddress(ctx, tokenAccountOwner)
-	if err != nil && err.Error() != ErrNotFound {
-		if err.Error() != ErrNotFound {
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
 			logrus.WithError(err).Error("failed to query for whirlpool")
 		}
 		return false
@@ -423,8 +430,8 @@ func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner
 
 func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
 	_, err := p.repo.AdminGetVaultByAddress(ctx, tokenAccountOwner)
-	if err != nil && err.Error() != ErrNotFound {
-		if err.Error() != ErrNotFound {
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
 			logrus.WithError(err).Error("failed to query for vault")
 		}
 		return false
@@ -435,7 +442,7 @@ func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string)
 func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool {
 	_, err := p.repo.GetPositionByNFTMint(ctx, mint)
 	if err != nil {
-		if err.Error() != ErrNotFound {
+		if err.Error() != repository.ErrRecordNotFound {
 			logrus.WithError(err).Error("failed to query for position")
 		}
 		return false
@@ -446,7 +453,7 @@ func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
 func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
 	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
-	if err != nil && err.Error() == ErrNotFound {
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
 			return nil, err
 		}
@@ -459,7 +466,7 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
 func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
 	vault, err := p.repo.AdminGetVaultByAddress(ctx, address)
-	if err != nil && err.Error() == ErrNotFound {
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			return nil, err
 		}

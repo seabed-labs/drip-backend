@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+const ErrRecordNotFound = "record not found"
+
 type TokenSwapWithBalance struct {
 	model.TokenSwap
 	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`

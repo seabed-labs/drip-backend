@@ -19,6 +19,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const ErrNotFound = "not found"
+
 type Solana interface {
 	MintToWallet(context.Context, string, string, uint64) (string, error)
 	signAndBroadcast(context.Context, rpc.CommitmentType, ...solana.Instruction) (string, error)
@@ -140,10 +142,6 @@ func (s impl) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (
 			DataSlice:  nil,
 		})
 	if err != nil {
-		logrus.
-			WithError(err).
-			WithField("address", tokenMetadataAddress).
-			Errorf("couldn't get acount info")
 		return tokenMetadata, err
 	}
 	decoder := bin.NewBorshDecoder(resp.Value.Data.GetBinary())
