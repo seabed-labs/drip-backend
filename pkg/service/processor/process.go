@@ -333,7 +333,19 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	if err := p.client.GetAccount(ctx, address, &position); err != nil {
 		return err
 	}
-	if _, err := p.ensureVault(ctx, position.Vault.String()); err != nil {
+	vault, err := p.ensureVault(ctx, position.Vault.String())
+	if err != nil {
+		return err
+	}
+	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
+	if err != nil {
+		return err
+	}
+	// Get up to date token metadata info
+	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenA); err != nil {
+		return err
+	}
+	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenB); err != nil {
 		return err
 	}
 	return p.repo.UpsertPositions(ctx, &model.Position{
