@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"math"
+	"math/big"
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/repository/model"
@@ -69,6 +71,11 @@ func (h Handler) GetV1DripPositionPubkeyPathMetadata(
 			tokenB = *tokenMint
 		}
 	}
+	depositAmount := *big.NewFloat(float64(position.DepositedTokenAAmount))
+	if tokenA.Decimals != 0 {
+		scale := math.Pow(10, float64(tokenA.Decimals))
+		depositAmount = *new(big.Float).Quo(&depositAmount, big.NewFloat(scale))
+	}
 	var tokenASymbol string
 	if tokenA.Symbol != nil {
 		tokenASymbol = *tokenA.Symbol
@@ -89,7 +96,7 @@ func (h Handler) GetV1DripPositionPubkeyPathMetadata(
 		nofMSwaps = fmt.Sprintf("%d/%d", endPeriodID-vault.LastDcaPeriod, position.NumberOfSwaps)
 	}
 	res := defaultTokenMetadata
-	res.Description = fmt.Sprintf("Drip %d %s to %s\nDeposited on %s, with %s drips remaining",
-		position.DepositedTokenAAmount, tokenASymbol, tokenBSymbol, position.DepositTimestamp.String(), nofMSwaps)
+	res.Description = fmt.Sprintf("Drip %s %s to %s\nDeposited on %s, with %s drips remaining",
+		depositAmount.Text('e', 2), tokenASymbol, tokenBSymbol, position.DepositTimestamp.String(), nofMSwaps)
 	return c.JSON(http.StatusOK, res)
 }
