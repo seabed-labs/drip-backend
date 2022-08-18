@@ -178,3 +178,25 @@ func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []s
 	}
 	return stmt.Find()
 }
+
+func (d repositoryImpl) GetVaultPeriods(
+	ctx context.Context,
+	vault string, vaultPeriod *string,
+	paginationParams PaginationParams,
+) ([]*model.VaultPeriod, error) {
+	stmt := d.repo.
+		VaultPeriod.WithContext(ctx).
+		Join(d.repo.Vault, d.repo.VaultPeriod.Vault.EqCol(d.repo.Vault.Pubkey)).
+		Where(d.repo.VaultPeriod.Vault.Eq(vault)).
+		Where(d.repo.Vault.Enabled.Is(true))
+	if vaultPeriod != nil {
+		stmt = stmt.Where(d.repo.VaultPeriod.Pubkey.Eq(*vaultPeriod))
+	}
+	if paginationParams.Limit != nil {
+		stmt = stmt.Limit(*paginationParams.Limit)
+	}
+	if paginationParams.Offset != nil {
+		stmt = stmt.Offset(*paginationParams.Offset)
+	}
+	return stmt.Find()
+}

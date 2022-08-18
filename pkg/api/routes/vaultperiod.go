@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/repository"
+
 	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -22,13 +24,15 @@ func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsP
 	vaultPeriodModels, err := h.repo.GetVaultPeriods(
 		c.Request().Context(),
 		(string)(params.Vault),
-		limit,
-		offset,
 		(*string)(params.VaultPeriod),
+		repository.PaginationParams{
+			Limit:  &limit,
+			Offset: &offset,
+		},
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault periods")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
 	}
 
 	for i := range vaultPeriodModels {

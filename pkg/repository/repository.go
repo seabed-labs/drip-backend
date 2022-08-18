@@ -37,7 +37,7 @@ type Repository interface {
 	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
 	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
-	GetVaultPeriods(context.Context, string, int, int, *string) ([]*model.VaultPeriod, error)
+	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
 
 	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
 
@@ -60,7 +60,7 @@ type Repository interface {
 	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
-	AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error)
+	AdminGetVaults(ctx context.Context, enabled *bool, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
 }
 

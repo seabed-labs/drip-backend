@@ -32,17 +32,17 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 	return &res, err
 }
 
-func (d repositoryImpl) AdminGetVaults(ctx context.Context, enabled *bool, limit *int, offset *int) ([]*model.Vault, error) {
+func (d repositoryImpl) AdminGetVaults(ctx context.Context, enabled *bool, paginationParams PaginationParams) ([]*model.Vault, error) {
 	stmt := d.repo.Vault.
 		WithContext(ctx)
 	if enabled != nil {
 		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*enabled))
 	}
-	if limit != nil && *limit > 0 {
-		stmt = stmt.Limit(*limit)
+	if paginationParams.Limit != nil && *paginationParams.Limit > 0 {
+		stmt = stmt.Limit(*paginationParams.Limit)
 	}
-	if offset != nil && *offset > 0 {
-		stmt = stmt.Offset(*offset)
+	if paginationParams.Offset != nil && *paginationParams.Offset > 0 {
+		stmt = stmt.Offset(*paginationParams.Offset)
 	}
 	stmt = stmt.Order(d.repo.Vault.Pubkey)
 	return stmt.Find()
@@ -100,18 +100,6 @@ func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string,
 	}
 	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
 	return stmt.Find()
-}
-
-func (d repositoryImpl) GetVaultPeriods(ctx context.Context, vault string, limit int, offset int, vaultPeriod *string) ([]*model.VaultPeriod, error) {
-	stmt := d.repo.
-		VaultPeriod.WithContext(ctx).
-		Join(d.repo.Vault, d.repo.VaultPeriod.Vault.EqCol(d.repo.Vault.Pubkey)).
-		Where(d.repo.VaultPeriod.Vault.Eq(vault)).
-		Where(d.repo.Vault.Enabled.Is(true))
-	if vaultPeriod != nil {
-		stmt = stmt.Where(d.repo.VaultPeriod.Pubkey.Eq(*vaultPeriod))
-	}
-	return stmt.Limit(limit).Offset(offset).Find()
 }
 
 func (d repositoryImpl) GetAdminPositions(
