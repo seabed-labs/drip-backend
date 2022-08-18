@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/dcaf-labs/drip/pkg/repository"
-
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	apispec "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
