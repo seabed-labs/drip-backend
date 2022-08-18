@@ -12,7 +12,7 @@ import (
 )
 
 func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPositionsParams) error {
-	var res apispec.ListAdminPositions
+	res := apispec.ListAdminPositions{}
 
 	positions, err := h.repo.GetAdminPositions(
 		c.Request().Context(),

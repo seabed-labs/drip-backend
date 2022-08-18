@@ -13,7 +13,7 @@ import (
 )
 
 func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcawhirlpoolconfigsParams) error {
-	var res Swagger.ListOrcaWhirlpoolConfigs
+	res := Swagger.ListOrcaWhirlpoolConfigs{}
 
 	// TODO(Mocha): Refactor this and a the token swap config controller
 	var vaults []*model.Vault

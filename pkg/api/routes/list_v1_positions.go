@@ -12,7 +12,7 @@ import (
 )
 
 func (h Handler) GetV1Positions(c echo.Context, params apispec.GetV1PositionsParams) error {
-	var res apispec.ListPositions
+	res := apispec.ListPositions{}
 
 	enabled := true
 	wallet := string(params.Wallet)

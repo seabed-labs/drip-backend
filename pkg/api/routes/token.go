@@ -9,7 +9,7 @@ import (
 )
 
 func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error {
-	var res Swagger.ListTokens
+	res := Swagger.ListTokens{}
 	if params.TokenA != nil && params.TokenB != nil {
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "both tokenA and tokenB cannot be set"})
 	}

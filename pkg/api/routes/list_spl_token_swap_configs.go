@@ -12,7 +12,7 @@ import (
 )
 
 func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltokenswapconfigsParams) error {
-	var res Swagger.ListSplTokenSwapConfigs
+	res := Swagger.ListSplTokenSwapConfigs{}
 
 	var vaults []*model.Vault
 	if params.Vault != nil {
