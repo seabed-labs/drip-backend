@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	apispec "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -23,14 +23,22 @@ const (
 	treasuryTokenBAccountValue = GetAdminVaultsExpandParams("treasuryTokenBAccountValue")
 )
 
-func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsParams) error {
-	var res Swagger.ListExpandedAdminVaults
+// GetAdminVaults DEPRECATED
+func (h Handler) GetAdminVaults(c echo.Context, params apispec.GetAdminVaultsParams) error {
+	return h.GetV1AdminVaults(c, apispec.GetV1AdminVaultsParams(params))
+}
+
+func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVaultsParams) error {
+	var res apispec.ListExpandedAdminVaults
 
 	// Get all Vaults
-	vaults, err := h.repo.AdminGetVaults(c.Request().Context(), (*bool)(params.Enabled), (*int)(params.Limit), (*int)(params.Offset))
+	vaults, err := h.repo.AdminGetVaults(c.Request().Context(), (*bool)(params.Enabled), repository.PaginationParams{
+		Limit:  (*int)(params.Limit),
+		Offset: (*int)(params.Offset),
+	})
 	if err != nil {
 		logrus.WithError(err).Error("failed to get vaults")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get vaults as admin"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults as admin"})
 	}
 	// Get and Map all TokenPairs
 	var tokenPairIDS []string
@@ -41,7 +49,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 	tokenPairs, err := h.repo.GetTokenPairsByIDS(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get tokenPairs")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get token pairs"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get token pairs"})
 	}
 	tokenPairsByID := make(map[string]*model.TokenPair)
 	for i := range tokenPairs {
@@ -58,10 +66,10 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 				WithField("tokenPairID", vault.TokenPairID).
 				WithField("vault", vault.Pubkey).
 				Errorf("could not find token pair")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 		}
-		res = append(res, Swagger.ExpandedAdminVault{
-			Vault: Swagger.Vault{
+		res = append(res, apispec.ExpandedAdminVault{
+			Vault: apispec.Vault{
 				DcaActivationTimestamp: strconv.FormatInt(vault.DcaActivationTimestamp.Unix(), 10),
 				DripAmount:             strconv.FormatUint(vault.DripAmount, 10),
 				LastDcaPeriod:          strconv.FormatUint(vault.LastDcaPeriod, 10),
@@ -86,7 +94,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 		return c.JSON(http.StatusOK, res)
 	}
 	if hasValue(*params.Expand, string(expandAll)) {
-		newParams := Swagger.ExpandAdminVaultsQueryParam{string(protoConfigValue), string(tokenAMintValue), string(tokenBMintValue), string(tokenAAccountValue), string(tokenBAccountValue), string(treasuryTokenBAccountValue)}
+		newParams := apispec.ExpandAdminVaultsQueryParam{string(protoConfigValue), string(tokenAMintValue), string(tokenBMintValue), string(tokenAAccountValue), string(tokenBAccountValue), string(treasuryTokenBAccountValue)}
 		params.Expand = &newParams
 	}
 
@@ -104,7 +112,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 	tokenAccountBalances, err := h.repo.GetTokenAccountBalancesByIDS(c.Request().Context(), tokenAccountPubkeys)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	tokenAccountBalancesByPubkey := make(map[string]*model.TokenAccountBalance)
 	for i := range tokenAccountBalances {
@@ -122,7 +130,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 	tokens, err := h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	tokensByPubkey := make(map[string]*model.Token)
 	for i := range tokens {
@@ -133,7 +141,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 	protoConfigs, err := h.repo.GetProtoConfigsByAddresses(c.Request().Context(), protoConfigPubkeys)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get protoConfigs")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	protoConfigsByPubkey := make(map[string]*model.ProtoConfig)
 	for i := range protoConfigs {
@@ -154,7 +162,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					continue
 				}
 				// TODO(Mocha): unsafe cast
-				res[i].ProtoConfigValue = &Swagger.ProtoConfig{
+				res[i].ProtoConfigValue = &apispec.ProtoConfig{
 					BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
 					Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
 					Pubkey:               protoConfig.Pubkey,
@@ -172,7 +180,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					continue
 				}
 				//TODO(Mocha): unsafe cast
-				res[i].TokenAMintValue = &Swagger.Token{
+				res[i].TokenAMintValue = &apispec.Token{
 					Decimals: int(token.Decimals),
 					Pubkey:   token.Pubkey,
 					Symbol:   token.Symbol,
@@ -188,7 +196,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 						Error("missing TokenBMint")
 					continue
 				}
-				res[i].TokenBMintValue = &Swagger.Token{
+				res[i].TokenBMintValue = &apispec.Token{
 					//TODO(Mocha): unsafe cast
 					Decimals: int(token.Decimals),
 					Pubkey:   token.Pubkey,
@@ -206,7 +214,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					continue
 				}
 				// TODO(Mocha): Unsafe cast
-				res[i].TokenAAccountValue = &Swagger.TokenAccountBalance{
+				res[i].TokenAAccountValue = &apispec.TokenAccountBalance{
 					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
@@ -225,7 +233,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					continue
 				}
 				// TODO(Mocha): Unsafe cast
-				res[i].TokenBAccountValue = &Swagger.TokenAccountBalance{
+				res[i].TokenBAccountValue = &apispec.TokenAccountBalance{
 					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
@@ -244,7 +252,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 					continue
 				}
 				// TODO(Mocha): Unsafe cast
-				res[i].TreasuryTokenBAccountValue = &Swagger.TokenAccountBalance{
+				res[i].TreasuryTokenBAccountValue = &apispec.TokenAccountBalance{
 					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 					Mint:   tokenAccountBalance.Mint,
 					Owner:  tokenAccountBalance.Owner,
@@ -258,7 +266,7 @@ func (h Handler) GetAdminVaults(c echo.Context, params Swagger.GetAdminVaultsPar
 	return c.JSON(http.StatusOK, res)
 }
 
-func hasValue(params Swagger.ExpandAdminVaultsQueryParam, value string) bool {
+func hasValue(params apispec.ExpandAdminVaultsQueryParam, value string) bool {
 	for _, v := range params {
 		if v == value {
 			return true

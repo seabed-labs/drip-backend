@@ -50,6 +50,9 @@ type ExpandedAdminVault struct {
 	TreasuryTokenBAccountValue *TokenAccountBalance `json:"treasuryTokenBAccountValue,omitempty"`
 }
 
+// ListAdminPositions defines model for listAdminPositions.
+type ListAdminPositions []Position
+
 // ListExpandedAdminVaults defines model for listExpandedAdminVaults.
 type ListExpandedAdminVaults []ExpandedAdminVault
 
@@ -111,15 +114,15 @@ type PingResponse struct {
 // Position defines model for position.
 type Position struct {
 	Authority                string `json:"authority"`
-	DcaPeriodIdBeforeDeposit int    `json:"dcaPeriodIdBeforeDeposit"`
+	DcaPeriodIdBeforeDeposit string `json:"dcaPeriodIdBeforeDeposit"`
 	DepositTimestamp         string `json:"depositTimestamp"`
-	DepositedTokenAAmount    int    `json:"depositedTokenAAmount"`
+	DepositedTokenAAmount    string `json:"depositedTokenAAmount"`
 	IsClosed                 bool   `json:"isClosed"`
-	NumberOfSwaps            int    `json:"numberOfSwaps"`
-	PeriodicDripAmount       int    `json:"periodicDripAmount"`
+	NumberOfSwaps            string `json:"numberOfSwaps"`
+	PeriodicDripAmount       string `json:"periodicDripAmount"`
 	Pubkey                   string `json:"pubkey"`
 	Vault                    string `json:"vault"`
-	WithdrawnTokenBAmount    int    `json:"withdrawnTokenBAmount"`
+	WithdrawnTokenBAmount    string `json:"withdrawnTokenBAmount"`
 }
 
 // ProtoConfig defines model for protoConfig.
@@ -226,6 +229,9 @@ type ExpandAdminVaultsQueryParam []string
 // GoogleTokenIdHeaderParam defines model for googleTokenIdHeaderParam.
 type GoogleTokenIdHeaderParam string
 
+// IsClosedQueryParam defines model for isClosedQueryParam.
+type IsClosedQueryParam bool
+
 // LimitQueryParam defines model for limitQueryParam.
 type LimitQueryParam int
 
@@ -284,11 +290,6 @@ type GetOrcawhirlpoolconfigsParams struct {
 	Vault *VaultQueryParam `json:"vault,omitempty"`
 }
 
-// GetPositionsParams defines parameters for GetPositions.
-type GetPositionsParams struct {
-	Wallet RequiredWalletQueryParam `json:"Wallet"`
-}
-
 // GetProtoconfigsParams defines parameters for GetProtoconfigs.
 type GetProtoconfigsParams struct {
 	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
@@ -315,6 +316,40 @@ type GetTokenpairsParams struct {
 type GetTokensParams struct {
 	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
 	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
+}
+
+// GetV1AdminPositionsParams defines parameters for GetV1AdminPositions.
+type GetV1AdminPositionsParams struct {
+	Enabled  *EnabledQueryParam       `json:"enabled,omitempty"`
+	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
+	Offset   *OffsetQueryParam        `json:"offset,omitempty"`
+	Limit    *LimitQueryParam         `json:"limit,omitempty"`
+	TokenId  GoogleTokenIdHeaderParam `json:"token-id"`
+}
+
+// PutV1AdminVaultPubkeyPathEnableParams defines parameters for PutV1AdminVaultPubkeyPathEnable.
+type PutV1AdminVaultPubkeyPathEnableParams struct {
+	TokenId GoogleTokenIdHeaderParam `json:"token-id"`
+}
+
+// GetV1AdminVaultsParams defines parameters for GetV1AdminVaults.
+type GetV1AdminVaultsParams struct {
+	Expand  *ExpandAdminVaultsQueryParam `json:"expand,omitempty"`
+	Enabled *EnabledQueryParam           `json:"enabled,omitempty"`
+	Offset  *OffsetQueryParam            `json:"offset,omitempty"`
+	Limit   *LimitQueryParam             `json:"limit,omitempty"`
+	TokenId GoogleTokenIdHeaderParam     `json:"token-id"`
+}
+
+// GetV1AdminVaultsParamsExpand defines parameters for GetV1AdminVaults.
+type GetV1AdminVaultsParamsExpand string
+
+// GetV1PositionsParams defines parameters for GetV1Positions.
+type GetV1PositionsParams struct {
+	Wallet   RequiredWalletQueryParam `json:"wallet"`
+	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
+	Offset   *OffsetQueryParam        `json:"offset,omitempty"`
+	Limit    *LimitQueryParam         `json:"limit,omitempty"`
 }
 
 // GetVaultperiodsParams defines parameters for GetVaultperiods.
@@ -427,9 +462,6 @@ type ClientInterface interface {
 	// GetOrcawhirlpoolconfigs request
 	GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetPositions request
-	GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetProtoconfigs request
 	GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -448,11 +480,23 @@ type ClientInterface interface {
 	// GetTokens request
 	GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1AdminPositions request
+	GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutV1AdminVaultPubkeyPathEnable request
+	PutV1AdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1AdminVaults request
+	GetV1AdminVaults(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Positions request
+	GetV1Positions(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetVaultperiods request
 	GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -523,18 +567,6 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 
 func (c *Client) GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrcawhirlpoolconfigsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPositionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -617,6 +649,42 @@ func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEdit
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1AdminPositionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutV1AdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutV1AdminVaultPubkeyPathEnableRequest(c.Server, pubkeyPath, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1AdminVaults(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1AdminVaultsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1DripPositionPubkeyPathMetadataRequest(c.Server, pubkeyPath)
 	if err != nil {
@@ -631,6 +699,18 @@ func (c *Client) GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkey
 
 func (c *Client) GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1DripPubkeyPathTokenmetadataRequest(c.Server, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Positions(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1PositionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -914,49 +994,6 @@ func NewGetOrcawhirlpoolconfigsRequest(server string, params *GetOrcawhirlpoolco
 			}
 		}
 
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetPositionsRequest generates requests for GetPositions
-func NewGetPositionsRequest(server string, params *GetPositionsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/positions")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "Wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
-		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-		return nil, err
-	} else {
-		for k, v := range parsed {
-			for _, v2 := range v {
-				queryValues.Add(k, v2)
-			}
-		}
 	}
 
 	queryURL.RawQuery = queryValues.Encode()
@@ -1279,6 +1316,257 @@ func NewGetTokensRequest(server string, params *GetTokensParams) (*http.Request,
 	return req, nil
 }
 
+// NewGetV1AdminPositionsRequest generates requests for GetV1AdminPositions
+func NewGetV1AdminPositionsRequest(server string, params *GetV1AdminPositionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/positions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Enabled != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "enabled", runtime.ParamLocationQuery, *params.Enabled); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.IsClosed != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "isClosed", runtime.ParamLocationQuery, *params.IsClosed); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Offset != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
+
+	return req, nil
+}
+
+// NewPutV1AdminVaultPubkeyPathEnableRequest generates requests for PutV1AdminVaultPubkeyPathEnable
+func NewPutV1AdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/vault/%s/enable", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
+
+	return req, nil
+}
+
+// NewGetV1AdminVaultsRequest generates requests for GetV1AdminVaults
+func NewGetV1AdminVaultsRequest(server string, params *GetV1AdminVaultsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/vaults")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Expand != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "expand", runtime.ParamLocationQuery, *params.Expand); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Enabled != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "enabled", runtime.ParamLocationQuery, *params.Enabled); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Offset != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
+
+	return req, nil
+}
+
 // NewGetV1DripPositionPubkeyPathMetadataRequest generates requests for GetV1DripPositionPubkeyPathMetadata
 func NewGetV1DripPositionPubkeyPathMetadataRequest(server string, pubkeyPath PubkeyPathParam) (*http.Request, error) {
 	var err error
@@ -1338,6 +1626,97 @@ func NewGetV1DripPubkeyPathTokenmetadataRequest(server string, pubkeyPath Pubkey
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1PositionsRequest generates requests for GetV1Positions
+func NewGetV1PositionsRequest(server string, params *GetV1PositionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/positions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.IsClosed != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "isClosed", runtime.ParamLocationQuery, *params.IsClosed); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Offset != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1577,9 +1956,6 @@ type ClientWithResponsesInterface interface {
 	// GetOrcawhirlpoolconfigs request
 	GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error)
 
-	// GetPositions request
-	GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error)
-
 	// GetProtoconfigs request
 	GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
 
@@ -1598,11 +1974,23 @@ type ClientWithResponsesInterface interface {
 	// GetTokens request
 	GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error)
 
+	// GetV1AdminPositions request
+	GetV1AdminPositionsWithResponse(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*GetV1AdminPositionsResponse, error)
+
+	// PutV1AdminVaultPubkeyPathEnable request
+	PutV1AdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutV1AdminVaultPubkeyPathEnableResponse, error)
+
+	// GetV1AdminVaults request
+	GetV1AdminVaultsWithResponse(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*GetV1AdminVaultsResponse, error)
+
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPositionPubkeyPathMetadataResponse, error)
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPubkeyPathTokenmetadataResponse, error)
+
+	// GetV1Positions request
+	GetV1PositionsWithResponse(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*GetV1PositionsResponse, error)
 
 	// GetVaultperiods request
 	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
@@ -1724,30 +2112,6 @@ func (r GetOrcawhirlpoolconfigsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetOrcawhirlpoolconfigsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetPositionsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListPositions
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetPositionsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetPositionsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1896,6 +2260,79 @@ func (r GetTokensResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1AdminPositionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListAdminPositions
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1AdminPositionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1AdminPositionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutV1AdminVaultPubkeyPathEnableResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Vault
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutV1AdminVaultPubkeyPathEnableResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutV1AdminVaultPubkeyPathEnableResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1AdminVaultsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListExpandedAdminVaults
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1AdminVaultsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1AdminVaultsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1DripPositionPubkeyPathMetadataResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1938,6 +2375,30 @@ func (r GetV1DripPubkeyPathTokenmetadataResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV1DripPubkeyPathTokenmetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1PositionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListPositions
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1PositionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1PositionsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2045,15 +2506,6 @@ func (c *ClientWithResponses) GetOrcawhirlpoolconfigsWithResponse(ctx context.Co
 	return ParseGetOrcawhirlpoolconfigsResponse(rsp)
 }
 
-// GetPositionsWithResponse request returning *GetPositionsResponse
-func (c *ClientWithResponses) GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error) {
-	rsp, err := c.GetPositions(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetPositionsResponse(rsp)
-}
-
 // GetProtoconfigsWithResponse request returning *GetProtoconfigsResponse
 func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error) {
 	rsp, err := c.GetProtoconfigs(ctx, params, reqEditors...)
@@ -2108,6 +2560,33 @@ func (c *ClientWithResponses) GetTokensWithResponse(ctx context.Context, params 
 	return ParseGetTokensResponse(rsp)
 }
 
+// GetV1AdminPositionsWithResponse request returning *GetV1AdminPositionsResponse
+func (c *ClientWithResponses) GetV1AdminPositionsWithResponse(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*GetV1AdminPositionsResponse, error) {
+	rsp, err := c.GetV1AdminPositions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1AdminPositionsResponse(rsp)
+}
+
+// PutV1AdminVaultPubkeyPathEnableWithResponse request returning *PutV1AdminVaultPubkeyPathEnableResponse
+func (c *ClientWithResponses) PutV1AdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutV1AdminVaultPubkeyPathEnableResponse, error) {
+	rsp, err := c.PutV1AdminVaultPubkeyPathEnable(ctx, pubkeyPath, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutV1AdminVaultPubkeyPathEnableResponse(rsp)
+}
+
+// GetV1AdminVaultsWithResponse request returning *GetV1AdminVaultsResponse
+func (c *ClientWithResponses) GetV1AdminVaultsWithResponse(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*GetV1AdminVaultsResponse, error) {
+	rsp, err := c.GetV1AdminVaults(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1AdminVaultsResponse(rsp)
+}
+
 // GetV1DripPositionPubkeyPathMetadataWithResponse request returning *GetV1DripPositionPubkeyPathMetadataResponse
 func (c *ClientWithResponses) GetV1DripPositionPubkeyPathMetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPositionPubkeyPathMetadataResponse, error) {
 	rsp, err := c.GetV1DripPositionPubkeyPathMetadata(ctx, pubkeyPath, reqEditors...)
@@ -2124,6 +2603,15 @@ func (c *ClientWithResponses) GetV1DripPubkeyPathTokenmetadataWithResponse(ctx c
 		return nil, err
 	}
 	return ParseGetV1DripPubkeyPathTokenmetadataResponse(rsp)
+}
+
+// GetV1PositionsWithResponse request returning *GetV1PositionsResponse
+func (c *ClientWithResponses) GetV1PositionsWithResponse(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*GetV1PositionsResponse, error) {
+	rsp, err := c.GetV1Positions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1PositionsResponse(rsp)
 }
 
 // GetVaultperiodsWithResponse request returning *GetVaultperiodsResponse
@@ -2313,46 +2801,6 @@ func ParseGetOrcawhirlpoolconfigsResponse(rsp *http.Response) (*GetOrcawhirlpool
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ListOrcaWhirlpoolConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetPositionsResponse parses an HTTP response from a GetPositionsWithResponse call
-func ParseGetPositionsResponse(rsp *http.Response) (*GetPositionsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetPositionsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListPositions
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -2603,6 +3051,133 @@ func ParseGetTokensResponse(rsp *http.Response) (*GetTokensResponse, error) {
 	return response, nil
 }
 
+// ParseGetV1AdminPositionsResponse parses an HTTP response from a GetV1AdminPositionsWithResponse call
+func ParseGetV1AdminPositionsResponse(rsp *http.Response) (*GetV1AdminPositionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1AdminPositionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListAdminPositions
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutV1AdminVaultPubkeyPathEnableResponse parses an HTTP response from a PutV1AdminVaultPubkeyPathEnableWithResponse call
+func ParsePutV1AdminVaultPubkeyPathEnableResponse(rsp *http.Response) (*PutV1AdminVaultPubkeyPathEnableResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutV1AdminVaultPubkeyPathEnableResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Vault
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1AdminVaultsResponse parses an HTTP response from a GetV1AdminVaultsWithResponse call
+func ParseGetV1AdminVaultsResponse(rsp *http.Response) (*GetV1AdminVaultsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1AdminVaultsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListExpandedAdminVaults
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1DripPositionPubkeyPathMetadataResponse parses an HTTP response from a GetV1DripPositionPubkeyPathMetadataWithResponse call
 func ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp *http.Response) (*GetV1DripPositionPubkeyPathMetadataResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2659,6 +3234,46 @@ func ParseGetV1DripPubkeyPathTokenmetadataResponse(rsp *http.Response) (*GetV1Dr
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest TokenMetadata
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1PositionsResponse parses an HTTP response from a GetV1PositionsWithResponse call
+func ParseGetV1PositionsResponse(rsp *http.Response) (*GetV1PositionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1PositionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListPositions
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -2780,9 +3395,6 @@ type ServerInterface interface {
 	// Get Orca Whirlpool Swap Configs
 	// (GET /orcawhirlpoolconfigs)
 	GetOrcawhirlpoolconfigs(ctx echo.Context, params GetOrcawhirlpoolconfigsParams) error
-	// Get User Positions
-	// (GET /positions)
-	GetPositions(ctx echo.Context, params GetPositionsParams) error
 	// Get Proto Configs
 	// (GET /protoconfigs)
 	GetProtoconfigs(ctx echo.Context, params GetProtoconfigsParams) error
@@ -2801,12 +3413,24 @@ type ServerInterface interface {
 	// Get Tokens
 	// (GET /tokens)
 	GetTokens(ctx echo.Context, params GetTokensParams) error
+	// Get All Positions
+	// (GET /v1/admin/positions)
+	GetV1AdminPositions(ctx echo.Context, params GetV1AdminPositionsParams) error
+	// Toggle the 'enabled' flag on a vault
+	// (PUT /v1/admin/vault/{pubkeyPath}/enable)
+	PutV1AdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPathParam, params PutV1AdminVaultPubkeyPathEnableParams) error
+	// Get All Vaults
+	// (GET /v1/admin/vaults)
+	GetV1AdminVaults(ctx echo.Context, params GetV1AdminVaultsParams) error
 	// Get Drip Position Metadata
 	// (GET /v1/drip/position/{pubkeyPath}/metadata)
 	GetV1DripPositionPubkeyPathMetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
 	// Get TokenMetadata for Devnet Mints.
 	// (GET /v1/drip/{pubkeyPath}/tokenmetadata)
 	GetV1DripPubkeyPathTokenmetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
+	// Get User Positions
+	// (GET /v1/positions)
+	GetV1Positions(ctx echo.Context, params GetV1PositionsParams) error
 	// Get Vault Periods
 	// (GET /vaultperiods)
 	GetVaultperiods(ctx echo.Context, params GetVaultperiodsParams) error
@@ -2952,24 +3576,6 @@ func (w *ServerInterfaceWrapper) GetOrcawhirlpoolconfigs(ctx echo.Context) error
 	return err
 }
 
-// GetPositions converts echo context to params.
-func (w *ServerInterfaceWrapper) GetPositions(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetPositionsParams
-	// ------------- Required query parameter "Wallet" -------------
-
-	err = runtime.BindQueryParameter("form", true, true, "Wallet", ctx.QueryParams(), &params.Wallet)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter Wallet: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetPositions(ctx, params)
-	return err
-}
-
 // GetProtoconfigs converts echo context to params.
 func (w *ServerInterfaceWrapper) GetProtoconfigs(ctx echo.Context) error {
 	var err error
@@ -3090,6 +3696,160 @@ func (w *ServerInterfaceWrapper) GetTokens(ctx echo.Context) error {
 	return err
 }
 
+// GetV1AdminPositions converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1AdminPositions(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1AdminPositionsParams
+	// ------------- Optional query parameter "enabled" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "enabled", ctx.QueryParams(), &params.Enabled)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter enabled: %s", err))
+	}
+
+	// ------------- Optional query parameter "isClosed" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "isClosed", ctx.QueryParams(), &params.IsClosed)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter isClosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", ctx.QueryParams(), &params.Offset)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId GoogleTokenIdHeaderParam
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1AdminPositions(ctx, params)
+	return err
+}
+
+// PutV1AdminVaultPubkeyPathEnable converts echo context to params.
+func (w *ServerInterfaceWrapper) PutV1AdminVaultPubkeyPathEnable(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "pubkeyPath" -------------
+	var pubkeyPath PubkeyPathParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pubkeyPath: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params PutV1AdminVaultPubkeyPathEnableParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId GoogleTokenIdHeaderParam
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PutV1AdminVaultPubkeyPathEnable(ctx, pubkeyPath, params)
+	return err
+}
+
+// GetV1AdminVaults converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1AdminVaults(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1AdminVaultsParams
+	// ------------- Optional query parameter "expand" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "expand", ctx.QueryParams(), &params.Expand)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter expand: %s", err))
+	}
+
+	// ------------- Optional query parameter "enabled" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "enabled", ctx.QueryParams(), &params.Enabled)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter enabled: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", ctx.QueryParams(), &params.Offset)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId GoogleTokenIdHeaderParam
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1AdminVaults(ctx, params)
+	return err
+}
+
 // GetV1DripPositionPubkeyPathMetadata converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1DripPositionPubkeyPathMetadata(ctx echo.Context) error {
 	var err error
@@ -3119,6 +3879,45 @@ func (w *ServerInterfaceWrapper) GetV1DripPubkeyPathTokenmetadata(ctx echo.Conte
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetV1DripPubkeyPathTokenmetadata(ctx, pubkeyPath)
+	return err
+}
+
+// GetV1Positions converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Positions(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1PositionsParams
+	// ------------- Required query parameter "wallet" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "wallet", ctx.QueryParams(), &params.Wallet)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter wallet: %s", err))
+	}
+
+	// ------------- Optional query parameter "isClosed" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "isClosed", ctx.QueryParams(), &params.IsClosed)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter isClosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", ctx.QueryParams(), &params.Offset)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1Positions(ctx, params)
 	return err
 }
 
@@ -3226,15 +4025,18 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/admin/vaults", wrapper.GetAdminVaults)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/orcawhirlpoolconfigs", wrapper.GetOrcawhirlpoolconfigs)
-	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/spltokenswapconfigs", wrapper.GetSpltokenswapconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
+	router.GET(baseURL+"/v1/admin/positions", wrapper.GetV1AdminPositions)
+	router.PUT(baseURL+"/v1/admin/vault/:pubkeyPath/enable", wrapper.PutV1AdminVaultPubkeyPathEnable)
+	router.GET(baseURL+"/v1/admin/vaults", wrapper.GetV1AdminVaults)
 	router.GET(baseURL+"/v1/drip/position/:pubkeyPath/metadata", wrapper.GetV1DripPositionPubkeyPathMetadata)
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
+	router.GET(baseURL+"/v1/positions", wrapper.GetV1Positions)
 	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
@@ -3243,65 +4045,67 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"yzIxgTJ3FN37/wUAAP//6wXNiDtaAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
