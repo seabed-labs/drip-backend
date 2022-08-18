@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/repository"
+
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	apispec "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
@@ -31,7 +33,10 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	var res apispec.ListExpandedAdminVaults
 
 	// Get all Vaults
-	vaults, err := h.repo.AdminGetVaults(c.Request().Context(), (*bool)(params.Enabled), (*int)(params.Limit), (*int)(params.Offset))
+	vaults, err := h.repo.AdminGetVaults(c.Request().Context(), (*bool)(params.Enabled), repository.PaginationParams{
+		Limit:  (*int)(params.Limit),
+		Offset: (*int)(params.Offset),
+	})
 	if err != nil {
 		logrus.WithError(err).Error("failed to get vaults")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults as admin"})
