@@ -16,8 +16,7 @@ type TokenSwapWithBalance struct {
 	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
 }
 
-// TODO(Mocha): clean this up, likely as separate repo files
-
+// TODO(Mocha): clean this up, likely as separate repo file
 type Repository interface {
 	InsertTokenPairs(context.Context, ...*model.TokenPair) error
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
@@ -56,7 +55,7 @@ type Repository interface {
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
 
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
-	GetAdminPositions(ctx context.Context, isVaultEnabled, isClosed *bool, limit, offset *int) ([]*model.Position, error)
+	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
 	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 
@@ -78,4 +77,14 @@ func NewRepository(
 		repo: repo,
 		db:   db,
 	}
+}
+
+type PaginationParams struct {
+	Limit  *int
+	Offset *int
+}
+
+type PositionFilterParams struct {
+	IsClosed *bool
+	Wallet   *string
 }

@@ -11,15 +11,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPositionsParams) error {
-	var res apispec.ListAdminPositions
+func (h Handler) GetV1Positions(c echo.Context, params apispec.GetV1PositionsParams) error {
+	var res apispec.ListPositions
 
+	enabled := true
+	wallet := string(params.Wallet)
 	positions, err := h.repo.GetAdminPositions(
 		c.Request().Context(),
-		(*bool)(params.Enabled),
+		&enabled,
 		repository.PositionFilterParams{
 			IsClosed: (*bool)(params.IsClosed),
-			Wallet:   nil,
+			Wallet:   &wallet,
 		},
 		repository.PaginationParams{
 			Limit:  (*int)(params.Limit),

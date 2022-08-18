@@ -113,3 +113,41 @@ func (d repositoryImpl) GetVaultPeriods(ctx context.Context, vault string, limit
 	}
 	return stmt.Limit(limit).Offset(offset).Find()
 }
+
+func (d repositoryImpl) GetAdminPositions(
+	ctx context.Context, isVaultEnabled *bool,
+	positionFilterParams PositionFilterParams,
+	params PaginationParams,
+) ([]*model.Position, error) {
+	stmt := d.repo.Position.WithContext(ctx)
+
+	// Apply Joins
+	if isVaultEnabled != nil {
+		stmt = stmt.Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Join(d.repo.TokenAccountBalance, d.repo.TokenAccountBalance.Mint.EqCol(d.repo.Position.Authority))
+	}
+
+	// Apply Filters
+	if isVaultEnabled != nil {
+		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*isVaultEnabled))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Where(
+				d.repo.TokenAccountBalance.Owner.Eq(*positionFilterParams.Wallet),
+				d.repo.TokenAccountBalance.Amount.Gt(0))
+	}
+	if positionFilterParams.IsClosed != nil {
+		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*positionFilterParams.IsClosed))
+	}
+	if params.Limit != nil {
+		stmt = stmt.Limit(*params.Limit)
+	}
+	if params.Offset != nil {
+		stmt = stmt.Offset(*params.Offset)
+	}
+	return stmt.Find()
+}

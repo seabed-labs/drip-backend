@@ -178,22 +178,3 @@ func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []s
 	}
 	return stmt.Find()
 }
-
-func (d repositoryImpl) GetAdminPositions(ctx context.Context, isVaultEnabled *bool, isClosed *bool, limit *int, offset *int) ([]*model.Position, error) {
-	stmt := d.repo.Position.WithContext(ctx).
-		Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault))
-
-	if isVaultEnabled != nil {
-		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*isVaultEnabled))
-	}
-	if isClosed != nil {
-		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*isClosed))
-	}
-	if limit != nil {
-		stmt = stmt.Limit(*limit)
-	}
-	if offset != nil {
-		stmt = stmt.Offset(*offset)
-	}
-	return stmt.Find()
-}

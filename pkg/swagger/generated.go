@@ -290,11 +290,6 @@ type GetOrcawhirlpoolconfigsParams struct {
 	Vault *VaultQueryParam `json:"vault,omitempty"`
 }
 
-// GetPositionsParams defines parameters for GetPositions.
-type GetPositionsParams struct {
-	Wallet RequiredWalletQueryParam `json:"Wallet"`
-}
-
 // GetProtoconfigsParams defines parameters for GetProtoconfigs.
 type GetProtoconfigsParams struct {
 	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
@@ -348,6 +343,14 @@ type GetV1AdminVaultsParams struct {
 
 // GetV1AdminVaultsParamsExpand defines parameters for GetV1AdminVaults.
 type GetV1AdminVaultsParamsExpand string
+
+// GetV1PositionsParams defines parameters for GetV1Positions.
+type GetV1PositionsParams struct {
+	Wallet   RequiredWalletQueryParam `json:"wallet"`
+	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
+	Offset   *OffsetQueryParam        `json:"offset,omitempty"`
+	Limit    *LimitQueryParam         `json:"limit,omitempty"`
+}
 
 // GetVaultperiodsParams defines parameters for GetVaultperiods.
 type GetVaultperiodsParams struct {
@@ -459,9 +462,6 @@ type ClientInterface interface {
 	// GetOrcawhirlpoolconfigs request
 	GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetPositions request
-	GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetProtoconfigs request
 	GetProtoconfigs(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -494,6 +494,9 @@ type ClientInterface interface {
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Positions request
+	GetV1Positions(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetVaultperiods request
 	GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -564,18 +567,6 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 
 func (c *Client) GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrcawhirlpoolconfigsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetPositions(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPositionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -708,6 +699,18 @@ func (c *Client) GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkey
 
 func (c *Client) GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1DripPubkeyPathTokenmetadataRequest(c.Server, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Positions(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1PositionsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -991,49 +994,6 @@ func NewGetOrcawhirlpoolconfigsRequest(server string, params *GetOrcawhirlpoolco
 			}
 		}
 
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetPositionsRequest generates requests for GetPositions
-func NewGetPositionsRequest(server string, params *GetPositionsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/positions")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "Wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
-		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-		return nil, err
-	} else {
-		for k, v := range parsed {
-			for _, v2 := range v {
-				queryValues.Add(k, v2)
-			}
-		}
 	}
 
 	queryURL.RawQuery = queryValues.Encode()
@@ -1675,6 +1635,97 @@ func NewGetV1DripPubkeyPathTokenmetadataRequest(server string, pubkeyPath Pubkey
 	return req, nil
 }
 
+// NewGetV1PositionsRequest generates requests for GetV1Positions
+func NewGetV1PositionsRequest(server string, params *GetV1PositionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/positions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "wallet", runtime.ParamLocationQuery, params.Wallet); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.IsClosed != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "isClosed", runtime.ParamLocationQuery, *params.IsClosed); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Offset != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetVaultperiodsRequest generates requests for GetVaultperiods
 func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*http.Request, error) {
 	var err error
@@ -1905,9 +1956,6 @@ type ClientWithResponsesInterface interface {
 	// GetOrcawhirlpoolconfigs request
 	GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error)
 
-	// GetPositions request
-	GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error)
-
 	// GetProtoconfigs request
 	GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
 
@@ -1940,6 +1988,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPubkeyPathTokenmetadataResponse, error)
+
+	// GetV1Positions request
+	GetV1PositionsWithResponse(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*GetV1PositionsResponse, error)
 
 	// GetVaultperiods request
 	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
@@ -2061,30 +2112,6 @@ func (r GetOrcawhirlpoolconfigsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetOrcawhirlpoolconfigsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetPositionsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListPositions
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetPositionsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetPositionsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2354,6 +2381,30 @@ func (r GetV1DripPubkeyPathTokenmetadataResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1PositionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListPositions
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1PositionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1PositionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetVaultperiodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2455,15 +2506,6 @@ func (c *ClientWithResponses) GetOrcawhirlpoolconfigsWithResponse(ctx context.Co
 	return ParseGetOrcawhirlpoolconfigsResponse(rsp)
 }
 
-// GetPositionsWithResponse request returning *GetPositionsResponse
-func (c *ClientWithResponses) GetPositionsWithResponse(ctx context.Context, params *GetPositionsParams, reqEditors ...RequestEditorFn) (*GetPositionsResponse, error) {
-	rsp, err := c.GetPositions(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetPositionsResponse(rsp)
-}
-
 // GetProtoconfigsWithResponse request returning *GetProtoconfigsResponse
 func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, params *GetProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error) {
 	rsp, err := c.GetProtoconfigs(ctx, params, reqEditors...)
@@ -2561,6 +2603,15 @@ func (c *ClientWithResponses) GetV1DripPubkeyPathTokenmetadataWithResponse(ctx c
 		return nil, err
 	}
 	return ParseGetV1DripPubkeyPathTokenmetadataResponse(rsp)
+}
+
+// GetV1PositionsWithResponse request returning *GetV1PositionsResponse
+func (c *ClientWithResponses) GetV1PositionsWithResponse(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*GetV1PositionsResponse, error) {
+	rsp, err := c.GetV1Positions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1PositionsResponse(rsp)
 }
 
 // GetVaultperiodsWithResponse request returning *GetVaultperiodsResponse
@@ -2750,46 +2801,6 @@ func ParseGetOrcawhirlpoolconfigsResponse(rsp *http.Response) (*GetOrcawhirlpool
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ListOrcaWhirlpoolConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetPositionsResponse parses an HTTP response from a GetPositionsWithResponse call
-func ParseGetPositionsResponse(rsp *http.Response) (*GetPositionsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetPositionsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListPositions
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3247,6 +3258,46 @@ func ParseGetV1DripPubkeyPathTokenmetadataResponse(rsp *http.Response) (*GetV1Dr
 	return response, nil
 }
 
+// ParseGetV1PositionsResponse parses an HTTP response from a GetV1PositionsWithResponse call
+func ParseGetV1PositionsResponse(rsp *http.Response) (*GetV1PositionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1PositionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListPositions
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetVaultperiodsResponse parses an HTTP response from a GetVaultperiodsWithResponse call
 func ParseGetVaultperiodsResponse(rsp *http.Response) (*GetVaultperiodsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3344,9 +3395,6 @@ type ServerInterface interface {
 	// Get Orca Whirlpool Swap Configs
 	// (GET /orcawhirlpoolconfigs)
 	GetOrcawhirlpoolconfigs(ctx echo.Context, params GetOrcawhirlpoolconfigsParams) error
-	// Get User Positions
-	// (GET /positions)
-	GetPositions(ctx echo.Context, params GetPositionsParams) error
 	// Get Proto Configs
 	// (GET /protoconfigs)
 	GetProtoconfigs(ctx echo.Context, params GetProtoconfigsParams) error
@@ -3380,6 +3428,9 @@ type ServerInterface interface {
 	// Get TokenMetadata for Devnet Mints.
 	// (GET /v1/drip/{pubkeyPath}/tokenmetadata)
 	GetV1DripPubkeyPathTokenmetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
+	// Get User Positions
+	// (GET /v1/positions)
+	GetV1Positions(ctx echo.Context, params GetV1PositionsParams) error
 	// Get Vault Periods
 	// (GET /vaultperiods)
 	GetVaultperiods(ctx echo.Context, params GetVaultperiodsParams) error
@@ -3522,24 +3573,6 @@ func (w *ServerInterfaceWrapper) GetOrcawhirlpoolconfigs(ctx echo.Context) error
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetOrcawhirlpoolconfigs(ctx, params)
-	return err
-}
-
-// GetPositions converts echo context to params.
-func (w *ServerInterfaceWrapper) GetPositions(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetPositionsParams
-	// ------------- Required query parameter "Wallet" -------------
-
-	err = runtime.BindQueryParameter("form", true, true, "Wallet", ctx.QueryParams(), &params.Wallet)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter Wallet: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetPositions(ctx, params)
 	return err
 }
 
@@ -3849,6 +3882,45 @@ func (w *ServerInterfaceWrapper) GetV1DripPubkeyPathTokenmetadata(ctx echo.Conte
 	return err
 }
 
+// GetV1Positions converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Positions(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1PositionsParams
+	// ------------- Required query parameter "wallet" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "wallet", ctx.QueryParams(), &params.Wallet)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter wallet: %s", err))
+	}
+
+	// ------------- Optional query parameter "isClosed" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "isClosed", ctx.QueryParams(), &params.IsClosed)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter isClosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", ctx.QueryParams(), &params.Offset)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter offset: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1Positions(ctx, params)
+	return err
+}
+
 // GetVaultperiods converts echo context to params.
 func (w *ServerInterfaceWrapper) GetVaultperiods(ctx echo.Context) error {
 	var err error
@@ -3953,7 +4025,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/admin/vaults", wrapper.GetAdminVaults)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/orcawhirlpoolconfigs", wrapper.GetOrcawhirlpoolconfigs)
-	router.GET(baseURL+"/positions", wrapper.GetPositions)
 	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
 	router.GET(baseURL+"/spltokenswapconfigs", wrapper.GetSpltokenswapconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
@@ -3965,6 +4036,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/v1/admin/vaults", wrapper.GetV1AdminVaults)
 	router.GET(baseURL+"/v1/drip/position/:pubkeyPath/metadata", wrapper.GetV1DripPositionPubkeyPathMetadata)
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
+	router.GET(baseURL+"/v1/positions", wrapper.GetV1Positions)
 	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
 	router.GET(baseURL+"/vaults", wrapper.GetVaults)
 
@@ -3973,67 +4045,67 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"R45lmZhAmTuK7v3/AgAA//8wrkXomVkAAA==",
+	"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",
+	"yzIxgTJ3FN37/wUAAP//6wXNiDtaAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
