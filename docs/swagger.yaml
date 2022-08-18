@@ -22,6 +22,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/pingResponse"
 
+  #  DEPRECATED
   /admin/vault/{pubkeyPath}/enable:
     put:
       tags:
@@ -57,6 +58,42 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/admin/vault/{pubkeyPath}/enable:
+    put:
+      tags:
+        - admin
+      summary: Toggle the 'enabled' flag on a vault
+      description: Enable/disable the specified vault
+      parameters:
+        - $ref: "#/components/parameters/pubkeyPathParam"
+        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/vault"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  #  DEPRECATED
   /admin/vaults:
     get:
       tags:
@@ -76,6 +113,70 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/listExpandedAdminVaults"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/admin/vaults:
+    get:
+      tags:
+        - admin
+      summary: Get All Vaults
+      description: Get all vaults with filters and expanded properties.
+      parameters:
+        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+        - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
+        - $ref: '#/components/parameters/enabledQueryParam'
+        - $ref: "#/components/parameters/offsetQueryParam"
+        - $ref: "#/components/parameters/limitQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listExpandedAdminVaults"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/admin/positions:
+    get:
+      tags:
+        - admin
+      summary: Get All Positions
+      description: Get all positions with pagination.
+      parameters:
+        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+        - $ref: '#/components/parameters/enabledQueryParam'
+        - $ref: '#/components/parameters/isClosedQueryParam'
+        - $ref: "#/components/parameters/offsetQueryParam"
+        - $ref: "#/components/parameters/limitQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listAdminPositions"
         "400":
           description: Bad Request
           content:
@@ -434,6 +535,12 @@ components:
       schema:
         type: boolean
 
+    isClosedQueryParam:
+      name: isClosed
+      in: query
+      schema:
+        type: boolean
+
     expandAdminVaultsQueryParam:
       name: expand
       in: query
@@ -531,33 +638,12 @@ components:
         type: string
 
   schemas:
-    #    DATA MODELS
 
-    errorResponse:
-      required:
-        - error
-      properties:
-        error:
-          type: string
-
-    expandedAdminVault:
-      description: Internal vault schema.
-      allOf:
-        - $ref: "#/components/schemas/vault"
-        - type: object
-          properties:
-            protoConfigValue:
-              $ref: "#/components/schemas/protoConfig"
-            tokenAMintValue:
-              $ref: "#/components/schemas/token"
-            tokenBMintValue:
-              $ref: "#/components/schemas/token"
-            tokenAAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
-            tokenBAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
-            treasuryTokenBAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
+    #   API RESPONSES
+    listAdminPositions:
+      type: array
+      items:
+        $ref: "#/components/schemas/position"
 
     listExpandedAdminVaults:
       type: array
@@ -609,8 +695,6 @@ components:
       items:
         $ref: "#/components/schemas/vault"
 
-    #   API RESPONSES
-
     mintRequest:
       required:
         - mint
@@ -638,6 +722,34 @@ components:
         message:
           type: string
 
+    #    DATA MODELS
+
+    errorResponse:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+
+    expandedAdminVault:
+      description: Internal vault schema.
+      allOf:
+        - $ref: "#/components/schemas/vault"
+        - type: object
+          properties:
+            protoConfigValue:
+              $ref: "#/components/schemas/protoConfig"
+            tokenAMintValue:
+              $ref: "#/components/schemas/token"
+            tokenBMintValue:
+              $ref: "#/components/schemas/token"
+            tokenAAccountValue:
+              $ref: "#/components/schemas/tokenAccountBalance"
+            tokenBAccountValue:
+              $ref: "#/components/schemas/tokenAccountBalance"
+            treasuryTokenBAccountValue:
+              $ref: "#/components/schemas/tokenAccountBalance"
+
     position:
       type: object
       required:
@@ -662,23 +774,23 @@ components:
           type: string
           example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
         depositedTokenAAmount:
-          type: integer
-          example: 10000
+          type: string
+          example: "10000"
         withdrawnTokenBAmount:
-          type: integer
-          example: 10000
+          type: string
+          example: "10000"
         depositTimestamp:
           type: string
           example: "1652747980"
         dcaPeriodIdBeforeDeposit:
-          type: integer
-          example: 10
+          type: string
+          example: "10"
         numberOfSwaps:
-          type: integer
-          example: 543
+          type: string
+          example: "543"
         periodicDripAmount:
-          type: integer
-          example: 40
+          type: string
+          example: "40"
         isClosed:
           type: boolean
 
@@ -819,7 +931,6 @@ components:
             oracle:
               type: string
               example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"
-
 
     tokenAccountBalance:
       type: object
