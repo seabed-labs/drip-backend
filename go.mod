@@ -20,9 +20,9 @@ require (
 	github.com/test-go/testify v1.1.4
 	github.com/ulule/limiter/v3 v3.10.0
 	google.golang.org/api v0.86.0
-	gorm.io/driver/postgres v1.3.4
-	gorm.io/gen v0.3.9
-	gorm.io/gorm v1.23.7
+	gorm.io/driver/postgres v1.3.8
+	gorm.io/gen v0.3.14
+	gorm.io/gorm v1.23.9-0.20220713102635-3262daf8d468
 	gorm.io/plugin/dbresolver v1.2.1
 )
 

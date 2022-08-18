@@ -328,6 +328,10 @@ func (t tokenAccountBalanceDo) Scan(result interface{}) (err error) {
 	return t.DO.Scan(result)
 }
 
+func (t tokenAccountBalanceDo) Delete(models ...*model.TokenAccountBalance) (result gen.ResultInfo, err error) {
+	return t.DO.Delete(models)
+}
+
 func (t *tokenAccountBalanceDo) withDO(do gen.Dao) *tokenAccountBalanceDo {
 	t.DO = *do.(*gen.DO)
 	return t

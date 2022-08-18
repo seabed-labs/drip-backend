@@ -2,6 +2,7 @@ package repository
 
 import (
 	context "context"
+	"fmt"
 
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 )
@@ -33,34 +34,41 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 }
 
 func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
-	stmt := d.repo.Vault.
-		WithContext(ctx)
-
-	// Add join
-	if vaultFilterParams.LikeTokenA != nil || vaultFilterParams.LikeTokenB != nil {
-		stmt = stmt.Join(d.repo.TokenPair, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
-	}
-	// Add Filters
+	var vaults []*model.Vault
+	query := `SELECT vault.* FROM vault JOIN token_pair ON token_pair.id = vault.token_pair_id`
+	var conditions []string
 	if vaultFilterParams.IsEnabled != nil {
-		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*vaultFilterParams.IsEnabled))
+		conditions = append(conditions, "vault.enabled=true")
 	}
 	if vaultFilterParams.LikeVault != nil {
-		stmt = stmt.Where(d.repo.Vault.Pubkey.Like(*vaultFilterParams.LikeVault))
+		conditions = append(conditions, fmt.Sprintf("vault.pubkey ~ '(?i)%s'", *vaultFilterParams.LikeVault))
 	}
 	if vaultFilterParams.LikeTokenA != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenA.Like(*vaultFilterParams.LikeTokenA))
+		conditions = append(conditions, fmt.Sprintf("token_pair.token_a ~ '(?i)%s'", *vaultFilterParams.LikeTokenA))
 	}
 	if vaultFilterParams.LikeTokenB != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenB.Like(*vaultFilterParams.LikeTokenB))
+		conditions = append(conditions, fmt.Sprintf("token_pair.token_b ~ '(?i)%s'", *vaultFilterParams.LikeTokenB))
+	}
+	if len(conditions) > 0 {
+		query = fmt.Sprintf("%s WHERE", query)
+	}
+	for _, condition := range conditions {
+		query = fmt.Sprintf("%s %s", query, condition)
 	}
 	if paginationParams.Limit != nil {
-		stmt = stmt.Limit(*paginationParams.Limit)
+		query = fmt.Sprintf("%s LIMIT %d", query, *paginationParams.Limit)
 	}
 	if paginationParams.Offset != nil {
-		stmt = stmt.Offset(*paginationParams.Offset)
+		query = fmt.Sprintf("%s OFFSET %d", query, *paginationParams.Offset)
 	}
-	stmt = stmt.Order(d.repo.Vault.Pubkey)
-	return stmt.Find()
+	query = fmt.Sprintf("%s;", query)
+	if err := d.db.SelectContext(ctx,
+		&vaults,
+		query,
+	); err != nil {
+		return nil, err
+	}
+	return vaults, nil
 }
 
 func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {

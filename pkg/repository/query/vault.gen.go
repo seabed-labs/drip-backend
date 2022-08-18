@@ -350,6 +350,10 @@ func (v vaultDo) Scan(result interface{}) (err error) {
 	return v.DO.Scan(result)
 }
 
+func (v vaultDo) Delete(models ...*model.Vault) (result gen.ResultInfo, err error) {
+	return v.DO.Delete(models)
+}
+
 func (v *vaultDo) withDO(do gen.Dao) *vaultDo {
 	v.DO = *do.(*gen.DO)
 	return v

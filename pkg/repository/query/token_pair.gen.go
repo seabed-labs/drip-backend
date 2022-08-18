@@ -320,6 +320,10 @@ func (t tokenPairDo) Scan(result interface{}) (err error) {
 	return t.DO.Scan(result)
 }
 
+func (t tokenPairDo) Delete(models ...*model.TokenPair) (result gen.ResultInfo, err error) {
+	return t.DO.Delete(models)
+}
+
 func (t *tokenPairDo) withDO(do gen.Dao) *tokenPairDo {
 	t.DO = *do.(*gen.DO)
 	return t

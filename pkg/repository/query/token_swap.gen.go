@@ -348,6 +348,10 @@ func (t tokenSwapDo) Scan(result interface{}) (err error) {
 	return t.DO.Scan(result)
 }
 
+func (t tokenSwapDo) Delete(models ...*model.TokenSwap) (result gen.ResultInfo, err error) {
+	return t.DO.Delete(models)
+}
+
 func (t *tokenSwapDo) withDO(do gen.Dao) *tokenSwapDo {
 	t.DO = *do.(*gen.DO)
 	return t
