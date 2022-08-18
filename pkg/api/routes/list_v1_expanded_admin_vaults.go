@@ -24,7 +24,7 @@ const (
 )
 
 func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVaultsParams) error {
-	var res apispec.ListExpandedAdminVaults
+	res := apispec.ListExpandedAdminVaults{}
 
 	// Get all Vaults
 	vaults, err := h.repo.AdminGetVaults(c.Request().Context(),
