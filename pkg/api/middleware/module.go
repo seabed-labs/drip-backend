@@ -21,7 +21,6 @@ type Handler struct {
 	googleClientID string
 	repo           repository.Repository
 	rateLimiter    *limiter.Limiter
-	env            configs.Environment
 }
 
 func NewHandler(
@@ -40,13 +39,11 @@ func NewHandler(
 		googleClientID: config.GoogleClientID,
 		repo:           repo,
 		rateLimiter:    rateLimiter,
-		env:            config.Environment,
 	}
 }
 
 func (h *Handler) ValidateAccessToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return next(c)
 		if !strings.Contains(c.Request().RequestURI, "admin") {
 			return next(c)
 		}
