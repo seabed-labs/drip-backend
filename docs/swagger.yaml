@@ -93,39 +93,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  #  DEPRECATED
-  /admin/vaults:
-    get:
-      tags:
-        - admin
-      summary: Get All Vaults
-      description: Get all vaults with filters and expanded properties.
-      parameters:
-        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
-        - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
-        - $ref: '#/components/parameters/enabledQueryParam'
-        - $ref: "#/components/parameters/offsetQueryParam"
-        - $ref: "#/components/parameters/limitQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listExpandedAdminVaults"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
   /v1/admin/vaults:
     get:
       tags:
@@ -135,6 +102,9 @@ paths:
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
         - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
+        - $ref: '#/components/parameters/likeVaultQueryParam'
+        - $ref: '#/components/parameters/likeTokenAQueryParam'
+        - $ref: '#/components/parameters/likeTokenBQueryParam'
         - $ref: '#/components/parameters/enabledQueryParam'
         - $ref: "#/components/parameters/offsetQueryParam"
         - $ref: "#/components/parameters/limitQueryParam"
@@ -537,6 +507,24 @@ components:
       in: query
       schema:
         type: boolean
+
+    likeTokenAQueryParam:
+      name: tokenA
+      in: query
+      schema:
+        type: string
+
+    likeTokenBQueryParam:
+      name: tokenB
+      in: query
+      schema:
+        type: string
+
+    likeVaultQueryParam:
+      name: vault
+      in: query
+      schema:
+        type: string
 
     isClosedQueryParam:
       name: isClosed

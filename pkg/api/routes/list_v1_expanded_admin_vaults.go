@@ -23,19 +23,21 @@ const (
 	treasuryTokenBAccountValue = GetAdminVaultsExpandParams("treasuryTokenBAccountValue")
 )
 
-// GetAdminVaults DEPRECATED
-func (h Handler) GetAdminVaults(c echo.Context, params apispec.GetAdminVaultsParams) error {
-	return h.GetV1AdminVaults(c, apispec.GetV1AdminVaultsParams(params))
-}
-
 func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVaultsParams) error {
 	var res apispec.ListExpandedAdminVaults
 
 	// Get all Vaults
-	vaults, err := h.repo.AdminGetVaults(c.Request().Context(), (*bool)(params.Enabled), repository.PaginationParams{
-		Limit:  (*int)(params.Limit),
-		Offset: (*int)(params.Offset),
-	})
+	vaults, err := h.repo.AdminGetVaults(c.Request().Context(),
+		repository.VaultFilterParams{
+			IsEnabled:  (*bool)(params.Enabled),
+			LikeTokenA: (*string)(params.TokenA),
+			LikeTokenB: (*string)(params.TokenB),
+			LikeVault:  (*string)(params.Vault),
+		},
+		repository.PaginationParams{
+			Limit:  (*int)(params.Limit),
+			Offset: (*int)(params.Offset),
+		})
 	if err != nil {
 		logrus.WithError(err).Error("failed to get vaults")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults as admin"})

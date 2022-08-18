@@ -60,7 +60,7 @@ type Repository interface {
 	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
-	AdminGetVaults(ctx context.Context, enabled *bool, paginationParams PaginationParams) ([]*model.Vault, error)
+	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
 }
 
@@ -82,6 +82,13 @@ func NewRepository(
 type PaginationParams struct {
 	Limit  *int
 	Offset *int
+}
+
+type VaultFilterParams struct {
+	IsEnabled  *bool
+	LikeTokenA *string
+	LikeTokenB *string
+	LikeVault  *string
 }
 
 type PositionFilterParams struct {
