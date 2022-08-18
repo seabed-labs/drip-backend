@@ -4,6 +4,8 @@ import (
 	context "context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 )
 
@@ -66,6 +68,7 @@ func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams Va
 		&vaults,
 		query,
 	); err != nil {
+		logrus.WithError(err).WithField("query", query).Error("failed to run query")
 		return nil, err
 	}
 	return vaults, nil
