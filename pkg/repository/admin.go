@@ -32,16 +32,31 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 	return &res, err
 }
 
-func (d repositoryImpl) AdminGetVaults(ctx context.Context, enabled *bool, paginationParams PaginationParams) ([]*model.Vault, error) {
+func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
 	stmt := d.repo.Vault.
 		WithContext(ctx)
-	if enabled != nil {
-		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*enabled))
+
+	// Add join
+	if vaultFilterParams.LikeTokenA != nil || vaultFilterParams.LikeTokenB != nil {
+		stmt = stmt.Join(d.repo.TokenPair, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
 	}
-	if paginationParams.Limit != nil && *paginationParams.Limit > 0 {
+	// Add Filters
+	if vaultFilterParams.IsEnabled != nil {
+		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*vaultFilterParams.IsEnabled))
+	}
+	if vaultFilterParams.LikeVault != nil {
+		stmt = stmt.Where(d.repo.Vault.Pubkey.Like(*vaultFilterParams.LikeVault))
+	}
+	if vaultFilterParams.LikeTokenA != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenA.Like(*vaultFilterParams.LikeTokenA))
+	}
+	if vaultFilterParams.LikeTokenB != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenB.Like(*vaultFilterParams.LikeTokenB))
+	}
+	if paginationParams.Limit != nil {
 		stmt = stmt.Limit(*paginationParams.Limit)
 	}
-	if paginationParams.Offset != nil && *paginationParams.Offset > 0 {
+	if paginationParams.Offset != nil {
 		stmt = stmt.Offset(*paginationParams.Offset)
 	}
 	stmt = stmt.Order(d.repo.Vault.Pubkey)
