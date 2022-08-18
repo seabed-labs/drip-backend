@@ -312,6 +312,10 @@ func (s sourceReferenceDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
+func (s sourceReferenceDo) Delete(models ...*model.SourceReference) (result gen.ResultInfo, err error) {
+	return s.DO.Delete(models)
+}
+
 func (s *sourceReferenceDo) withDO(do gen.Dao) *sourceReferenceDo {
 	s.DO = *do.(*gen.DO)
 	return s

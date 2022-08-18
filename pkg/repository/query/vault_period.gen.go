@@ -328,6 +328,10 @@ func (v vaultPeriodDo) Scan(result interface{}) (err error) {
 	return v.DO.Scan(result)
 }
 
+func (v vaultPeriodDo) Delete(models ...*model.VaultPeriod) (result gen.ResultInfo, err error) {
+	return v.DO.Delete(models)
+}
+
 func (v *vaultPeriodDo) withDO(do gen.Dao) *vaultPeriodDo {
 	v.DO = *do.(*gen.DO)
 	return v

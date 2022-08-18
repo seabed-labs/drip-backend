@@ -346,6 +346,10 @@ func (p positionDo) Scan(result interface{}) (err error) {
 	return p.DO.Scan(result)
 }
 
+func (p positionDo) Delete(models ...*model.Position) (result gen.ResultInfo, err error) {
+	return p.DO.Delete(models)
+}
+
 func (p *positionDo) withDO(do gen.Dao) *positionDo {
 	p.DO = *do.(*gen.DO)
 	return p

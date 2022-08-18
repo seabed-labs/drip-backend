@@ -316,6 +316,10 @@ func (s schemaMigrationDo) Scan(result interface{}) (err error) {
 	return s.DO.Scan(result)
 }
 
+func (s schemaMigrationDo) Delete(models ...*model.SchemaMigration) (result gen.ResultInfo, err error) {
+	return s.DO.Delete(models)
+}
+
 func (s *schemaMigrationDo) withDO(do gen.Dao) *schemaMigrationDo {
 	s.DO = *do.(*gen.DO)
 	return s

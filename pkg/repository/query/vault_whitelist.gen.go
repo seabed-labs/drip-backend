@@ -320,6 +320,10 @@ func (v vaultWhitelistDo) Scan(result interface{}) (err error) {
 	return v.DO.Scan(result)
 }
 
+func (v vaultWhitelistDo) Delete(models ...*model.VaultWhitelist) (result gen.ResultInfo, err error) {
+	return v.DO.Delete(models)
+}
+
 func (v *vaultWhitelistDo) withDO(do gen.Dao) *vaultWhitelistDo {
 	v.DO = *do.(*gen.DO)
 	return v

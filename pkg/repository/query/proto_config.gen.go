@@ -328,6 +328,10 @@ func (p protoConfigDo) Scan(result interface{}) (err error) {
 	return p.DO.Scan(result)
 }
 
+func (p protoConfigDo) Delete(models ...*model.ProtoConfig) (result gen.ResultInfo, err error) {
+	return p.DO.Delete(models)
+}
+
 func (p *protoConfigDo) withDO(do gen.Dao) *protoConfigDo {
 	p.DO = *do.(*gen.DO)
 	return p

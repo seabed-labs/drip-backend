@@ -320,6 +320,10 @@ func (u userPositionDo) Scan(result interface{}) (err error) {
 	return u.DO.Scan(result)
 }
 
+func (u userPositionDo) Delete(models ...*model.UserPosition) (result gen.ResultInfo, err error) {
+	return u.DO.Delete(models)
+}
+
 func (u *userPositionDo) withDO(do gen.Dao) *userPositionDo {
 	u.DO = *do.(*gen.DO)
 	return u

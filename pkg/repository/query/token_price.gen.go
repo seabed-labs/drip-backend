@@ -332,6 +332,10 @@ func (t tokenPriceDo) Scan(result interface{}) (err error) {
 	return t.DO.Scan(result)
 }
 
+func (t tokenPriceDo) Delete(models ...*model.TokenPrice) (result gen.ResultInfo, err error) {
+	return t.DO.Delete(models)
+}
+
 func (t *tokenPriceDo) withDO(do gen.Dao) *tokenPriceDo {
 	t.DO = *do.(*gen.DO)
 	return t

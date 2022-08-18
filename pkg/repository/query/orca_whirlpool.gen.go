@@ -388,6 +388,10 @@ func (o orcaWhirlpoolDo) Scan(result interface{}) (err error) {
 	return o.DO.Scan(result)
 }
 
+func (o orcaWhirlpoolDo) Delete(models ...*model.OrcaWhirlpool) (result gen.ResultInfo, err error) {
+	return o.DO.Delete(models)
+}
+
 func (o *orcaWhirlpoolDo) withDO(do gen.Dao) *orcaWhirlpoolDo {
 	o.DO = *do.(*gen.DO)
 	return o
