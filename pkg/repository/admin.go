@@ -38,7 +38,7 @@ func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams Va
 	query := `SELECT vault.* FROM vault JOIN token_pair ON token_pair.id = vault.token_pair_id`
 	var conditions []string
 	if vaultFilterParams.IsEnabled != nil {
-		conditions = append(conditions, "vault.enabled=true")
+		conditions = append(conditions, fmt.Sprintf("vault.enabled=%t", *vaultFilterParams.IsEnabled))
 	}
 	if vaultFilterParams.LikeVault != nil {
 		conditions = append(conditions, fmt.Sprintf("vault.pubkey ~ '(?i)%s'", *vaultFilterParams.LikeVault))
