@@ -74,14 +74,14 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 		return err
 	}
 	// Don't need to constantly backfill these, just do it once
-	//go d.processor.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
+	go d.processor.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
 
 	// Track orca_whirlpool program accounts
 	if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent); err != nil {
 		return err
 	}
 	// Don't need to constantly backfill these, just do it once
-	//go d.processor.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
+	go d.processor.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
 
 	// Track Balance Updates Live
 	if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {
