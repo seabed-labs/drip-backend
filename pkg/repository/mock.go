@@ -80,6 +80,21 @@ func (mr *MockRepositoryMockRecorder) AdminSetVaultEnabled(ctx, pubkey, enabled 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminSetVaultEnabled", reflect.TypeOf((*MockRepository)(nil).AdminSetVaultEnabled), ctx, pubkey, enabled)
 }
 
+// GetActiveWallets mocks base method.
+func (m *MockRepository) GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetActiveWallets", ctx, params)
+	ret0, _ := ret[0].([]ActiveWallet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetActiveWallets indicates an expected call of GetActiveWallets.
+func (mr *MockRepositoryMockRecorder) GetActiveWallets(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveWallets", reflect.TypeOf((*MockRepository)(nil).GetActiveWallets), ctx, params)
+}
+
 // GetAdminPositions mocks base method.
 func (m *MockRepository) GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error) {
 	m.ctrl.T.Helper()
