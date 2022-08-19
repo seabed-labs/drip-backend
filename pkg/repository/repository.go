@@ -10,12 +10,6 @@ import (
 
 const ErrRecordNotFound = "record not found"
 
-type TokenSwapWithBalance struct {
-	model.TokenSwap
-	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
-	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
-}
-
 // TODO(Mocha): clean this up, likely as separate repo file
 type Repository interface {
 	InsertTokenPairs(context.Context, ...*model.TokenPair) error
@@ -62,6 +56,8 @@ type Repository interface {
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
+
+	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 }
 
 type repositoryImpl struct {
@@ -77,6 +73,23 @@ func NewRepository(
 		repo: repo,
 		db:   db,
 	}
+}
+
+type TokenSwapWithBalance struct {
+	model.TokenSwap
+	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
+	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
+}
+
+type GetActiveWalletParams struct {
+	PositionIsClosed *bool
+	Owner            *string
+	Vault            *string
+}
+
+type ActiveWallet struct {
+	Owner         string `json:"owner" db:"owner"`
+	PositionCount int    `json:"position_count" db:"position_count"`
 }
 
 type PaginationParams struct {
