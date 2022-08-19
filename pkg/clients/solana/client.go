@@ -33,6 +33,7 @@ type Solana interface {
 
 	GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error)
 	GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error)
+	GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.TokenLargestAccountsResult, error)
 
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
@@ -181,6 +182,18 @@ func (s impl) GetAccount(ctx context.Context, address string, v interface{}) err
 		return err
 	}
 	return nil
+}
+
+func (s impl) GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.TokenLargestAccountsResult, error) {
+	pubkey, err := solana.PublicKeyFromBase58(mint)
+	if err != nil {
+		return nil, err
+	}
+	out, err := s.client.GetTokenLargestAccounts(ctx, pubkey, "confirmed")
+	if out == nil {
+		return nil, err
+	}
+	return out.Value, err
 }
 
 func (s impl) GetProgramAccounts(ctx context.Context, address string) ([]string, error) {
