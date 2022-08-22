@@ -387,6 +387,8 @@ github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746 h1:eKU
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220822224702-b657f391cd76 h1:yGhydbmKxUf6s1+qaFIt5xMmbEWCt5pOndcTSB1kEJE=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220822224702-b657f391cd76/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220822231656-b584aaa1044e h1:GrrfdKXxTAoYfZIFgQ6lZHy+6o+F9YqblIBZQHOdDNY=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220822231656-b584aaa1044e/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d/go.mod h1:tmAIfUFEirG/Y8jhZ9M+h36obRZAk/1fcSpXwAVlfqE=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=
