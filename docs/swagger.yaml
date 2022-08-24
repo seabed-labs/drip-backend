@@ -257,9 +257,6 @@ paths:
     get:
       summary: Get Proto Configs
       description: Get all proto configs with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
       responses:
         "200":
           description: OK

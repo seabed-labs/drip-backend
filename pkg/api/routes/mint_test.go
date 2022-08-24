@@ -10,11 +10,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	solana2 "github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -36,7 +35,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -59,7 +58,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -87,7 +86,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -126,7 +125,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -180,7 +179,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -239,7 +238,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Environment: configs.DevnetEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),

@@ -77,42 +77,6 @@ func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams Va
 	return vaults, nil
 }
 
-func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
-	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
-	if tokenBMint != nil {
-		stmt = stmt.
-			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
-			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-			Where(d.repo.Vault.Enabled.Is(true))
-	}
-	return stmt.Find()
-}
-
-func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
-	return d.repo.
-		Vault.WithContext(ctx).
-		Where(d.repo.Vault.Pubkey.Eq(address)).
-		Where(d.repo.Vault.Enabled.Is(true)).
-		First()
-}
-
-func (d repositoryImpl) GetProtoConfigs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.ProtoConfig, error) {
-	stmt := d.repo.ProtoConfig.WithContext(ctx)
-	stmt = stmt.Join(d.repo.Vault, d.repo.ProtoConfig.Pubkey.EqCol(d.repo.Vault.ProtoConfig))
-
-	if tokenAMint != nil || tokenBMint != nil {
-		stmt = stmt.Join(d.repo.Vault, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
-	}
-	if tokenAMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
-	}
-	if tokenBMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
-	}
-	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
-	return stmt.Find()
-}
-
 func (d repositoryImpl) GetAdminPositions(
 	ctx context.Context, isVaultEnabled *bool,
 	positionFilterParams PositionFilterParams,

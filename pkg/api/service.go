@@ -8,8 +8,8 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
-	swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	oapiMiddleware "github.com/deepmap/oapi-codegen/pkg/middleware"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -42,17 +42,17 @@ func listenAndServe(
 	middlewareHandler *middleware.Handler,
 	apiHandler *controller.Handler,
 ) (*http.Server, error) {
-	swaggerSpec, err := swagger.GetSwagger()
+	apiSpec, err := apispec.GetSwagger()
 	if err != nil {
 		return nil, err
 	}
-	swaggerSpec.Servers = nil
+	apiSpec.Servers = nil
 	e := echo.New()
 	e.Use(echoMiddleware.Recover())
 	e.Use(middlewareHandler.ValidateAccessToken)
 	e.Use(middlewareHandler.RateLimit)
-	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
-	swagger.RegisterHandlers(e, apiHandler)
+	e.Use(oapiMiddleware.OapiRequestValidator(apiSpec))
+	apispec.RegisterHandlers(e, apiHandler)
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: cors.AllowAll().Handler(e),

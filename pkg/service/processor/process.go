@@ -7,14 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	bin "github.com/gagliardetto/binary"
-
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
+	bin "github.com/gagliardetto/binary"
 	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"

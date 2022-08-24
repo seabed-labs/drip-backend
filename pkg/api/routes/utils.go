@@ -3,11 +3,23 @@ package controller
 import (
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository"
-
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
 )
+
+func vaultProtoConfigDataBaseModelToAPIModel(vaultProtoConfigs []*model.ProtoConfig) []apispec.ProtoConfig {
+	res := []apispec.ProtoConfig{}
+	for _, protoConfig := range vaultProtoConfigs {
+		res = append(res, apispec.ProtoConfig{
+			Pubkey:               protoConfig.Pubkey,
+			BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
+			Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
+			TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
+		})
+	}
+	return res
+}
 
 func vaultPeriodDatabaseModelToAPIModel(vaultPeriods []*model.VaultPeriod) []apispec.VaultPeriod {
 	res := []apispec.VaultPeriod{}

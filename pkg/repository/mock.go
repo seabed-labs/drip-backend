@@ -156,18 +156,18 @@ func (mr *MockRepositoryMockRecorder) GetPositionByNFTMint(ctx, nftMint interfac
 }
 
 // GetProtoConfigs mocks base method.
-func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
+func (m *MockRepository) GetProtoConfigs(arg0 context.Context) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0)
 	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProtoConfigs indicates an expected call of GetProtoConfigs.
-func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0)
 }
 
 // GetProtoConfigsByAddresses mocks base method.
@@ -231,18 +231,18 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairByID(arg0, arg1 interface{}) *
 }
 
 // GetTokenPairs mocks base method.
-func (m *MockRepository) GetTokenPairs(arg0 context.Context, arg1, arg2 *string) ([]*model.TokenPair, error) {
+func (m *MockRepository) GetTokenPairs(arg0 context.Context, arg1 TokenPairFilterParams) ([]*model.TokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenPairs", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetTokenPairs", arg0, arg1)
 	ret0, _ := ret[0].([]*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTokenPairs indicates an expected call of GetTokenPairs.
-func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairs", reflect.TypeOf((*MockRepository)(nil).GetTokenPairs), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairs", reflect.TypeOf((*MockRepository)(nil).GetTokenPairs), arg0, arg1)
 }
 
 // GetTokenPairsByIDS mocks base method.
@@ -336,10 +336,10 @@ func (mr *MockRepositoryMockRecorder) GetTokensWithSupportedTokenPair(arg0, arg1
 }
 
 // GetVaultByAddress mocks base method.
-func (m *MockRepository) GetVaultByAddress(arg0 context.Context, arg1 string) (*model.Vault, error) {
+func (m *MockRepository) GetVaultByAddress(arg0 context.Context, arg1 string) (*VaultWithTokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultByAddress", arg0, arg1)
-	ret0, _ := ret[0].(*model.Vault)
+	ret0, _ := ret[0].(*VaultWithTokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -381,18 +381,18 @@ func (mr *MockRepositoryMockRecorder) GetVaultWhitelistsByVaultAddress(arg0, arg
 }
 
 // GetVaultsWithFilter mocks base method.
-func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
+func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1 VaultFilterParams) ([]*VaultWithTokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetVaultsWithFilter", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].([]*model.Vault)
+	ret := m.ctrl.Call(m, "GetVaultsWithFilter", arg0, arg1)
+	ret0, _ := ret[0].([]*VaultWithTokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetVaultsWithFilter indicates an expected call of GetVaultsWithFilter.
-func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1, arg2, arg3)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1)
 }
 
 // InsertTokenPairs mocks base method.

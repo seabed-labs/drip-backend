@@ -3,18 +3,18 @@ package controller
 import (
 	"net/http"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetSwaps(c echo.Context, params Swagger.GetSwapsParams) error {
-	res := Swagger.ListTokenSwaps{}
+func (h Handler) GetSwaps(c echo.Context, params apispec.GetSwapsParams) error {
+	res := apispec.ListTokenSwaps{}
 
 	tokenSwaps, err := h.repo.GetTokenSwaps(c.Request().Context(), []string{string(*params.TokenPair)})
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 
 	for i := range tokenSwaps {

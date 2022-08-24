@@ -250,3 +250,34 @@ func (d repositoryImpl) GetActiveWallets(
 		Scan(&res)
 	return res, err
 }
+
+func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
+	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
+	if tokenBMint != nil {
+		stmt = stmt.
+			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
+			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+			Where(d.repo.Vault.Enabled.Is(true))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*VaultWithTokenPair, error) {
+	stmt := d.repo.
+		Vault.WithContext(ctx).
+		Join(d.repo.TokenPair, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID)).
+		Where(d.repo.Vault.Pubkey.Eq(address)).
+		Where(d.repo.Vault.Enabled.Is(true))
+	var res VaultWithTokenPair
+	if err := stmt.Scan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (d repositoryImpl) GetProtoConfigs(ctx context.Context) ([]*model.ProtoConfig, error) {
+	stmt := d.repo.ProtoConfig.WithContext(ctx)
+	stmt = stmt.Join(d.repo.Vault, d.repo.ProtoConfig.Pubkey.EqCol(d.repo.Vault.ProtoConfig))
+	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
+	return stmt.Find()
+}

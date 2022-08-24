@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
+
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
-	model2 "github.com/dcaf-labs/drip/pkg/repository/model"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"
@@ -20,7 +20,7 @@ import (
 
 func TestHandler_GetVaults(t *testing.T) {
 	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
-	tokenPairs := []*model2.TokenPair{
+	tokenPairs := []*model.TokenPair{
 		{
 			ID:     "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
 			TokenA: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
@@ -32,7 +32,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			TokenB: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
 		},
 	}
-	vaults := []*model2.Vault{
+	vaults := []*model.Vault{
 		{
 			Pubkey:                 "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV",
 			ProtoConfig:            "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L",
@@ -66,7 +66,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			Wallet:      privKey,
 		}, solana.NewMockSolana(ctrl), m)
 
-		params := Swagger.GetVaultsParams{
+		params := apispec.GetVaultsParams{
 			TokenA:      nil,
 			TokenB:      nil,
 			ProtoConfig: nil,
@@ -78,7 +78,7 @@ func TestHandler_GetVaults(t *testing.T) {
 
 		m.
 			EXPECT().
-			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
+			GetVaultsWithFilter(gomock.Any(), gomock.Any()).
 			Return(nil, fmt.Errorf("some error")).
 			AnyTimes()
 
@@ -95,7 +95,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			Wallet:      privKey,
 		}, solana.NewMockSolana(ctrl), m)
 
-		params := Swagger.GetVaultsParams{
+		params := apispec.GetVaultsParams{
 			TokenA:      nil,
 			TokenB:      nil,
 			ProtoConfig: nil,
@@ -117,14 +117,14 @@ func TestHandler_GetVaults(t *testing.T) {
 			AnyTimes()
 		m.
 			EXPECT().
-			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
+			GetVaultsWithFilter(gomock.Any(), gomock.Any()).
 			Return(vaults, nil).
 			AnyTimes()
 
 		err := h.GetVaults(c, params)
 		assert.NoError(t, err)
 		assert.Equal(t, rec.Code, http.StatusOK)
-		vaults, err := Swagger.ParseGetVaultsResponse(rec.Result())
+		vaults, err := apispec.ParseGetVaultsResponse(rec.Result())
 		assert.NoError(t, err)
 		assert.NotNil(t, vaults.JSON200)
 		assert.Equal(t, len(*vaults.JSON200), 2)

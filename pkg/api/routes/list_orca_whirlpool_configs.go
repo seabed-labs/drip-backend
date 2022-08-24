@@ -4,32 +4,33 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/repository"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
+	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcawhirlpoolconfigsParams) error {
-	res := Swagger.ListOrcaWhirlpoolConfigs{}
+func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params apispec.GetOrcawhirlpoolconfigsParams) error {
+	res := apispec.ListOrcaWhirlpoolConfigs{}
 
 	// TODO(Mocha): Refactor this and a the token swap config controller
-	var vaults []*model.Vault
+	var vaults []*repository.VaultWithTokenPair
 	if params.Vault != nil {
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vault by address")
-			return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid vault address"})
+			return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: "invalid vault address"})
 		}
-		vaults = []*model.Vault{vault}
+		vaults = []*repository.VaultWithTokenPair{vault}
 	} else {
 		var err error
-		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), nil, nil, nil)
+		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), repository.VaultFilterParams{})
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vaults")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get vaults"})
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults"})
 		}
 	}
 
@@ -43,7 +44,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault whitelists")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
 	for i := range vaultWhitelists {
@@ -57,7 +58,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 	orcaWhirlpools, err := h.repo.GetOrcaWhirlpoolsByTokenPairIDs(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get orca whirlpools")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 
 	orcaWhirlpoolsByTokenPairID := make(map[string][]*model.OrcaWhirlpool)
@@ -76,12 +77,12 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
 			continue
 		}
-		res = append(res, Swagger.OrcaWhirlpoolConfig{
+		res = append(res, apispec.OrcaWhirlpoolConfig{
 			Oracle:      orcaWhirlpool.Oracle,
 			TokenVaultA: orcaWhirlpool.TokenVaultA,
 			TokenVaultB: orcaWhirlpool.TokenVaultB,
 			Whirlpool:   orcaWhirlpool.Pubkey,
-			DripCommon: Swagger.DripCommon{
+			DripCommon: apispec.DripCommon{
 				TokenAMint:         orcaWhirlpool.TokenMintA,
 				TokenBMint:         orcaWhirlpool.TokenMintB,
 				Vault:              vault.Pubkey,
@@ -95,7 +96,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 }
 
 func findOrcaWhirlpoolForVault(
-	vault *model.Vault,
+	vault *repository.VaultWithTokenPair,
 	vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist,
 	orcaWhirlpoolsByTokenPairID map[string][]*model.OrcaWhirlpool,
 	env configs.Environment,

@@ -23,12 +23,12 @@ type Repository interface {
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
-	GetVaultByAddress(context.Context, string) (*model.Vault, error)
+	GetVaultByAddress(context.Context, string) (*VaultWithTokenPair, error)
 	GetVaultsWithFilter(context.Context, VaultFilterParams) ([]*VaultWithTokenPair, error)
 
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 
-	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
+	GetProtoConfigs(context.Context) ([]*model.ProtoConfig, error)
 	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
 	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
