@@ -397,33 +397,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /tokens:
-    get:
-      summary: Get Tokens
-      description: Get tokens with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listTokens"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
   /vaultperiods:
     get:
       summary: Get Vault Periods

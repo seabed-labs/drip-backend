@@ -24,7 +24,7 @@ type Repository interface {
 	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
-	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
+	GetVaultsWithFilter(context.Context, VaultFilterParams) ([]*VaultWithTokenPair, error)
 
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 
@@ -38,7 +38,7 @@ type Repository interface {
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
-	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
+	GetTokenPairs(context.Context, TokenPairFilterParams) ([]*model.TokenPair, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 
 	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
@@ -54,7 +54,7 @@ type Repository interface {
 	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
-	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
+	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterLikeParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
 
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
@@ -97,14 +97,33 @@ type PaginationParams struct {
 	Offset *int
 }
 
+type VaultFilterLikeParams struct {
+	IsEnabled   *bool
+	LikeTokenA  *string
+	LikeTokenB  *string
+	LikeVault   *string
+	ProtoConfig *string
+}
+
 type VaultFilterParams struct {
-	IsEnabled  *bool
-	LikeTokenA *string
-	LikeTokenB *string
-	LikeVault  *string
+	IsEnabled   *bool
+	TokenA      *string
+	TokenB      *string
+	Vault       *string
+	ProtoConfig *string
+}
+
+type VaultWithTokenPair struct {
+	model.Vault
+	model.TokenPair
 }
 
 type PositionFilterParams struct {
 	IsClosed *bool
 	Wallet   *string
+}
+
+type TokenPairFilterParams struct {
+	TokenA *string
+	TokenB *string
 }

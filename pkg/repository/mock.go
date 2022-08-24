@@ -51,7 +51,7 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultByAddress(ctx, address interf
 }
 
 // AdminGetVaults mocks base method.
-func (m *MockRepository) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
+func (m *MockRepository) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterLikeParams, paginationParams PaginationParams) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminGetVaults", ctx, vaultFilterParams, paginationParams)
 	ret0, _ := ret[0].([]*model.Vault)

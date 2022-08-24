@@ -35,12 +35,15 @@ func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey st
 	return &res, err
 }
 
-func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
+func (d repositoryImpl) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterLikeParams, paginationParams PaginationParams) ([]*model.Vault, error) {
 	var vaults []*model.Vault
 	query := `SELECT vault.* FROM vault JOIN token_pair ON token_pair.id = vault.token_pair_id`
 	var conditions []string
 	if vaultFilterParams.IsEnabled != nil {
 		conditions = append(conditions, fmt.Sprintf("vault.enabled=%t", *vaultFilterParams.IsEnabled))
+	}
+	if vaultFilterParams.ProtoConfig != nil {
+		conditions = append(conditions, fmt.Sprintf("vault.proto_config=%s", *vaultFilterParams.ProtoConfig))
 	}
 	if vaultFilterParams.LikeVault != nil {
 		conditions = append(conditions, fmt.Sprintf("vault.pubkey ~ '(?i)%s'", *vaultFilterParams.LikeVault))
@@ -82,24 +85,6 @@ func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenB
 			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
 			Where(d.repo.Vault.Enabled.Is(true))
 	}
-	return stmt.Find()
-}
-
-func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
-	stmt := d.repo.Vault.WithContext(ctx)
-	if tokenAMint != nil || tokenBMint != nil {
-		stmt = stmt.Join(d.repo.Vault, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
-	}
-	if tokenAMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
-	}
-	if tokenBMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
-	}
-	if protoConfig != nil {
-		stmt = stmt.Where(d.repo.Vault.ProtoConfig.Eq(*protoConfig))
-	}
-	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
 	return stmt.Find()
 }
 

@@ -28,7 +28,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 
 	// Get all Vaults
 	vaults, err := h.repo.AdminGetVaults(c.Request().Context(),
-		repository.VaultFilterParams{
+		repository.VaultFilterLikeParams{
 			IsEnabled:  (*bool)(params.Enabled),
 			LikeTokenA: (*string)(params.TokenA),
 			LikeTokenB: (*string)(params.TokenB),

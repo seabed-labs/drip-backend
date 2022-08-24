@@ -83,9 +83,6 @@ type ListTokenPairs []TokenPair
 // ListTokenSwaps defines model for listTokenSwaps.
 type ListTokenSwaps []TokenSwap
 
-// ListTokens defines model for listTokens.
-type ListTokens []Token
-
 // ListVaultPeriods defines model for listVaultPeriods.
 type ListVaultPeriods []VaultPeriod
 
@@ -321,12 +318,6 @@ type GetTokenpairsParams struct {
 	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
-// GetTokensParams defines parameters for GetTokens.
-type GetTokensParams struct {
-	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
-	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
-}
-
 // GetV1AdminPositionsParams defines parameters for GetV1AdminPositions.
 type GetV1AdminPositionsParams struct {
 	Enabled  *EnabledQueryParam       `json:"enabled,omitempty"`
@@ -494,9 +485,6 @@ type ClientInterface interface {
 	// GetTokenpairs request
 	GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetTokens request
-	GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetV1AdminPositions request
 	GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -635,18 +623,6 @@ func (c *Client) GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditor
 
 func (c *Client) GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetTokenpairsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetTokensRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1116,69 +1092,6 @@ func NewGetTokenpairsRequest(server string, params *GetTokenpairsParams) (*http.
 	}
 
 	operationPath := fmt.Sprintf("/tokenpairs")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.TokenA != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.TokenB != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetTokensRequest generates requests for GetTokens
-func NewGetTokensRequest(server string, params *GetTokensParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/tokens")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2020,9 +1933,6 @@ type ClientWithResponsesInterface interface {
 	// GetTokenpairs request
 	GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error)
 
-	// GetTokens request
-	GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error)
-
 	// GetV1AdminPositions request
 	GetV1AdminPositionsWithResponse(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*GetV1AdminPositionsResponse, error)
 
@@ -2258,30 +2168,6 @@ func (r GetTokenpairsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetTokenpairsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetTokensResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListTokens
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetTokensResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetTokensResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2592,15 +2478,6 @@ func (c *ClientWithResponses) GetTokenpairsWithResponse(ctx context.Context, par
 		return nil, err
 	}
 	return ParseGetTokenpairsResponse(rsp)
-}
-
-// GetTokensWithResponse request returning *GetTokensResponse
-func (c *ClientWithResponses) GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error) {
-	rsp, err := c.GetTokens(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetTokensResponse(rsp)
 }
 
 // GetV1AdminPositionsWithResponse request returning *GetV1AdminPositionsResponse
@@ -3023,46 +2900,6 @@ func ParseGetTokenpairsResponse(rsp *http.Response) (*GetTokenpairsResponse, err
 	return response, nil
 }
 
-// ParseGetTokensResponse parses an HTTP response from a GetTokensWithResponse call
-func ParseGetTokensResponse(rsp *http.Response) (*GetTokensResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetTokensResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListTokens
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetV1AdminPositionsResponse parses an HTTP response from a GetV1AdminPositionsWithResponse call
 func ParseGetV1AdminPositionsResponse(rsp *http.Response) (*GetV1AdminPositionsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3459,9 +3296,6 @@ type ServerInterface interface {
 	// Get Token Pairs
 	// (GET /tokenpairs)
 	GetTokenpairs(ctx echo.Context, params GetTokenpairsParams) error
-	// Get Tokens
-	// (GET /tokens)
-	GetTokens(ctx echo.Context, params GetTokensParams) error
 	// Get All Positions
 	// (GET /v1/admin/positions)
 	GetV1AdminPositions(ctx echo.Context, params GetV1AdminPositionsParams) error
@@ -3662,31 +3496,6 @@ func (w *ServerInterfaceWrapper) GetTokenpairs(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetTokenpairs(ctx, params)
-	return err
-}
-
-// GetTokens converts echo context to params.
-func (w *ServerInterfaceWrapper) GetTokens(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetTokensParams
-	// ------------- Optional query parameter "tokenA" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
-	}
-
-	// ------------- Optional query parameter "tokenB" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetTokens(ctx, params)
 	return err
 }
 
@@ -4095,7 +3904,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
 	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
-	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/v1/admin/positions", wrapper.GetV1AdminPositions)
 	router.GET(baseURL+"/v1/admin/summary/activewallets", wrapper.GetV1AdminSummaryActivewallets)
 	router.PUT(baseURL+"/v1/admin/vault/:pubkeyPath/enable", wrapper.PutV1AdminVaultPubkeyPathEnable)
@@ -4111,69 +3919,69 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AP//LQ2Zp0BaAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

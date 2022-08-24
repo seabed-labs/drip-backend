@@ -29,13 +29,13 @@ func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model
 		First()
 }
 
-func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.TokenPair, error) {
+func (d repositoryImpl) GetTokenPairs(ctx context.Context, params TokenPairFilterParams) ([]*model.TokenPair, error) {
 	stmt := d.repo.TokenPair.WithContext(ctx)
-	if tokenAMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
+	if params.TokenA != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*params.TokenA))
 	}
-	if tokenBMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
+	if params.TokenB != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*params.TokenB))
 	}
 	return stmt.Find()
 }
@@ -199,6 +199,28 @@ func (d repositoryImpl) GetVaultPeriods(
 		stmt = stmt.Offset(*paginationParams.Offset)
 	}
 	return stmt.Find()
+}
+
+func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, filter VaultFilterParams) ([]*VaultWithTokenPair, error) {
+	stmt := d.repo.Vault.WithContext(ctx).
+		Join(d.repo.Vault, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
+	if filter.TokenA != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*filter.TokenA))
+	}
+	if filter.TokenB != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*filter.TokenB))
+	}
+	if filter.ProtoConfig != nil {
+		stmt = stmt.Where(d.repo.Vault.ProtoConfig.Eq(*filter.ProtoConfig))
+	}
+	if filter.Vault != nil {
+		stmt = stmt.Where(d.repo.Vault.Pubkey.Eq(*filter.Vault))
+	}
+	var res []*VaultWithTokenPair
+	if err := stmt.Scan(&res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (d repositoryImpl) GetActiveWallets(
