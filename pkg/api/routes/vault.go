@@ -3,17 +3,14 @@ package controller
 import (
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository"
-
-	"github.com/sirupsen/logrus"
-
 	"github.com/labstack/echo/v4"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
-	res := Swagger.ListVaults{}
+func (h Handler) GetVaults(c echo.Context, params apispec.GetVaultsParams) error {
+	res := apispec.ListVaults{}
 	vaultEnabledFilter := true
 	vaultModels, err := h.repo.GetVaultsWithFilter(
 		c.Request().Context(),
@@ -27,7 +24,7 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vaults")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	res = vaultWithTokenPairDatabaseModelToAPIModel(vaultModels)
 	return c.JSON(http.StatusOK, res)

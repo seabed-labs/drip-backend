@@ -36,10 +36,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // AdminGetVaultByAddress mocks base method.
-func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
+func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, address string) (*VaultWithTokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminGetVaultByAddress", ctx, address)
-	ret0, _ := ret[0].(*model.Vault)
+	ret0, _ := ret[0].(*VaultWithTokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

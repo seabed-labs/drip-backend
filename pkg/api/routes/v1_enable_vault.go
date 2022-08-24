@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"

@@ -1,19 +1,23 @@
 package repository
 
 import (
-	context "context"
+	"context"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/sirupsen/logrus"
 )
 
-func (d repositoryImpl) AdminGetVaultByAddress(ctx context.Context, pubkey string) (*model.Vault, error) {
-	return d.repo.
+func (d repositoryImpl) AdminGetVaultByAddress(ctx context.Context, pubkey string) (*VaultWithTokenPair, error) {
+	stmt := d.repo.
 		Vault.WithContext(ctx).
-		Where(d.repo.Vault.Pubkey.Eq(pubkey)).
-		First()
+		Join(d.repo.TokenPair, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID)).
+		Where(d.repo.Vault.Pubkey.Eq(pubkey))
+	var vault VaultWithTokenPair
+	if err := stmt.Scan(&vault); err != nil {
+		return nil, err
+	}
+	return &vault, nil
 }
 
 func (d repositoryImpl) AdminGetVaultsByTokenAccountAddress(ctx context.Context, tokenAccountPubkey string) ([]*model.Vault, error) {

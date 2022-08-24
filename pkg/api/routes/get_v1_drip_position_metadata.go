@@ -45,14 +45,9 @@ func (h Handler) GetV1DripPositionPubkeyPathMetadata(
 		log.WithError(err).Error("failed to find vault for position")
 		return c.JSON(http.StatusOK, defaultTokenMetadata)
 	}
-	tokenPair, err := h.repo.GetTokenPairByID(c.Request().Context(), vault.TokenPairID)
-	if err != nil {
-		log.WithError(err).Error("failed to find tokenPair")
-		return c.JSON(http.StatusOK, defaultTokenMetadata)
-	}
-	log = log.WithField("vaultTokenA", tokenPair.TokenA).WithField("vaultTokenB", tokenPair.TokenB)
+	log = log.WithField("vaultTokenA", vault.TokenA).WithField("vaultTokenB", vault.TokenB)
 	tokenMints, err := h.repo.GetTokensByMints(c.Request().Context(), []string{
-		tokenPair.TokenA, tokenPair.TokenB,
+		vault.TokenA, vault.TokenB,
 	})
 	if err != nil {
 		log.WithError(err).Error("failed to get tokenMints")
@@ -63,9 +58,9 @@ func (h Handler) GetV1DripPositionPubkeyPathMetadata(
 	var tokenA model.Token
 	var tokenB model.Token
 	for _, tokenMint := range tokenMints {
-		if tokenMint.Pubkey == tokenPair.TokenA {
+		if tokenMint.Pubkey == vault.TokenA {
 			tokenA = *tokenMint
-		} else if tokenMint.Pubkey == tokenPair.TokenB {
+		} else if tokenMint.Pubkey == vault.TokenB {
 			tokenB = *tokenMint
 		}
 	}
