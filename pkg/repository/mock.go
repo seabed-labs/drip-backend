@@ -98,7 +98,7 @@ func (mr *MockRepositoryMockRecorder) GetActiveWallets(ctx, params interface{}) 
 // GetAdminPositions mocks base method.
 func (m *MockRepository) GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAdminPositions", ctx, isVaultEnabled, positionFilterParams, paginationParams)
+	ret := m.ctrl.Call(m, "GetPositionsWithFilter", ctx, isVaultEnabled, positionFilterParams, paginationParams)
 	ret0, _ := ret[0].([]*model.Position)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -107,7 +107,7 @@ func (m *MockRepository) GetAdminPositions(ctx context.Context, isVaultEnabled *
 // GetAdminPositions indicates an expected call of GetAdminPositions.
 func (mr *MockRepositoryMockRecorder) GetAdminPositions(ctx, isVaultEnabled, positionFilterParams, paginationParams interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdminPositions", reflect.TypeOf((*MockRepository)(nil).GetAdminPositions), ctx, isVaultEnabled, positionFilterParams, paginationParams)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPositionsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetAdminPositions), ctx, isVaultEnabled, positionFilterParams, paginationParams)
 }
 
 // GetOrcaWhirlpoolByAddress mocks base method.
@@ -203,7 +203,7 @@ func (mr *MockRepositoryMockRecorder) GetTokenAccountBalancesByIDS(arg0, arg1 in
 // GetTokenPair mocks base method.
 func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (*model.TokenPair, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenPair", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetTokenPairByTokens", arg0, arg1, arg2)
 	ret0, _ := ret[0].(*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -212,7 +212,7 @@ func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (
 // GetTokenPair indicates an expected call of GetTokenPair.
 func (mr *MockRepositoryMockRecorder) GetTokenPair(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPair", reflect.TypeOf((*MockRepository)(nil).GetTokenPair), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairByTokens", reflect.TypeOf((*MockRepository)(nil).GetTokenPair), arg0, arg1, arg2)
 }
 
 // GetTokenPairByID mocks base method.
@@ -278,7 +278,7 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwapByAddress(arg0, arg1 interface
 // GetTokenSwaps mocks base method.
 func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 []string) ([]*model.TokenSwap, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenSwaps", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetTokenSwapsByAddresses", arg0, arg1)
 	ret0, _ := ret[0].([]*model.TokenSwap)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -287,13 +287,13 @@ func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 []string) ([]*
 // GetTokenSwaps indicates an expected call of GetTokenSwaps.
 func (mr *MockRepositoryMockRecorder) GetTokenSwaps(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwaps", reflect.TypeOf((*MockRepository)(nil).GetTokenSwaps), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsByAddresses", reflect.TypeOf((*MockRepository)(nil).GetTokenSwaps), arg0, arg1)
 }
 
 // GetTokenSwapsWithBalance mocks base method.
 func (m *MockRepository) GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenSwapsWithBalance", ctx, tokenPairIDs)
+	ret := m.ctrl.Call(m, "GetTokenSwapsByTokenPairIDsWithBalance", ctx, tokenPairIDs)
 	ret0, _ := ret[0].([]TokenSwapWithBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -302,7 +302,7 @@ func (m *MockRepository) GetTokenSwapsWithBalance(ctx context.Context, tokenPair
 // GetTokenSwapsWithBalance indicates an expected call of GetTokenSwapsWithBalance.
 func (mr *MockRepositoryMockRecorder) GetTokenSwapsWithBalance(ctx, tokenPairIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsWithBalance", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsWithBalance), ctx, tokenPairIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSwapsByTokenPairIDsWithBalance", reflect.TypeOf((*MockRepository)(nil).GetTokenSwapsWithBalance), ctx, tokenPairIDs)
 }
 
 // GetTokensByMints mocks base method.
@@ -368,7 +368,7 @@ func (mr *MockRepositoryMockRecorder) GetVaultPeriods(arg0, arg1, arg2, arg3 int
 // GetVaultWhitelistsByVaultAddress mocks base method.
 func (m *MockRepository) GetVaultWhitelistsByVaultAddress(arg0 context.Context, arg1 []string) ([]*model.VaultWhitelist, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetVaultWhitelistsByVaultAddress", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetVaultWhitelistsForVaults", arg0, arg1)
 	ret0, _ := ret[0].([]*model.VaultWhitelist)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -377,7 +377,7 @@ func (m *MockRepository) GetVaultWhitelistsByVaultAddress(arg0 context.Context, 
 // GetVaultWhitelistsByVaultAddress indicates an expected call of GetVaultWhitelistsByVaultAddress.
 func (mr *MockRepositoryMockRecorder) GetVaultWhitelistsByVaultAddress(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultWhitelistsByVaultAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultWhitelistsByVaultAddress), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultWhitelistsForVaults", reflect.TypeOf((*MockRepository)(nil).GetVaultWhitelistsByVaultAddress), arg0, arg1)
 }
 
 // GetVaultsWithFilter mocks base method.

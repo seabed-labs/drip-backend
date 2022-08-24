@@ -15,7 +15,7 @@ func (h Handler) GetV1Positions(c echo.Context, params apispec.GetV1PositionsPar
 
 	enabled := true
 	wallet := string(params.Wallet)
-	positions, err := h.repo.GetAdminPositions(
+	positions, err := h.repo.GetPositionsWithFilter(
 		c.Request().Context(),
 		&enabled,
 		repository.PositionFilterParams{
@@ -28,7 +28,7 @@ func (h Handler) GetV1Positions(c echo.Context, params apispec.GetV1PositionsPar
 		},
 	)
 	if err != nil {
-		logrus.WithError(err).Error("failed to GetAdminPositions")
+		logrus.WithError(err).Error("failed to GetPositionsWithFilter")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	for _, position := range positions {

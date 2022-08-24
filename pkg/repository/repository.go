@@ -12,52 +12,49 @@ const ErrRecordNotFound = "record not found"
 
 // TODO(Mocha): clean this up, likely as separate repo file
 type Repository interface {
-	InsertTokenPairs(context.Context, ...*model.TokenPair) error
-	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
-	UpsertTokens(context.Context, ...*model.Token) error
-	UpsertVaults(context.Context, ...*model.Vault) error
-	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
-	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
-	UpsertPositions(context.Context, ...*model.Position) error
-	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
-	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
-	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
+	InsertTokenPairs(ctx context.Context, tokenPairs ...*model.TokenPair) error
+	UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error
+	UpsertTokens(ctx context.Context, tokens ...*model.Token) error
+	UpsertVaults(ctx context.Context, vaults ...*model.Vault) error
+	UpsertVaultWhitelists(ctx context.Context, vaultWhitelists ...*model.VaultWhitelist) error
+	UpsertVaultPeriods(ctx context.Context, vaultPeriods ...*model.VaultPeriod) error
+	UpsertPositions(ctx context.Context, positions ...*model.Position) error
+	UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error
+	UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model.OrcaWhirlpool) error
+	UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccountBalance) error
 
-	GetVaultByAddress(context.Context, string) (*VaultWithTokenPair, error)
-	GetVaultsWithFilter(context.Context, VaultFilterParams) ([]*VaultWithTokenPair, error)
+	GetVaultByAddress(ctx context.Context, adress string) (*VaultWithTokenPair, error)
+	GetVaultsWithFilter(ctx context.Context, params VaultFilterParams) ([]*VaultWithTokenPair, error)
+	SearchVaultsWithFilter(ctx context.Context, params VaultSearchFilterParams) ([]*VaultWithTokenPair, error)
 
-	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
+	GetVaultWhitelistsForVaults(ctx context.Context, vaultAddresses ...string) ([]*model.VaultWhitelist, error)
 
-	GetProtoConfigs(context.Context) ([]*model.ProtoConfig, error)
-	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
+	GetProtoConfigs(ctx context.Context) ([]*model.ProtoConfig, error)
+	GetProtoConfigsByAddresses(ctx context.Context, addresses ...string) ([]*model.ProtoConfig, error)
 
-	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
+	GetVaultPeriods(ctx context.Context, vault string, vaultPeriodId *string, paginationParams PaginationParams) ([]*model.VaultPeriod, error)
 
-	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
+	GetTokenPairByID(ctx context.Context, id string) (*model.TokenPair, error)
+	GetTokenPairsByIDS(ctx context.Context, ids []string) ([]*model.TokenPair, error)
+	GetTokenPairs(ctx context.Context, params TokenPairFilterParams) ([]*model.TokenPair, error)
 
-	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
-	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
-	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
-	GetTokenPairs(context.Context, TokenPairFilterParams) ([]*model.TokenPair, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 
-	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
-	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
-	GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
+	GetTokenSwapByAddress(ctx context.Context, address string) (*model.TokenSwap, error)
+	GetTokenSwapsByAddresses(ctx context.Context, addresses []string) ([]*model.TokenSwap, error)
+	GetTokenSwapsByTokenPairIDsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 
-	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
+	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error)
 
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
-	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
+	GetPositionsWithFilter(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
-	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
-
-	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
-	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterLikeParams, paginationParams PaginationParams) ([]*model.Vault, error)
-	AdminGetVaultByAddress(ctx context.Context, address string) (*VaultWithTokenPair, error)
+	GetTokenAccountBalancesByIDS(ctx context.Context, ids []string) ([]*model.TokenAccountBalance, error)
 
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
+
+	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 }
 
 type repositoryImpl struct {
@@ -109,8 +106,15 @@ type VaultFilterParams struct {
 	IsEnabled   *bool
 	TokenA      *string
 	TokenB      *string
-	Vault       *string
 	ProtoConfig *string
+}
+
+type VaultSearchFilterParams struct {
+	IsEnabled       *bool
+	LikeTokenA      *string
+	LikeTokenB      *string
+	LikeVault       *string
+	LikeProtoConfig *string
 }
 
 type VaultWithTokenPair struct {

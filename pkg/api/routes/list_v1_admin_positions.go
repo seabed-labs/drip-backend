@@ -13,7 +13,7 @@ import (
 func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPositionsParams) error {
 	res := apispec.ListAdminPositions{}
 
-	positions, err := h.repo.GetAdminPositions(
+	positions, err := h.repo.GetPositionsWithFilter(
 		c.Request().Context(),
 		(*bool)(params.Enabled),
 		repository.PositionFilterParams{
@@ -26,7 +26,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		},
 	)
 	if err != nil {
-		logrus.WithError(err).Error("failed to GetAdminPositions")
+		logrus.WithError(err).Error("failed to GetPositionsWithFilter")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	for _, position := range positions {

@@ -11,7 +11,7 @@ import (
 func (h Handler) GetSwaps(c echo.Context, params apispec.GetSwapsParams) error {
 	res := apispec.ListTokenSwaps{}
 
-	tokenSwaps, err := h.repo.GetTokenSwaps(c.Request().Context(), []string{string(*params.TokenPair)})
+	tokenSwaps, err := h.repo.GetTokenSwapsByAddresses(c.Request().Context(), []string{string(*params.TokenPair)})
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-labs/drip/pkg/repository"
-
 	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -41,7 +40,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params apispec.GetOrcaw
 		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
 		vaultPubkeys = append(vaultPubkeys, vault.Pubkey)
 	}
-	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
+	vaultWhitelists, err := h.repo.GetVaultWhitelistsForVaults(c.Request().Context(), vaultPubkeys)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault whitelists")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})

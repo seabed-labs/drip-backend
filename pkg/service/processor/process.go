@@ -632,12 +632,12 @@ func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool 
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
 func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
-	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
+	tokenPair, err := p.repo.GetTokenPairByTokens(ctx, tokenAAMint, tokenBMint)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
 			return nil, err
 		}
-		return p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
+		return p.repo.GetTokenPairByTokens(ctx, tokenAAMint, tokenBMint)
 	}
 
 	return tokenPair, err

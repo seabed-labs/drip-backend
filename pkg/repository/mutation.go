@@ -1,7 +1,7 @@
 package repository
 
 import (
-	context "context"
+	"context"
 
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"gorm.io/gorm/clause"
@@ -28,7 +28,7 @@ func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*mod
 }
 
 func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model.VaultWhitelist) error {
-	// Insert new vault whitelists or do no thing
+	// Insert new vault whitelists or do nothing
 	return d.repo.VaultWhitelist.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -85,4 +85,14 @@ func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...
 
 func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model.Position) error {
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
+}
+
+func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, address string, enabled bool) (*model.Vault, error) {
+	var res model.Vault
+	_, err := d.repo.Vault.
+		WithContext(ctx).
+		Returning(&res, res.GetAllColumns()...).
+		Where(d.repo.Vault.Pubkey.Eq(address)).
+		Update(d.repo.Vault.Enabled, enabled)
+	return &res, err
 }
