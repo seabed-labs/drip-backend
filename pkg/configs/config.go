@@ -85,7 +85,7 @@ func NewPSQLConfig() (*PSQLConfig, error) {
 }
 
 func IsStaging(env Environment) bool {
-	return env == StagingEnv
+	return env == StagingEnv || env == NilEnv
 }
 
 func IsProd(env Environment) bool {
