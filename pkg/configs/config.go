@@ -8,7 +8,7 @@ import (
 )
 
 type AppConfig struct {
-	Environment    Environment `yaml:"environment" env:"ENV"`
+	Environment    Environment `yaml:"environment" env:"ENV" env-default:"STAGING"`
 	Network        Network     `yaml:"network" env:"NETWORK" env-default:"DEVNET"`
 	DripProgramID  string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
 	GoogleClientID string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
