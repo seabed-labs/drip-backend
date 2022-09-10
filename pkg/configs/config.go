@@ -9,6 +9,7 @@ import (
 
 type AppConfig struct {
 	Environment    Environment `yaml:"environment" env:"ENV"`
+	Network        Network     `yaml:"network" env:"NETWORK" env-default:"DEVNET"`
 	DripProgramID  string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
 	GoogleClientID string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
 	Wallet         string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
@@ -25,13 +26,21 @@ type PSQLConfig struct {
 	IsTestDB bool   `yaml:"is_test_db" env:"IS_TEST_DB"`
 }
 
+type Network string
+
+const (
+	NilNetwork     = Network("")
+	LocalNetwork   = Network("LOCALNET")
+	DevnetNetwork  = Network("DEVNET")
+	MainnetNetwork = Network("MAINNET")
+)
+
 type Environment string
 
 const (
-	NilEnv      = Environment("")
-	LocalnetEnv = Environment("LOCALNET")
-	DevnetEnv   = Environment("DEVNET")
-	MainnetEnv  = Environment("MAINNET")
+	NilEnv     = Environment("")
+	StagingEnv = Environment("STAGING")
+	ProdEnv    = Environment("PROD")
 )
 
 type EnvVar string
@@ -75,29 +84,22 @@ func NewPSQLConfig() (*PSQLConfig, error) {
 	return &config, nil
 }
 
-func IsLocal(env Environment) bool {
-	return env == LocalnetEnv || env == NilEnv
+func IsStaging(env Environment) bool {
+	return env == StagingEnv
 }
 
-func IsDev(env Environment) bool {
-	return env == DevnetEnv
+func IsProd(env Environment) bool {
+	return env == ProdEnv
 }
 
-func IsMainnet(env Environment) bool {
-	return env == MainnetEnv
+func IsLocal(network Network) bool {
+	return network == LocalNetwork || network == NilNetwork
 }
 
-func GetEnv(env Environment) Environment {
-	switch env {
-	case MainnetEnv:
-		return MainnetEnv
-	case DevnetEnv:
-		return DevnetEnv
-	case NilEnv:
-		fallthrough
-	case LocalnetEnv:
-		fallthrough
-	default:
-		return LocalnetEnv
-	}
+func IsDevnet(network Network) bool {
+	return network == DevnetNetwork
+}
+
+func IsMainnet(network Network) bool {
+	return network == MainnetNetwork
 }

@@ -33,7 +33,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
@@ -56,7 +57,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
@@ -84,7 +86,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
@@ -123,7 +126,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return an error when api wallet is not mint authority", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
@@ -177,7 +181,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{
@@ -236,7 +241,8 @@ func TestHandler_PostMint(t *testing.T) {
 	t.Run("should return success", func(t *testing.T) {
 		m := solana2.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(Swagger.MintRequest{

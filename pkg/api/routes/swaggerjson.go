@@ -20,22 +20,21 @@ func (h Handler) GetSwaggerJson(
 		return err
 	}
 	swaggerSpec.Servers = openapi3.Servers{
-		&openapi3.Server{URL: getURL(h.env, h.port)},
+		&openapi3.Server{URL: getURL(h.network, h.env, h.port)},
 	}
 	return c.JSON(http.StatusOK, swaggerSpec)
 }
 
-func getURL(env configs.Environment, port int) string {
-	switch env {
-	case configs.DevnetEnv:
-		return "drip-backend-devnet.herokuapp.com"
-	case configs.MainnetEnv:
+func getURL(network configs.Network, env configs.Environment, port int) string {
+	if configs.IsMainnet(network) {
 		return "drip-backend-mainnet.herokuapp.com"
-	case configs.NilEnv:
-		fallthrough
-	case configs.LocalnetEnv:
-		fallthrough
-	default:
-		return fmt.Sprintf("http://localhost:%d", port)
+	} else if configs.IsDevnet(network) {
+		if configs.IsStaging(env) {
+			// TODO
+			return "drip-backend-devnet.herokuapp.com"
+		} else if configs.IsProd(env) {
+			return "drip-backend-devnet.herokuapp.com"
+		}
 	}
+	return fmt.Sprintf("http://localhost:%d", port)
 }
