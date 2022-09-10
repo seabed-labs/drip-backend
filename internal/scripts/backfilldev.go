@@ -36,7 +36,7 @@ func Backfill(
 	config *configs2.AppConfig,
 	processor processor.Processor,
 ) error {
-	//if !configs2.IsDev(config.Environment) {
+	//if !configs2.IsDevnet(config.Environment) {
 	//	logrus.WithField("environment", config.Environment).Infof("skipping backfill")
 	//	return nil
 	//}

@@ -69,19 +69,22 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 		return err
 	}
 
-	// Track token_swap program accounts
-	if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent); err != nil {
-		return err
-	}
-	// Don't need to constantly backfill these, just do it once
-	go d.processor.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
+	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
+	if configs.IsProd(d.environment) {
+		// Track token_swap program accounts
+		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent); err != nil {
+			return err
+		}
+		// Don't need to constantly backfill these, just do it once
+		go d.processor.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
 
-	// Track orca_whirlpool program accounts
-	if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent); err != nil {
-		return err
+		// Track orca_whirlpool program accounts
+		if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent); err != nil {
+			return err
+		}
+		// Don't need to constantly backfill these, just do it once
+		go d.processor.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
 	}
-	// Don't need to constantly backfill these, just do it once
-	go d.processor.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
 
 	// Track Balance Updates Live
 	if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {

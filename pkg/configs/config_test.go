@@ -10,7 +10,7 @@ func TestNewAppConfig(t *testing.T) {
 	config, err := NewAppConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, config)
-	assert.Contains(t, []Environment{NilEnv, LocalnetEnv, DevnetEnv}, config.Environment)
+	assert.Contains(t, []Network{NilNetwork, LocalNetwork, DevnetNetwork}, config.Network)
 }
 
 func TestNewPSQLConfig(t *testing.T) {
@@ -20,20 +20,20 @@ func TestNewPSQLConfig(t *testing.T) {
 }
 
 func TestIsDev(t *testing.T) {
-	assert.Equal(t, IsDev(DevnetEnv), true)
-	assert.Equal(t, IsDev(LocalnetEnv), false)
-	assert.Equal(t, IsDev("random"), false)
+	assert.Equal(t, IsDevnet(DevnetNetwork), true)
+	assert.Equal(t, IsDevnet(LocalNetwork), false)
+	assert.Equal(t, IsDevnet("random"), false)
 }
 
 func TestIsLocal(t *testing.T) {
-	assert.Equal(t, IsLocal(NilEnv), true)
-	assert.Equal(t, IsLocal(LocalnetEnv), true)
-	assert.Equal(t, IsLocal(DevnetEnv), false)
+	assert.Equal(t, IsLocal(NilNetwork), true)
+	assert.Equal(t, IsLocal(LocalNetwork), true)
+	assert.Equal(t, IsLocal(DevnetNetwork), false)
 	assert.Equal(t, IsLocal("random"), false)
 }
 
 func TestIsProd(t *testing.T) {
-	assert.Equal(t, IsMainnet(MainnetEnv), true)
-	assert.Equal(t, IsMainnet(LocalnetEnv), false)
+	assert.Equal(t, IsMainnet(MainnetNetwork), true)
+	assert.Equal(t, IsMainnet(LocalNetwork), false)
 	assert.Equal(t, IsMainnet("random"), false)
 }

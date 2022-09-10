@@ -13,6 +13,7 @@ type Handler struct {
 	decoder      *schema.Decoder
 	solanaClient solana.Solana
 	repo         repository.Repository
+	network      configs.Network
 	env          configs.Environment
 	port         int
 }
@@ -26,6 +27,7 @@ func NewHandler(
 		decoder:      schema.NewDecoder(),
 		solanaClient: solanaClient,
 		repo:         repo,
+		network:      config.Network,
 		env:          config.Environment,
 		port:         config.Port,
 	}

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/event"
+
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
@@ -28,24 +30,50 @@ func main() {
 }
 
 func getDependencies() []fx.Option {
-	return []fx.Option{
-		fx.Provide(
-			configs.NewAppConfig,
-			configs.NewPSQLConfig,
-			psql.NewDatabase,
-			psql.NewGORMDatabase,
-			query.Use,
-			solana.NewSolanaClient,
-			repository.NewRepository,
-			middleware.NewHandler,
-			controller.NewHandler,
-			processor.NewProcessor,
-		),
-		fx.Invoke(
-			// func() { log.SetFormatter(&log.JSONFormatter{}) },
-			psql.RunMigrations,
-			api.StartServer,
-		),
-		fx.NopLogger,
+	config, _ := configs.NewAppConfig()
+	// Hack to save on dyno costs, this will run  the event server and api server in the same dyno for staging
+	if configs.IsStaging(config.Environment) {
+		return []fx.Option{
+			fx.Provide(
+				configs.NewAppConfig,
+				configs.NewPSQLConfig,
+				psql.NewDatabase,
+				psql.NewGORMDatabase,
+				query.Use,
+				solana.NewSolanaClient,
+				repository.NewRepository,
+				middleware.NewHandler,
+				controller.NewHandler,
+				processor.NewProcessor,
+			),
+			fx.Invoke(
+				// func() { log.SetFormatter(&log.JSONFormatter{}) },
+				psql.RunMigrations,
+				api.StartServer,
+				event.Server,
+			),
+			fx.NopLogger,
+		}
+	} else {
+		return []fx.Option{
+			fx.Provide(
+				configs.NewAppConfig,
+				configs.NewPSQLConfig,
+				psql.NewDatabase,
+				psql.NewGORMDatabase,
+				query.Use,
+				solana.NewSolanaClient,
+				repository.NewRepository,
+				middleware.NewHandler,
+				controller.NewHandler,
+				processor.NewProcessor,
+			),
+			fx.Invoke(
+				// func() { log.SetFormatter(&log.JSONFormatter{}) },
+				psql.RunMigrations,
+				api.StartServer,
+			),
+			fx.NopLogger,
+		}
 	}
 }
