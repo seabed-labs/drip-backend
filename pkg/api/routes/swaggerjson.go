@@ -30,8 +30,7 @@ func getURL(network configs.Network, env configs.Environment, port int) string {
 		return "drip-backend-mainnet.herokuapp.com"
 	} else if configs.IsDevnet(network) {
 		if configs.IsStaging(env) {
-			// TODO
-			return "drip-backend-devnet.herokuapp.com"
+			return "drip-backend-devnet-staging.herokuapp.com"
 		} else if configs.IsProd(env) {
 			return "drip-backend-devnet.herokuapp.com"
 		}
