@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
@@ -38,6 +39,7 @@ func getDependencies() []fx.Option {
 			repository.NewRepository,
 			solana.NewSolanaClient,
 			processor.NewProcessor,
+			alert.NewService,
 		),
 		fx.Invoke(
 			event.Server,
