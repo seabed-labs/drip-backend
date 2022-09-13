@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/api/middleware"
-	controller "github.com/dcaf-labs/drip/pkg/api/routes"
-	"github.com/dcaf-labs/drip/pkg/service/processor"
+	"github.com/dcaf-labs/drip/pkg/event"
 
 	"github.com/dcaf-labs/drip/pkg/api"
+	"github.com/dcaf-labs/drip/pkg/api/middleware"
+	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/configs"
-	psql2 "github.com/dcaf-labs/drip/pkg/database/psql"
+	"github.com/dcaf-labs/drip/pkg/database/psql"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/query"
+	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -29,24 +31,51 @@ func main() {
 }
 
 func getDependencies() []fx.Option {
-	return []fx.Option{
-		fx.Provide(
-			configs.NewAppConfig,
-			configs.NewPSQLConfig,
-			psql2.NewDatabase,
-			psql2.NewGORMDatabase,
-			query.Use,
-			solana.NewSolanaClient,
-			repository.NewRepository,
-			middleware.NewHandler,
-			controller.NewHandler,
-			processor.NewProcessor,
-		),
-		fx.Invoke(
-			// func() { log.SetFormatter(&log.JSONFormatter{}) },
-			psql2.RunMigrations,
-			api.StartServer,
-		),
-		fx.NopLogger,
+	config, _ := configs.NewAppConfig()
+	// Hack to save on dyno costs, this will run  the event server and api server in the same dyno for staging
+	if configs.IsStaging(config.Environment) {
+		return []fx.Option{
+			fx.Provide(
+				configs.NewAppConfig,
+				configs.NewPSQLConfig,
+				psql.NewDatabase,
+				psql.NewGORMDatabase,
+				query.Use,
+				solana.NewSolanaClient,
+				repository.NewRepository,
+				middleware.NewHandler,
+				controller.NewHandler,
+				processor.NewProcessor,
+				alert.NewService,
+			),
+			fx.Invoke(
+				// func() { log.SetFormatter(&log.JSONFormatter{}) },
+				psql.RunMigrations,
+				api.StartServer,
+				event.Server,
+			),
+			fx.NopLogger,
+		}
+	} else {
+		return []fx.Option{
+			fx.Provide(
+				configs.NewAppConfig,
+				configs.NewPSQLConfig,
+				psql.NewDatabase,
+				psql.NewGORMDatabase,
+				query.Use,
+				solana.NewSolanaClient,
+				repository.NewRepository,
+				middleware.NewHandler,
+				controller.NewHandler,
+				processor.NewProcessor,
+			),
+			fx.Invoke(
+				// func() { log.SetFormatter(&log.JSONFormatter{}) },
+				psql.RunMigrations,
+				api.StartServer,
+			),
+			fx.NopLogger,
+		}
 	}
 }

@@ -1,14 +1,31 @@
-    # drip-backend
+# drip-backend
 
 <a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/maintainability"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/maintainability" /></a>
 <a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/test_coverage"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/test_coverage" /></a>
 [![CI](https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml)
-## Mainnet
-[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge)
-##  Devnet
-[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg)](https://betteruptime.com/?utm_source=status_badge)
 
 ## Mainnet
+
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge)
+
+## Devnet
+
+[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg)](https://betteruptime.com/?utm_source=status_badge)
+
+## Deploy Process
+
+### Devnet Staging
+
+- merge into `main`
+
+### Devnet Prod
+
+- merge into `devnet`
+
+### Mainnet Prod
+
+- upgrade devnet prod via pipeline
+
 ## Setup
 
 - install go 1.18
@@ -19,10 +36,12 @@
 export GOPRIVATE=github.com/dcaf-labs/solana-go-clients
 go get -u ./...
 ```
+
 Add the following to ~/.gitconfig
+
 ```txt
 [url "ssh://git@github.com/"]
-	insteadOf = https://github.com/
+insteadOf = https://github.com/
 ```
 
 - setup a `.env` file
@@ -103,7 +122,7 @@ docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down
 go run cmd/migrate/main.go
 ```
 
-> **_NOTE:_**  The DB must be running prior to running this script.
+> **_NOTE:_** The DB must be running prior to running this script.
 
 ### Codegen
 
@@ -115,14 +134,14 @@ go run cmd/migrate/main.go
 go run cmd/codegen/main.go
 ```
 
-> **_NOTE:_**  The DB must be running prior to running this script.
+> **_NOTE:_** The DB must be running prior to running this script.
 
 ### Process for Creating/Updating Database Models
 
 - Create a migration file under `internal/database/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
 - Run the migration + codegen script `go run cmd/codegen/main.go`
 
-> **_NOTE:_**  The DB must be running prior to running this script.
+> **_NOTE:_** The DB must be running prior to running this script.
 
 ### Backfill DB for Devnet
 
@@ -132,4 +151,4 @@ Run the following script
 go run cmd/backfill/main.go
 ```
 
-> **_NOTE:_**  This backfills based on the content of `devnet.yaml`.
+> **_NOTE:_** This backfills based on the content of `devnet.yaml`.

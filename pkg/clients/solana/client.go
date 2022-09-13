@@ -47,18 +47,19 @@ func NewSolanaClient(
 }
 
 type impl struct {
-	environment configs.Environment
-	client      *rpc.Client
-	wallet      *solana.Wallet
+	//environment configs.Environment
+	network configs.Network
+	client  *rpc.Client
+	wallet  *solana.Wallet
 }
 
 func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
-	url := getURL(config.Environment)
+	url := getURL(config.Network)
 	solanaClient := impl{
-		client:      rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 2)),
-		environment: config.Environment,
+		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 2)),
+		network: config.Network,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -281,7 +282,7 @@ func (s impl) MintToWallet(
 func (s impl) ProgramSubscribe(
 	ctx context.Context, program string, onReceive func(string, []byte),
 ) error {
-	url := getWSURL(s.environment)
+	url := getWSURL(s.network)
 	client, err := ws.Connect(ctx, url)
 	if err != nil {
 		return err
@@ -446,30 +447,30 @@ func getTokenMetadataAddress(
 	return addr.String(), err
 }
 
-func getURL(env configs.Environment) string {
+func getURL(env configs.Network) string {
 	switch env {
-	case configs.DevnetEnv:
-		return "https://devnet.genesysgo.net"
-	case configs.MainnetEnv:
-		return "https://ssc-dao.genesysgo.net"
-	case configs.NilEnv:
+	case configs.DevnetNetwork:
+		return rpc.DevNet_RPC
+	case configs.MainnetNetwork:
+		return rpc.MainNetBeta_RPC
+	case configs.NilNetwork:
 		fallthrough
-	case configs.LocalnetEnv:
+	case configs.LocalNetwork:
 		fallthrough
 	default:
 		return rpc.LocalNet_RPC
 	}
 }
 
-func getWSURL(env configs.Environment) string {
+func getWSURL(env configs.Network) string {
 	switch env {
-	case configs.DevnetEnv:
-		return "wss://devnet.genesysgo.net"
-	case configs.MainnetEnv:
-		return "wss://ssc-dao.genesysgo.net"
-	case configs.NilEnv:
+	case configs.DevnetNetwork:
+		return rpc.DevNet_WS
+	case configs.MainnetNetwork:
+		return rpc.MainNetBeta_WS
+	case configs.NilNetwork:
 		fallthrough
-	case configs.LocalnetEnv:
+	case configs.LocalNetwork:
 		fallthrough
 	default:
 		return rpc.LocalNet_WS

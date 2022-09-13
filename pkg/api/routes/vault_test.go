@@ -62,7 +62,8 @@ func TestHandler_GetVaults(t *testing.T) {
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
 		m := repository.NewMockRepository(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, solana.NewMockSolana(ctrl), m)
 
@@ -91,7 +92,8 @@ func TestHandler_GetVaults(t *testing.T) {
 	t.Run("should return vaults without filter", func(t *testing.T) {
 		m := repository.NewMockRepository(ctrl)
 		h := NewHandler(&configs.AppConfig{
-			Environment: configs.DevnetEnv,
+			Network:     configs.DevnetNetwork,
+			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, solana.NewMockSolana(ctrl), m)
 
