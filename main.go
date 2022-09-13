@@ -13,6 +13,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/database/psql"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/query"
+	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -45,6 +46,7 @@ func getDependencies() []fx.Option {
 				middleware.NewHandler,
 				controller.NewHandler,
 				processor.NewProcessor,
+				alert.NewService,
 			),
 			fx.Invoke(
 				// func() { log.SetFormatter(&log.JSONFormatter{}) },
