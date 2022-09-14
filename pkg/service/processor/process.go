@@ -3,8 +3,11 @@ package processor
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"strconv"
 	"time"
+
+	bin "github.com/gagliardetto/binary"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/repository"
@@ -23,12 +26,19 @@ type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
 	UpsertPositionByAddress(context.Context, string) error
+	UpsertPosition(context.Context, string, drip.Position) error
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
 	UpsertTokenAccountBalanceByAddress(context.Context, string) error
 	UpsertTokenAccountBalance(context.Context, string, token.Account) error
+
+	Backfill(ctx context.Context, programID string, processor func(string, []byte))
+	ProcessDripEvent(address string, data []byte)
+	ProcessTokenSwapEvent(address string, data []byte)
+	ProcessWhirlpoolEvent(address string, data []byte)
+	ProcessTokenEvent(address string, data []byte)
 }
 
 type impl struct {
@@ -43,6 +53,143 @@ func NewProcessor(
 	return impl{
 		repo:   repo,
 		client: client,
+	}
+}
+
+func (p impl) Backfill(ctx context.Context, programID string, processor func(string, []byte)) {
+	log := logrus.WithField("program", programID).WithField("func", "Backfill")
+	accounts, err := p.client.GetProgramAccounts(ctx, programID)
+	if err != nil {
+		log.WithError(err).Error("failed to get accounts")
+	}
+	page, pageSize, total := 0, 50, len(accounts)
+	start, end := paginate(page, pageSize, total)
+	for start < end {
+		log = log.
+			WithField("page", page).
+			WithField("pageSize", pageSize).
+			WithField("total", total)
+		log.Infof("backfilling program accounts")
+		err := p.client.GetAccounts(ctx, accounts[start:end], func(address string, data []byte) {
+			processor(address, data)
+		})
+		if err != nil {
+			log.WithError(err).
+				Error("failed to get accounts")
+		}
+		page++
+		start, end = paginate(page, pageSize, total)
+	}
+}
+
+func (p impl) ProcessDripEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	// log.Infof("received drip account update")
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processEvent")
+		}
+	}()
+	var vaultPeriod drip.VaultPeriod
+	if err := bin.NewBinDecoder(data).Decode(&vaultPeriod); err == nil {
+		// log.Infof("decoded as vaultPeriod")
+		if err := p.UpsertVaultPeriodByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert vaultPeriod")
+		}
+		return
+	}
+	var position drip.Position
+	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
+		// log.Infof("decoded as position")
+		if err := p.UpsertPosition(ctx, address, position); err != nil {
+			log.WithError(err).Error("failed to upsert position")
+		}
+		return
+	}
+	var vault drip.Vault
+	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
+		// log.Infof("decoded as vault")
+		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert vault")
+		}
+		return
+	}
+	var protoConfig drip.VaultProtoConfig
+	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
+		// log.Infof("decoded as protoConfig")
+		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert protoConfig")
+		}
+		return
+	}
+	log.Errorf("failed to decode drip account to known types")
+}
+
+func (p impl) ProcessTokenSwapEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenSwapEvent")
+		}
+	}()
+	var tokenSwap tokenswap.TokenSwap
+	err := bin.NewBinDecoder(data).Decode(&tokenSwap)
+	if err == nil {
+		if err := p.UpsertTokenSwapByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert tokenSwap")
+		}
+		return
+	}
+	// log.WithError(err).Errorf("failed to decode token swap account")
+}
+
+func (p impl) ProcessWhirlpoolEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processWhirlpoolEvent")
+		}
+	}()
+	var whirlpoolAccount whirlpool.Whirlpool
+	err := bin.NewBinDecoder(data).Decode(&whirlpoolAccount)
+	if err == nil {
+		if err := p.UpsertWhirlpoolByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert tokenSwap")
+		}
+		return
+	}
+}
+
+func (p impl) ProcessTokenEvent(address string, data []byte) {
+	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+		logrus.WithField("address", address).Info("skipping zero/invalid address")
+	}
+	ctx := context.Background()
+	log := logrus.WithField("address", address)
+	defer func() {
+		if r := recover(); r != nil {
+			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenEvent")
+		}
+	}()
+	var tokenAccount token.Account
+	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
+	if err == nil {
+		if err := p.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
+			log.WithError(err).Error("failed to upsert tokenAccountBalance")
+		}
+		return
 	}
 }
 
@@ -203,7 +350,7 @@ func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address st
 }
 
 func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
-	if !p.shouldIngestTokenBalance(ctx, tokenAccount, address) {
+	if !p.shouldIngestTokenBalance(ctx, tokenAccount) {
 		return nil
 	}
 	state := "initialized"
@@ -232,12 +379,12 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
 	tokenMint, err := p.client.GetTokenMint(ctx, mintAddress)
 	if err != nil {
-		return fmt.Errorf("failed to GetTokenMin %s, err: %w", mintAddress, err)
+		return fmt.Errorf("failed to GetTokenMint %s, err: %w", mintAddress, err)
 	}
 	tokenMetadataAccount, err := p.client.GetTokenMetadataAccount(ctx, mintAddress)
 	if err != nil {
 		if err.Error() != solana.ErrNotFound {
-			return fmt.Errorf("failed to GetTokenMetadataAccount for mint %s, err: %w", mintAddress, err)
+			logrus.WithError(err).WithField("mint", mintAddress).Error("failed to GetTokenMetadataAccount for mint")
 		}
 		tokenModel := model.Token{
 			Pubkey:   mintAddress,
@@ -252,7 +399,6 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 		IconURL:  nil, // TODO(Mocha): fetch the image via the URI if the URI is present
 	}
 	return p.repo.UpsertTokens(ctx, &tokenModel)
-
 }
 
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
@@ -333,22 +479,29 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	if err := p.client.GetAccount(ctx, address, &position); err != nil {
 		return err
 	}
+	return p.UpsertPosition(ctx, address, position)
+}
+
+func (p impl) UpsertPosition(ctx context.Context, address string, position drip.Position) error {
 	vault, err := p.ensureVault(ctx, position.Vault.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to ensureVault, err: %w", err)
 	}
 	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to GetTokenPairByID, err: %w", err)
 	}
 	// Get up to date token metadata info
 	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenA); err != nil {
-		return err
+		return fmt.Errorf("failed to UpsertTokenByAddress, err: %w", err)
 	}
 	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenB); err != nil {
 		return err
 	}
-	return p.repo.UpsertPositions(ctx, &model.Position{
+	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
+		return err
+	}
+	if err := p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,
 		Vault:                    position.Vault.String(),
 		Authority:                position.PositionAuthority.String(),
@@ -359,7 +512,23 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 		NumberOfSwaps:            position.NumberOfSwaps,
 		PeriodicDripAmount:       position.PeriodicDripAmount,
 		IsClosed:                 position.IsClosed,
-	})
+	}); err != nil {
+		logrus.WithError(err).Error("failed to UpsertPositions in UpsertPosition")
+		return err
+	}
+	largestAccounts, err := p.client.GetLargestTokenAccounts(ctx, position.PositionAuthority.String())
+	if err != nil {
+		return err
+	}
+	for _, account := range largestAccounts {
+		if account == nil {
+			continue
+		}
+		if err := p.UpsertTokenAccountBalanceByAddress(ctx, account.Address.String()); err != nil {
+			logrus.WithError(err).Error("failed to UpsertTokenAccountBalanceByAddress in UpsertPosition")
+		}
+	}
+	return nil
 }
 
 func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) error {
@@ -405,7 +574,7 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	})
 }
 
-func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account, tokenAccountAddress string) bool {
+func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account) bool {
 	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
 		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
 		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
@@ -485,4 +654,19 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 		return p.repo.AdminGetVaultByAddress(ctx, address)
 	}
 	return vault, err
+}
+
+func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
+	start := pageNum * pageSize
+
+	if start > sliceLength {
+		start = sliceLength
+	}
+
+	end := start + pageSize
+	if end > sliceLength {
+		end = sliceLength
+	}
+
+	return start, end
 }

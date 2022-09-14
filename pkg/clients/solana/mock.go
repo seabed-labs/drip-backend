@@ -81,6 +81,21 @@ func (mr *MockSolanaMockRecorder) GetAccounts(arg0, arg1, arg2 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockSolana)(nil).GetAccounts), arg0, arg1, arg2)
 }
 
+// GetLargestTokenAccounts mocks base method.
+func (m *MockSolana) GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.TokenLargestAccountsResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLargestTokenAccounts", ctx, mint)
+	ret0, _ := ret[0].([]*rpc.TokenLargestAccountsResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLargestTokenAccounts indicates an expected call of GetLargestTokenAccounts.
+func (mr *MockSolanaMockRecorder) GetLargestTokenAccounts(ctx, mint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLargestTokenAccounts", reflect.TypeOf((*MockSolana)(nil).GetLargestTokenAccounts), ctx, mint)
+}
+
 // GetProgramAccounts mocks base method.
 func (m *MockSolana) GetProgramAccounts(arg0 context.Context, arg1 string) ([]string, error) {
 	m.ctrl.T.Helper()

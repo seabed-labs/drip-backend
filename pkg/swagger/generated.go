@@ -22,6 +22,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ActiveWallet defines model for activeWallet.
+type ActiveWallet struct {
+	Owner         string `json:"owner"`
+	PositionCount int    `json:"positionCount"`
+}
+
 // DripCommon defines model for dripCommon.
 type DripCommon struct {
 	TokenAMint         string `json:"tokenAMint"`
@@ -49,6 +55,9 @@ type ExpandedAdminVault struct {
 	TokenBMintValue            *Token               `json:"tokenBMintValue,omitempty"`
 	TreasuryTokenBAccountValue *TokenAccountBalance `json:"treasuryTokenBAccountValue,omitempty"`
 }
+
+// ListActiveWallets defines model for listActiveWallets.
+type ListActiveWallets []ActiveWallet
 
 // ListAdminPositions defines model for listAdminPositions.
 type ListAdminPositions []Position
@@ -247,6 +256,9 @@ type LimitQueryParam int
 // OffsetQueryParam defines model for offsetQueryParam.
 type OffsetQueryParam int
 
+// OwnerQueryParam defines model for ownerQueryParam.
+type OwnerQueryParam string
+
 // ProtoConfigQueryParam defines model for protoConfigQueryParam.
 type ProtoConfigQueryParam string
 
@@ -321,6 +333,14 @@ type GetV1AdminPositionsParams struct {
 	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
 	Offset   *OffsetQueryParam        `json:"offset,omitempty"`
 	Limit    *LimitQueryParam         `json:"limit,omitempty"`
+	TokenId  GoogleTokenIdHeaderParam `json:"token-id"`
+}
+
+// GetV1AdminSummaryActivewalletsParams defines parameters for GetV1AdminSummaryActivewallets.
+type GetV1AdminSummaryActivewalletsParams struct {
+	Vault    *VaultQueryParam         `json:"vault,omitempty"`
+	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
+	Owner    *OwnerQueryParam         `json:"owner,omitempty"`
 	TokenId  GoogleTokenIdHeaderParam `json:"token-id"`
 }
 
@@ -480,6 +500,9 @@ type ClientInterface interface {
 	// GetV1AdminPositions request
 	GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1AdminSummaryActivewallets request
+	GetV1AdminSummaryActivewallets(ctx context.Context, params *GetV1AdminSummaryActivewalletsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PutV1AdminVaultPubkeyPathEnable request
 	PutV1AdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -636,6 +659,18 @@ func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEdit
 
 func (c *Client) GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1AdminPositionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1AdminSummaryActivewallets(ctx context.Context, params *GetV1AdminSummaryActivewalletsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1AdminSummaryActivewalletsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1301,6 +1336,94 @@ func NewGetV1AdminPositionsRequest(server string, params *GetV1AdminPositionsPar
 	return req, nil
 }
 
+// NewGetV1AdminSummaryActivewalletsRequest generates requests for GetV1AdminSummaryActivewallets
+func NewGetV1AdminSummaryActivewalletsRequest(server string, params *GetV1AdminSummaryActivewalletsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/admin/summary/activewallets")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Vault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.IsClosed != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "isClosed", runtime.ParamLocationQuery, *params.IsClosed); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Owner != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "owner", runtime.ParamLocationQuery, *params.Owner); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var headerParam0 string
+
+	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("token-id", headerParam0)
+
+	return req, nil
+}
+
 // NewPutV1AdminVaultPubkeyPathEnableRequest generates requests for PutV1AdminVaultPubkeyPathEnable
 func NewPutV1AdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams) (*http.Request, error) {
 	var err error
@@ -1903,6 +2026,9 @@ type ClientWithResponsesInterface interface {
 	// GetV1AdminPositions request
 	GetV1AdminPositionsWithResponse(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*GetV1AdminPositionsResponse, error)
 
+	// GetV1AdminSummaryActivewallets request
+	GetV1AdminSummaryActivewalletsWithResponse(ctx context.Context, params *GetV1AdminSummaryActivewalletsParams, reqEditors ...RequestEditorFn) (*GetV1AdminSummaryActivewalletsResponse, error)
+
 	// PutV1AdminVaultPubkeyPathEnable request
 	PutV1AdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutV1AdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutV1AdminVaultPubkeyPathEnableResponse, error)
 
@@ -2186,6 +2312,30 @@ func (r GetV1AdminPositionsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1AdminSummaryActivewalletsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListActiveWallets
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1AdminSummaryActivewalletsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1AdminSummaryActivewalletsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type PutV1AdminVaultPubkeyPathEnableResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2460,6 +2610,15 @@ func (c *ClientWithResponses) GetV1AdminPositionsWithResponse(ctx context.Contex
 		return nil, err
 	}
 	return ParseGetV1AdminPositionsResponse(rsp)
+}
+
+// GetV1AdminSummaryActivewalletsWithResponse request returning *GetV1AdminSummaryActivewalletsResponse
+func (c *ClientWithResponses) GetV1AdminSummaryActivewalletsWithResponse(ctx context.Context, params *GetV1AdminSummaryActivewalletsParams, reqEditors ...RequestEditorFn) (*GetV1AdminSummaryActivewalletsResponse, error) {
+	rsp, err := c.GetV1AdminSummaryActivewallets(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1AdminSummaryActivewalletsResponse(rsp)
 }
 
 // PutV1AdminVaultPubkeyPathEnableWithResponse request returning *PutV1AdminVaultPubkeyPathEnableResponse
@@ -2944,6 +3103,46 @@ func ParseGetV1AdminPositionsResponse(rsp *http.Response) (*GetV1AdminPositionsR
 	return response, nil
 }
 
+// ParseGetV1AdminSummaryActivewalletsResponse parses an HTTP response from a GetV1AdminSummaryActivewalletsWithResponse call
+func ParseGetV1AdminSummaryActivewalletsResponse(rsp *http.Response) (*GetV1AdminSummaryActivewalletsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1AdminSummaryActivewalletsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListActiveWallets
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParsePutV1AdminVaultPubkeyPathEnableResponse parses an HTTP response from a PutV1AdminVaultPubkeyPathEnableWithResponse call
 func ParsePutV1AdminVaultPubkeyPathEnableResponse(rsp *http.Response) (*PutV1AdminVaultPubkeyPathEnableResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3266,6 +3465,9 @@ type ServerInterface interface {
 	// Get All Positions
 	// (GET /v1/admin/positions)
 	GetV1AdminPositions(ctx echo.Context, params GetV1AdminPositionsParams) error
+	// Get All Active Wallet Addresses
+	// (GET /v1/admin/summary/activewallets)
+	GetV1AdminSummaryActivewallets(ctx echo.Context, params GetV1AdminSummaryActivewalletsParams) error
 	// Toggle the 'enabled' flag on a vault
 	// (PUT /v1/admin/vault/{pubkeyPath}/enable)
 	PutV1AdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPathParam, params PutV1AdminVaultPubkeyPathEnableParams) error
@@ -3543,6 +3745,57 @@ func (w *ServerInterfaceWrapper) GetV1AdminPositions(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetV1AdminPositions(ctx, params)
+	return err
+}
+
+// GetV1AdminSummaryActivewallets converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1AdminSummaryActivewallets(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1AdminSummaryActivewalletsParams
+	// ------------- Optional query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// ------------- Optional query parameter "isClosed" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "isClosed", ctx.QueryParams(), &params.IsClosed)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter isClosed: %s", err))
+	}
+
+	// ------------- Optional query parameter "owner" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "owner", ctx.QueryParams(), &params.Owner)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter owner: %s", err))
+	}
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "token-id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
+		var TokenId GoogleTokenIdHeaderParam
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
+		}
+
+		params.TokenId = TokenId
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1AdminSummaryActivewallets(ctx, params)
 	return err
 }
 
@@ -3844,6 +4097,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/v1/admin/positions", wrapper.GetV1AdminPositions)
+	router.GET(baseURL+"/v1/admin/summary/activewallets", wrapper.GetV1AdminSummaryActivewallets)
 	router.PUT(baseURL+"/v1/admin/vault/:pubkeyPath/enable", wrapper.PutV1AdminVaultPubkeyPathEnable)
 	router.GET(baseURL+"/v1/admin/vaults", wrapper.GetV1AdminVaults)
 	router.GET(baseURL+"/v1/drip/position/:pubkeyPath/metadata", wrapper.GetV1DripPositionPubkeyPathMetadata)
@@ -3857,67 +4111,69 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

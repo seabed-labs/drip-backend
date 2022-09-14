@@ -200,3 +200,31 @@ func (d repositoryImpl) GetVaultPeriods(
 	}
 	return stmt.Find()
 }
+
+func (d repositoryImpl) GetActiveWallets(
+	ctx context.Context, params GetActiveWalletParams,
+) ([]ActiveWallet, error) {
+	var res []ActiveWallet
+	stmt := d.repo.TokenAccountBalance.WithContext(ctx).
+		Select(
+			d.repo.TokenAccountBalance.Owner.As("owner"),
+			d.repo.TokenAccountBalance.Owner.Count().As("position_count"),
+		).
+		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccountBalance.Mint)).
+		Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault)).
+		Where(d.repo.Vault.Enabled.Is(true))
+
+	if params.Owner != nil {
+		stmt = stmt.Where(d.repo.TokenAccountBalance.Owner.Eq(*params.Owner))
+	}
+	if params.PositionIsClosed != nil {
+		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*params.PositionIsClosed))
+	}
+	if params.Vault != nil {
+		stmt = stmt.Where(d.repo.Vault.Pubkey.Eq(*params.Vault))
+	}
+	err := stmt.
+		Group(d.repo.TokenAccountBalance.Owner).
+		Scan(&res)
+	return res, err
+}

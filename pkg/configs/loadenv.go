@@ -27,7 +27,10 @@ func GetProjectRoot() string {
 
 // LoadEnv loads env vars from .env at root of repo
 func LoadEnv() {
-	log.WithField("env", Environment(os.Getenv(string(ENV)))).Infof("loading env")
+	log.
+		WithField("env", Environment(os.Getenv(string(ENV)))).
+		WithField("network", Network(os.Getenv(string(NETWORK)))).
+		Infof("loading env")
 	re := regexp.MustCompile(`^(.*` + PROJECT_DIR + `)`)
 	cwd, _ := os.Getwd()
 	rootPath := re.Find([]byte(cwd))

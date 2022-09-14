@@ -10,7 +10,7 @@ import (
 )
 
 func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsParams) error {
-	var res Swagger.ListProtoConfigs
+	res := Swagger.ListProtoConfigs{}
 
 	protoConfigModels, err := h.repo.GetProtoConfigs(
 		c.Request().Context(),

@@ -13,7 +13,7 @@ import (
 )
 
 func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcawhirlpoolconfigsParams) error {
-	var res Swagger.ListOrcaWhirlpoolConfigs
+	res := Swagger.ListOrcaWhirlpoolConfigs{}
 
 	// TODO(Mocha): Refactor this and a the token swap config controller
 	var vaults []*model.Vault
@@ -71,7 +71,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 
 	for i := range vaults {
 		vault := vaults[i]
-		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID, h.env)
+		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID, h.network)
 		if err != nil {
 			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
 			continue
@@ -98,7 +98,7 @@ func findOrcaWhirlpoolForVault(
 	vault *model.Vault,
 	vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist,
 	orcaWhirlpoolsByTokenPairID map[string][]*model.OrcaWhirlpool,
-	env configs.Environment,
+	network configs.Network,
 ) (*model.OrcaWhirlpool, error) {
 	orcaWhirlpools, ok := orcaWhirlpoolsByTokenPairID[vault.TokenPairID]
 	if !ok {
@@ -108,7 +108,7 @@ func findOrcaWhirlpoolForVault(
 			Infof("skipping vault swap config, missing swap")
 	}
 	// TODO: Remove
-	if env == configs.MainnetEnv {
+	if network == configs.MainnetNetwork {
 		var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
 		for _, orcaWhirlpool := range orcaWhirlpools {
 			if orcaWhirlpool.Pubkey == "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ" ||

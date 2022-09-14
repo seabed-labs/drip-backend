@@ -9,7 +9,7 @@ import (
 )
 
 func (h Handler) GetTokenpairs(c echo.Context, params Swagger.GetTokenpairsParams) error {
-	var res Swagger.ListTokenPairs
+	res := Swagger.ListTokenPairs{}
 
 	tokenPairs, err := h.repo.GetTokenPairs(c.Request().Context(), (*string)(params.TokenA), (*string)(params.TokenB))
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 )
 
 func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
-	var res Swagger.ListVaults
+	res := Swagger.ListVaults{}
 
 	vaultModels, err := h.repo.GetVaultsWithFilter(
 		c.Request().Context(),

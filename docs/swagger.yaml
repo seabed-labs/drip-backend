@@ -128,6 +128,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/admin/summary/activewallets:
+    get:
+      tags:
+        - admin
+      summary: Get All Active Wallet Addresses
+      description: Get all wallet addresses with open positions.
+      parameters:
+        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+        - $ref: "#/components/parameters/vaultQueryParam"
+        - $ref: "#/components/parameters/isClosedQueryParam"
+        - $ref: "#/components/parameters/ownerQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listActiveWallets"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
   /v1/admin/positions:
     get:
       tags:
@@ -590,6 +621,12 @@ components:
         type: string
       required: true
 
+    ownerQueryParam:
+      name: owner
+      in: query
+      schema:
+        type: string
+
     tokenAQueryParam:
       name: tokenA
       in: query
@@ -635,6 +672,11 @@ components:
       type: array
       items:
         $ref: "#/components/schemas/position"
+
+    listActiveWallets:
+      type: array
+      items:
+        $ref: "#/components/schemas/activeWallet"
 
     listExpandedAdminVaults:
       type: array
@@ -714,6 +756,17 @@ components:
           type: string
 
     #    DATA MODELS
+
+    activeWallet:
+      type: object
+      properties:
+        owner:
+          type: string
+        positionCount:
+          type: integer
+      required:
+        - owner
+        - positionCount
 
     errorResponse:
       required:

@@ -12,7 +12,7 @@ import (
 )
 
 func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsParams) error {
-	var res Swagger.ListVaultPeriods
+	res := Swagger.ListVaultPeriods{}
 	limit := defaultLimit
 	if params.Limit != nil {
 		limit = int(*params.Limit)
