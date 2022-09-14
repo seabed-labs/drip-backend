@@ -49,6 +49,7 @@ type EnvVar string
 
 const (
 	ENV                   EnvVar = "ENV"
+	NETWORK               EnvVar = "NETWORK"
 	PROJECT_ROOT_OVERRIDE EnvVar = "PROJECT_ROOT_OVERRIDE"
 )
 
