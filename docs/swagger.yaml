@@ -294,7 +294,7 @@ paths:
   /spltokenswapconfigs:
     get:
       summary: Get Token Swaps Configs
-      description: Get token swap configs for triggerDCA.
+      description: Get token swap configs for DripSPLTokenSwap.
       parameters:
         - $ref: "#/components/parameters/vaultQueryParam"
       responses:
@@ -873,20 +873,28 @@ components:
       type: object
       required:
         - pubkey
+        - admin
         - granularity
-        - triggerDcaSpread
-        - baseWithdrawalSpread
+        - tokenADripTriggerSpread
+        - tokenBWithdrawalSpread
+        - tokenBReferralSpread
       properties:
         pubkey:
+          type: string
+          example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
+        admin:
           type: string
           example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
         granularity:
           type: string
           example: 60
-        triggerDcaSpread:
+        tokenADripTriggerSpread:
           type: integer
           example: 50
-        baseWithdrawalSpread:
+        tokenBWithdrawalSpread:
+          type: integer
+          example: 50
+        tokenBReferralSpread:
           type: integer
           example: 50
 

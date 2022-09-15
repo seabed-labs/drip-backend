@@ -21,10 +21,12 @@ func (h Handler) GetProtoconfigs(c echo.Context) error {
 	for i := range protoConfigModels {
 		protoConfig := protoConfigModels[i]
 		res = append(res, Swagger.ProtoConfig{
-			Pubkey:               protoConfig.Pubkey,
-			BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
-			Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
-			TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
+			Pubkey:                  protoConfig.Pubkey,
+			Admin:                   protoConfig.Admin,
+			Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
+			TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
+			TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
+			TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
 		},
 		)
 	}

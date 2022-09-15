@@ -165,10 +165,12 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 				}
 				// TODO(Mocha): unsafe cast
 				res[i].ProtoConfigValue = &apispec.ProtoConfig{
-					BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
-					Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
-					Pubkey:               protoConfig.Pubkey,
-					TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
+					Pubkey:                  protoConfig.Pubkey,
+					Admin:                   protoConfig.Admin,
+					Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
+					TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
+					TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
+					TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
 				}
 			}
 		case string(tokenAMintValue):
