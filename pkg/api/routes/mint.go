@@ -9,7 +9,7 @@ import (
 	"github.com/gagliardetto/solana-go"
 	"github.com/labstack/echo/v4"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 

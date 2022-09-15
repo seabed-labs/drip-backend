@@ -91,7 +91,7 @@ go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 To update the spec run the following from root:
 
 ```bash
- oapi-codegen ./docs/swagger.yaml > pkg/swagger/generated.go
+ oapi-codegen ./docs/apispec.yaml > pkg/apispec/generated.go
 ```
 
 API docs are viewable at `http://localhost:8080/swagger.json`.

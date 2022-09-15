@@ -10,7 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 )
 

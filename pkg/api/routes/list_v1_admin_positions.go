@@ -6,7 +6,7 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/repository"
 
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
+	apispec "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
