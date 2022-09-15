@@ -156,18 +156,18 @@ func (mr *MockRepositoryMockRecorder) GetPositionByNFTMint(ctx, nftMint interfac
 }
 
 // GetProtoConfigs mocks base method.
-func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
+func (m *MockRepository) GetProtoConfigs(arg0 context.Context) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0)
 	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProtoConfigs indicates an expected call of GetProtoConfigs.
-func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0)
 }
 
 // GetProtoConfigsByAddresses mocks base method.

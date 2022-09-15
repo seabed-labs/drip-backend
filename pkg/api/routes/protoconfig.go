@@ -12,11 +12,7 @@ import (
 func (h Handler) GetProtoconfigs(c echo.Context) error {
 	res := Swagger.ListProtoConfigs{}
 
-	protoConfigModels, err := h.repo.GetProtoConfigs(
-		c.Request().Context(),
-		(*string)(params.TokenA),
-		(*string)(params.TokenB),
-	)
+	protoConfigModels, err := h.repo.GetProtoConfigs(c.Request().Context())
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get proto configs")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
