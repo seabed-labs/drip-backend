@@ -10,11 +10,12 @@ const TableNameProtoConfig = "proto_config"
 
 // ProtoConfig mapped from table <proto_config>
 type ProtoConfig struct {
-	Pubkey               string `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
-	Granularity          uint64 `gorm:"column:granularity;type:numeric;not null" json:"granularity" db:"granularity"`
-	TriggerDcaSpread     uint16 `gorm:"column:trigger_dca_spread;type:int2;not null" json:"triggerDcaSpread" db:"trigger_dca_spread"`
-	BaseWithdrawalSpread uint16 `gorm:"column:base_withdrawal_spread;type:int2;not null" json:"baseWithdrawalSpread" db:"base_withdrawal_spread"`
-	Admin                string `gorm:"column:admin;type:varchar;not null" json:"admin" db:"admin"`
+	Pubkey                  string `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
+	Granularity             uint64 `gorm:"column:granularity;type:numeric;not null" json:"granularity" db:"granularity"`
+	TokenADripTriggerSpread uint16 `gorm:"column:token_a_drip_trigger_spread;type:int2;not null" json:"tokenADripTriggerSpread" db:"token_a_drip_trigger_spread"`
+	TokenBWithdrawalSpread  uint16 `gorm:"column:token_b_withdrawal_spread;type:int2;not null" json:"tokenBWithdrawalSpread" db:"token_b_withdrawal_spread"`
+	Admin                   string `gorm:"column:admin;type:varchar;not null" json:"admin" db:"admin"`
+	TokenBReferralSpread    uint16 `gorm:"column:token_b_referral_spread;type:int4;not null" json:"tokenBReferralSpread" db:"token_b_referral_spread"`
 }
 
 // TableName ProtoConfig's table name

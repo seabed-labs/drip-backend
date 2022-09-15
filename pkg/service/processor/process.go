@@ -407,11 +407,12 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 		return err
 	}
 	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
-		Pubkey:               address,
-		Admin:                protoConfig.Admin.String(),
-		Granularity:          protoConfig.Granularity,
-		TriggerDcaSpread:     protoConfig.TokenADripTriggerSpread,
-		BaseWithdrawalSpread: protoConfig.TokenBWithdrawalSpread,
+		Pubkey:                  address,
+		Admin:                   protoConfig.Admin.String(),
+		Granularity:             protoConfig.Granularity,
+		TokenADripTriggerSpread: protoConfig.TokenADripTriggerSpread,
+		TokenBWithdrawalSpread:  protoConfig.TokenBWithdrawalSpread,
+		TokenBReferralSpread:    protoConfig.TokenBReferralSpread,
 	})
 }
 
