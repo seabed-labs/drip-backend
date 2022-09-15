@@ -22,9 +22,7 @@ func Use(db *gorm.DB) *Query {
 		Token:               newToken(db),
 		TokenAccountBalance: newTokenAccountBalance(db),
 		TokenPair:           newTokenPair(db),
-		TokenPrice:          newTokenPrice(db),
 		TokenSwap:           newTokenSwap(db),
-		UserPosition:        newUserPosition(db),
 		Vault:               newVault(db),
 		VaultPeriod:         newVaultPeriod(db),
 		VaultWhitelist:      newVaultWhitelist(db),
@@ -42,9 +40,7 @@ type Query struct {
 	Token               token
 	TokenAccountBalance tokenAccountBalance
 	TokenPair           tokenPair
-	TokenPrice          tokenPrice
 	TokenSwap           tokenSwap
-	UserPosition        userPosition
 	Vault               vault
 	VaultPeriod         vaultPeriod
 	VaultWhitelist      vaultWhitelist
@@ -63,9 +59,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Token:               q.Token.clone(db),
 		TokenAccountBalance: q.TokenAccountBalance.clone(db),
 		TokenPair:           q.TokenPair.clone(db),
-		TokenPrice:          q.TokenPrice.clone(db),
 		TokenSwap:           q.TokenSwap.clone(db),
-		UserPosition:        q.UserPosition.clone(db),
 		Vault:               q.Vault.clone(db),
 		VaultPeriod:         q.VaultPeriod.clone(db),
 		VaultWhitelist:      q.VaultWhitelist.clone(db),
@@ -81,9 +75,7 @@ type queryCtx struct {
 	Token               *tokenDo
 	TokenAccountBalance *tokenAccountBalanceDo
 	TokenPair           *tokenPairDo
-	TokenPrice          *tokenPriceDo
 	TokenSwap           *tokenSwapDo
-	UserPosition        *userPositionDo
 	Vault               *vaultDo
 	VaultPeriod         *vaultPeriodDo
 	VaultWhitelist      *vaultWhitelistDo
@@ -99,9 +91,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Token:               q.Token.WithContext(ctx),
 		TokenAccountBalance: q.TokenAccountBalance.WithContext(ctx),
 		TokenPair:           q.TokenPair.WithContext(ctx),
-		TokenPrice:          q.TokenPrice.WithContext(ctx),
 		TokenSwap:           q.TokenSwap.WithContext(ctx),
-		UserPosition:        q.UserPosition.WithContext(ctx),
 		Vault:               q.Vault.WithContext(ctx),
 		VaultPeriod:         q.VaultPeriod.WithContext(ctx),
 		VaultWhitelist:      q.VaultWhitelist.WithContext(ctx),
