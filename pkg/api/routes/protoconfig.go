@@ -4,19 +4,15 @@ import (
 	"net/http"
 	"strconv"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetProtoconfigs(c echo.Context, params Swagger.GetProtoconfigsParams) error {
+func (h Handler) GetProtoconfigs(c echo.Context) error {
 	res := Swagger.ListProtoConfigs{}
 
-	protoConfigModels, err := h.repo.GetProtoConfigs(
-		c.Request().Context(),
-		(*string)(params.TokenA),
-		(*string)(params.TokenB),
-	)
+	protoConfigModels, err := h.repo.GetProtoConfigs(c.Request().Context())
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get proto configs")
 		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})

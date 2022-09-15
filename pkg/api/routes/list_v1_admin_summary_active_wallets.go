@@ -5,8 +5,8 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/repository"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
+	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
+	apispec "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )

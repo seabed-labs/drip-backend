@@ -8,6 +8,11 @@ import (
 	"github.com/lib/pq"
 )
 
+func (d repositoryImpl) GetProtoConfigs(ctx context.Context) ([]*model.ProtoConfig, error) {
+	stmt := d.repo.ProtoConfig.WithContext(ctx)
+	return stmt.Find()
+}
+
 func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	// The position_authority is the nft mint
 	return d.repo.Position.
@@ -227,4 +232,79 @@ func (d repositoryImpl) GetActiveWallets(
 		Group(d.repo.TokenAccountBalance.Owner).
 		Scan(&res)
 	return res, err
+}
+
+func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
+	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
+	if tokenBMint != nil {
+		stmt = stmt.
+			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
+			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+			Where(d.repo.Vault.Enabled.Is(true))
+	}
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
+	stmt := d.repo.Vault.WithContext(ctx)
+	if tokenAMint != nil || tokenBMint != nil {
+		stmt = stmt.Join(d.repo.Vault, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID))
+	}
+	if tokenAMint != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
+	}
+	if tokenBMint != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
+	}
+	if protoConfig != nil {
+		stmt = stmt.Where(d.repo.Vault.ProtoConfig.Eq(*protoConfig))
+	}
+	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
+	return stmt.Find()
+}
+
+func (d repositoryImpl) GetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
+	return d.repo.
+		Vault.WithContext(ctx).
+		Where(d.repo.Vault.Pubkey.Eq(address)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		First()
+}
+
+func (d repositoryImpl) GetAdminPositions(
+	ctx context.Context, isVaultEnabled *bool,
+	positionFilterParams PositionFilterParams,
+	params PaginationParams,
+) ([]*model.Position, error) {
+	stmt := d.repo.Position.WithContext(ctx)
+
+	// Apply Joins
+	if isVaultEnabled != nil {
+		stmt = stmt.Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Join(d.repo.TokenAccountBalance, d.repo.TokenAccountBalance.Mint.EqCol(d.repo.Position.Authority))
+	}
+
+	// Apply Filters
+	if isVaultEnabled != nil {
+		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*isVaultEnabled))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Where(
+				d.repo.TokenAccountBalance.Owner.Eq(*positionFilterParams.Wallet),
+				d.repo.TokenAccountBalance.Amount.Gt(0))
+	}
+	if positionFilterParams.IsClosed != nil {
+		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*positionFilterParams.IsClosed))
+	}
+	if params.Limit != nil {
+		stmt = stmt.Limit(*params.Limit)
+	}
+	if params.Offset != nil {
+		stmt = stmt.Offset(*params.Offset)
+	}
+	return stmt.Find()
 }

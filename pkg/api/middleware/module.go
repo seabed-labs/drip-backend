@@ -8,9 +8,9 @@ import (
 
 	"google.golang.org/api/idtoken"
 
+	swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
-	swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"
