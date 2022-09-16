@@ -132,9 +132,9 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	}
 	for i := range res {
 		var tokenPair *model.TokenPair
-		vault, _ := vaultsByPubkey[res[i].Position.Vault]
+		vault := vaultsByPubkey[res[i].Position.Vault]
 		if vault != nil {
-			tokenPair, _ = tokenPairsByID[vault.TokenPairID]
+			tokenPair = tokenPairsByID[vault.TokenPairID]
 		}
 		if shouldExpandVault && vault != nil && tokenPair != nil {
 			res[i].Vault = &apispec.Vault{
@@ -153,7 +153,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		}
 
 		if shouldExpandTokenA && vault != nil && tokenPair != nil {
-			tokenA, _ := tokensByPubkey[tokenPair.TokenA]
+			tokenA := tokensByPubkey[tokenPair.TokenA]
 			if tokenA != nil {
 				res[i].TokenA = &apispec.Token{
 					Decimals: int(tokenA.Decimals),
@@ -163,7 +163,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 			}
 		}
 		if shouldExpandTokenB && vault != nil && tokenPair != nil {
-			tokenB, _ := tokensByPubkey[tokenPair.TokenB]
+			tokenB := tokensByPubkey[tokenPair.TokenB]
 			if tokenB != nil {
 				res[i].TokenB = &apispec.Token{
 					Decimals: int(tokenB.Decimals),
@@ -173,7 +173,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 			}
 		}
 		if shouldExpandProtoConfig && vault != nil {
-			protoConfig, _ := protoConfigsByPubkey[vault.ProtoConfig]
+			protoConfig := protoConfigsByPubkey[vault.ProtoConfig]
 			res[i].ProtoConfig = &apispec.ProtoConfig{
 				Admin:                   protoConfig.Admin,
 				Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
