@@ -46,7 +46,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 				DcaPeriodIdBeforeDeposit: strconv.FormatUint(position.DcaPeriodIDBeforeDeposit, 10),
 				DepositTimestamp:         strconv.FormatInt(position.DepositTimestamp.Unix(), 10),
 				DepositedTokenAAmount:    strconv.FormatUint(position.DepositedTokenAAmount, 10),
-				IsClosed:                 false,
+				IsClosed:                 position.IsClosed,
 				NumberOfSwaps:            strconv.FormatUint(position.NumberOfSwaps, 10),
 				PeriodicDripAmount:       strconv.FormatUint(position.PeriodicDripAmount, 10),
 				Pubkey:                   position.Pubkey,
