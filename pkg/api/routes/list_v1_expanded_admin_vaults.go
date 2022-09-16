@@ -269,12 +269,3 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 
 	return c.JSON(http.StatusOK, res)
 }
-
-func hasValue(params apispec.ExpandAdminVaultsQueryParam, value string) bool {
-	for _, v := range params {
-		if v == value {
-			return true
-		}
-	}
-	return false
-}

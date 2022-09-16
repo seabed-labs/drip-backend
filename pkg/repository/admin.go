@@ -16,6 +16,13 @@ func (d repositoryImpl) AdminGetVaultByAddress(ctx context.Context, pubkey strin
 		First()
 }
 
+func (d repositoryImpl) AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error) {
+	return d.repo.
+		Vault.WithContext(ctx).
+		Where(d.repo.Vault.Pubkey.In(addresses...)).
+		Find()
+}
+
 func (d repositoryImpl) AdminGetVaultsByTokenAccountAddress(ctx context.Context, tokenAccountPubkey string) ([]*model.Vault, error) {
 	return d.repo.
 		Vault.WithContext(ctx).
