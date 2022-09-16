@@ -44,7 +44,6 @@ func NewHandler(
 
 func (h *Handler) ValidateAccessToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return next(c)
 		if !strings.Contains(c.Request().RequestURI, "admin") {
 			return next(c)
 		}
