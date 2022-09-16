@@ -167,6 +167,7 @@ paths:
       description: Get all positions with pagination.
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+        - $ref: "#/components/parameters/expandAdminPositionsQueryParam"
         - $ref: '#/components/parameters/enabledQueryParam'
         - $ref: '#/components/parameters/isClosedQueryParam'
         - $ref: "#/components/parameters/offsetQueryParam"
@@ -581,6 +582,22 @@ components:
               "treasuryTokenBAccountValue",
             ]
 
+    expandAdminPositionsQueryParam:
+      name: expand
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            [
+              "all",
+              "vault",
+              "protoConfig",
+              "tokenA",
+              "tokenB",
+            ]
+
     googleTokenIdHeaderParam:
       name: token-id
       in: header
@@ -671,7 +688,7 @@ components:
     listAdminPositions:
       type: array
       items:
-        $ref: "#/components/schemas/position"
+        $ref: "#/components/schemas/expandedAdminPosition"
 
     listActiveWallets:
       type: array
@@ -793,6 +810,21 @@ components:
               $ref: "#/components/schemas/tokenAccountBalance"
             treasuryTokenBAccountValue:
               $ref: "#/components/schemas/tokenAccountBalance"
+
+    expandedAdminPosition:
+      description: Get Position with Expanded Data
+      allOf:
+        - $ref: "#/components/schemas/position"
+        - type: object
+          properties:
+            vault:
+              $ref: "#/components/schemas/vault"
+            protoConfig:
+              $ref: "#/components/schemas/protoConfig"
+            tokenA:
+              $ref: "#/components/schemas/token"
+            tokenB:
+              $ref: "#/components/schemas/token"
 
     position:
       type: object
