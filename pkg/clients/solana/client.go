@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
+
+	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 
@@ -38,6 +41,8 @@ type Solana interface {
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
+
+	GetVaultPeriodPDA(vaultAddress string, vaultPeriodID int64) (string, error)
 }
 
 func NewSolanaClient(
@@ -47,10 +52,25 @@ func NewSolanaClient(
 }
 
 type impl struct {
-	//environment configs.Environment
 	network configs.Network
 	client  *rpc.Client
 	wallet  *solana.Wallet
+}
+
+func (s impl) GetVaultPeriodPDA(vaultAddress string, vaultPeriodID int64) (string, error) {
+	vaultPubkey, err := solana.PublicKeyFromBase58(vaultAddress)
+	if err != nil {
+		return "", fmt.Errorf("failed to get convert vault string addr to pubkey, err: %w", err)
+	}
+	vaultPeriod, _, err := solana.FindProgramAddress([][]byte{
+		[]byte("vault_period"),
+		vaultPubkey[:],
+		[]byte(strconv.FormatInt(vaultPeriodID, 10)),
+	}, drip.ProgramID)
+	if err != nil {
+		return "", err
+	}
+	return vaultPeriod.String(), nil
 }
 
 func createClient(

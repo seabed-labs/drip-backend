@@ -544,13 +544,70 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 	if _, err := p.ensureVault(ctx, vaultPeriodAccount.Vault.String()); err != nil {
 		return err
 	}
+	// todo backfill from last vault period
+	for i := int64(0); i < int64(vaultPeriodAccount.PeriodId); i++ {
+		vaultPeriodAddress, err := p.client.GetVaultPeriodPDA(vaultPeriodAccount.Vault.String(), i)
+		if err != nil {
+			logrus.WithField("vaultPeriodID", i).WithError(err).Errorf("failed to GetVaultPeriodPDA")
+			continue
+		}
+		_, err = p.ensureVaultPeriod(ctx, vaultPeriodAddress)
+		if err != nil {
+			logrus.WithField("vaultPeriodID", i).WithError(err).Errorf("failed to ensureVaultPeriod")
+			continue
+		}
+	}
+	priceBOverA, err := p.getVaultPeriodPriceBOverA(ctx, vaultPeriodAccount)
+	if err != nil {
+		logrus.
+			WithField("vaultPeriodAddress", address).
+			WithField("vaultPeriodId", vaultPeriodAccount.PeriodId).
+			WithError(err).Errorf("failed to getVaultPeriodPriceBOverA")
+		return err
+	}
 	return p.repo.UpsertVaultPeriods(ctx, &model.VaultPeriod{
-		Pubkey:   address,
-		Vault:    vaultPeriodAccount.Vault.String(),
-		PeriodID: vaultPeriodAccount.PeriodId,
-		Twap:     twap,
-		Dar:      vaultPeriodAccount.Dar,
+		Pubkey:      address,
+		Vault:       vaultPeriodAccount.Vault.String(),
+		PeriodID:    vaultPeriodAccount.PeriodId,
+		Twap:        twap,
+		Dar:         vaultPeriodAccount.Dar,
+		PriceBOverA: priceBOverA,
 	})
+}
+
+// getVaultPeriodPriceBOverA calculate and return normalized price of b over a
+// in the following, twap[x] is the normalized twap value (not the x64 value stored on chain)
+//	p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
+//  p[i] = twap[i] for i = 0
+func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultPeriod) (decimal.Decimal, error) {
+	twapI, err := decimal.NewFromString(periodI.Twap.String())
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to get twapI decimal, err: %w", err)
+	}
+	twapI = twapI.Shift(-64)
+	if periodI.PeriodId == 0 {
+		return twapI, nil
+	}
+	periodIPrecedingAddress, err := p.client.GetVaultPeriodPDA(periodI.Vault.String(), int64(periodI.PeriodId-1))
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to GetVaultPeriodPDA, err: %w", err)
+	}
+	periodIPPreceding, err := p.ensureVaultPeriod(ctx, periodIPrecedingAddress)
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to ensureVaultPeriod, err: %w", err)
+	}
+	twapIPreceding, err := decimal.NewFromString(periodIPPreceding.Twap.String())
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to get twapIPreceeding decimal, err: %w", err)
+	}
+	twapIPreceding = twapIPreceding.Shift(-64)
+
+	periodIID, err := decimal.NewFromString(strconv.FormatUint(periodI.PeriodId, 10))
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to periodIId decimal, err: %w", err)
+	}
+	periodIPrecedingID := periodIID.Sub(decimal.NewFromInt(1))
+	return twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID)), nil
 }
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
@@ -655,6 +712,18 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 		return p.repo.AdminGetVaultByAddress(ctx, address)
 	}
 	return vault, err
+}
+
+// ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
+func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model.VaultPeriod, error) {
+	vaultPeriod, err := p.repo.GetVaultPeriodByAddress(ctx, address)
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
+		if err := p.UpsertVaultPeriodByAddress(ctx, address); err != nil {
+			return nil, err
+		}
+		return p.repo.GetVaultPeriodByAddress(ctx, address)
+	}
+	return vaultPeriod, err
 }
 
 func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {

@@ -31,6 +31,7 @@ type Repository interface {
 	GetProtoConfigs(context.Context) ([]*model.ProtoConfig, error)
 	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
+	GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error)
 	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
 
 	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
