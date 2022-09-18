@@ -91,9 +91,6 @@ type ListSplTokenSwapConfigs []SplTokenSwapConfig
 // ListTokenPairs defines model for listTokenPairs.
 type ListTokenPairs []TokenPair
 
-// ListTokenSwaps defines model for listTokenSwaps.
-type ListTokenSwaps []TokenSwap
-
 // ListTokens defines model for listTokens.
 type ListTokens []Token
 
@@ -204,19 +201,6 @@ type TokenPair struct {
 	TokenB string `json:"tokenB"`
 }
 
-// TokenSwap defines model for tokenSwap.
-type TokenSwap struct {
-	Authority  string `json:"authority"`
-	FeeAccount string `json:"feeAccount"`
-	Mint       string `json:"mint"`
-
-	// token pair reference identifier
-	Pair          string `json:"pair"`
-	Pubkey        string `json:"pubkey"`
-	TokenAAccount string `json:"tokenAAccount"`
-	TokenBAccount string `json:"tokenBAccount"`
-}
-
 // Vault defines model for vault.
 type Vault struct {
 	// unix timestamp
@@ -293,37 +277,14 @@ type TokenAQueryParam string
 // TokenBQueryParam defines model for tokenBQueryParam.
 type TokenBQueryParam string
 
-// Token pair identifier.
-type TokenPairQueryParam string
-
 // VaultPeriodQueryParam defines model for vaultPeriodQueryParam.
 type VaultPeriodQueryParam string
 
 // VaultQueryParam defines model for vaultQueryParam.
 type VaultQueryParam string
 
-// PutAdminVaultPubkeyPathEnableParams defines parameters for PutAdminVaultPubkeyPathEnable.
-type PutAdminVaultPubkeyPathEnableParams struct {
-	TokenId GoogleTokenIdHeaderParam `json:"token-id"`
-}
-
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
-
-// GetOrcawhirlpoolconfigsParams defines parameters for GetOrcawhirlpoolconfigs.
-type GetOrcawhirlpoolconfigsParams struct {
-	Vault *VaultQueryParam `json:"vault,omitempty"`
-}
-
-// GetSpltokenswapconfigsParams defines parameters for GetSpltokenswapconfigs.
-type GetSpltokenswapconfigsParams struct {
-	Vault *VaultQueryParam `json:"vault,omitempty"`
-}
-
-// GetSwapsParams defines parameters for GetSwaps.
-type GetSwapsParams struct {
-	TokenPair *TokenPairQueryParam `json:"tokenPair,omitempty"`
-}
 
 // GetTokenpairsParams defines parameters for GetTokenpairs.
 type GetTokenpairsParams struct {
@@ -378,6 +339,16 @@ type GetV1AdminVaultsParams struct {
 // GetV1AdminVaultsParamsExpand defines parameters for GetV1AdminVaults.
 type GetV1AdminVaultsParamsExpand string
 
+// GetV1DripOrcawhirlpoolconfigsParams defines parameters for GetV1DripOrcawhirlpoolconfigs.
+type GetV1DripOrcawhirlpoolconfigsParams struct {
+	Vault *VaultQueryParam `json:"vault,omitempty"`
+}
+
+// GetV1DripSpltokenswapconfigsParams defines parameters for GetV1DripSpltokenswapconfigs.
+type GetV1DripSpltokenswapconfigsParams struct {
+	Vault *VaultQueryParam `json:"vault,omitempty"`
+}
+
 // GetV1PositionsParams defines parameters for GetV1Positions.
 type GetV1PositionsParams struct {
 	Wallet   RequiredWalletQueryParam `json:"wallet"`
@@ -386,16 +357,16 @@ type GetV1PositionsParams struct {
 	Limit    *LimitQueryParam         `json:"limit,omitempty"`
 }
 
-// GetVaultperiodsParams defines parameters for GetVaultperiods.
-type GetVaultperiodsParams struct {
+// GetV1VaultperiodsParams defines parameters for GetV1Vaultperiods.
+type GetV1VaultperiodsParams struct {
 	Vault       RequiredVaultQueryParam `json:"vault"`
 	VaultPeriod *VaultPeriodQueryParam  `json:"vaultPeriod,omitempty"`
 	Offset      *OffsetQueryParam       `json:"offset,omitempty"`
 	Limit       *LimitQueryParam        `json:"limit,omitempty"`
 }
 
-// GetVaultsParams defines parameters for GetVaults.
-type GetVaultsParams struct {
+// GetV1VaultsParams defines parameters for GetV1Vaults.
+type GetV1VaultsParams struct {
 	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
 	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 
@@ -482,28 +453,13 @@ type ClientInterface interface {
 	// Get request
 	Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PutAdminVaultPubkeyPathEnable request
-	PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// PostMint request with any body
 	PostMintWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostMint(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetOrcawhirlpoolconfigs request
-	GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetProtoconfigs request
-	GetProtoconfigs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetSpltokenswapconfigs request
-	GetSpltokenswapconfigs(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetSwaps request
-	GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetTokenpairs request
 	GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -523,8 +479,14 @@ type ClientInterface interface {
 	// GetV1AdminVaults request
 	GetV1AdminVaults(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1DripOrcawhirlpoolconfigs request
+	GetV1DripOrcawhirlpoolconfigs(ctx context.Context, params *GetV1DripOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1DripSpltokenswapconfigs request
+	GetV1DripSpltokenswapconfigs(ctx context.Context, params *GetV1DripSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -532,27 +494,18 @@ type ClientInterface interface {
 	// GetV1Positions request
 	GetV1Positions(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetVaultperiods request
-	GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetV1Protoconfigs request
+	GetV1Protoconfigs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetVaults request
-	GetVaults(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetV1Vaultperiods request
+	GetV1Vaultperiods(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1Vaults request
+	GetV1Vaults(ctx context.Context, params *GetV1VaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) Get(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PutAdminVaultPubkeyPathEnable(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPutAdminVaultPubkeyPathEnableRequest(c.Server, pubkeyPath, params)
 	if err != nil {
 		return nil, err
 	}
@@ -587,56 +540,8 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrcawhirlpoolconfigs(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrcawhirlpoolconfigsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetProtoconfigs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProtoconfigsRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetSpltokenswapconfigs(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSpltokenswapconfigsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetSwaps(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSwapsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -719,8 +624,32 @@ func (c *Client) GetV1AdminVaults(ctx context.Context, params *GetV1AdminVaultsP
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetV1DripOrcawhirlpoolconfigs(ctx context.Context, params *GetV1DripOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1DripOrcawhirlpoolconfigsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV1DripPositionPubkeyPathMetadata(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1DripPositionPubkeyPathMetadataRequest(c.Server, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1DripSpltokenswapconfigs(ctx context.Context, params *GetV1DripSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1DripSpltokenswapconfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -755,8 +684,8 @@ func (c *Client) GetV1Positions(ctx context.Context, params *GetV1PositionsParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetVaultperiods(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetVaultperiodsRequest(c.Server, params)
+func (c *Client) GetV1Protoconfigs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1ProtoconfigsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -767,8 +696,20 @@ func (c *Client) GetVaultperiods(ctx context.Context, params *GetVaultperiodsPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetVaults(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetVaultsRequest(c.Server, params)
+func (c *Client) GetV1Vaultperiods(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1VaultperiodsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1Vaults(ctx context.Context, params *GetV1VaultsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1VaultsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -802,49 +743,6 @@ func NewGetRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	return req, nil
-}
-
-// NewPutAdminVaultPubkeyPathEnableRequest generates requests for PutAdminVaultPubkeyPathEnable
-func NewPutAdminVaultPubkeyPathEnableRequest(server string, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, pubkeyPath)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/admin/vault/%s/enable", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var headerParam0 string
-
-	headerParam0, err = runtime.StyleParamWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, params.TokenId)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("token-id", headerParam0)
 
 	return req, nil
 }
@@ -889,127 +787,6 @@ func NewPostMintRequestWithBody(server string, contentType string, body io.Reade
 	return req, nil
 }
 
-// NewGetOrcawhirlpoolconfigsRequest generates requests for GetOrcawhirlpoolconfigs
-func NewGetOrcawhirlpoolconfigsRequest(server string, params *GetOrcawhirlpoolconfigsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/orcawhirlpoolconfigs")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.Vault != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetProtoconfigsRequest generates requests for GetProtoconfigs
-func NewGetProtoconfigsRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/protoconfigs")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetSpltokenswapconfigsRequest generates requests for GetSpltokenswapconfigs
-func NewGetSpltokenswapconfigsRequest(server string, params *GetSpltokenswapconfigsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/spltokenswapconfigs")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.Vault != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewGetSwaggerJsonRequest generates requests for GetSwaggerJson
 func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	var err error
@@ -1028,53 +805,6 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetSwapsRequest generates requests for GetSwaps
-func NewGetSwapsRequest(server string, params *GetSwapsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/swaps")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.TokenPair != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenPair", runtime.ParamLocationQuery, *params.TokenPair); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1613,6 +1343,53 @@ func NewGetV1AdminVaultsRequest(server string, params *GetV1AdminVaultsParams) (
 	return req, nil
 }
 
+// NewGetV1DripOrcawhirlpoolconfigsRequest generates requests for GetV1DripOrcawhirlpoolconfigs
+func NewGetV1DripOrcawhirlpoolconfigsRequest(server string, params *GetV1DripOrcawhirlpoolconfigsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/drip/orcawhirlpoolconfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Vault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV1DripPositionPubkeyPathMetadataRequest generates requests for GetV1DripPositionPubkeyPathMetadata
 func NewGetV1DripPositionPubkeyPathMetadataRequest(server string, pubkeyPath PubkeyPathParam) (*http.Request, error) {
 	var err error
@@ -1638,6 +1415,53 @@ func NewGetV1DripPositionPubkeyPathMetadataRequest(server string, pubkeyPath Pub
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1DripSpltokenswapconfigsRequest generates requests for GetV1DripSpltokenswapconfigs
+func NewGetV1DripSpltokenswapconfigsRequest(server string, params *GetV1DripSpltokenswapconfigsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/drip/spltokenswapconfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Vault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "vault", runtime.ParamLocationQuery, *params.Vault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1772,8 +1596,8 @@ func NewGetV1PositionsRequest(server string, params *GetV1PositionsParams) (*htt
 	return req, nil
 }
 
-// NewGetVaultperiodsRequest generates requests for GetVaultperiods
-func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*http.Request, error) {
+// NewGetV1ProtoconfigsRequest generates requests for GetV1Protoconfigs
+func NewGetV1ProtoconfigsRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1781,7 +1605,34 @@ func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*h
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/vaultperiods")
+	operationPath := fmt.Sprintf("/v1/protoconfigs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1VaultperiodsRequest generates requests for GetV1Vaultperiods
+func NewGetV1VaultperiodsRequest(server string, params *GetV1VaultperiodsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/vaultperiods")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1863,8 +1714,8 @@ func NewGetVaultperiodsRequest(server string, params *GetVaultperiodsParams) (*h
 	return req, nil
 }
 
-// NewGetVaultsRequest generates requests for GetVaults
-func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request, error) {
+// NewGetV1VaultsRequest generates requests for GetV1Vaults
+func NewGetV1VaultsRequest(server string, params *GetV1VaultsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1872,7 +1723,7 @@ func NewGetVaultsRequest(server string, params *GetVaultsParams) (*http.Request,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/vaults")
+	operationPath := fmt.Sprintf("/v1/vaults")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1988,28 +1839,13 @@ type ClientWithResponsesInterface interface {
 	// Get request
 	GetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetResponse, error)
 
-	// PutAdminVaultPubkeyPathEnable request
-	PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error)
-
 	// PostMint request with any body
 	PostMintWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
 	PostMintWithResponse(ctx context.Context, body PostMintJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMintResponse, error)
 
-	// GetOrcawhirlpoolconfigs request
-	GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error)
-
-	// GetProtoconfigs request
-	GetProtoconfigsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error)
-
-	// GetSpltokenswapconfigs request
-	GetSpltokenswapconfigsWithResponse(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetSpltokenswapconfigsResponse, error)
-
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
-
-	// GetSwaps request
-	GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error)
 
 	// GetTokenpairs request
 	GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error)
@@ -2029,8 +1865,14 @@ type ClientWithResponsesInterface interface {
 	// GetV1AdminVaults request
 	GetV1AdminVaultsWithResponse(ctx context.Context, params *GetV1AdminVaultsParams, reqEditors ...RequestEditorFn) (*GetV1AdminVaultsResponse, error)
 
+	// GetV1DripOrcawhirlpoolconfigs request
+	GetV1DripOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetV1DripOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetV1DripOrcawhirlpoolconfigsResponse, error)
+
 	// GetV1DripPositionPubkeyPathMetadata request
 	GetV1DripPositionPubkeyPathMetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPositionPubkeyPathMetadataResponse, error)
+
+	// GetV1DripSpltokenswapconfigs request
+	GetV1DripSpltokenswapconfigsWithResponse(ctx context.Context, params *GetV1DripSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetV1DripSpltokenswapconfigsResponse, error)
 
 	// GetV1DripPubkeyPathTokenmetadata request
 	GetV1DripPubkeyPathTokenmetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPubkeyPathTokenmetadataResponse, error)
@@ -2038,11 +1880,14 @@ type ClientWithResponsesInterface interface {
 	// GetV1Positions request
 	GetV1PositionsWithResponse(ctx context.Context, params *GetV1PositionsParams, reqEditors ...RequestEditorFn) (*GetV1PositionsResponse, error)
 
-	// GetVaultperiods request
-	GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error)
+	// GetV1Protoconfigs request
+	GetV1ProtoconfigsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProtoconfigsResponse, error)
 
-	// GetVaults request
-	GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error)
+	// GetV1Vaultperiods request
+	GetV1VaultperiodsWithResponse(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*GetV1VaultperiodsResponse, error)
+
+	// GetV1Vaults request
+	GetV1VaultsWithResponse(ctx context.Context, params *GetV1VaultsParams, reqEditors ...RequestEditorFn) (*GetV1VaultsResponse, error)
 }
 
 type GetResponse struct {
@@ -2061,31 +1906,6 @@ func (r GetResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PutAdminVaultPubkeyPathEnableResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *Vault
-	JSON400      *ErrorResponse
-	JSON401      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r PutAdminVaultPubkeyPathEnableResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PutAdminVaultPubkeyPathEnableResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2116,78 +1936,6 @@ func (r PostMintResponse) StatusCode() int {
 	return 0
 }
 
-type GetOrcawhirlpoolconfigsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListOrcaWhirlpoolConfigs
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetOrcawhirlpoolconfigsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetOrcawhirlpoolconfigsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetProtoconfigsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListProtoConfigs
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetProtoconfigsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetProtoconfigsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetSpltokenswapconfigsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListSplTokenSwapConfigs
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetSpltokenswapconfigsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetSpltokenswapconfigsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type GetSwaggerJsonResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2204,30 +1952,6 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetSwapsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListTokenSwaps
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetSwapsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetSwapsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2379,6 +2103,30 @@ func (r GetV1AdminVaultsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1DripOrcawhirlpoolconfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListOrcaWhirlpoolConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1DripOrcawhirlpoolconfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1DripOrcawhirlpoolconfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1DripPositionPubkeyPathMetadataResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2397,6 +2145,30 @@ func (r GetV1DripPositionPubkeyPathMetadataResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetV1DripPositionPubkeyPathMetadataResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1DripSpltokenswapconfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListSplTokenSwapConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1DripSpltokenswapconfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1DripSpltokenswapconfigsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2451,7 +2223,31 @@ func (r GetV1PositionsResponse) StatusCode() int {
 	return 0
 }
 
-type GetVaultperiodsResponse struct {
+type GetV1ProtoconfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListProtoConfigs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1ProtoconfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1ProtoconfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1VaultperiodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListVaultPeriods
@@ -2460,7 +2256,7 @@ type GetVaultperiodsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetVaultperiodsResponse) Status() string {
+func (r GetV1VaultperiodsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2468,14 +2264,14 @@ func (r GetVaultperiodsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetVaultperiodsResponse) StatusCode() int {
+func (r GetV1VaultperiodsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetVaultsResponse struct {
+type GetV1VaultsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *ListVaults
@@ -2484,7 +2280,7 @@ type GetVaultsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetVaultsResponse) Status() string {
+func (r GetV1VaultsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2492,7 +2288,7 @@ func (r GetVaultsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetVaultsResponse) StatusCode() int {
+func (r GetV1VaultsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2506,15 +2302,6 @@ func (c *ClientWithResponses) GetWithResponse(ctx context.Context, reqEditors ..
 		return nil, err
 	}
 	return ParseGetResponse(rsp)
-}
-
-// PutAdminVaultPubkeyPathEnableWithResponse request returning *PutAdminVaultPubkeyPathEnableResponse
-func (c *ClientWithResponses) PutAdminVaultPubkeyPathEnableWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, params *PutAdminVaultPubkeyPathEnableParams, reqEditors ...RequestEditorFn) (*PutAdminVaultPubkeyPathEnableResponse, error) {
-	rsp, err := c.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePutAdminVaultPubkeyPathEnableResponse(rsp)
 }
 
 // PostMintWithBodyWithResponse request with arbitrary body returning *PostMintResponse
@@ -2534,33 +2321,6 @@ func (c *ClientWithResponses) PostMintWithResponse(ctx context.Context, body Pos
 	return ParsePostMintResponse(rsp)
 }
 
-// GetOrcawhirlpoolconfigsWithResponse request returning *GetOrcawhirlpoolconfigsResponse
-func (c *ClientWithResponses) GetOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetOrcawhirlpoolconfigsResponse, error) {
-	rsp, err := c.GetOrcawhirlpoolconfigs(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetOrcawhirlpoolconfigsResponse(rsp)
-}
-
-// GetProtoconfigsWithResponse request returning *GetProtoconfigsResponse
-func (c *ClientWithResponses) GetProtoconfigsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetProtoconfigsResponse, error) {
-	rsp, err := c.GetProtoconfigs(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetProtoconfigsResponse(rsp)
-}
-
-// GetSpltokenswapconfigsWithResponse request returning *GetSpltokenswapconfigsResponse
-func (c *ClientWithResponses) GetSpltokenswapconfigsWithResponse(ctx context.Context, params *GetSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetSpltokenswapconfigsResponse, error) {
-	rsp, err := c.GetSpltokenswapconfigs(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetSpltokenswapconfigsResponse(rsp)
-}
-
 // GetSwaggerJsonWithResponse request returning *GetSwaggerJsonResponse
 func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error) {
 	rsp, err := c.GetSwaggerJson(ctx, reqEditors...)
@@ -2568,15 +2328,6 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
-}
-
-// GetSwapsWithResponse request returning *GetSwapsResponse
-func (c *ClientWithResponses) GetSwapsWithResponse(ctx context.Context, params *GetSwapsParams, reqEditors ...RequestEditorFn) (*GetSwapsResponse, error) {
-	rsp, err := c.GetSwaps(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetSwapsResponse(rsp)
 }
 
 // GetTokenpairsWithResponse request returning *GetTokenpairsResponse
@@ -2633,6 +2384,15 @@ func (c *ClientWithResponses) GetV1AdminVaultsWithResponse(ctx context.Context, 
 	return ParseGetV1AdminVaultsResponse(rsp)
 }
 
+// GetV1DripOrcawhirlpoolconfigsWithResponse request returning *GetV1DripOrcawhirlpoolconfigsResponse
+func (c *ClientWithResponses) GetV1DripOrcawhirlpoolconfigsWithResponse(ctx context.Context, params *GetV1DripOrcawhirlpoolconfigsParams, reqEditors ...RequestEditorFn) (*GetV1DripOrcawhirlpoolconfigsResponse, error) {
+	rsp, err := c.GetV1DripOrcawhirlpoolconfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1DripOrcawhirlpoolconfigsResponse(rsp)
+}
+
 // GetV1DripPositionPubkeyPathMetadataWithResponse request returning *GetV1DripPositionPubkeyPathMetadataResponse
 func (c *ClientWithResponses) GetV1DripPositionPubkeyPathMetadataWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1DripPositionPubkeyPathMetadataResponse, error) {
 	rsp, err := c.GetV1DripPositionPubkeyPathMetadata(ctx, pubkeyPath, reqEditors...)
@@ -2640,6 +2400,15 @@ func (c *ClientWithResponses) GetV1DripPositionPubkeyPathMetadataWithResponse(ct
 		return nil, err
 	}
 	return ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp)
+}
+
+// GetV1DripSpltokenswapconfigsWithResponse request returning *GetV1DripSpltokenswapconfigsResponse
+func (c *ClientWithResponses) GetV1DripSpltokenswapconfigsWithResponse(ctx context.Context, params *GetV1DripSpltokenswapconfigsParams, reqEditors ...RequestEditorFn) (*GetV1DripSpltokenswapconfigsResponse, error) {
+	rsp, err := c.GetV1DripSpltokenswapconfigs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1DripSpltokenswapconfigsResponse(rsp)
 }
 
 // GetV1DripPubkeyPathTokenmetadataWithResponse request returning *GetV1DripPubkeyPathTokenmetadataResponse
@@ -2660,22 +2429,31 @@ func (c *ClientWithResponses) GetV1PositionsWithResponse(ctx context.Context, pa
 	return ParseGetV1PositionsResponse(rsp)
 }
 
-// GetVaultperiodsWithResponse request returning *GetVaultperiodsResponse
-func (c *ClientWithResponses) GetVaultperiodsWithResponse(ctx context.Context, params *GetVaultperiodsParams, reqEditors ...RequestEditorFn) (*GetVaultperiodsResponse, error) {
-	rsp, err := c.GetVaultperiods(ctx, params, reqEditors...)
+// GetV1ProtoconfigsWithResponse request returning *GetV1ProtoconfigsResponse
+func (c *ClientWithResponses) GetV1ProtoconfigsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProtoconfigsResponse, error) {
+	rsp, err := c.GetV1Protoconfigs(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetVaultperiodsResponse(rsp)
+	return ParseGetV1ProtoconfigsResponse(rsp)
 }
 
-// GetVaultsWithResponse request returning *GetVaultsResponse
-func (c *ClientWithResponses) GetVaultsWithResponse(ctx context.Context, params *GetVaultsParams, reqEditors ...RequestEditorFn) (*GetVaultsResponse, error) {
-	rsp, err := c.GetVaults(ctx, params, reqEditors...)
+// GetV1VaultperiodsWithResponse request returning *GetV1VaultperiodsResponse
+func (c *ClientWithResponses) GetV1VaultperiodsWithResponse(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*GetV1VaultperiodsResponse, error) {
+	rsp, err := c.GetV1Vaultperiods(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetVaultsResponse(rsp)
+	return ParseGetV1VaultperiodsResponse(rsp)
+}
+
+// GetV1VaultsWithResponse request returning *GetV1VaultsResponse
+func (c *ClientWithResponses) GetV1VaultsWithResponse(ctx context.Context, params *GetV1VaultsParams, reqEditors ...RequestEditorFn) (*GetV1VaultsResponse, error) {
+	rsp, err := c.GetV1Vaults(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1VaultsResponse(rsp)
 }
 
 // ParseGetResponse parses an HTTP response from a GetWithResponse call
@@ -2698,53 +2476,6 @@ func ParseGetResponse(rsp *http.Response) (*GetResponse, error) {
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePutAdminVaultPubkeyPathEnableResponse parses an HTTP response from a PutAdminVaultPubkeyPathEnableWithResponse call
-func ParsePutAdminVaultPubkeyPathEnableResponse(rsp *http.Response) (*PutAdminVaultPubkeyPathEnableResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PutAdminVaultPubkeyPathEnableResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Vault
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
 
 	}
 
@@ -2791,126 +2522,6 @@ func ParsePostMintResponse(rsp *http.Response) (*PostMintResponse, error) {
 	return response, nil
 }
 
-// ParseGetOrcawhirlpoolconfigsResponse parses an HTTP response from a GetOrcawhirlpoolconfigsWithResponse call
-func ParseGetOrcawhirlpoolconfigsResponse(rsp *http.Response) (*GetOrcawhirlpoolconfigsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetOrcawhirlpoolconfigsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListOrcaWhirlpoolConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetProtoconfigsResponse parses an HTTP response from a GetProtoconfigsWithResponse call
-func ParseGetProtoconfigsResponse(rsp *http.Response) (*GetProtoconfigsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetProtoconfigsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListProtoConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetSpltokenswapconfigsResponse parses an HTTP response from a GetSpltokenswapconfigsWithResponse call
-func ParseGetSpltokenswapconfigsResponse(rsp *http.Response) (*GetSpltokenswapconfigsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetSpltokenswapconfigsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListSplTokenSwapConfigs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetSwaggerJsonResponse parses an HTTP response from a GetSwaggerJsonWithResponse call
 func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -2931,46 +2542,6 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetSwapsResponse parses an HTTP response from a GetSwapsWithResponse call
-func ParseGetSwapsResponse(rsp *http.Response) (*GetSwapsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetSwapsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListTokenSwaps
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
 
 	}
 
@@ -3224,6 +2795,46 @@ func ParseGetV1AdminVaultsResponse(rsp *http.Response) (*GetV1AdminVaultsRespons
 	return response, nil
 }
 
+// ParseGetV1DripOrcawhirlpoolconfigsResponse parses an HTTP response from a GetV1DripOrcawhirlpoolconfigsWithResponse call
+func ParseGetV1DripOrcawhirlpoolconfigsResponse(rsp *http.Response) (*GetV1DripOrcawhirlpoolconfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1DripOrcawhirlpoolconfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListOrcaWhirlpoolConfigs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1DripPositionPubkeyPathMetadataResponse parses an HTTP response from a GetV1DripPositionPubkeyPathMetadataWithResponse call
 func ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp *http.Response) (*GetV1DripPositionPubkeyPathMetadataResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3240,6 +2851,46 @@ func ParseGetV1DripPositionPubkeyPathMetadataResponse(rsp *http.Response) (*GetV
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest TokenMetadata
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1DripSpltokenswapconfigsResponse parses an HTTP response from a GetV1DripSpltokenswapconfigsWithResponse call
+func ParseGetV1DripSpltokenswapconfigsResponse(rsp *http.Response) (*GetV1DripSpltokenswapconfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1DripSpltokenswapconfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListSplTokenSwapConfigs
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3344,15 +2995,55 @@ func ParseGetV1PositionsResponse(rsp *http.Response) (*GetV1PositionsResponse, e
 	return response, nil
 }
 
-// ParseGetVaultperiodsResponse parses an HTTP response from a GetVaultperiodsWithResponse call
-func ParseGetVaultperiodsResponse(rsp *http.Response) (*GetVaultperiodsResponse, error) {
+// ParseGetV1ProtoconfigsResponse parses an HTTP response from a GetV1ProtoconfigsWithResponse call
+func ParseGetV1ProtoconfigsResponse(rsp *http.Response) (*GetV1ProtoconfigsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetVaultperiodsResponse{
+	response := &GetV1ProtoconfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListProtoConfigs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1VaultperiodsResponse parses an HTTP response from a GetV1VaultperiodsWithResponse call
+func ParseGetV1VaultperiodsResponse(rsp *http.Response) (*GetV1VaultperiodsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1VaultperiodsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3384,15 +3075,15 @@ func ParseGetVaultperiodsResponse(rsp *http.Response) (*GetVaultperiodsResponse,
 	return response, nil
 }
 
-// ParseGetVaultsResponse parses an HTTP response from a GetVaultsWithResponse call
-func ParseGetVaultsResponse(rsp *http.Response) (*GetVaultsResponse, error) {
+// ParseGetV1VaultsResponse parses an HTTP response from a GetV1VaultsWithResponse call
+func ParseGetV1VaultsResponse(rsp *http.Response) (*GetV1VaultsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetVaultsResponse{
+	response := &GetV1VaultsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -3429,27 +3120,12 @@ type ServerInterface interface {
 	// Health Check
 	// (GET /)
 	Get(ctx echo.Context) error
-	// Toggle the 'enabled' flag on a vault
-	// (PUT /admin/vault/{pubkeyPath}/enable)
-	PutAdminVaultPubkeyPathEnable(ctx echo.Context, pubkeyPath PubkeyPathParam, params PutAdminVaultPubkeyPathEnableParams) error
 	// Mint tokens (DEVNET ONLY)
 	// (POST /mint)
 	PostMint(ctx echo.Context) error
-	// Get Orca Whirlpool Swap Configs
-	// (GET /orcawhirlpoolconfigs)
-	GetOrcawhirlpoolconfigs(ctx echo.Context, params GetOrcawhirlpoolconfigsParams) error
-	// Get Proto Configs
-	// (GET /protoconfigs)
-	GetProtoconfigs(ctx echo.Context) error
-	// Get Token Swaps Configs
-	// (GET /spltokenswapconfigs)
-	GetSpltokenswapconfigs(ctx echo.Context, params GetSpltokenswapconfigsParams) error
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
-	// Get Token Swaps
-	// (GET /swaps)
-	GetSwaps(ctx echo.Context, params GetSwapsParams) error
 	// Get Token Pairs
 	// (GET /tokenpairs)
 	GetTokenpairs(ctx echo.Context, params GetTokenpairsParams) error
@@ -3468,21 +3144,30 @@ type ServerInterface interface {
 	// Get All Vaults
 	// (GET /v1/admin/vaults)
 	GetV1AdminVaults(ctx echo.Context, params GetV1AdminVaultsParams) error
+	// Get Orca Whirlpool Swap Configs
+	// (GET /v1/drip/orcawhirlpoolconfigs)
+	GetV1DripOrcawhirlpoolconfigs(ctx echo.Context, params GetV1DripOrcawhirlpoolconfigsParams) error
 	// Get Drip Position Metadata
 	// (GET /v1/drip/position/{pubkeyPath}/metadata)
 	GetV1DripPositionPubkeyPathMetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
+	// Get Token Swaps Configs
+	// (GET /v1/drip/spltokenswapconfigs)
+	GetV1DripSpltokenswapconfigs(ctx echo.Context, params GetV1DripSpltokenswapconfigsParams) error
 	// Get TokenMetadata for Devnet Mints.
 	// (GET /v1/drip/{pubkeyPath}/tokenmetadata)
 	GetV1DripPubkeyPathTokenmetadata(ctx echo.Context, pubkeyPath PubkeyPathParam) error
 	// Get User Positions
 	// (GET /v1/positions)
 	GetV1Positions(ctx echo.Context, params GetV1PositionsParams) error
+	// Get Proto Configs
+	// (GET /v1/protoconfigs)
+	GetV1Protoconfigs(ctx echo.Context) error
 	// Get Vault Periods
-	// (GET /vaultperiods)
-	GetVaultperiods(ctx echo.Context, params GetVaultperiodsParams) error
+	// (GET /v1/vaultperiods)
+	GetV1Vaultperiods(ctx echo.Context, params GetV1VaultperiodsParams) error
 	// Get Supported Vaults
-	// (GET /vaults)
-	GetVaults(ctx echo.Context, params GetVaultsParams) error
+	// (GET /v1/vaults)
+	GetV1Vaults(ctx echo.Context, params GetV1VaultsParams) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -3499,44 +3184,6 @@ func (w *ServerInterfaceWrapper) Get(ctx echo.Context) error {
 	return err
 }
 
-// PutAdminVaultPubkeyPathEnable converts echo context to params.
-func (w *ServerInterfaceWrapper) PutAdminVaultPubkeyPathEnable(ctx echo.Context) error {
-	var err error
-	// ------------- Path parameter "pubkeyPath" -------------
-	var pubkeyPath PubkeyPathParam
-
-	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pubkeyPath: %s", err))
-	}
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params PutAdminVaultPubkeyPathEnableParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "token-id" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("token-id")]; found {
-		var TokenId GoogleTokenIdHeaderParam
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for token-id, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithLocation("simple", false, "token-id", runtime.ParamLocationHeader, valueList[0], &TokenId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter token-id: %s", err))
-		}
-
-		params.TokenId = TokenId
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter token-id is required, but not found"))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.PutAdminVaultPubkeyPathEnable(ctx, pubkeyPath, params)
-	return err
-}
-
 // PostMint converts echo context to params.
 func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 	var err error
@@ -3546,75 +3193,12 @@ func (w *ServerInterfaceWrapper) PostMint(ctx echo.Context) error {
 	return err
 }
 
-// GetOrcawhirlpoolconfigs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetOrcawhirlpoolconfigs(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetOrcawhirlpoolconfigsParams
-	// ------------- Optional query parameter "vault" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetOrcawhirlpoolconfigs(ctx, params)
-	return err
-}
-
-// GetProtoconfigs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetProtoconfigs(ctx echo.Context) error {
-	var err error
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetProtoconfigs(ctx)
-	return err
-}
-
-// GetSpltokenswapconfigs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSpltokenswapconfigs(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetSpltokenswapconfigsParams
-	// ------------- Optional query parameter "vault" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetSpltokenswapconfigs(ctx, params)
-	return err
-}
-
 // GetSwaggerJson converts echo context to params.
 func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetSwaggerJson(ctx)
-	return err
-}
-
-// GetSwaps converts echo context to params.
-func (w *ServerInterfaceWrapper) GetSwaps(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetSwapsParams
-	// ------------- Optional query parameter "tokenPair" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenPair", ctx.QueryParams(), &params.TokenPair)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenPair: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetSwaps(ctx, params)
 	return err
 }
 
@@ -3901,6 +3485,24 @@ func (w *ServerInterfaceWrapper) GetV1AdminVaults(ctx echo.Context) error {
 	return err
 }
 
+// GetV1DripOrcawhirlpoolconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1DripOrcawhirlpoolconfigs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1DripOrcawhirlpoolconfigsParams
+	// ------------- Optional query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1DripOrcawhirlpoolconfigs(ctx, params)
+	return err
+}
+
 // GetV1DripPositionPubkeyPathMetadata converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1DripPositionPubkeyPathMetadata(ctx echo.Context) error {
 	var err error
@@ -3914,6 +3516,24 @@ func (w *ServerInterfaceWrapper) GetV1DripPositionPubkeyPathMetadata(ctx echo.Co
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetV1DripPositionPubkeyPathMetadata(ctx, pubkeyPath)
+	return err
+}
+
+// GetV1DripSpltokenswapconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1DripSpltokenswapconfigs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1DripSpltokenswapconfigsParams
+	// ------------- Optional query parameter "vault" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "vault", ctx.QueryParams(), &params.Vault)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter vault: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1DripSpltokenswapconfigs(ctx, params)
 	return err
 }
 
@@ -3972,12 +3592,21 @@ func (w *ServerInterfaceWrapper) GetV1Positions(ctx echo.Context) error {
 	return err
 }
 
-// GetVaultperiods converts echo context to params.
-func (w *ServerInterfaceWrapper) GetVaultperiods(ctx echo.Context) error {
+// GetV1Protoconfigs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Protoconfigs(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1Protoconfigs(ctx)
+	return err
+}
+
+// GetV1Vaultperiods converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Vaultperiods(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetVaultperiodsParams
+	var params GetV1VaultperiodsParams
 	// ------------- Required query parameter "vault" -------------
 
 	err = runtime.BindQueryParameter("form", true, true, "vault", ctx.QueryParams(), &params.Vault)
@@ -4007,16 +3636,16 @@ func (w *ServerInterfaceWrapper) GetVaultperiods(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetVaultperiods(ctx, params)
+	err = w.Handler.GetV1Vaultperiods(ctx, params)
 	return err
 }
 
-// GetVaults converts echo context to params.
-func (w *ServerInterfaceWrapper) GetVaults(ctx echo.Context) error {
+// GetV1Vaults converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1Vaults(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetVaultsParams
+	var params GetV1VaultsParams
 	// ------------- Optional query parameter "tokenA" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
@@ -4039,7 +3668,7 @@ func (w *ServerInterfaceWrapper) GetVaults(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetVaults(ctx, params)
+	err = w.Handler.GetV1Vaults(ctx, params)
 	return err
 }
 
@@ -4072,95 +3701,90 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.GET(baseURL+"/", wrapper.Get)
-	router.PUT(baseURL+"/admin/vault/:pubkeyPath/enable", wrapper.PutAdminVaultPubkeyPathEnable)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
-	router.GET(baseURL+"/orcawhirlpoolconfigs", wrapper.GetOrcawhirlpoolconfigs)
-	router.GET(baseURL+"/protoconfigs", wrapper.GetProtoconfigs)
-	router.GET(baseURL+"/spltokenswapconfigs", wrapper.GetSpltokenswapconfigs)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
-	router.GET(baseURL+"/swaps", wrapper.GetSwaps)
 	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
 	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/v1/admin/positions", wrapper.GetV1AdminPositions)
 	router.GET(baseURL+"/v1/admin/summary/activewallets", wrapper.GetV1AdminSummaryActivewallets)
 	router.PUT(baseURL+"/v1/admin/vault/:pubkeyPath/enable", wrapper.PutV1AdminVaultPubkeyPathEnable)
 	router.GET(baseURL+"/v1/admin/vaults", wrapper.GetV1AdminVaults)
+	router.GET(baseURL+"/v1/drip/orcawhirlpoolconfigs", wrapper.GetV1DripOrcawhirlpoolconfigs)
 	router.GET(baseURL+"/v1/drip/position/:pubkeyPath/metadata", wrapper.GetV1DripPositionPubkeyPathMetadata)
+	router.GET(baseURL+"/v1/drip/spltokenswapconfigs", wrapper.GetV1DripSpltokenswapconfigs)
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
 	router.GET(baseURL+"/v1/positions", wrapper.GetV1Positions)
-	router.GET(baseURL+"/vaultperiods", wrapper.GetVaultperiods)
-	router.GET(baseURL+"/vaults", wrapper.GetVaults)
+	router.GET(baseURL+"/v1/protoconfigs", wrapper.GetV1Protoconfigs)
+	router.GET(baseURL+"/v1/vaultperiods", wrapper.GetV1Vaultperiods)
+	router.GET(baseURL+"/v1/vaults", wrapper.GetV1Vaults)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"lLiLXwAA",
+	"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",
+	"1pFlmgamUBaOqnv9vwAAAP//blkhQXZWAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

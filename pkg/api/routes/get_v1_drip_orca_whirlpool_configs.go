@@ -4,16 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcawhirlpoolconfigsParams) error {
-	res := Swagger.ListOrcaWhirlpoolConfigs{}
+// TODO: Remove
+var mainnetOrcaWhirlpools = []string{
+	"HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
+	"ErSQss3jrqDpQoLEYvo6onzjsi6zm4Sjpoz1pjqz2o6D",
+	"E5KuHFnU2VuuZFKeghbTLazgxeni4dhQ7URE4oBtJju2",
+}
+
+func (h Handler) GetV1DripOrcawhirlpoolconfigs(c echo.Context, params apispec.GetV1DripOrcawhirlpoolconfigsParams) error {
+	res := apispec.ListOrcaWhirlpoolConfigs{}
 
 	// TODO(Mocha): Refactor this and a the token swap config controller
 	var vaults []*model.Vault
@@ -21,7 +27,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vault by address")
-			return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid vault address"})
+			return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: "invalid vault address"})
 		}
 		vaults = []*model.Vault{vault}
 	} else {
@@ -29,7 +35,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), nil, nil, nil)
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vaults")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get vaults"})
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults"})
 		}
 	}
 
@@ -43,7 +49,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault whitelists")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
 	for i := range vaultWhitelists {
@@ -57,7 +63,7 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 	orcaWhirlpools, err := h.repo.GetOrcaWhirlpoolsByTokenPairIDs(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get orca whirlpools")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 
 	orcaWhirlpoolsByTokenPairID := make(map[string][]*model.OrcaWhirlpool)
@@ -76,12 +82,12 @@ func (h Handler) GetOrcawhirlpoolconfigs(c echo.Context, params Swagger.GetOrcaw
 			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
 			continue
 		}
-		res = append(res, Swagger.OrcaWhirlpoolConfig{
+		res = append(res, apispec.OrcaWhirlpoolConfig{
 			Oracle:      orcaWhirlpool.Oracle,
 			TokenVaultA: orcaWhirlpool.TokenVaultA,
 			TokenVaultB: orcaWhirlpool.TokenVaultB,
 			Whirlpool:   orcaWhirlpool.Pubkey,
-			DripCommon: Swagger.DripCommon{
+			DripCommon: apispec.DripCommon{
 				TokenAMint:         orcaWhirlpool.TokenMintA,
 				TokenBMint:         orcaWhirlpool.TokenMintB,
 				Vault:              vault.Pubkey,
@@ -107,14 +113,15 @@ func findOrcaWhirlpoolForVault(
 			WithField("TokenPairID", vault.TokenPairID).
 			Infof("skipping vault swap config, missing swap")
 	}
+
 	// TODO: Remove
 	if network == configs.MainnetNetwork {
 		var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
 		for _, orcaWhirlpool := range orcaWhirlpools {
-			if orcaWhirlpool.Pubkey == "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ" ||
-				orcaWhirlpool.Pubkey == "ErSQss3jrqDpQoLEYvo6onzjsi6zm4Sjpoz1pjqz2o6D" ||
-				orcaWhirlpool.Pubkey == "E5KuHFnU2VuuZFKeghbTLazgxeni4dhQ7URE4oBtJju2" {
-				elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, orcaWhirlpool)
+			for _, mainnetOrcaWhirlpool := range mainnetOrcaWhirlpools {
+				if orcaWhirlpool.Pubkey == mainnetOrcaWhirlpool {
+					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, orcaWhirlpool)
+				}
 			}
 		}
 		return elgibleOrcaWhirlpools[0], nil
@@ -140,21 +147,3 @@ func findOrcaWhirlpoolForVault(
 
 	return elgibleOrcaWhirlpools[0], nil
 }
-
-//// TODO(Mocha): Figure how to get deltaB for an orca whirlpool
-
-//bestSwap := eligibleSwaps[0]
-//bestSwapDeltaB := evaluateTokenSwap(vault.DripAmount, bestSwap.TokenABalanceAmount, bestSwap.TokenBBalanceAmount)
-//for _, eligibleSwap := range eligibleSwaps {
-//	swapDeltaB := evaluateTokenSwap(vault.DripAmount, eligibleSwap.TokenABalanceAmount, eligibleSwap.TokenBBalanceAmount)
-//	if swapDeltaB > bestSwapDeltaB {
-//		bestSwap = eligibleSwap
-//		bestSwapDeltaB = swapDeltaB
-//	}
-//}
-// Calculates DeltaB from (reserveA + deltaA) * (reserveB - deltaB) = reserveA*reserveB =  k
-// deltaB = reserveB - ((reserveA * reserveB) / (reservaA + deltaA))
-// to be used to MAXIMIZE delta b across all swaps
-//func evaluateOrcaWhirlpool(deltaA, reserveA, reserveB uint64) uint64 {
-//	return reserveB - ((reserveA * reserveB) / (reserveA + deltaA))
-//}

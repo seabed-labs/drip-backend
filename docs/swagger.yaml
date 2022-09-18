@@ -22,31 +22,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/pingResponse"
 
-  #  DEPRECATED
-  /admin/vault/{pubkeyPath}/enable:
-    put:
-      tags:
-        - admin
-      summary: Toggle the 'enabled' flag on a vault
-      description: Enable/disable the specified vault
-      parameters:
-        - $ref: "#/components/parameters/pubkeyPathParam"
-        - $ref: "#/components/parameters/googleTokenIdHeaderParam"
+  /swagger.json:
+    get:
+      summary: Swagger spec
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/vault"
-        "400":
-          description: Bad Request
+                type: object
+
+  # Devnet Only
+  /mint:
+    post:
+      summary: Mint tokens (DEVNET ONLY)
+      description:
+        mint test tokens to a desired associated token account, or passed
+        in token account
+      requestBody:
+        description: Pet to add to the store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/mintRequest"
+      responses:
+        "200":
+          description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/errorResponse"
-        "401":
-          description: Unauthorized
+                $ref: "#/components/schemas/mintResponse"
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -57,6 +66,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/errorResponse"
+
+  # v1 Admin
 
   /v1/admin/vault/{pubkeyPath}/enable:
     put:
@@ -192,26 +203,46 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /mint:
-    post:
-      summary: Mint tokens (DEVNET ONLY)
-      description:
-        mint test tokens to a desired associated token account, or passed
-        in token account
-      requestBody:
-        description: Pet to add to the store
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/mintRequest"
+  # v1 Public
+  /v1/protoconfigs:
+    get:
+      summary: Get Proto Configs
+      description: Get all proto configs.
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/mintResponse"
+                $ref: "#/components/schemas/listProtoConfigs"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/vaults:
+    get:
+      summary: Get Supported Vaults
+      description: Get all vaults with filters.
+      parameters:
+        - $ref: "#/components/parameters/tokenAQueryParam"
+        - $ref: "#/components/parameters/tokenBQueryParam"
+        - $ref: "#/components/parameters/protoConfigQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listVaults"
         "400":
           description: Bad Request
           content:
@@ -254,178 +285,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /protoconfigs:
-    get:
-      summary: Get Proto Configs
-      description: Get all proto configs.
-#      parameters:
-#        - $ref: "#/components/parameters/tokenAQueryParam"
-#        - $ref: "#/components/parameters/tokenBQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listProtoConfigs"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /swagger.json:
-    get:
-      summary: Swagger spec
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-
-  /spltokenswapconfigs:
-    get:
-      summary: Get Token Swaps Configs
-      description: Get token swap configs for DripSPLTokenSwap.
-      parameters:
-        - $ref: "#/components/parameters/vaultQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listSplTokenSwapConfigs"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /orcawhirlpoolconfigs:
-    get:
-      summary: Get Orca Whirlpool Swap Configs
-      description: Get whirlpool configs for dripOrcaWhirlpool.
-      parameters:
-        - $ref: "#/components/parameters/vaultQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listOrcaWhirlpoolConfigs"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /swaps:
-    get:
-      summary: Get Token Swaps
-      description: Get token swaps with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenPairQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listTokenSwaps"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /tokenpairs:
-    get:
-      summary: Get Token Pairs
-      description: Get token pairs with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
-
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listTokenPairs"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /tokens:
-    get:
-      summary: Get Tokens
-      description: Get tokens with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listTokens"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
-  /vaultperiods:
+  /v1/vaultperiods:
     get:
       summary: Get Vault Periods
       description: Get vault periods with pagination and filters.
@@ -454,21 +314,45 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /vaults:
+  /v1/drip/spltokenswapconfigs:
     get:
-      summary: Get Supported Vaults
-      description: Get all vaults with filters.
+      summary: Get Token Swaps Configs
+      description: Get token swap configs for DripSPLTokenSwap.
       parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
-        - $ref: "#/components/parameters/protoConfigQueryParam"
+        - $ref: "#/components/parameters/vaultQueryParam"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/listVaults"
+                $ref: "#/components/schemas/listSplTokenSwapConfigs"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /v1/drip/orcawhirlpoolconfigs:
+    get:
+      summary: Get Orca Whirlpool Swap Configs
+      description: Get whirlpool configs for dripOrcaWhirlpool.
+      parameters:
+        - $ref: "#/components/parameters/vaultQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listOrcaWhirlpoolConfigs"
         "400":
           description: Bad Request
           content:
@@ -519,6 +403,62 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/tokenMetadata"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+
+  /tokenpairs:
+    get:
+      summary: Get Token Pairs
+      description: Get token pairs with filters.
+      parameters:
+        - $ref: "#/components/parameters/tokenAQueryParam"
+        - $ref: "#/components/parameters/tokenBQueryParam"
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listTokenPairs"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
+  /tokens:
+    get:
+      summary: Get Tokens
+      description: Get tokens with filters.
+      parameters:
+        - $ref: "#/components/parameters/tokenAQueryParam"
+        - $ref: "#/components/parameters/tokenBQueryParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listTokens"
         "400":
           description: Bad Request
           content:

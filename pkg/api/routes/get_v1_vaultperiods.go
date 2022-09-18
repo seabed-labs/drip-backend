@@ -4,15 +4,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsParams) error {
-	res := Swagger.ListVaultPeriods{}
+func (h Handler) GetV1Vaultperiods(c echo.Context, params apispec.GetV1VaultperiodsParams) error {
+	res := apispec.ListVaultPeriods{}
 	limit := defaultLimit
 	if params.Limit != nil {
 		limit = int(*params.Limit)
@@ -32,7 +31,7 @@ func (h Handler) GetVaultperiods(c echo.Context, params Swagger.GetVaultperiodsP
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault periods")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 
 	for i := range vaultPeriodModels {
