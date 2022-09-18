@@ -80,6 +80,7 @@ func GenerateModels(
 		gen.FieldType("period_id", "uint64"),
 		gen.FieldType("dar", "uint64"),
 		gen.FieldType("twap", "decimal.Decimal"),
+		gen.FieldType("price_b_over_a", "decimal.Decimal"),
 	).AddMethod(ModelUtil{})
 
 	g.GenerateModel("position",

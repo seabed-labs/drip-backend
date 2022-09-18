@@ -370,6 +370,21 @@ func (mr *MockRepositoryMockRecorder) GetVaultByAddress(arg0, arg1 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultByAddress), arg0, arg1)
 }
 
+// GetVaultPeriodByAddress mocks base method.
+func (m *MockRepository) GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVaultPeriodByAddress", ctx, address)
+	ret0, _ := ret[0].(*model.VaultPeriod)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVaultPeriodByAddress indicates an expected call of GetVaultPeriodByAddress.
+func (mr *MockRepositoryMockRecorder) GetVaultPeriodByAddress(ctx, address interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultPeriodByAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultPeriodByAddress), ctx, address)
+}
+
 // GetVaultPeriods mocks base method.
 func (m *MockRepository) GetVaultPeriods(arg0 context.Context, arg1 string, arg2 *string, arg3 PaginationParams) ([]*model.VaultPeriod, error) {
 	m.ctrl.T.Helper()

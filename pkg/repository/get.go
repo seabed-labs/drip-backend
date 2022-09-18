@@ -184,6 +184,16 @@ func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []s
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetVaultPeriodByAddress(
+	ctx context.Context,
+	address string,
+) (*model.VaultPeriod, error) {
+	return d.repo.
+		VaultPeriod.WithContext(ctx).
+		Where(d.repo.VaultPeriod.Pubkey.Eq(address)).
+		First()
+}
+
 func (d repositoryImpl) GetVaultPeriods(
 	ctx context.Context,
 	vault string, vaultPeriod *string,

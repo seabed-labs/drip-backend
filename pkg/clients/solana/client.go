@@ -47,7 +47,6 @@ func NewSolanaClient(
 }
 
 type impl struct {
-	//environment configs.Environment
 	network configs.Network
 	client  *rpc.Client
 	wallet  *solana.Wallet
