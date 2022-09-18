@@ -537,8 +537,8 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 }
 
 // upsertVaultPeriodByAddress: this is potentially a recursive call
-// if shouldUpsertPrice is set to true, we will try and price the period, which depends on period[i-1]
-// if shouldUpsertPrice is set to false, we will not upsert the price to 0
+// if shouldUpsertPrice is set to true, we will try and price period[i], which will try to ensure period[i-1]
+// if shouldUpsertPrice is set to false, we will not calculate a price and will upsert it to 0
 func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, shouldUpsertPrice bool) error {
 	var vaultPeriodAccount drip.VaultPeriod
 	if err := p.client.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
