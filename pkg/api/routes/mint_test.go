@@ -10,11 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	solana2 "github.com/dcaf-labs/drip/pkg/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/apispec"
+	solanaClient "github.com/dcaf-labs/drip/pkg/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -31,13 +30,13 @@ func TestHandler_PostMint(t *testing.T) {
 	e := echo.New()
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -55,13 +54,13 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -84,13 +83,13 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -124,13 +123,13 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when api wallet is not mint authority", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -179,13 +178,13 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),
@@ -239,13 +238,13 @@ func TestHandler_PostMint(t *testing.T) {
 	})
 
 	t.Run("should return success", func(t *testing.T) {
-		m := solana2.NewMockSolana(ctrl)
+		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(&configs.AppConfig{
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
 		}, m, repository.NewMockRepository(ctrl))
-		reqBody, err := json.Marshal(Swagger.MintRequest{
+		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
 			Wallet: solana.NewWallet().PublicKey().String(),

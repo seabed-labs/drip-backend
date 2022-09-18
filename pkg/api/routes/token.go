@@ -3,15 +3,15 @@ package controller
 import (
 	"net/http"
 
-	Swagger "github.com/dcaf-labs/drip/pkg/apispec"
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error {
-	res := Swagger.ListTokens{}
+func (h Handler) GetTokens(c echo.Context, params apispec.GetTokensParams) error {
+	res := apispec.ListTokens{}
 	if params.TokenA != nil && params.TokenB != nil {
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "both tokenA and tokenB cannot be set"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "both tokenA and tokenB cannot be set"})
 	}
 	var mintFilter *string
 	var supportedTokenA bool
@@ -25,11 +25,11 @@ func (h Handler) GetTokens(c echo.Context, params Swagger.GetTokensParams) error
 	tokens, err := h.repo.GetTokensWithSupportedTokenPair(c.Request().Context(), mintFilter, supportedTokenA)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	for i := range tokens {
 		token := tokens[i]
-		res = append(res, Swagger.Token{
+		res = append(res, apispec.Token{
 			Decimals: int(token.Decimals),
 			Pubkey:   token.Pubkey,
 			Symbol:   token.Symbol,
