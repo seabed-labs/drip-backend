@@ -579,13 +579,16 @@ func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, sh
 //  p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
 //  p[i] = twap[i] for i = 0
 func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultPeriod) (decimal.Decimal, error) {
+	tokenA, tokenB, err := p.getTokensForVault(ctx, periodI.Vault.String())
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
 	twapI, err := decimal.NewFromString(periodI.Twap.String())
 	if err != nil {
 		return decimal.Decimal{}, fmt.Errorf("failed to get twapI decimal, err: %w", err)
 	}
-	twapI = twapI.Shift(-64)
 	if periodI.PeriodId == 0 {
-		return twapI, nil
+		return normalizePrice(twapI, decimal.NewFromInt(int64(tokenA.Decimals)), decimal.NewFromInt(int64(tokenB.Decimals))), nil
 	}
 	periodIPrecedingAddress, err := utils.GetVaultPeriodPDA(periodI.Vault.String(), int64(periodI.PeriodId-1))
 	if err != nil {
@@ -599,21 +602,21 @@ func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultP
 	if err != nil {
 		return decimal.Decimal{}, fmt.Errorf("failed to get twapIPreceeding decimal, err: %w", err)
 	}
-	twapIPreceding = twapIPreceding.Shift(-64)
 
 	periodIID, err := decimal.NewFromString(strconv.FormatUint(periodI.PeriodId, 10))
 	if err != nil {
 		return decimal.Decimal{}, fmt.Errorf("failed to periodIId decimal, err: %w", err)
 	}
 	periodIPrecedingID := periodIID.Sub(decimal.NewFromInt(1))
+	// average price from period I to period I-1
 	rawPrice := twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID))
-	tokenA, tokenB, err := p.getTokensForVault(ctx, periodI.Vault.String())
-	if err != nil {
-		return decimal.Decimal{}, err
-	}
-	return rawPrice.
-		Mul(decimal.NewFromInt(10).Pow(decimal.NewFromInt(int64(tokenA.Decimals)))).
-		DivRound(decimal.NewFromInt(10).Pow(decimal.NewFromInt(int64(tokenB.Decimals))), 128), nil
+	return normalizePrice(rawPrice, decimal.NewFromInt(int64(tokenA.Decimals)), decimal.NewFromInt(int64(tokenB.Decimals))), nil
+}
+
+func normalizePrice(rawPrice, tokenADecimals, tokenBDecimals decimal.Decimal) decimal.Decimal {
+	return rawPrice.Div(decimal.NewFromInt(2).Pow(decimal.NewFromInt(64))).
+		Mul(decimal.NewFromInt(10).Pow(tokenADecimals)).
+		DivRound(decimal.NewFromInt(10).Pow(tokenBDecimals), 64)
 }
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
