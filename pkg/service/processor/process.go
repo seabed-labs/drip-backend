@@ -576,7 +576,7 @@ func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, sh
 
 // getVaultPeriodPriceBOverA calculate and return normalized price of b over a
 // in the following, twap[x] is the normalized twap value (not the x64 value stored on chain)
-//	p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
+//  p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
 //  p[i] = twap[i] for i = 0
 func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultPeriod) (decimal.Decimal, error) {
 	twapI, err := decimal.NewFromString(periodI.Twap.String())
