@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/utils"
+
 	bin "github.com/gagliardetto/binary"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
@@ -585,7 +587,7 @@ func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultP
 	if periodI.PeriodId == 0 {
 		return twapI, nil
 	}
-	periodIPrecedingAddress, err := p.client.GetVaultPeriodPDA(periodI.Vault.String(), int64(periodI.PeriodId-1))
+	periodIPrecedingAddress, err := utils.GetVaultPeriodPDA(periodI.Vault.String(), int64(periodI.PeriodId-1))
 	if err != nil {
 		return decimal.Decimal{}, fmt.Errorf("failed to GetVaultPeriodPDA, err: %w", err)
 	}
