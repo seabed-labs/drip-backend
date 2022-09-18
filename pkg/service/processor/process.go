@@ -533,6 +533,13 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 }
 
 func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) error {
+	return p.upsertVaultPeriodByAddress(ctx, address, true)
+}
+
+// upsertVaultPeriodByAddress: this is potentially a recursive call
+// if shouldUpsertPrice is set to true, we will try and price the period, which depends on period[i-1]
+// if shouldUpsertPrice is set to false, we will not upsert the price to 0
+func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, shouldUpsertPrice bool) error {
 	var vaultPeriodAccount drip.VaultPeriod
 	if err := p.client.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
 		return err
@@ -544,26 +551,16 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 	if _, err := p.ensureVault(ctx, vaultPeriodAccount.Vault.String()); err != nil {
 		return err
 	}
-	// todo backfill from last vault period
-	for i := int64(0); i < int64(vaultPeriodAccount.PeriodId); i++ {
-		vaultPeriodAddress, err := p.client.GetVaultPeriodPDA(vaultPeriodAccount.Vault.String(), i)
+	var priceBOverA decimal.Decimal
+	if shouldUpsertPrice {
+		priceBOverA, err = p.getVaultPeriodPriceBOverA(ctx, vaultPeriodAccount)
 		if err != nil {
-			logrus.WithField("vaultPeriodID", i).WithError(err).Errorf("failed to GetVaultPeriodPDA")
-			continue
+			logrus.
+				WithField("vaultPeriodAddress", address).
+				WithField("vaultPeriodId", vaultPeriodAccount.PeriodId).
+				WithError(err).Errorf("failed to getVaultPeriodPriceBOverA")
+			return err
 		}
-		_, err = p.ensureVaultPeriod(ctx, vaultPeriodAddress)
-		if err != nil {
-			logrus.WithField("vaultPeriodID", i).WithError(err).Errorf("failed to ensureVaultPeriod")
-			continue
-		}
-	}
-	priceBOverA, err := p.getVaultPeriodPriceBOverA(ctx, vaultPeriodAccount)
-	if err != nil {
-		logrus.
-			WithField("vaultPeriodAddress", address).
-			WithField("vaultPeriodId", vaultPeriodAccount.PeriodId).
-			WithError(err).Errorf("failed to getVaultPeriodPriceBOverA")
-		return err
 	}
 	return p.repo.UpsertVaultPeriods(ctx, &model.VaultPeriod{
 		Pubkey:      address,
@@ -607,7 +604,14 @@ func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultP
 		return decimal.Decimal{}, fmt.Errorf("failed to periodIId decimal, err: %w", err)
 	}
 	periodIPrecedingID := periodIID.Sub(decimal.NewFromInt(1))
-	return twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID)), nil
+	rawPrice := twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID))
+	tokenA, tokenB, err := p.getTokensForVault(ctx, periodI.Vault.String())
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+	return rawPrice.
+		Mul(decimal.NewFromInt(10).Pow(decimal.NewFromInt(int64(tokenA.Decimals)))).
+		DivRound(decimal.NewFromInt(10).Pow(decimal.NewFromInt(int64(tokenB.Decimals))), 128), nil
 }
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
@@ -630,6 +634,29 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
 	})
+}
+
+// todo: this should prob live in the repo layer
+func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*model.Token, *model.Token, error) {
+	vault, err := p.ensureVault(ctx, vaultAddress)
+	if err != nil {
+		return nil, nil, err
+	}
+	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
+	if err != nil {
+		return nil, nil, err
+	}
+	tokens, err := p.repo.GetTokensByMints(ctx, []string{tokenPair.TokenA, tokenPair.TokenB})
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(tokens) != 2 {
+		return nil, nil, fmt.Errorf("invalid number of tokens return for GetTokensByMints for id: %s", vault.TokenPairID)
+	}
+	if tokens[0].Pubkey == tokenPair.TokenA {
+		return tokens[0], tokens[1], nil
+	}
+	return tokens[1], tokens[0], nil
 }
 
 func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account) bool {
@@ -714,11 +741,11 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 	return vault, err
 }
 
-// ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
+// ensureVaultPeriod - if vaultPeriod exists return it , else upsert vaultPeriods with a price of 0
 func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model.VaultPeriod, error) {
 	vaultPeriod, err := p.repo.GetVaultPeriodByAddress(ctx, address)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
-		if err := p.UpsertVaultPeriodByAddress(ctx, address); err != nil {
+		if err := p.upsertVaultPeriodByAddress(ctx, address, false); err != nil {
 			return nil, err
 		}
 		return p.repo.GetVaultPeriodByAddress(ctx, address)
