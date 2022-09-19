@@ -4,15 +4,20 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/repository"
+
 	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetV1Protoconfigs(c echo.Context) error {
+func (h Handler) GetV1Protoconfigs(c echo.Context, params apispec.GetV1ProtoconfigsParams) error {
 	res := apispec.ListProtoConfigs{}
 
-	protoConfigModels, err := h.repo.GetProtoConfigs(c.Request().Context())
+	protoConfigModels, err := h.repo.GetProtoConfigs(c.Request().Context(), repository.ProtoConfigParams{
+		TokenA: (*string)(params.TokenA),
+		TokenB: (*string)(params.TokenB),
+	})
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get proto configs")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
