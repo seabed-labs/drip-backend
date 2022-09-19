@@ -417,10 +417,10 @@ paths:
                 $ref: "#/components/schemas/errorResponse"
 
 
-  /tokenpairs:
+  /v1/vault/tokenpairs:
     get:
-      summary: Get Token Pairs
-      description: Get token pairs with filters.
+      summary: Get all Supported Token Pairs
+      description: Get supported token pairs with filters.
       parameters:
         - $ref: "#/components/parameters/tokenAQueryParam"
         - $ref: "#/components/parameters/tokenBQueryParam"
@@ -445,10 +445,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /tokens:
+  /v1/vault/tokens:
     get:
-      summary: Get Tokens
-      description: Get tokens with filters.
+      summary: Get all Supported Tokens
+      description: Get supported tokens with filters.
       parameters:
         - $ref: "#/components/parameters/tokenAQueryParam"
         - $ref: "#/components/parameters/tokenBQueryParam"

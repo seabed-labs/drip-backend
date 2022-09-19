@@ -286,18 +286,6 @@ type VaultQueryParam string
 // PostMintJSONBody defines parameters for PostMint.
 type PostMintJSONBody MintRequest
 
-// GetTokenpairsParams defines parameters for GetTokenpairs.
-type GetTokenpairsParams struct {
-	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
-	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
-}
-
-// GetTokensParams defines parameters for GetTokens.
-type GetTokensParams struct {
-	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
-	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
-}
-
 // GetV1AdminPositionsParams defines parameters for GetV1AdminPositions.
 type GetV1AdminPositionsParams struct {
 	Expand   *ExpandAdminPositionsQueryParam `json:"expand,omitempty"`
@@ -355,6 +343,18 @@ type GetV1PositionsParams struct {
 	IsClosed *IsClosedQueryParam      `json:"isClosed,omitempty"`
 	Offset   *OffsetQueryParam        `json:"offset,omitempty"`
 	Limit    *LimitQueryParam         `json:"limit,omitempty"`
+}
+
+// GetV1VaultTokenpairsParams defines parameters for GetV1VaultTokenpairs.
+type GetV1VaultTokenpairsParams struct {
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
+}
+
+// GetV1VaultTokensParams defines parameters for GetV1VaultTokens.
+type GetV1VaultTokensParams struct {
+	TokenA *TokenAQueryParam `json:"tokenA,omitempty"`
+	TokenB *TokenBQueryParam `json:"tokenB,omitempty"`
 }
 
 // GetV1VaultperiodsParams defines parameters for GetV1Vaultperiods.
@@ -461,12 +461,6 @@ type ClientInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetTokenpairs request
-	GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetTokens request
-	GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetV1AdminPositions request
 	GetV1AdminPositions(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -496,6 +490,12 @@ type ClientInterface interface {
 
 	// GetV1Protoconfigs request
 	GetV1Protoconfigs(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1VaultTokenpairs request
+	GetV1VaultTokenpairs(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetV1VaultTokens request
+	GetV1VaultTokens(ctx context.Context, params *GetV1VaultTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetV1Vaultperiods request
 	GetV1Vaultperiods(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -542,30 +542,6 @@ func (c *Client) PostMint(ctx context.Context, body PostMintJSONRequestBody, req
 
 func (c *Client) GetSwaggerJson(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSwaggerJsonRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetTokenpairs(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetTokenpairsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetTokens(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetTokensRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -696,6 +672,30 @@ func (c *Client) GetV1Protoconfigs(ctx context.Context, reqEditors ...RequestEdi
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetV1VaultTokenpairs(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1VaultTokenpairsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1VaultTokens(ctx context.Context, params *GetV1VaultTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1VaultTokensRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetV1Vaultperiods(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1VaultperiodsRequest(c.Server, params)
 	if err != nil {
@@ -805,132 +805,6 @@ func NewGetSwaggerJsonRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetTokenpairsRequest generates requests for GetTokenpairs
-func NewGetTokenpairsRequest(server string, params *GetTokenpairsParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/tokenpairs")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.TokenA != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.TokenB != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetTokensRequest generates requests for GetTokens
-func NewGetTokensRequest(server string, params *GetTokensParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/tokens")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryURL.Query()
-
-	if params.TokenA != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.TokenB != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -1623,6 +1497,132 @@ func NewGetV1ProtoconfigsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetV1VaultTokenpairsRequest generates requests for GetV1VaultTokenpairs
+func NewGetV1VaultTokenpairsRequest(server string, params *GetV1VaultTokenpairsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/vault/tokenpairs")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenA != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.TokenB != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetV1VaultTokensRequest generates requests for GetV1VaultTokens
+func NewGetV1VaultTokensRequest(server string, params *GetV1VaultTokensParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/vault/tokens")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.TokenA != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenA", runtime.ParamLocationQuery, *params.TokenA); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.TokenB != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "tokenB", runtime.ParamLocationQuery, *params.TokenB); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV1VaultperiodsRequest generates requests for GetV1Vaultperiods
 func NewGetV1VaultperiodsRequest(server string, params *GetV1VaultperiodsParams) (*http.Request, error) {
 	var err error
@@ -1847,12 +1847,6 @@ type ClientWithResponsesInterface interface {
 	// GetSwaggerJson request
 	GetSwaggerJsonWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetSwaggerJsonResponse, error)
 
-	// GetTokenpairs request
-	GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error)
-
-	// GetTokens request
-	GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error)
-
 	// GetV1AdminPositions request
 	GetV1AdminPositionsWithResponse(ctx context.Context, params *GetV1AdminPositionsParams, reqEditors ...RequestEditorFn) (*GetV1AdminPositionsResponse, error)
 
@@ -1882,6 +1876,12 @@ type ClientWithResponsesInterface interface {
 
 	// GetV1Protoconfigs request
 	GetV1ProtoconfigsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetV1ProtoconfigsResponse, error)
+
+	// GetV1VaultTokenpairs request
+	GetV1VaultTokenpairsWithResponse(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*GetV1VaultTokenpairsResponse, error)
+
+	// GetV1VaultTokens request
+	GetV1VaultTokensWithResponse(ctx context.Context, params *GetV1VaultTokensParams, reqEditors ...RequestEditorFn) (*GetV1VaultTokensResponse, error)
 
 	// GetV1Vaultperiods request
 	GetV1VaultperiodsWithResponse(ctx context.Context, params *GetV1VaultperiodsParams, reqEditors ...RequestEditorFn) (*GetV1VaultperiodsResponse, error)
@@ -1952,54 +1952,6 @@ func (r GetSwaggerJsonResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetSwaggerJsonResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetTokenpairsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListTokenPairs
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetTokenpairsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetTokenpairsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetTokensResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ListTokens
-	JSON400      *ErrorResponse
-	JSON500      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetTokensResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetTokensResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2247,6 +2199,54 @@ func (r GetV1ProtoconfigsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1VaultTokenpairsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListTokenPairs
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1VaultTokenpairsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1VaultTokenpairsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetV1VaultTokensResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListTokens
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1VaultTokensResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1VaultTokensResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1VaultperiodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2328,24 +2328,6 @@ func (c *ClientWithResponses) GetSwaggerJsonWithResponse(ctx context.Context, re
 		return nil, err
 	}
 	return ParseGetSwaggerJsonResponse(rsp)
-}
-
-// GetTokenpairsWithResponse request returning *GetTokenpairsResponse
-func (c *ClientWithResponses) GetTokenpairsWithResponse(ctx context.Context, params *GetTokenpairsParams, reqEditors ...RequestEditorFn) (*GetTokenpairsResponse, error) {
-	rsp, err := c.GetTokenpairs(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetTokenpairsResponse(rsp)
-}
-
-// GetTokensWithResponse request returning *GetTokensResponse
-func (c *ClientWithResponses) GetTokensWithResponse(ctx context.Context, params *GetTokensParams, reqEditors ...RequestEditorFn) (*GetTokensResponse, error) {
-	rsp, err := c.GetTokens(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetTokensResponse(rsp)
 }
 
 // GetV1AdminPositionsWithResponse request returning *GetV1AdminPositionsResponse
@@ -2436,6 +2418,24 @@ func (c *ClientWithResponses) GetV1ProtoconfigsWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetV1ProtoconfigsResponse(rsp)
+}
+
+// GetV1VaultTokenpairsWithResponse request returning *GetV1VaultTokenpairsResponse
+func (c *ClientWithResponses) GetV1VaultTokenpairsWithResponse(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*GetV1VaultTokenpairsResponse, error) {
+	rsp, err := c.GetV1VaultTokenpairs(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1VaultTokenpairsResponse(rsp)
+}
+
+// GetV1VaultTokensWithResponse request returning *GetV1VaultTokensResponse
+func (c *ClientWithResponses) GetV1VaultTokensWithResponse(ctx context.Context, params *GetV1VaultTokensParams, reqEditors ...RequestEditorFn) (*GetV1VaultTokensResponse, error) {
+	rsp, err := c.GetV1VaultTokens(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1VaultTokensResponse(rsp)
 }
 
 // GetV1VaultperiodsWithResponse request returning *GetV1VaultperiodsResponse
@@ -2542,86 +2542,6 @@ func ParseGetSwaggerJsonResponse(rsp *http.Response) (*GetSwaggerJsonResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetTokenpairsResponse parses an HTTP response from a GetTokenpairsWithResponse call
-func ParseGetTokenpairsResponse(rsp *http.Response) (*GetTokenpairsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetTokenpairsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListTokenPairs
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetTokensResponse parses an HTTP response from a GetTokensWithResponse call
-func ParseGetTokensResponse(rsp *http.Response) (*GetTokensResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetTokensResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ListTokens
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
 
 	}
 
@@ -3035,6 +2955,86 @@ func ParseGetV1ProtoconfigsResponse(rsp *http.Response) (*GetV1ProtoconfigsRespo
 	return response, nil
 }
 
+// ParseGetV1VaultTokenpairsResponse parses an HTTP response from a GetV1VaultTokenpairsWithResponse call
+func ParseGetV1VaultTokenpairsResponse(rsp *http.Response) (*GetV1VaultTokenpairsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1VaultTokenpairsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListTokenPairs
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetV1VaultTokensResponse parses an HTTP response from a GetV1VaultTokensWithResponse call
+func ParseGetV1VaultTokensResponse(rsp *http.Response) (*GetV1VaultTokensResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1VaultTokensResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListTokens
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1VaultperiodsResponse parses an HTTP response from a GetV1VaultperiodsWithResponse call
 func ParseGetV1VaultperiodsResponse(rsp *http.Response) (*GetV1VaultperiodsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3126,12 +3126,6 @@ type ServerInterface interface {
 	// Swagger spec
 	// (GET /swagger.json)
 	GetSwaggerJson(ctx echo.Context) error
-	// Get Token Pairs
-	// (GET /tokenpairs)
-	GetTokenpairs(ctx echo.Context, params GetTokenpairsParams) error
-	// Get Tokens
-	// (GET /tokens)
-	GetTokens(ctx echo.Context, params GetTokensParams) error
 	// Get All Positions
 	// (GET /v1/admin/positions)
 	GetV1AdminPositions(ctx echo.Context, params GetV1AdminPositionsParams) error
@@ -3162,6 +3156,12 @@ type ServerInterface interface {
 	// Get Proto Configs
 	// (GET /v1/protoconfigs)
 	GetV1Protoconfigs(ctx echo.Context) error
+	// Get all Supported Token Pairs
+	// (GET /v1/vault/tokenpairs)
+	GetV1VaultTokenpairs(ctx echo.Context, params GetV1VaultTokenpairsParams) error
+	// Get all Supported Tokens
+	// (GET /v1/vault/tokens)
+	GetV1VaultTokens(ctx echo.Context, params GetV1VaultTokensParams) error
 	// Get Vault Periods
 	// (GET /v1/vaultperiods)
 	GetV1Vaultperiods(ctx echo.Context, params GetV1VaultperiodsParams) error
@@ -3199,56 +3199,6 @@ func (w *ServerInterfaceWrapper) GetSwaggerJson(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.GetSwaggerJson(ctx)
-	return err
-}
-
-// GetTokenpairs converts echo context to params.
-func (w *ServerInterfaceWrapper) GetTokenpairs(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetTokenpairsParams
-	// ------------- Optional query parameter "tokenA" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
-	}
-
-	// ------------- Optional query parameter "tokenB" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetTokenpairs(ctx, params)
-	return err
-}
-
-// GetTokens converts echo context to params.
-func (w *ServerInterfaceWrapper) GetTokens(ctx echo.Context) error {
-	var err error
-
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetTokensParams
-	// ------------- Optional query parameter "tokenA" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
-	}
-
-	// ------------- Optional query parameter "tokenB" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
-	}
-
-	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetTokens(ctx, params)
 	return err
 }
 
@@ -3601,6 +3551,56 @@ func (w *ServerInterfaceWrapper) GetV1Protoconfigs(ctx echo.Context) error {
 	return err
 }
 
+// GetV1VaultTokenpairs converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1VaultTokenpairs(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1VaultTokenpairsParams
+	// ------------- Optional query parameter "tokenA" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
+	}
+
+	// ------------- Optional query parameter "tokenB" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1VaultTokenpairs(ctx, params)
+	return err
+}
+
+// GetV1VaultTokens converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1VaultTokens(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetV1VaultTokensParams
+	// ------------- Optional query parameter "tokenA" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenA", ctx.QueryParams(), &params.TokenA)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenA: %s", err))
+	}
+
+	// ------------- Optional query parameter "tokenB" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "tokenB", ctx.QueryParams(), &params.TokenB)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter tokenB: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1VaultTokens(ctx, params)
+	return err
+}
+
 // GetV1Vaultperiods converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1Vaultperiods(ctx echo.Context) error {
 	var err error
@@ -3703,8 +3703,6 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/", wrapper.Get)
 	router.POST(baseURL+"/mint", wrapper.PostMint)
 	router.GET(baseURL+"/swagger.json", wrapper.GetSwaggerJson)
-	router.GET(baseURL+"/tokenpairs", wrapper.GetTokenpairs)
-	router.GET(baseURL+"/tokens", wrapper.GetTokens)
 	router.GET(baseURL+"/v1/admin/positions", wrapper.GetV1AdminPositions)
 	router.GET(baseURL+"/v1/admin/summary/activewallets", wrapper.GetV1AdminSummaryActivewallets)
 	router.PUT(baseURL+"/v1/admin/vault/:pubkeyPath/enable", wrapper.PutV1AdminVaultPubkeyPathEnable)
@@ -3715,6 +3713,8 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
 	router.GET(baseURL+"/v1/positions", wrapper.GetV1Positions)
 	router.GET(baseURL+"/v1/protoconfigs", wrapper.GetV1Protoconfigs)
+	router.GET(baseURL+"/v1/vault/tokenpairs", wrapper.GetV1VaultTokenpairs)
+	router.GET(baseURL+"/v1/vault/tokens", wrapper.GetV1VaultTokens)
 	router.GET(baseURL+"/v1/vaultperiods", wrapper.GetV1Vaultperiods)
 	router.GET(baseURL+"/v1/vaults", wrapper.GetV1Vaults)
 
@@ -3723,68 +3723,68 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xceXPiupb/Ki7PVN2ZKjoJO/RfA4Slw9JsIQn3dU0JWwaBNySZrSvffcryArZlMOmk",
-	"75378s97t/HRT9LR7xydcyTlpygZmmnoUKdE/PpTNAEGGqQQs39BHcxUKA8siPd9+4v9I9LFr+La/klM",
-	"iTrQoPjVExRTIpEWUAO2HN2b9qeZYagQ6OLra0qEOxPockXWkN43CKLI0EkCcNYqgI0o1NwRWpr49U8R",
-	"qKqYEjfAUqmYEk1sUKNm6AqaiymRGiuoV7z/qIo/Ut7YCMVIn4uv/g8AY7APD3Vio77rOE/GNwGqBf1B",
-	"dpFOA79UI79UKpJkWGGx8I8YAmLh/Tj6MdHs54YxVyFr/U1uQSBDHJz6gv12nDsbxRdkzx7DtYUwlMWv",
-	"FFuQwwiv39eUiEhNNUgShnmSlyimopUz7splTJ8Y54boA1YTAlYTADJKXcbz+HweTkMJoJgYDwrpFM4h",
-	"ZliGohCYAMyRu4i21SFOAGaLXZjkicEEAWVIJIxM25OIX0WmVoEJCxKTFkxrpiJJWMH9jZji9h90FmdH",
-	"Yc1WcN8HdBGckAno4gTPl7rSGDzZK8nxli6egKomWegtk7uyE/qe5kff0/SYyvoQI0NOqF9HOAnse1jz",
-	"q/eR7RlAomgDnaViezM2TIgpguyrYzZRkJRoultrzXb6MbZ5XM8/fQMMtjvuE8ZsCSVqI8sYmTVD02xj",
-	"C4/nuIGx/W4HNFO1W1fH0152gR8yoxLJVfKoUlce63UIhnr38blUJ1YzrW/GYJFZaM8ib2/yt8Egbh5n",
-	"ska7u5d2ur6sPOSken21SM9mNWMrTbeHTqH1oi066yE4DAAP11mNAGRmldX3u96gW7amL+vlvDzoTp8L",
-	"s/meyM/Z7LqSaadH2UyzgfeVfCxk/8SdBNDL6xYubl+MYXtVaQzqD9ti9b6aq61LZJyrNZWKZGSlXqu4",
-	"wtX+Uyz6+DQECOI369NmBTc28rq7b+QWaGdYZa2A6/UBbSsjq7hrz1EZteFykH85j1/l4pfTW0p2KF3G",
-	"9yNrkRlbg/Zuunnao/RofD+omy9IqzSM7j5fmu2j+CHOebYQURl3ntzBncZMgXCJS12IsYGHkJiGTmCU",
-	"vezzeZ9pD9sR++HHhzAYzDKrVdXvivj1z5/if2KoiF/F/7g9hti3rnnferYmvqbCQzGDBDqLciLqO95L",
-	"jZjU0bISi/sGc07aEXp9jazAj1Ror25CKnh6E7aILoS6q1LhHlAghnU88bpPpmB3IOe068TDb1FxIKBO",
-	"oj+3QRWoQJfgEegY3V+3aO81gOobBhCfWrxlIAmY8k2nEOtAFdiaCg7cjchiX0IrJ7skCeRc58YS2Fsj",
-	"GZCLHMhTE0PzPUNMH/UIxd/Y0cTlO7eX71gCTwuEVdMwVIfMybsxoo3j+rleWeYF/ZxsDVeAhmyWgzsy",
-	"VUbg0RaY18KTSNu4XphYHyCcHJx6Tc5iXokXhzU5hrjJEU/j4nO4VyLysDSk0yFcW5BwAmCgheLbYyij",
-	"oZgPWz+YPr/Pa05M4ac/bl8//DHFxRF01wJkcbkDV84G5NlX4m3uJCKP7nUGBpIKg1Fciz6vytLmJY8I",
-	"gBOwRWDceMTdQqWVTc8zzzO8Lq8ng+HmYSJ3YsNxtr6VIHCj318M+91S3thss+Zja1UarPurTGm8LGZy",
-	"Uu9Zye4OcFmbzBot/TxwNRSVb7uDcb1Tn9eldnGSnW+n1Va+9LRpSsMp2YOnngln633DmjfbkAe89XQb",
-	"hC1s0+WXfHGS1laZWiFfz68b2WLh+VC1Jmm03Oxyi0x72uu11uvJ4mI4e+wjqKHgtFLeivzgbXqRkNVE",
-	"+jyeaRokBMxhAi67gj9OUkOONVl0YWBE90EtaUPpIVM80HGtodPZ42ZTnGT6o926U1YelHm63coph+no",
-	"ZdLPcdkiS8DxFN/kKlQMDO8hG0Kwk/Qdt60jOkYaJBRoZqhNIZ8p5orl0rm2UHbzCC2azqTv7u64bf1K",
-	"I6fAmBJ1S5tB/F2xnT8JZaS5LA/PZApA0j1GJm8gOe4onCrSuy4GJ+P9RUQ7bJcx2OpuMJhczSGOurM9",
-	"VvCPdIxbzLjeOcQ5w8PwgnKX64QTXDsNJmwhu7KDs3dV+hwD3VJBxFYLd7+HRk4Yb6tnjNF8DvHIxBDI",
-	"gT7yx7H4VScv5RhCBWIM1CubPbmrnbhhHMWcFQnqMX5Wsd3HTIdHEE7A+D4bPNmCkFtclTs9fUfmByoB",
-	"vBkP9o3nQueQrzVLZndSLg9NOD2UrWWdHnK8tbUBK/yd4FcDBxu6ASG3tPQwG0w6+qAnrdKr5gw/PjSW",
-	"9fFu1lCG9wtiWeX6GimNrvw42rfioM8Uxkpt2ig1n6papl/eypVdb7rQ0HQ9TOfHbb06qdbLz0R5KG3R",
-	"bmqehefXxbL5deFxk11kjVGhaUmFwaDU2g3up4fDbPJCd500HT49FReNNMp3zsJHa5ylYVmrNhq4kEkP",
-	"2/fTHlil2x0w6xD6WM9V4HJW6lSV+0WvT0D2oo8N9sPTGm+qkYULk8T5d8KQxslGIk5ShhLSgBrcT9Nc",
-	"Z/ABDo3stVk4Ohx97yTftPzhp0QkGfojVsXYyYfqH2eymgShihZhzC+qwj9UeDfEj1gvCmgoq0E6ogio",
-	"6MAOiBMum5vkeccfwNvsHfzYFexCCmRAQXTtJENVocSPrxWgIXXPTUqd46FLYTyTSnk43NOZ06oZpx+4",
-	"c+po/2thlSuANH5CETvEU9tJNHpXPDhWr+PQCFOn+oxdDVYqiWgbyaGzi8KsNLuD8pdiGZS/5MrFzJeZ",
-	"kodfckAqgVkZFhUZxMc67x8+hVLcLDoU9OlkiZpTKtcVpfJ4jyeLXCVf1be9wtRoLbN6vz+l7QdlcpHf",
-	"SD575+WoPz8fCDljCbCaKrAVH8i+gmVZS0c7gZ4E2YmTs5hEKJ3h5k/e3SJuOqYCQu+94D4RnBl3PvcB",
-	"ju7X1jV02hAqX/Q1Se4cZvVOZwf6UraxLjSWaLQsbumykuvWafqxNq3qrUWBbuOhOce1yroyfpn1pw8N",
-	"uS6/PK3qs8awqi826U61sKUdPVMut5ZdrZ6z1vH05g45vy62OnNls9NW60q7MAD1xgvuaZv25jCYLp8e",
-	"Dsvt0MpRA5VH22tOgisja73dbWq5xvPuoTkuP6+n3edZrX0/qILhuGLWF72M0ctOOtlKiYvLO9EIdlHD",
-	"E3nd1V5qsyopHZoZrG3lp7lGRhXcHs+6j5vsejM+lB4KL0+15BsQ75pa9DQzTIOwjuMmEDaOgOGl4sz8",
-	"aG+xLuNobCHHAXAyC3Qz8WTCH5DARrKmmL45BZN39dSRqoevGXeQKabT6EKwq3O6YjhBh06B5AxTA0i1",
-	"9WNIC/A/sgSUG2Ic75907Z8jgYJo57zCDEgrqMsCgXiDJHjzL72iqkKl/+0PIizABgpA+NYXMKBQYDfJ",
-	"BEMR0ncCdorzRDAhFgiUDF2++Rcr7yLK9MXAqw64PVGIidNr+ubu5o6FnCbUgYls3bKfUuw6FSPUrf0/",
-	"c6deHxxzH+lzAZjoRmQAmJHYZpTYdK8rOWVTBpO5u/MUBR3DBqapIok1ul0SJ1w63so5e7R0WpNl6xAc",
-	"2Pc2W2ViaRrAeztthkClC6G2gNKKfbr1gnbTIJyZ2V8FCgkVmJUTgRoCEGRIbNIIgBBDQoBC2fksAMfY",
-	"U4KBBRMQAmUB6cFvERX1DUJdz+KuX9WQ9++motNDG46G+pCyOcn2FAS6gAKhBoaRO2avH7iKgTOcmFVM",
-	"ibl37DF4/YTTZRXIgq+1lJj/nX37B+wjiDcQC3V2yyXI4y7jpUPJ/7qvT3r1sfC913n5b4fUZAvmc4hv",
-	"vJG5VhuxzZEj90BY3P9LC8zxiRds0e1cICaUnGGzCZneAS3X1TShO2+ByTlXVRSkUogJ1/2Mj5ipwH36",
-	"mErfUeQ2cnPyNZWszekFydcfH2g5oVPtT9tJYjs2hZjSBE9rHvUS0C4p4/7RbPtk2pVMc0m2Sd+y4w7/",
-	"ns15wgFVFXxJh3cmmCOdzYdLvUk6dEvqWhLGvjRJQMYLz4mSIEQeOCVoxHm0kqBV5G1Fgjbhtx0fbmyh",
-	"xfw0uqRGZ2dLp0ZAwZyw917ssPFH0Bjdpu4lxO3x6uJZw3Tk7MAZQ0Kga592+nS02XM2OnJ6rQQ6/Z3m",
-	"Gn4m8XGmFnp49PFmE7iD+mk111iNozvBUZ5Q8dh9yYYYmW5/Hh9bvbrOnKXWFseO6uzzrYyI/f9O5mlC",
-	"CSkIyoJXgQllypZnPM5NSb8zB+tq6wk/IEvA5XiD+0hSe9f4/4ZEzt2lf1/fj7p7EekA5b+lFY2N+dwl",
-	"8x9uMPOHoKhgLhi6AHxaXzaly/uPIxbIRgSgy4J3DV04VoPPbUPu3eC/KE6MvOVOFIVFH+wmbDZ+Q4rF",
-	"fXD8UbHs/4uolPdI4nOTvWaT9Y0uxhHIGJnsoYd/kVk6PoqI9Qq+sPvYmgiKgQUbK/DgJMYb3LtykS6v",
-	"dQ2RuPKj+ch9TvNJyKSEtNUn+PoTRltgCkctnhDSS2uCYZ52cv8mrszssMtLyI5xm39355cjt4/kWPCa",
-	"0SexkhKLHTb6b0pPFHjCKWKqTll1C8wkPs4p/dvSASdndzXqd/xrvWd83IjT49/exfHex30S8bpiP3tR",
-	"wPdsAYfG2HGFV/ObjgMNP13aP5VJnt4czwM3OqRCF+mU3PisSl7ftwjEFwuGb6/nx/6FmX/vwvpnTf16",
-	"7j/aTD1VnEt1bFAjydbNTrNO/hZULNlPAT+aB6fv2T+pkJQKTG2RrZRFRebx+XosE5w/HOFKhs81WRHr",
-	"3PH6JD057eitHvENJST+36v6p/jEwF8f+LSFpLbg/JG7o95ObOFNRdxznP+rLpVcbsP/i4C/h7OfbE3O",
-	"1pFlmgamUBaOqnv9vwAAAP//blkhQXZWAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
