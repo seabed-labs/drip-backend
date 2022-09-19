@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetTokenpairs(c echo.Context, params apispec.GetTokenpairsParams) error {
+func (h Handler) GetV1VaultTokenpairs(c echo.Context, params apispec.GetV1VaultTokenpairsParams) error {
 	res := apispec.ListTokenPairs{}
 
 	tokenPairs, err := h.repo.GetTokenPairs(c.Request().Context(), (*string)(params.TokenA), (*string)(params.TokenB))
