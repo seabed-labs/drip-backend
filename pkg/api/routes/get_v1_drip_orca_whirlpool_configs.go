@@ -11,13 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: Remove
-var mainnetOrcaWhirlpools = []string{
-	"HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ",
-	"ErSQss3jrqDpQoLEYvo6onzjsi6zm4Sjpoz1pjqz2o6D",
-	"E5KuHFnU2VuuZFKeghbTLazgxeni4dhQ7URE4oBtJju2",
-}
-
 func (h Handler) GetV1DripOrcawhirlpoolconfigs(c echo.Context, params apispec.GetV1DripOrcawhirlpoolconfigsParams) error {
 	res := apispec.ListOrcaWhirlpoolConfigs{}
 
@@ -114,31 +107,29 @@ func findOrcaWhirlpoolForVault(
 			Infof("skipping vault swap config, missing swap")
 	}
 
-	// TODO: Remove
-	if network == configs.MainnetNetwork {
-		var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
-		for _, orcaWhirlpool := range orcaWhirlpools {
-			for _, mainnetOrcaWhirlpool := range mainnetOrcaWhirlpools {
-				if orcaWhirlpool.Pubkey == mainnetOrcaWhirlpool {
-					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, orcaWhirlpool)
-				}
-			}
-		}
-		return elgibleOrcaWhirlpools[0], nil
-	}
-
 	var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
 	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
 	if !ok || len(vaultWhitelists) == 0 {
 		elgibleOrcaWhirlpools = orcaWhirlpools
 	} else {
-		for _, tokenSwap := range orcaWhirlpools {
+		for _, swap := range orcaWhirlpools {
 			for _, vaultWhitelist := range vaultWhitelists {
-				if vaultWhitelist.TokenSwapPubkey == tokenSwap.Pubkey {
-					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, tokenSwap)
+				if vaultWhitelist.TokenSwapPubkey == swap.Pubkey {
+					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, swap)
 				}
 			}
 		}
+	}
+
+	// TODO: Remove
+	if network == configs.MainnetNetwork {
+		var tempElgibleOrcaWhirlpools []*model.OrcaWhirlpool
+		for _, orcaWhirlpool := range elgibleOrcaWhirlpools {
+			if _, ok := mainnetOrcaWhirlpoolsMap[orcaWhirlpool.Pubkey]; ok {
+				tempElgibleOrcaWhirlpools = append(tempElgibleOrcaWhirlpools, orcaWhirlpool)
+			}
+		}
+		elgibleOrcaWhirlpools = tempElgibleOrcaWhirlpools
 	}
 
 	if len(elgibleOrcaWhirlpools) == 0 {
