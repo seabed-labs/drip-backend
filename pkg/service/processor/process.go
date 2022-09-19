@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
-
+	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
@@ -17,6 +17,7 @@ import (
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
+	"github.com/disgoorg/disgo/discord"
 	bin "github.com/gagliardetto/binary"
 	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -48,6 +49,8 @@ type impl struct {
 	repo                repository.Repository
 	solanaClient        solana.Solana
 	tokenRegistryClient tokenregistry.TokenRegistry
+	client              solana.Solana
+	discordAlertService alert.Service
 }
 
 func NewProcessor(
@@ -134,6 +137,21 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		return
 	}
 	log.Errorf("failed to decode drip account to known types")
+
+	// Build data and send new position alert on discord
+	var tokenAMint, tokenBMint = vault.TokenAMint, vault.TokenBMint
+	tokenA, tokenAErr := p.repo.GetTokenByMint(ctx, tokenAMint.String())
+	tokenB, tokenBErr := p.repo.GetTokenByMint(ctx, tokenBMint.String())
+	if tokenAErr == nil && tokenBErr == nil {
+		p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Build().Fields,
+			discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol},
+			discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol},
+			discord.EmbedField{Name: "Token A Deposit", Value: fmt.Sprint(position.DepositedTokenAAmount / uint64(tokenA.Decimals))},
+			discord.EmbedField{Name: "Granularity", Value: fmt.Sprint(protoConfig.Granularity)},
+			discord.EmbedField{Name: "Drip Amount", Value: fmt.Sprint(vault.DripAmount)},
+			discord.EmbedField{Name: "Wallet Address", Value: position.PositionAuthority.String()},
+		), alert.Success)
+	}
 }
 
 func (p impl) ProcessTokenSwapEvent(address string, data []byte) {
@@ -660,8 +678,9 @@ func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, sh
 
 // getVaultPeriodPriceBOverA calculate and return normalized price of b over a
 // in the following, twap[x] is the normalized twap value (not the x64 value stored on chain)
-//  p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
-//  p[i] = twap[i] for i = 0
+//
+//	p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
+//	p[i] = twap[i] for i = 0
 func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultPeriod) (decimal.Decimal, error) {
 	tokenA, tokenB, err := p.getTokensForVault(ctx, periodI.Vault.String())
 	if err != nil {

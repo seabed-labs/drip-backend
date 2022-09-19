@@ -16,7 +16,8 @@ import (
 
 type Service interface {
 	SendError(ctx context.Context, err error) error
-	SendInfo(ctx context.Context, message string) error
+	SendInfo(ctx context.Context, title string, message string, alertType AlertColor) error
+	SendAlertWithFields(ctx context.Context, title string, fields []discord.EmbedField, alertType AlertColor) error
 }
 
 func NewService(
@@ -41,7 +42,7 @@ func NewService(
 			}),
 		)
 		service.client = client
-		if err := service.SendInfo(context.Background(), "initialized alert service"); err != nil {
+		if err := service.SendInfo(context.Background(), "Info", "initialized alert service", Info); err != nil {
 			return nil, err
 		}
 	}
@@ -79,7 +80,17 @@ func (a serviceImpl) SendError(ctx context.Context, err error) error {
 	return nil
 }
 
-func (a serviceImpl) SendInfo(ctx context.Context, message string) error {
+type AlertColor int
+
+// string mapping
+const (
+	Success AlertColor = 1752220
+	Error              = 15158332
+	Warn               = 15844367
+	Info               = 0
+)
+
+func (a serviceImpl) SendInfo(ctx context.Context, title string, message string, alertType AlertColor) error {
 	if !a.enabled {
 		logrus.WithField("msg", message).Info("alert service disabled, skipping info alert")
 		return nil
@@ -89,9 +100,33 @@ func (a serviceImpl) SendInfo(ctx context.Context, message string) error {
 			SetAvatarURL("https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg").
 			SetEmbeds(
 				discord.Embed{
-					Title:       "Info",
+					Title:       title,
 					Description: message,
-					Color:       15258703,
+					Color:       int(alertType),
+				},
+			).
+			Build(),
+		// delay each request by 2 seconds
+		rest.WithDelay(2*time.Second),
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a serviceImpl) SendAlertWithFields(ctx context.Context, title string, embedFields []discord.EmbedField, alertType AlertColor) error {
+	if !a.enabled {
+		logrus.WithField("msg", title).Info("alert service disabled, skipping info alert")
+		return nil
+	}
+	if _, err := a.client.CreateMessage(
+		discord.NewWebhookMessageCreateBuilder().
+			SetAvatarURL("https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg").
+			SetEmbeds(
+				discord.Embed{
+					Title:  title,
+					Color:  int(alertType),
+					Fields: embedFields,
 				},
 			).
 			Build(),

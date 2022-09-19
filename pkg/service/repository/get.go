@@ -220,6 +220,13 @@ func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys 
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
+	stmt := d.repo.Token.
+		WithContext(ctx)
+	stmt = stmt.Where(d.repo.Token.Pubkey.Eq(mint))
+	return stmt.First()
+}
+
 func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
 	stmt := d.repo.Token.
 		WithContext(ctx)
