@@ -8,8 +8,20 @@ import (
 	"github.com/lib/pq"
 )
 
-func (d repositoryImpl) GetProtoConfigs(ctx context.Context) ([]*model.ProtoConfig, error) {
+func (d repositoryImpl) GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error) {
 	stmt := d.repo.ProtoConfig.WithContext(ctx)
+	if filterParams.TokenA != nil || filterParams.TokenB != nil {
+		stmt = stmt.
+			Join(d.repo.Vault, d.repo.Vault.ProtoConfig.EqCol(d.repo.ProtoConfig.Pubkey)).
+			Join(d.repo.TokenPair, d.repo.TokenPair.ID.EqCol(d.repo.Vault.TokenPairID)).
+			Where(d.repo.Vault.Enabled.Is(true))
+	}
+	if filterParams.TokenA != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*filterParams.TokenA))
+	}
+	if filterParams.TokenB != nil {
+		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*filterParams.TokenB))
+	}
 	return stmt.Find()
 }
 

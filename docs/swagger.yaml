@@ -207,7 +207,12 @@ paths:
   /v1/protoconfigs:
     get:
       summary: Get Proto Configs
-      description: Get all proto configs.
+      description: >
+        Get all supported proto configs. 
+        If token filters are supplied, then the proto configs for vaults with those tokens will be returned.
+      parameters:
+        - $ref: "#/components/parameters/tokenAQueryParam"
+        - $ref: "#/components/parameters/tokenBQueryParam"
       responses:
         "200":
           description: OK
