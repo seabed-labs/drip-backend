@@ -32,6 +32,7 @@ require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/dave/jennifer v1.5.1 // indirect
 	github.com/disgoorg/disgo v0.13.19 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.0 // indirect
