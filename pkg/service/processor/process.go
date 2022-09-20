@@ -93,7 +93,8 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 	// log.Infof("received drip account update")
 	defer func() {
 		if r := recover(); r != nil {
-			log.WithField("stack", debug.Stack()).Errorf("panic in processEvent")
+			debug.PrintStack()
+			log.WithField("stack", string(debug.Stack())).Errorf("panic in processEvent")
 		}
 	}()
 	var vaultPeriod drip.VaultPeriod
@@ -393,7 +394,7 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 		var iconURL *string = nil
 		// TODO: replace this call with GetTokenByMint after https://github.com/dcaf-labs/drip-backend/pull/45
 		existingTokens, err := p.repo.GetTokensByMints(ctx, []string{mintAddress})
-		if len(existingTokens) > 1 || err.Error() != repository.ErrRecordNotFound {
+		if len(existingTokens) > 1 || (err != nil && err.Error() != repository.ErrRecordNotFound) {
 			return fmt.Errorf("unexepcted error when fetching mints, err: %w", err)
 		}
 		if len(existingTokens) == 1 {
