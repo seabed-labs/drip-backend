@@ -116,20 +116,16 @@ func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairI
 }
 
 func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model.Token, error) {
-	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
+	stmt := d.repo.Token.WithContext(ctx).
+		Distinct(d.repo.Token.ALL).
+		Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
+		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+		Where(d.repo.Vault.Enabled.Is(true))
 	if tokenMint != nil {
 		if supportedTokenA {
-			stmt = stmt.
-				Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
-				Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-				Where(d.repo.Vault.Enabled.Is(true)).
-				Where(d.repo.TokenPair.TokenA.Eq(*tokenMint))
+			stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenMint))
 		} else {
-			stmt = stmt.
-				Join(d.repo.TokenPair, d.repo.TokenPair.TokenA.EqCol(d.repo.Token.Pubkey)).
-				Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-				Where(d.repo.Vault.Enabled.Is(true)).
-				Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
+			stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
 		}
 	}
 	return stmt.Find()
