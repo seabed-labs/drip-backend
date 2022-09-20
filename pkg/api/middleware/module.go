@@ -26,8 +26,8 @@ func NewHandler(
 	config *configs.AppConfig,
 	repo repository.Repository,
 ) *Handler {
-	// 10 requests / second
-	rate, err := limiter.NewRateFromFormatted("10-S")
+	// 20 requests / second
+	rate, err := limiter.NewRateFromFormatted("20-S")
 	if err != nil {
 		panic(err)
 	}
