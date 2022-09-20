@@ -22,6 +22,8 @@ func (d repositoryImpl) GetProtoConfigs(ctx context.Context, filterParams ProtoC
 	if filterParams.TokenB != nil {
 		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*filterParams.TokenB))
 	}
+	// default ascending
+	stmt = stmt.Order(d.repo.ProtoConfig.Granularity)
 	return stmt.Find()
 }
 
@@ -128,6 +130,7 @@ func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tok
 			stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
 		}
 	}
+	stmt = stmt.Order(d.repo.Token.Symbol.Desc())
 	return stmt.Find()
 }
 
@@ -277,7 +280,7 @@ func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tok
 	if protoConfig != nil {
 		stmt = stmt.Where(d.repo.Vault.ProtoConfig.Eq(*protoConfig))
 	}
-	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true))
+	stmt = stmt.Where(d.repo.Vault.Enabled.Is(true)).Order(d.repo.Vault.Pubkey)
 	return stmt.Find()
 }
 
