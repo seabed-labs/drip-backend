@@ -388,9 +388,23 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 		if err.Error() != solana.ErrNotFound {
 			logrus.WithError(err).WithField("mint", mintAddress).Error("failed to GetTokenMetadataAccount for mint")
 		}
+		// In case we manually added a token symbol, try and fetch that
+		var symbol *string = nil
+		var iconURL *string = nil
+		// TODO: replace this call with GetTokenByMint after https://github.com/dcaf-labs/drip-backend/pull/45
+		existingTokens, err := p.repo.GetTokensByMints(ctx, []string{mintAddress})
+		if len(existingTokens) > 1 || err.Error() != repository.ErrRecordNotFound {
+			return fmt.Errorf("unexepcted error when fetching mints, err: %w", err)
+		}
+		if len(existingTokens) == 1 {
+			symbol = existingTokens[0].Symbol
+			iconURL = existingTokens[0].IconURL
+		}
 		tokenModel := model.Token{
 			Pubkey:   mintAddress,
+			Symbol:   symbol,
 			Decimals: int16(tokenMint.Decimals),
+			IconURL:  iconURL,
 		}
 		return p.repo.UpsertTokens(ctx, &tokenModel)
 	}
