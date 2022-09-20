@@ -29,9 +29,10 @@ func newProtoConfig(db *gorm.DB) protoConfig {
 	_protoConfig.ALL = field.NewField(tableName, "*")
 	_protoConfig.Pubkey = field.NewString(tableName, "pubkey")
 	_protoConfig.Granularity = field.NewUint64(tableName, "granularity")
-	_protoConfig.TriggerDcaSpread = field.NewInt16(tableName, "trigger_dca_spread")
-	_protoConfig.BaseWithdrawalSpread = field.NewInt16(tableName, "base_withdrawal_spread")
+	_protoConfig.TokenADripTriggerSpread = field.NewInt16(tableName, "token_a_drip_trigger_spread")
+	_protoConfig.TokenBWithdrawalSpread = field.NewInt16(tableName, "token_b_withdrawal_spread")
 	_protoConfig.Admin = field.NewString(tableName, "admin")
+	_protoConfig.TokenBReferralSpread = field.NewInt32(tableName, "token_b_referral_spread")
 
 	_protoConfig.fillFieldMap()
 
@@ -41,12 +42,13 @@ func newProtoConfig(db *gorm.DB) protoConfig {
 type protoConfig struct {
 	protoConfigDo protoConfigDo
 
-	ALL                  field.Field
-	Pubkey               field.String
-	Granularity          field.Uint64
-	TriggerDcaSpread     field.Int16
-	BaseWithdrawalSpread field.Int16
-	Admin                field.String
+	ALL                     field.Field
+	Pubkey                  field.String
+	Granularity             field.Uint64
+	TokenADripTriggerSpread field.Int16
+	TokenBWithdrawalSpread  field.Int16
+	Admin                   field.String
+	TokenBReferralSpread    field.Int32
 
 	fieldMap map[string]field.Expr
 }
@@ -65,9 +67,10 @@ func (p *protoConfig) updateTableName(table string) *protoConfig {
 	p.ALL = field.NewField(table, "*")
 	p.Pubkey = field.NewString(table, "pubkey")
 	p.Granularity = field.NewUint64(table, "granularity")
-	p.TriggerDcaSpread = field.NewInt16(table, "trigger_dca_spread")
-	p.BaseWithdrawalSpread = field.NewInt16(table, "base_withdrawal_spread")
+	p.TokenADripTriggerSpread = field.NewInt16(table, "token_a_drip_trigger_spread")
+	p.TokenBWithdrawalSpread = field.NewInt16(table, "token_b_withdrawal_spread")
 	p.Admin = field.NewString(table, "admin")
+	p.TokenBReferralSpread = field.NewInt32(table, "token_b_referral_spread")
 
 	p.fillFieldMap()
 
@@ -92,12 +95,13 @@ func (p *protoConfig) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (p *protoConfig) fillFieldMap() {
-	p.fieldMap = make(map[string]field.Expr, 5)
+	p.fieldMap = make(map[string]field.Expr, 6)
 	p.fieldMap["pubkey"] = p.Pubkey
 	p.fieldMap["granularity"] = p.Granularity
-	p.fieldMap["trigger_dca_spread"] = p.TriggerDcaSpread
-	p.fieldMap["base_withdrawal_spread"] = p.BaseWithdrawalSpread
+	p.fieldMap["token_a_drip_trigger_spread"] = p.TokenADripTriggerSpread
+	p.fieldMap["token_b_withdrawal_spread"] = p.TokenBWithdrawalSpread
 	p.fieldMap["admin"] = p.Admin
+	p.fieldMap["token_b_referral_spread"] = p.TokenBReferralSpread
 }
 
 func (p protoConfig) clone(db *gorm.DB) protoConfig {

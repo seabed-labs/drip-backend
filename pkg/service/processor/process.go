@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/utils"
+
 	bin "github.com/gagliardetto/binary"
 
 	"github.com/dcaf-labs/drip/pkg/clients/solana"
@@ -386,9 +388,23 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 		if err.Error() != solana.ErrNotFound {
 			logrus.WithError(err).WithField("mint", mintAddress).Error("failed to GetTokenMetadataAccount for mint")
 		}
+		// In case we manually added a token symbol, try and fetch that
+		var symbol *string = nil
+		var iconURL *string = nil
+		// TODO: replace this call with GetTokenByMint after https://github.com/dcaf-labs/drip-backend/pull/45
+		existingTokens, err := p.repo.GetTokensByMints(ctx, []string{mintAddress})
+		if len(existingTokens) > 1 || err.Error() != repository.ErrRecordNotFound {
+			return fmt.Errorf("unexepcted error when fetching mints, err: %w", err)
+		}
+		if len(existingTokens) == 1 {
+			symbol = existingTokens[0].Symbol
+			iconURL = existingTokens[0].IconURL
+		}
 		tokenModel := model.Token{
 			Pubkey:   mintAddress,
+			Symbol:   symbol,
 			Decimals: int16(tokenMint.Decimals),
+			IconURL:  iconURL,
 		}
 		return p.repo.UpsertTokens(ctx, &tokenModel)
 	}
@@ -407,11 +423,12 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 		return err
 	}
 	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
-		Pubkey:               address,
-		Admin:                protoConfig.Admin.String(),
-		Granularity:          protoConfig.Granularity,
-		TriggerDcaSpread:     protoConfig.TokenADripTriggerSpread,
-		BaseWithdrawalSpread: protoConfig.TokenBWithdrawalSpread,
+		Pubkey:                  address,
+		Admin:                   protoConfig.Admin.String(),
+		Granularity:             protoConfig.Granularity,
+		TokenADripTriggerSpread: protoConfig.TokenADripTriggerSpread,
+		TokenBWithdrawalSpread:  protoConfig.TokenBWithdrawalSpread,
+		TokenBReferralSpread:    protoConfig.TokenBReferralSpread,
 	})
 }
 
@@ -532,6 +549,13 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 }
 
 func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) error {
+	return p.upsertVaultPeriodByAddress(ctx, address, true)
+}
+
+// upsertVaultPeriodByAddress: this is potentially a recursive call
+// if shouldUpsertPrice is set to true, we will try and price period[i], which will try to ensure period[i-1]
+// if shouldUpsertPrice is set to false, we will not calculate a price and will upsert it to 0
+func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, shouldUpsertPrice bool) error {
 	var vaultPeriodAccount drip.VaultPeriod
 	if err := p.client.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
 		return err
@@ -543,13 +567,70 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 	if _, err := p.ensureVault(ctx, vaultPeriodAccount.Vault.String()); err != nil {
 		return err
 	}
+	var priceBOverA decimal.Decimal
+	if shouldUpsertPrice {
+		priceBOverA, err = p.getVaultPeriodPriceBOverA(ctx, vaultPeriodAccount)
+		if err != nil {
+			logrus.
+				WithField("vaultPeriodAddress", address).
+				WithField("vaultPeriodId", vaultPeriodAccount.PeriodId).
+				WithError(err).Errorf("failed to getVaultPeriodPriceBOverA")
+			return err
+		}
+	}
 	return p.repo.UpsertVaultPeriods(ctx, &model.VaultPeriod{
-		Pubkey:   address,
-		Vault:    vaultPeriodAccount.Vault.String(),
-		PeriodID: vaultPeriodAccount.PeriodId,
-		Twap:     twap,
-		Dar:      vaultPeriodAccount.Dar,
+		Pubkey:      address,
+		Vault:       vaultPeriodAccount.Vault.String(),
+		PeriodID:    vaultPeriodAccount.PeriodId,
+		Twap:        twap,
+		Dar:         vaultPeriodAccount.Dar,
+		PriceBOverA: priceBOverA,
 	})
+}
+
+// getVaultPeriodPriceBOverA calculate and return normalized price of b over a
+// in the following, twap[x] is the normalized twap value (not the x64 value stored on chain)
+//  p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
+//  p[i] = twap[i] for i = 0
+func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultPeriod) (decimal.Decimal, error) {
+	tokenA, tokenB, err := p.getTokensForVault(ctx, periodI.Vault.String())
+	if err != nil {
+		return decimal.Decimal{}, err
+	}
+	twapI, err := decimal.NewFromString(periodI.Twap.String())
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to get twapI decimal, err: %w", err)
+	}
+	if periodI.PeriodId == 0 {
+		return normalizePrice(twapI, decimal.NewFromInt(int64(tokenA.Decimals)), decimal.NewFromInt(int64(tokenB.Decimals))), nil
+	}
+	periodIPrecedingAddress, err := utils.GetVaultPeriodPDA(periodI.Vault.String(), int64(periodI.PeriodId-1))
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to GetVaultPeriodPDA, err: %w", err)
+	}
+	periodIPPreceding, err := p.ensureVaultPeriod(ctx, periodIPrecedingAddress)
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to ensureVaultPeriod, err: %w", err)
+	}
+	twapIPreceding, err := decimal.NewFromString(periodIPPreceding.Twap.String())
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to get twapIPreceeding decimal, err: %w", err)
+	}
+
+	periodIID, err := decimal.NewFromString(strconv.FormatUint(periodI.PeriodId, 10))
+	if err != nil {
+		return decimal.Decimal{}, fmt.Errorf("failed to periodIId decimal, err: %w", err)
+	}
+	periodIPrecedingID := periodIID.Sub(decimal.NewFromInt(1))
+	// average price from period I to period I-1
+	rawPrice := twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID))
+	return normalizePrice(rawPrice, decimal.NewFromInt(int64(tokenA.Decimals)), decimal.NewFromInt(int64(tokenB.Decimals))), nil
+}
+
+func normalizePrice(rawPrice, tokenADecimals, tokenBDecimals decimal.Decimal) decimal.Decimal {
+	return rawPrice.Div(decimal.NewFromInt(2).Pow(decimal.NewFromInt(64))).
+		Mul(decimal.NewFromInt(10).Pow(tokenADecimals)).
+		DivRound(decimal.NewFromInt(10).Pow(tokenBDecimals), 64)
 }
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
@@ -572,6 +653,29 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
 	})
+}
+
+// todo: this should prob live in the repo layer
+func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*model.Token, *model.Token, error) {
+	vault, err := p.ensureVault(ctx, vaultAddress)
+	if err != nil {
+		return nil, nil, err
+	}
+	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
+	if err != nil {
+		return nil, nil, err
+	}
+	tokens, err := p.repo.GetTokensByMints(ctx, []string{tokenPair.TokenA, tokenPair.TokenB})
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(tokens) != 2 {
+		return nil, nil, fmt.Errorf("invalid number of tokens return for GetTokensByMints for id: %s", vault.TokenPairID)
+	}
+	if tokens[0].Pubkey == tokenPair.TokenA {
+		return tokens[0], tokens[1], nil
+	}
+	return tokens[1], tokens[0], nil
 }
 
 func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account) bool {
@@ -654,6 +758,18 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 		return p.repo.AdminGetVaultByAddress(ctx, address)
 	}
 	return vault, err
+}
+
+// ensureVaultPeriod - if vaultPeriod exists return it , else upsert vaultPeriods with a price of 0
+func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model.VaultPeriod, error) {
+	vaultPeriod, err := p.repo.GetVaultPeriodByAddress(ctx, address)
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
+		if err := p.upsertVaultPeriodByAddress(ctx, address, false); err != nil {
+			return nil, err
+		}
+		return p.repo.GetVaultPeriodByAddress(ctx, address)
+	}
+	return vaultPeriod, err
 }
 
 func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {

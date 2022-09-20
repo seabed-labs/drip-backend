@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
+	apispec "github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -165,10 +165,12 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 				}
 				// TODO(Mocha): unsafe cast
 				res[i].ProtoConfigValue = &apispec.ProtoConfig{
-					BaseWithdrawalSpread: int(protoConfig.BaseWithdrawalSpread),
-					Granularity:          strconv.FormatUint(protoConfig.Granularity, 10),
-					Pubkey:               protoConfig.Pubkey,
-					TriggerDcaSpread:     int(protoConfig.TriggerDcaSpread),
+					Pubkey:                  protoConfig.Pubkey,
+					Admin:                   protoConfig.Admin,
+					Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
+					TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
+					TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
+					TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
 				}
 			}
 		case string(tokenAMintValue):
@@ -266,13 +268,4 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	}
 
 	return c.JSON(http.StatusOK, res)
-}
-
-func hasValue(params apispec.ExpandAdminVaultsQueryParam, value string) bool {
-	for _, v := range params {
-		if v == value {
-			return true
-		}
-	}
-	return false
 }

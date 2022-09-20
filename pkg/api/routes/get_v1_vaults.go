@@ -4,15 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error {
-	res := Swagger.ListVaults{}
+func (h Handler) GetV1Vaults(c echo.Context, params apispec.GetV1VaultsParams) error {
+	res := apispec.ListVaults{}
 
 	vaultModels, err := h.repo.GetVaultsWithFilter(
 		c.Request().Context(),
@@ -22,7 +20,7 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 	)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vaults")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 
 	for i := range vaultModels {
@@ -31,10 +29,10 @@ func (h Handler) GetVaults(c echo.Context, params Swagger.GetVaultsParams) error
 		tokenPair, err := h.repo.GetTokenPairByID(c.Request().Context(), vault.TokenPairID)
 		if err != nil {
 			logrus.WithError(err).WithField("tokenPairID", tokenPair.ID).Errorf("could not find token pair")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 		}
 		res = append(res,
-			Swagger.Vault{
+			apispec.Vault{
 				DcaActivationTimestamp: strconv.FormatInt(vault.DcaActivationTimestamp.Unix(), 10),
 				DripAmount:             strconv.FormatUint(vault.DripAmount, 10),
 				LastDcaPeriod:          strconv.FormatUint(vault.LastDcaPeriod, 10),

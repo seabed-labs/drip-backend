@@ -65,6 +65,26 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaults(ctx, vaultFilterParams, pag
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaults", reflect.TypeOf((*MockRepository)(nil).AdminGetVaults), ctx, vaultFilterParams, paginationParams)
 }
 
+// AdminGetVaultsByAddresses mocks base method.
+func (m *MockRepository) AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range addresses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AdminGetVaultsByAddresses", varargs...)
+	ret0, _ := ret[0].([]*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaultsByAddresses indicates an expected call of AdminGetVaultsByAddresses.
+func (mr *MockRepositoryMockRecorder) AdminGetVaultsByAddresses(ctx interface{}, addresses ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, addresses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByAddresses", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByAddresses), varargs...)
+}
+
 // AdminSetVaultEnabled mocks base method.
 func (m *MockRepository) AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error) {
 	m.ctrl.T.Helper()
@@ -156,18 +176,18 @@ func (mr *MockRepositoryMockRecorder) GetPositionByNFTMint(ctx, nftMint interfac
 }
 
 // GetProtoConfigs mocks base method.
-func (m *MockRepository) GetProtoConfigs(arg0 context.Context, arg1, arg2 *string) ([]*model.ProtoConfig, error) {
+func (m *MockRepository) GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProtoConfigs", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "GetProtoConfigs", ctx, filterParams)
 	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProtoConfigs indicates an expected call of GetProtoConfigs.
-func (mr *MockRepositoryMockRecorder) GetProtoConfigs(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetProtoConfigs(ctx, filterParams interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigs", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigs), ctx, filterParams)
 }
 
 // GetProtoConfigsByAddresses mocks base method.
@@ -348,6 +368,21 @@ func (m *MockRepository) GetVaultByAddress(arg0 context.Context, arg1 string) (*
 func (mr *MockRepositoryMockRecorder) GetVaultByAddress(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultByAddress), arg0, arg1)
+}
+
+// GetVaultPeriodByAddress mocks base method.
+func (m *MockRepository) GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVaultPeriodByAddress", ctx, address)
+	ret0, _ := ret[0].(*model.VaultPeriod)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVaultPeriodByAddress indicates an expected call of GetVaultPeriodByAddress.
+func (mr *MockRepositoryMockRecorder) GetVaultPeriodByAddress(ctx, address interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultPeriodByAddress", reflect.TypeOf((*MockRepository)(nil).GetVaultPeriodByAddress), ctx, address)
 }
 
 // GetVaultPeriods mocks base method.

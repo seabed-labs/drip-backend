@@ -4,17 +4,11 @@ import (
 	"errors"
 	"net/http"
 
-	apispec "github.com/dcaf-labs/drip/pkg/swagger"
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
-
-func (h Handler) PutAdminVaultPubkeyPathEnable(
-	c echo.Context, pubkeyPath apispec.PubkeyPathParam, params apispec.PutAdminVaultPubkeyPathEnableParams,
-) error {
-	return h.PutV1AdminVaultPubkeyPathEnable(c, pubkeyPath, apispec.PutV1AdminVaultPubkeyPathEnableParams(params))
-}
 
 func (h Handler) PutV1AdminVaultPubkeyPathEnable(
 	c echo.Context,

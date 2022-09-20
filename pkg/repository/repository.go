@@ -28,9 +28,10 @@ type Repository interface {
 
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 
-	GetProtoConfigs(context.Context, *string, *string) ([]*model.ProtoConfig, error)
+	GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error)
 	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
+	GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error)
 	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
 
 	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
@@ -56,6 +57,7 @@ type Repository interface {
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
+	AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error)
 
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 }
@@ -79,6 +81,11 @@ type TokenSwapWithBalance struct {
 	model.TokenSwap
 	TokenABalanceAmount uint64 `json:"tokenAccountABalanceAmount" db:"token_account_a_balance_amount"`
 	TokenBBalanceAmount uint64 `json:"tokenAccountBBalanceAmount" db:"token_account_b_balance_amount"`
+}
+
+type ProtoConfigParams struct {
+	TokenA *string
+	TokenB *string
 }
 
 type GetActiveWalletParams struct {

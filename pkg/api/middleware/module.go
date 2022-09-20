@@ -6,15 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"google.golang.org/api/idtoken"
-
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
 	"github.com/dcaf-labs/drip/pkg/repository"
-	swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
+	"google.golang.org/api/idtoken"
 )
 
 type Handler struct {
@@ -27,8 +26,8 @@ func NewHandler(
 	config *configs.AppConfig,
 	repo repository.Repository,
 ) *Handler {
-	// 10 requests / second
-	rate, err := limiter.NewRateFromFormatted("10-S")
+	// 20 requests / second
+	rate, err := limiter.NewRateFromFormatted("20-S")
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +49,7 @@ func (h *Handler) ValidateAccessToken(next echo.HandlerFunc) echo.HandlerFunc {
 		accessToken := c.Request().Header.Get("token-id")
 		payload, err := idtoken.Validate(context.Background(), accessToken, h.googleClientID)
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, swagger.ErrorResponse{Error: "invalid token-id"})
+			return c.JSON(http.StatusUnauthorized, apispec.ErrorResponse{Error: "invalid token-id"})
 		}
 		logrus.
 			WithField("email", payload.Claims["email"]).
@@ -84,7 +83,7 @@ func (h *Handler) RateLimit(next echo.HandlerFunc) echo.HandlerFunc {
 
 		if limiterCtx.Reached {
 			log.Info("Too Many Requests from")
-			return c.JSON(http.StatusTooManyRequests, swagger.ErrorResponse{
+			return c.JSON(http.StatusTooManyRequests, apispec.ErrorResponse{
 				Error: "Too Many Requests on " + c.Request().URL.String(),
 			})
 		}

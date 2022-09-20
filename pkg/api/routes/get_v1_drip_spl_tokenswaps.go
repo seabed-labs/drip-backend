@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/repository"
 	"github.com/dcaf-labs/drip/pkg/repository/model"
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltokenswapconfigsParams) error {
-	res := Swagger.ListSplTokenSwapConfigs{}
+func (h Handler) GetV1DripSpltokenswapconfigs(c echo.Context, params apispec.GetV1DripSpltokenswapconfigsParams) error {
+	res := apispec.ListSplTokenSwapConfigs{}
 
 	var vaults []*model.Vault
 	if params.Vault != nil {
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vault by address")
-			return c.JSON(http.StatusBadRequest, Swagger.ErrorResponse{Error: "invalid vault address"})
+			return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: "invalid vault address"})
 		}
 		vaults = []*model.Vault{vault}
 	} else {
@@ -27,7 +27,7 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), nil, nil, nil)
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vaults")
-			return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "failed to get vaults"})
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults"})
 		}
 	}
 	var tokenPairIDS []string
@@ -40,7 +40,7 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get vault whitelists")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
 	for i := range vaultWhitelists {
@@ -53,7 +53,7 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 	tokenSwaps, err := h.repo.GetTokenSwapsWithBalance(c.Request().Context(), tokenPairIDS)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get token swaps")
-		return c.JSON(http.StatusInternalServerError, Swagger.ErrorResponse{Error: "internal api error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 
 	// TODO(Mocha): Return token swap with the most liquidity
@@ -73,14 +73,14 @@ func (h Handler) GetSpltokenswapconfigs(c echo.Context, params Swagger.GetSpltok
 			logrus.WithError(err).Errorf("failed to get token swap for vault")
 			continue
 		}
-		res = append(res, Swagger.SplTokenSwapConfig{
+		res = append(res, apispec.SplTokenSwapConfig{
 			Swap:              tokenSwap.Pubkey,
 			SwapAuthority:     tokenSwap.Authority,
 			SwapFeeAccount:    tokenSwap.FeeAccount,
 			SwapTokenAAccount: tokenSwap.TokenAAccount,
 			SwapTokenBAccount: tokenSwap.TokenBAccount,
 			SwapTokenMint:     tokenSwap.Mint,
-			DripCommon: Swagger.DripCommon{
+			DripCommon: apispec.DripCommon{
 				TokenAMint:         tokenSwap.TokenAMint,
 				TokenBMint:         tokenSwap.TokenBMint,
 				Vault:              vault.Pubkey,

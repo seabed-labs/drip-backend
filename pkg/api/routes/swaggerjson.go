@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/apispec"
 	"github.com/dcaf-labs/drip/pkg/configs"
-
-	"github.com/labstack/echo/v4"
-
-	Swagger "github.com/dcaf-labs/drip/pkg/swagger"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/labstack/echo/v4"
 )
 
 func (h Handler) GetSwaggerJson(
 	c echo.Context,
 ) error {
-	swaggerSpec, err := Swagger.GetSwagger()
+	swaggerSpec, err := apispec.GetSwagger()
 	if err != nil {
 		return err
 	}

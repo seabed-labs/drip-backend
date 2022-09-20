@@ -380,6 +380,8 @@ github.com/d2g/dhcp4client v1.0.0/go.mod h1:j0hNfjhrt2SxUOw55nL0ATM/z4Yt3t2Kd1mW
 github.com/d2g/dhcp4server v0.0.0-20181031114812-7d4a0a7f59a5/go.mod h1:Eo87+Kg/IX2hfWJfwxMzLyuSZyxSoAug2nGa1G2QAi8=
 github.com/d2g/hardwareaddr v0.0.0-20190221164911-e7d9fbe030e4/go.mod h1:bMl4RjIciD2oAxI7DmWRx6gbeqrkoLqv3MV0vzNad+I=
 github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CLnGVd57E=
+github.com/dave/jennifer v1.5.1 h1:AI8gaM02nCYRw6/WTH0W+S6UNck9YqPZ05xoIxQtuoE=
+github.com/dave/jennifer v1.5.1/go.mod h1:AxTG893FiZKqxy3FP1kL80VMshSMuz2G+EgvszgGRnk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -395,6 +397,8 @@ github.com/dcaf-labs/solana-go-clients v0.0.0-20220911015427-d2762cb3f3dd h1:yla
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220911015427-d2762cb3f3dd/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220913232444-7b6f34376bb9 h1:JxSlFb+A54Ma3mEXSPXdUDTwF6gEU7cTW8m2velu3jE=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220913232444-7b6f34376bb9/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220916003147-7942e13b2f72 h1:jApyMzKU4tg/RE5S6l/FJ3PaGj3/s9b+L3R41H0bx64=
+github.com/dcaf-labs/solana-go-clients v0.0.0-20220916003147-7942e13b2f72/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/decred/dcrd/crypto/blake256 v1.0.0/go.mod h1:sQl2p6Y26YV+ZOcSTP6thNdn47hh8kt6rqSlvmrXFAc=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d/go.mod h1:tmAIfUFEirG/Y8jhZ9M+h36obRZAk/1fcSpXwAVlfqE=
 github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1/go.mod h1:hyedUtir6IdtD/7lIxGeCxkaw7y45JueMRL4DIyJDKs=

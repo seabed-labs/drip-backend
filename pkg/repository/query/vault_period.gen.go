@@ -32,6 +32,7 @@ func newVaultPeriod(db *gorm.DB) vaultPeriod {
 	_vaultPeriod.PeriodID = field.NewUint64(tableName, "period_id")
 	_vaultPeriod.Twap = field.NewUint64(tableName, "twap")
 	_vaultPeriod.Dar = field.NewUint64(tableName, "dar")
+	_vaultPeriod.PriceBOverA = field.NewUint64(tableName, "price_b_over_a")
 
 	_vaultPeriod.fillFieldMap()
 
@@ -41,12 +42,13 @@ func newVaultPeriod(db *gorm.DB) vaultPeriod {
 type vaultPeriod struct {
 	vaultPeriodDo vaultPeriodDo
 
-	ALL      field.Field
-	Pubkey   field.String
-	Vault    field.String
-	PeriodID field.Uint64
-	Twap     field.Uint64
-	Dar      field.Uint64
+	ALL         field.Field
+	Pubkey      field.String
+	Vault       field.String
+	PeriodID    field.Uint64
+	Twap        field.Uint64
+	Dar         field.Uint64
+	PriceBOverA field.Uint64
 
 	fieldMap map[string]field.Expr
 }
@@ -68,6 +70,7 @@ func (v *vaultPeriod) updateTableName(table string) *vaultPeriod {
 	v.PeriodID = field.NewUint64(table, "period_id")
 	v.Twap = field.NewUint64(table, "twap")
 	v.Dar = field.NewUint64(table, "dar")
+	v.PriceBOverA = field.NewUint64(table, "price_b_over_a")
 
 	v.fillFieldMap()
 
@@ -92,12 +95,13 @@ func (v *vaultPeriod) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *vaultPeriod) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 5)
+	v.fieldMap = make(map[string]field.Expr, 6)
 	v.fieldMap["pubkey"] = v.Pubkey
 	v.fieldMap["vault"] = v.Vault
 	v.fieldMap["period_id"] = v.PeriodID
 	v.fieldMap["twap"] = v.Twap
 	v.fieldMap["dar"] = v.Dar
+	v.fieldMap["price_b_over_a"] = v.PriceBOverA
 }
 
 func (v vaultPeriod) clone(db *gorm.DB) vaultPeriod {

@@ -6,7 +6,7 @@ go 1.18
 replace github.com/dfuse-io/logging => github.com/streamingfast/logging v0.0.0-20210109005628-b97a57253f70
 
 require (
-	github.com/dcaf-labs/solana-go-clients v0.0.0-20220913232444-7b6f34376bb9
+	github.com/dcaf-labs/solana-go-clients v0.0.0-20220916003147-7942e13b2f72
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/gagliardetto/metaplex-go v0.2.1
 	github.com/getkin/kin-openapi v0.94.0
@@ -32,6 +32,7 @@ require (
 	cloud.google.com/go/compute v1.7.0 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/dave/jennifer v1.5.1 // indirect
 	github.com/disgoorg/disgo v0.13.19 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.0 // indirect

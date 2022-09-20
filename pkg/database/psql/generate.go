@@ -66,8 +66,9 @@ func GenerateModels(
 
 	g.GenerateModel("proto_config",
 		gen.FieldType("granularity", "uint64"),
-		gen.FieldType("trigger_dca_spread", "uint16"),
-		gen.FieldType("base_withdrawal_spread", "uint16"),
+		gen.FieldType("token_a_drip_trigger_spread", "uint16"),
+		gen.FieldType("token_b_withdrawal_spread", "uint16"),
+		gen.FieldType("token_b_referral_spread", "uint16"),
 	).AddMethod(ModelUtil{})
 
 	g.GenerateModel("vault",
@@ -79,6 +80,7 @@ func GenerateModels(
 		gen.FieldType("period_id", "uint64"),
 		gen.FieldType("dar", "uint64"),
 		gen.FieldType("twap", "decimal.Decimal"),
+		gen.FieldType("price_b_over_a", "decimal.Decimal"),
 	).AddMethod(ModelUtil{})
 
 	g.GenerateModel("position",
