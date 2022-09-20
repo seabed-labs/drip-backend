@@ -48,15 +48,28 @@ insteadOf = https://github.com/
 - ex:
 
 ```env
+
+# Devnet Staging
+ENV="STAGING"
+NETWORK="DEVNET"
+DRIP_PROGRAM_ID="F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo"
+# random wallet, this is the mint auth
+DRIP_BACKEND_WALLET="[141,241,173,131,255,186,170,216,65,246,24,196,173,94,39,225,161,108,251,102,177,20,166,223,13,69,103,38,242,107,72,194,177,170,44,204,179,183,235,4,231,51,88,169,156,153,132,247,235,166,41,123,87,219,139,204,95,1,176,98,72,90,51,82]"
+
+# Test Channel
+DISCORD_WEBHOOK_ID=1021592812954857492
+DISCORD_ACCESS_TOKEN=qPeOyI4e4k6kYah44k9_PXFQDsuLO7lbHcazLrsKcvzqvrQh_lr1PK21kB3GZCSTv2Xg
+
 PORT="8080"
-ENV="DEVNET"
-# must be the mint authority (tokenOwnerKeypair from setupKepperBot.ts)
-DRIP_BACKEND_WALLET="[some byte array]"
 PSQL_USER="dcaf"
 PSQL_PASS="drip"
 PSQL_DBNAME="drip"
 PSQL_PORT="5432"
 PSQL_HOST="localhost"
+PSQL_SSLMODE=disable
+OUTPUT=./internal/pkg/repository/models
+GOOGLE_KEY="540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"
+GOOGLE_SECRET="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"
 ```
 
 - run all tests

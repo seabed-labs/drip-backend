@@ -130,7 +130,7 @@ func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tok
 			stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
 		}
 	}
-	stmt = stmt.Order(d.repo.Token.Symbol.Desc())
+	stmt = stmt.Order(d.repo.Token.Symbol)
 	return stmt.Find()
 }
 
