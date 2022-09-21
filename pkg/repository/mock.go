@@ -205,6 +205,51 @@ func (mr *MockRepositoryMockRecorder) GetProtoConfigsByAddresses(ctx, pubkeys in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProtoConfigsByAddresses", reflect.TypeOf((*MockRepository)(nil).GetProtoConfigsByAddresses), ctx, pubkeys)
 }
 
+// GetSupportedTokenAs mocks base method.
+func (m *MockRepository) GetSupportedTokenAs(ctx context.Context, givenTokenBMint *string) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSupportedTokenAs", ctx, givenTokenBMint)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSupportedTokenAs indicates an expected call of GetSupportedTokenAs.
+func (mr *MockRepositoryMockRecorder) GetSupportedTokenAs(ctx, givenTokenBMint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSupportedTokenAs", reflect.TypeOf((*MockRepository)(nil).GetSupportedTokenAs), ctx, givenTokenBMint)
+}
+
+// GetSupportedTokenBs mocks base method.
+func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMint *string) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSupportedTokenBs", ctx, givenTokenAMint)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSupportedTokenBs indicates an expected call of GetSupportedTokenBs.
+func (mr *MockRepositoryMockRecorder) GetSupportedTokenBs(ctx, givenTokenAMint interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSupportedTokenBs", reflect.TypeOf((*MockRepository)(nil).GetSupportedTokenBs), ctx, givenTokenAMint)
+}
+
+// GetSupportedTokens mocks base method.
+func (m *MockRepository) GetSupportedTokens(arg0 context.Context) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSupportedTokens", arg0)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSupportedTokens indicates an expected call of GetSupportedTokens.
+func (mr *MockRepositoryMockRecorder) GetSupportedTokens(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSupportedTokens", reflect.TypeOf((*MockRepository)(nil).GetSupportedTokens), arg0)
+}
+
 // GetTokenAccountBalancesByIDS mocks base method.
 func (m *MockRepository) GetTokenAccountBalancesByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenAccountBalance, error) {
 	m.ctrl.T.Helper()
@@ -338,21 +383,6 @@ func (m *MockRepository) GetTokensByMints(ctx context.Context, mints []string) (
 func (mr *MockRepositoryMockRecorder) GetTokensByMints(ctx, mints interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensByMints", reflect.TypeOf((*MockRepository)(nil).GetTokensByMints), ctx, mints)
-}
-
-// GetTokensWithSupportedTokenPair mocks base method.
-func (m *MockRepository) GetTokensWithSupportedTokenPair(arg0 context.Context, arg1 *string, arg2 bool) ([]*model.Token, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokensWithSupportedTokenPair", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*model.Token)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTokensWithSupportedTokenPair indicates an expected call of GetTokensWithSupportedTokenPair.
-func (mr *MockRepositoryMockRecorder) GetTokensWithSupportedTokenPair(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensWithSupportedTokenPair", reflect.TypeOf((*MockRepository)(nil).GetTokensWithSupportedTokenPair), arg0, arg1, arg2)
 }
 
 // GetVaultByAddress mocks base method.

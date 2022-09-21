@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/apispec"
+	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -13,16 +14,15 @@ func (h Handler) GetV1VaultTokens(c echo.Context, params apispec.GetV1VaultToken
 	if params.TokenA != nil && params.TokenB != nil {
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "both tokenA and tokenB cannot be set"})
 	}
-	var mintFilter *string
-	var supportedTokenA bool
+	var tokens []*model.Token
+	var err error
 	if params.TokenA != nil {
-		mintFilter = (*string)(params.TokenA)
-		supportedTokenA = true
+		tokens, err = h.repo.GetSupportedTokenBs(c.Request().Context(), (*string)(params.TokenA))
+	} else if params.TokenB != nil {
+		tokens, err = h.repo.GetSupportedTokenAs(c.Request().Context(), (*string)(params.TokenB))
 	} else {
-		mintFilter = (*string)(params.TokenB)
-		supportedTokenA = false
+		tokens, err = h.repo.GetSupportedTokens(c.Request().Context())
 	}
-	tokens, err := h.repo.GetTokensWithSupportedTokenPair(c.Request().Context(), mintFilter, supportedTokenA)
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
