@@ -112,6 +112,14 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		}
 		return
 	}
+	var protoConfig drip.VaultProtoConfig
+	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
+		// log.Infof("decoded as protoConfig")
+		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert protoConfig")
+		}
+		return
+	}
 	var position drip.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		// log.Infof("decoded as position")
@@ -128,30 +136,7 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var protoConfig drip.VaultProtoConfig
-	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
-		// log.Infof("decoded as protoConfig")
-		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
-			log.WithError(err).Error("failed to upsert protoConfig")
-		}
-		return
-	}
 	log.Errorf("failed to decode drip account to known types")
-
-	// Build data and send new position alert on discord
-	var tokenAMint, tokenBMint = vault.TokenAMint, vault.TokenBMint
-	tokenA, tokenAErr := p.repo.GetTokenByMint(ctx, tokenAMint.String())
-	tokenB, tokenBErr := p.repo.GetTokenByMint(ctx, tokenBMint.String())
-	if tokenAErr == nil && tokenBErr == nil {
-		p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Build().Fields,
-			discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol},
-			discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol},
-			discord.EmbedField{Name: "Token A Deposit", Value: fmt.Sprint(position.DepositedTokenAAmount / uint64(tokenA.Decimals))},
-			discord.EmbedField{Name: "Granularity", Value: fmt.Sprint(protoConfig.Granularity)},
-			discord.EmbedField{Name: "Drip Amount", Value: fmt.Sprint(vault.DripAmount)},
-			discord.EmbedField{Name: "Wallet Address", Value: position.PositionAuthority.String()},
-		), alert.Success)
-	}
 }
 
 func (p impl) ProcessTokenSwapEvent(address string, data []byte) {
@@ -591,6 +576,23 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	return p.UpsertPosition(ctx, address, position)
 }
 
+func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Position, vault *model.Vault, tokenPair *model.TokenPair) {
+	// Build data and send new position alert on discord
+	tokenA, tokenAErr := p.repo.GetTokenByMint(ctx, tokenPair.TokenA)
+	tokenB, tokenBErr := p.repo.GetTokenByMint(ctx, tokenPair.TokenB)
+	protoConfig, protoConfigErr := p.repo.GetProtoConfigByAddress(ctx, vault.ProtoConfig)
+	if tokenAErr == nil && tokenBErr == nil && protoConfigErr == nil {
+		p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Build().Fields,
+			discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol},
+			discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol},
+			discord.EmbedField{Name: "Token A Deposit", Value: fmt.Sprint(position.DepositedTokenAAmount / uint64(tokenA.Decimals))},
+			discord.EmbedField{Name: "Granularity", Value: fmt.Sprint(protoConfig.Granularity)},
+			discord.EmbedField{Name: "Drip Amount", Value: fmt.Sprint(vault.DripAmount)},
+			discord.EmbedField{Name: "Wallet Address", Value: position.PositionAuthority.String()},
+		), alert.Success)
+	}
+}
+
 func (p impl) UpsertPosition(ctx context.Context, address string, position drip.Position) error {
 	vault, err := p.ensureVault(ctx, position.Vault.String())
 	if err != nil {
@@ -606,6 +608,12 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
 		return err
 	}
+
+	_, errGetPosition := p.repo.GetPositionByNFTMint(ctx, position.PositionAuthority.String())
+	if errGetPosition.Error() == repository.ErrRecordNotFound {
+		p.sendNewPositionAlertDiscord(ctx, position, vault, tokenPair)
+	}
+
 	if err := p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,
 		Vault:                    position.Vault.String(),

@@ -211,6 +211,13 @@ func (d repositoryImpl) GetVaultWhitelistsByVaultAddress(ctx context.Context, va
 		Find()
 }
 
+func (d repositoryImpl) GetProtoConfigByAddress(ctx context.Context, pubkey string) (*model.ProtoConfig, error) {
+	return d.repo.ProtoConfig.
+		WithContext(ctx).
+		Where(d.repo.ProtoConfig.Pubkey.Eq(pubkey)).
+		First()
+}
+
 func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
 	stmt := d.repo.ProtoConfig.
 		WithContext(ctx)
@@ -221,10 +228,10 @@ func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys 
 }
 
 func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
-	stmt := d.repo.Token.
-		WithContext(ctx)
-	stmt = stmt.Where(d.repo.Token.Pubkey.Eq(mint))
-	return stmt.First()
+	return d.repo.Token.
+		WithContext(ctx).
+		Where(d.repo.Token.Pubkey.Eq(mint)).
+		First()
 }
 
 func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {

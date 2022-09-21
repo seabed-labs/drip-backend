@@ -31,6 +31,7 @@ type Repository interface {
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 
 	GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error)
+	GetProtoConfigByAddress(ctx context.Context, pubkey string) (*model.ProtoConfig, error)
 	GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error)
 
 	GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error)
