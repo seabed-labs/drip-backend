@@ -34,7 +34,9 @@ type Repository interface {
 	GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error)
 	GetVaultPeriods(context.Context, string, *string, PaginationParams) ([]*model.VaultPeriod, error)
 
-	GetTokensWithSupportedTokenPair(context.Context, *string, bool) ([]*model.Token, error)
+	GetSupportedTokenAs(ctx context.Context, givenTokenBMint *string) ([]*model.Token, error)
+	GetSupportedTokenBs(ctx context.Context, givenTokenAMint *string) ([]*model.Token, error)
+	GetSupportedTokens(context.Context) ([]*model.Token, error)
 
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
