@@ -28,6 +28,9 @@ func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*mod
 }
 
 func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model.VaultWhitelist) error {
+	if len(vaultWhiteLists) == 0 {
+		return nil
+	}
 	// Insert new vault whitelists or do no thing
 	return d.repo.VaultWhitelist.
 		WithContext(ctx).
