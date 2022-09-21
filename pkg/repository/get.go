@@ -160,8 +160,8 @@ func (d repositoryImpl) GetSupportedTokenBs(ctx context.Context, tokenAMint stri
 		Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
 		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
 		Where(d.repo.Vault.Enabled.Is(true)).
-		Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint)).
-		Where(d.repo.Token.Pubkey.Neq(*tokenAMint)).
+		Where(d.repo.TokenPair.TokenA.Eq(tokenAMint)).
+		Where(d.repo.Token.Pubkey.Neq(tokenAMint)).
 		Order(d.repo.Token.Symbol).
 		Find()
 }
