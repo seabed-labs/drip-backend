@@ -439,7 +439,7 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 	if err := p.UpsertProtoConfigByAddress(ctx, vaultAccount.ProtoConfig.String()); err != nil {
-		return nil
+		return err
 	}
 	tokenPair, err := p.ensureTokenPair(ctx, vaultAccount.TokenAMint.String(), vaultAccount.TokenBMint.String())
 	if err != nil {
