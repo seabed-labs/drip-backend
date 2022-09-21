@@ -117,21 +117,57 @@ func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairI
 	return tokenSwaps, nil
 }
 
-func (d repositoryImpl) GetTokensWithSupportedTokenPair(ctx context.Context, tokenMint *string, supportedTokenA bool) ([]*model.Token, error) {
-	stmt := d.repo.Token.WithContext(ctx).
+func (d repositoryImpl) GetSupportedTokens(ctx context.Context) ([]*model.Token, error) {
+	tokenPairs, err := d.repo.TokenPair.WithContext(ctx).
+		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		Find()
+	if err != nil {
+		return nil, err
+	}
+	tokenMintSet := make(map[string]bool)
+	for _, pair := range tokenPairs {
+		tokenMintSet[pair.TokenA] = true
+		tokenMintSet[pair.TokenB] = true
+	}
+	tokenMints := []string{}
+	for mint := range tokenMintSet {
+		tokenMints = append(tokenMints, mint)
+	}
+	if len(tokenMints) == 0 {
+		return []*model.Token{}, nil
+	}
+	return d.GetTokensByMints(ctx, tokenMints)
+}
+
+func (d repositoryImpl) GetSupportedTokenAs(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
+	if tokenBMint == nil {
+		return d.GetSupportedTokens(ctx)
+	}
+	return d.repo.Token.WithContext(ctx).
+		Distinct(d.repo.Token.ALL).
+		Join(d.repo.TokenPair, d.repo.TokenPair.TokenA.EqCol(d.repo.Token.Pubkey)).
+		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint)).
+		Where(d.repo.Token.Pubkey.Neq(*tokenBMint)).
+		Order(d.repo.Token.Symbol).
+		Find()
+}
+
+func (d repositoryImpl) GetSupportedTokenBs(ctx context.Context, tokenAMint *string) ([]*model.Token, error) {
+	if tokenAMint == nil {
+		return d.GetSupportedTokens(ctx)
+	}
+	return d.repo.Token.WithContext(ctx).
 		Distinct(d.repo.Token.ALL).
 		Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
 		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-		Where(d.repo.Vault.Enabled.Is(true))
-	if tokenMint != nil {
-		if supportedTokenA {
-			stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenMint))
-		} else {
-			stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenMint))
-		}
-	}
-	stmt = stmt.Order(d.repo.Token.Symbol)
-	return stmt.Find()
+		Where(d.repo.Vault.Enabled.Is(true)).
+		Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint)).
+		Where(d.repo.Token.Pubkey.Neq(*tokenAMint)).
+		Order(d.repo.Token.Symbol).
+		Find()
 }
 
 func (d repositoryImpl) GetTokenSwapByAddress(ctx context.Context, address string) (*model.TokenSwap, error) {
