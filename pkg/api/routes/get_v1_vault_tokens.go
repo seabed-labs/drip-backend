@@ -17,11 +17,9 @@ func (h Handler) GetV1VaultTokens(c echo.Context, params apispec.GetV1VaultToken
 	var tokens []*model.Token
 	var err error
 	if params.TokenA != nil {
-		tokens, err = h.repo.GetSupportedTokenBs(c.Request().Context(), (*string)(params.TokenA))
-	} else if params.TokenB != nil {
-		tokens, err = h.repo.GetSupportedTokenAs(c.Request().Context(), (*string)(params.TokenB))
+		tokens, err = h.repo.GetSupportedTokenBs(c.Request().Context(), string(*params.TokenA))
 	} else {
-		tokens, err = h.repo.GetSupportedTokens(c.Request().Context())
+		tokens, err = h.repo.GetSupportedTokenAs(c.Request().Context(), (*string)(params.TokenB))
 	}
 	if err != nil {
 		logrus.WithError(err).Errorf("failed to get tokens")

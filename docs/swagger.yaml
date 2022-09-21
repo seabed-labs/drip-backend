@@ -453,7 +453,9 @@ paths:
   /v1/vault/tokens:
     get:
       summary: Get all Supported Tokens
-      description: Get supported tokens with filters.
+      description: >
+      Get supported tokens with filters.
+      If no params are passed, by default all supported tokenAs will be returned.
       parameters:
         - $ref: "#/components/parameters/tokenAQueryParam"
         - $ref: "#/components/parameters/tokenBQueryParam"
