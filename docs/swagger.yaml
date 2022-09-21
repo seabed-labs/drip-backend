@@ -454,8 +454,8 @@ paths:
     get:
       summary: Get all Supported Tokens
       description: >
-      Get supported tokens with filters.
-      If no params are passed, by default all supported tokenAs will be returned.
+        Get supported tokens with filters.
+        If no params are passed, by default all supported tokenAs will be returned.
       parameters:
         - $ref: "#/components/parameters/tokenAQueryParam"
         - $ref: "#/components/parameters/tokenBQueryParam"

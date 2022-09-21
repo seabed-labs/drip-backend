@@ -130,6 +130,21 @@ func (mr *MockRepositoryMockRecorder) GetAdminPositions(ctx, isVaultEnabled, pos
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdminPositions", reflect.TypeOf((*MockRepository)(nil).GetAdminPositions), ctx, isVaultEnabled, positionFilterParams, paginationParams)
 }
 
+// GetAllSupportedTokenAs mocks base method.
+func (m *MockRepository) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllSupportedTokenAs", ctx)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllSupportedTokenAs indicates an expected call of GetAllSupportedTokenAs.
+func (mr *MockRepositoryMockRecorder) GetAllSupportedTokenAs(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSupportedTokenAs", reflect.TypeOf((*MockRepository)(nil).GetAllSupportedTokenAs), ctx)
+}
+
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
