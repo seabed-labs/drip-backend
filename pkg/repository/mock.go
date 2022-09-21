@@ -130,6 +130,21 @@ func (mr *MockRepositoryMockRecorder) GetAdminPositions(ctx, isVaultEnabled, pos
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdminPositions", reflect.TypeOf((*MockRepository)(nil).GetAdminPositions), ctx, isVaultEnabled, positionFilterParams, paginationParams)
 }
 
+// GetAllSupportedTokenAs mocks base method.
+func (m *MockRepository) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllSupportedTokenAs", ctx)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllSupportedTokenAs indicates an expected call of GetAllSupportedTokenAs.
+func (mr *MockRepositoryMockRecorder) GetAllSupportedTokenAs(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSupportedTokenAs", reflect.TypeOf((*MockRepository)(nil).GetAllSupportedTokenAs), ctx)
+}
+
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
@@ -221,7 +236,7 @@ func (mr *MockRepositoryMockRecorder) GetSupportedTokenAs(ctx, givenTokenBMint i
 }
 
 // GetSupportedTokenBs mocks base method.
-func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMint *string) ([]*model.Token, error) {
+func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMint string) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSupportedTokenBs", ctx, givenTokenAMint)
 	ret0, _ := ret[0].([]*model.Token)
@@ -233,21 +248,6 @@ func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMin
 func (mr *MockRepositoryMockRecorder) GetSupportedTokenBs(ctx, givenTokenAMint interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSupportedTokenBs", reflect.TypeOf((*MockRepository)(nil).GetSupportedTokenBs), ctx, givenTokenAMint)
-}
-
-// GetSupportedTokens mocks base method.
-func (m *MockRepository) GetSupportedTokens(arg0 context.Context) ([]*model.Token, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSupportedTokens", arg0)
-	ret0, _ := ret[0].([]*model.Token)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSupportedTokens indicates an expected call of GetSupportedTokens.
-func (mr *MockRepositoryMockRecorder) GetSupportedTokens(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSupportedTokens", reflect.TypeOf((*MockRepository)(nil).GetSupportedTokens), arg0)
 }
 
 // GetTokenAccountBalancesByIDS mocks base method.

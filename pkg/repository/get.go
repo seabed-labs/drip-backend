@@ -117,7 +117,7 @@ func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairI
 	return tokenSwaps, nil
 }
 
-func (d repositoryImpl) GetSupportedTokens(ctx context.Context) ([]*model.Token, error) {
+func (d repositoryImpl) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
 	tokenPairs, err := d.repo.TokenPair.WithContext(ctx).
 		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
 		Where(d.repo.Vault.Enabled.Is(true)).
@@ -128,7 +128,6 @@ func (d repositoryImpl) GetSupportedTokens(ctx context.Context) ([]*model.Token,
 	tokenMintSet := make(map[string]bool)
 	for _, pair := range tokenPairs {
 		tokenMintSet[pair.TokenA] = true
-		tokenMintSet[pair.TokenB] = true
 	}
 	tokenMints := []string{}
 	for mint := range tokenMintSet {
@@ -142,7 +141,7 @@ func (d repositoryImpl) GetSupportedTokens(ctx context.Context) ([]*model.Token,
 
 func (d repositoryImpl) GetSupportedTokenAs(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
 	if tokenBMint == nil {
-		return d.GetSupportedTokens(ctx)
+		return d.GetAllSupportedTokenAs(ctx)
 	}
 	return d.repo.Token.WithContext(ctx).
 		Distinct(d.repo.Token.ALL).
@@ -155,10 +154,7 @@ func (d repositoryImpl) GetSupportedTokenAs(ctx context.Context, tokenBMint *str
 		Find()
 }
 
-func (d repositoryImpl) GetSupportedTokenBs(ctx context.Context, tokenAMint *string) ([]*model.Token, error) {
-	if tokenAMint == nil {
-		return d.GetSupportedTokens(ctx)
-	}
+func (d repositoryImpl) GetSupportedTokenBs(ctx context.Context, tokenAMint string) ([]*model.Token, error) {
 	return d.repo.Token.WithContext(ctx).
 		Distinct(d.repo.Token.ALL).
 		Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
