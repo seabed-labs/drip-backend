@@ -479,6 +479,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/token/{pubkeyPath}:
+    get:
+      summary: Get a Token
+      description: Get token mint info by pubkey.
+      parameters:
+        - $ref: "#/components/parameters/pubkeyPathParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/token"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
 components:
   parameters:
     enabledQueryParam:

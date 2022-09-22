@@ -498,6 +498,9 @@ type ClientInterface interface {
 	// GetV1Protoconfigs request
 	GetV1Protoconfigs(ctx context.Context, params *GetV1ProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetV1TokenPubkeyPath request
+	GetV1TokenPubkeyPath(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetV1VaultTokenpairs request
 	GetV1VaultTokenpairs(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -669,6 +672,18 @@ func (c *Client) GetV1Positions(ctx context.Context, params *GetV1PositionsParam
 
 func (c *Client) GetV1Protoconfigs(ctx context.Context, params *GetV1ProtoconfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetV1ProtoconfigsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetV1TokenPubkeyPath(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetV1TokenPubkeyPathRequest(c.Server, pubkeyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -1540,6 +1555,40 @@ func NewGetV1ProtoconfigsRequest(server string, params *GetV1ProtoconfigsParams)
 	return req, nil
 }
 
+// NewGetV1TokenPubkeyPathRequest generates requests for GetV1TokenPubkeyPath
+func NewGetV1TokenPubkeyPathRequest(server string, pubkeyPath PubkeyPathParam) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, pubkeyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/token/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetV1VaultTokenpairsRequest generates requests for GetV1VaultTokenpairs
 func NewGetV1VaultTokenpairsRequest(server string, params *GetV1VaultTokenpairsParams) (*http.Request, error) {
 	var err error
@@ -1920,6 +1969,9 @@ type ClientWithResponsesInterface interface {
 	// GetV1Protoconfigs request
 	GetV1ProtoconfigsWithResponse(ctx context.Context, params *GetV1ProtoconfigsParams, reqEditors ...RequestEditorFn) (*GetV1ProtoconfigsResponse, error)
 
+	// GetV1TokenPubkeyPath request
+	GetV1TokenPubkeyPathWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1TokenPubkeyPathResponse, error)
+
 	// GetV1VaultTokenpairs request
 	GetV1VaultTokenpairsWithResponse(ctx context.Context, params *GetV1VaultTokenpairsParams, reqEditors ...RequestEditorFn) (*GetV1VaultTokenpairsResponse, error)
 
@@ -2242,6 +2294,30 @@ func (r GetV1ProtoconfigsResponse) StatusCode() int {
 	return 0
 }
 
+type GetV1TokenPubkeyPathResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Token
+	JSON400      *ErrorResponse
+	JSON500      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetV1TokenPubkeyPathResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetV1TokenPubkeyPathResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetV1VaultTokenpairsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2461,6 +2537,15 @@ func (c *ClientWithResponses) GetV1ProtoconfigsWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetV1ProtoconfigsResponse(rsp)
+}
+
+// GetV1TokenPubkeyPathWithResponse request returning *GetV1TokenPubkeyPathResponse
+func (c *ClientWithResponses) GetV1TokenPubkeyPathWithResponse(ctx context.Context, pubkeyPath PubkeyPathParam, reqEditors ...RequestEditorFn) (*GetV1TokenPubkeyPathResponse, error) {
+	rsp, err := c.GetV1TokenPubkeyPath(ctx, pubkeyPath, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetV1TokenPubkeyPathResponse(rsp)
 }
 
 // GetV1VaultTokenpairsWithResponse request returning *GetV1VaultTokenpairsResponse
@@ -2998,6 +3083,46 @@ func ParseGetV1ProtoconfigsResponse(rsp *http.Response) (*GetV1ProtoconfigsRespo
 	return response, nil
 }
 
+// ParseGetV1TokenPubkeyPathResponse parses an HTTP response from a GetV1TokenPubkeyPathWithResponse call
+func ParseGetV1TokenPubkeyPathResponse(rsp *http.Response) (*GetV1TokenPubkeyPathResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetV1TokenPubkeyPathResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Token
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetV1VaultTokenpairsResponse parses an HTTP response from a GetV1VaultTokenpairsWithResponse call
 func ParseGetV1VaultTokenpairsResponse(rsp *http.Response) (*GetV1VaultTokenpairsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -3199,6 +3324,9 @@ type ServerInterface interface {
 	// Get Proto Configs
 	// (GET /v1/protoconfigs)
 	GetV1Protoconfigs(ctx echo.Context, params GetV1ProtoconfigsParams) error
+	// Get a Token
+	// (GET /v1/token/{pubkeyPath})
+	GetV1TokenPubkeyPath(ctx echo.Context, pubkeyPath PubkeyPathParam) error
 	// Get all Supported Token Pairs
 	// (GET /v1/vault/tokenpairs)
 	GetV1VaultTokenpairs(ctx echo.Context, params GetV1VaultTokenpairsParams) error
@@ -3610,6 +3738,22 @@ func (w *ServerInterfaceWrapper) GetV1Protoconfigs(ctx echo.Context) error {
 	return err
 }
 
+// GetV1TokenPubkeyPath converts echo context to params.
+func (w *ServerInterfaceWrapper) GetV1TokenPubkeyPath(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "pubkeyPath" -------------
+	var pubkeyPath PubkeyPathParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter pubkeyPath: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetV1TokenPubkeyPath(ctx, pubkeyPath)
+	return err
+}
+
 // GetV1VaultTokenpairs converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1VaultTokenpairs(ctx echo.Context) error {
 	var err error
@@ -3772,6 +3916,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/v1/drip/:pubkeyPath/tokenmetadata", wrapper.GetV1DripPubkeyPathTokenmetadata)
 	router.GET(baseURL+"/v1/positions", wrapper.GetV1Positions)
 	router.GET(baseURL+"/v1/protoconfigs", wrapper.GetV1Protoconfigs)
+	router.GET(baseURL+"/v1/token/:pubkeyPath", wrapper.GetV1TokenPubkeyPath)
 	router.GET(baseURL+"/v1/vault/tokenpairs", wrapper.GetV1VaultTokenpairs)
 	router.GET(baseURL+"/v1/vault/tokens", wrapper.GetV1VaultTokens)
 	router.GET(baseURL+"/v1/vaultperiods", wrapper.GetV1Vaultperiods)
@@ -3841,10 +3986,11 @@ var swaggerSpec = []string{
 	"CixWjPffwjox4AmmiKk6Vb4tMJPEOKfUbFMHgpwtatTv+I1wZ2LciCPxHx/ieG+UfAIxKRCZ6VhgI/zI",
 	"FghoDB1XRDV/6Dgw8DOk/a5I8uzmRB640SEVukin5MZHVfL6vkUgvlgwfHs9P/abDP/ehfXPmvr12H+0",
 	"kXpqOBfq2KBGkq3bRjuxTNPA1KlO+N9RITeC8E1x93a/loEhI1cRlFMCXUCdlVUC45gHnhZC6MIg0Ls3",
-	"3CJVFWZQwJBaWIduqwDPvU6ncK2H0TfUFCLfHfl4wJ++6vqJ+aSYZ2aL5AxOsZstoum9fxsL+yPkHXyz",
-	"EYGyXUzQn/hfpXCE/J7APHmL+ROWSWFph9KRjysnvfVsGIHoVfAMIdMOy7ohMIQ4Idnp+kkJs70gQ4V9",
-	"MyEY2B3YXRF9jzj/rTH+ie+fwncI2ubxuwKx0Ha+6OFShttn2F1JggDsCXpr4v2Gmwr+h8R+l9Q78FmI",
-	"T5dI6hLO1wePdjvxhTfdFZ7D/N8Vhy+P4X+q8ddg9hOtydF6DN5H073+XwAAAP//LALzMw9YAAA=",
+	"3CJVFWZQwJBaWIduqwDPvU6ncK2H0TfUFCLfHfl4wJ++6vqJ+aSYZ2aL5Axs+QJJQ4KclXVaIF0xhNle",
+	"cIbGRHvnxd7TD/380zOJT0QlRhRwcggfS87FCbOi6b3LHYukY/h0MMVGBErAMZCa+F84cYT8nkHu5I34",
+	"T0AmBqSqCiMfV85RybNhBKJXwTOETHuL1w2BIcTZ3p0OspQdEGWosO9vBJMEB3ZX7ORHnP/WGP/E90/h",
+	"OwRt8/iNilhoO1+HcSnDrVjs3i1BAPYEvfUQ94ZbL/5H6X6XY1zgEyOfLpHUJZwvWR7tduILb7p3Pof5",
+	"vysOXx7D/+znr8HsJ1qTo/UYvI+me/2/AAAA///2EToLW1oAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
