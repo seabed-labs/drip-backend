@@ -1045,17 +1045,18 @@ components:
       required:
         - pubkey
         - decimals
-        - iconUrl
       properties:
         pubkey:
           type: string
           example: "mRcJ27ztTCFntbUvv7V2PSxqL9fJfg1KH4fzZSYVP4L"
-        symbol:
-          type: string
-          example: "SOL"
         decimals:
           type: integer
           example: 10
+        symbol:
+          type: string
+          example: "SOL"
+        iconUrl:
+          type: string
 
     vault:
       type: object

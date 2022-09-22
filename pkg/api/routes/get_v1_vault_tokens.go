@@ -31,6 +31,7 @@ func (h Handler) GetV1VaultTokens(c echo.Context, params apispec.GetV1VaultToken
 			Decimals: int(token.Decimals),
 			Pubkey:   token.Pubkey,
 			Symbol:   token.Symbol,
+			IconUrl:  token.IconURL,
 		})
 	}
 	return c.JSON(http.StatusOK, res)
