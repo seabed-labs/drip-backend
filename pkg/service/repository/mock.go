@@ -8,8 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
-
+	model "github.com/dcaf-labs/drip/pkg/service/repository/model"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -37,10 +36,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // AdminGetVaultByAddress mocks base method.
-func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, address string) (*model2.Vault, error) {
+func (m *MockRepository) AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminGetVaultByAddress", ctx, address)
-	ret0, _ := ret[0].(*model2.Vault)
+	ret0, _ := ret[0].(*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,10 +51,10 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultByAddress(ctx, address interf
 }
 
 // AdminGetVaults mocks base method.
-func (m *MockRepository) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model2.Vault, error) {
+func (m *MockRepository) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminGetVaults", ctx, vaultFilterParams, paginationParams)
-	ret0, _ := ret[0].([]*model2.Vault)
+	ret0, _ := ret[0].([]*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -67,14 +66,14 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaults(ctx, vaultFilterParams, pag
 }
 
 // AdminGetVaultsByAddresses mocks base method.
-func (m *MockRepository) AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model2.Vault, error) {
+func (m *MockRepository) AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx}
 	for _, a := range addresses {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "AdminGetVaultsByAddresses", varargs...)
-	ret0, _ := ret[0].([]*model2.Vault)
+	ret0, _ := ret[0].([]*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -87,10 +86,10 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultsByAddresses(ctx interface{},
 }
 
 // AdminSetVaultEnabled mocks base method.
-func (m *MockRepository) AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model2.Vault, error) {
+func (m *MockRepository) AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AdminSetVaultEnabled", ctx, pubkey, enabled)
-	ret0, _ := ret[0].(*model2.Vault)
+	ret0, _ := ret[0].(*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -117,10 +116,10 @@ func (mr *MockRepositoryMockRecorder) GetActiveWallets(ctx, params interface{}) 
 }
 
 // GetAdminPositions mocks base method.
-func (m *MockRepository) GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model2.Position, error) {
+func (m *MockRepository) GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAdminPositions", ctx, isVaultEnabled, positionFilterParams, paginationParams)
-	ret0, _ := ret[0].([]*model2.Position)
+	ret0, _ := ret[0].([]*model.Position)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,10 +131,10 @@ func (mr *MockRepositoryMockRecorder) GetAdminPositions(ctx, isVaultEnabled, pos
 }
 
 // GetAllSupportTokens mocks base method.
-func (m *MockRepository) GetAllSupportTokens(ctx context.Context) ([]*model2.Token, error) {
+func (m *MockRepository) GetAllSupportTokens(ctx context.Context) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSupportTokens", ctx)
-	ret0, _ := ret[0].([]*model2.Token)
+	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -147,10 +146,10 @@ func (mr *MockRepositoryMockRecorder) GetAllSupportTokens(ctx interface{}) *gomo
 }
 
 // GetAllSupportedTokenAs mocks base method.
-func (m *MockRepository) GetAllSupportedTokenAs(ctx context.Context) ([]*model2.Token, error) {
+func (m *MockRepository) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSupportedTokenAs", ctx)
-	ret0, _ := ret[0].([]*model2.Token)
+	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -162,10 +161,10 @@ func (mr *MockRepositoryMockRecorder) GetAllSupportedTokenAs(ctx interface{}) *g
 }
 
 // GetOrcaWhirlpoolByAddress mocks base method.
-func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model2.OrcaWhirlpool, error) {
+func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolByAddress", ctx, address)
-	ret0, _ := ret[0].(*model2.OrcaWhirlpool)
+	ret0, _ := ret[0].(*model.OrcaWhirlpool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -177,10 +176,10 @@ func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolByAddress(ctx, address int
 }
 
 // GetOrcaWhirlpoolsByTokenPairIDs mocks base method.
-func (m *MockRepository) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model2.OrcaWhirlpool, error) {
+func (m *MockRepository) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolsByTokenPairIDs", ctx, tokenPairIDs)
-	ret0, _ := ret[0].([]*model2.OrcaWhirlpool)
+	ret0, _ := ret[0].([]*model.OrcaWhirlpool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -192,10 +191,10 @@ func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolsByTokenPairIDs(ctx, token
 }
 
 // GetPositionByNFTMint mocks base method.
-func (m *MockRepository) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model2.Position, error) {
+func (m *MockRepository) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPositionByNFTMint", ctx, nftMint)
-	ret0, _ := ret[0].(*model2.Position)
+	ret0, _ := ret[0].(*model.Position)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -207,10 +206,10 @@ func (mr *MockRepositoryMockRecorder) GetPositionByNFTMint(ctx, nftMint interfac
 }
 
 // GetProtoConfigs mocks base method.
-func (m *MockRepository) GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model2.ProtoConfig, error) {
+func (m *MockRepository) GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProtoConfigs", ctx, filterParams)
-	ret0, _ := ret[0].([]*model2.ProtoConfig)
+	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -222,10 +221,10 @@ func (mr *MockRepositoryMockRecorder) GetProtoConfigs(ctx, filterParams interfac
 }
 
 // GetProtoConfigsByAddresses mocks base method.
-func (m *MockRepository) GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model2.ProtoConfig, error) {
+func (m *MockRepository) GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProtoConfigsByAddresses", ctx, pubkeys)
-	ret0, _ := ret[0].([]*model2.ProtoConfig)
+	ret0, _ := ret[0].([]*model.ProtoConfig)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -237,10 +236,10 @@ func (mr *MockRepositoryMockRecorder) GetProtoConfigsByAddresses(ctx, pubkeys in
 }
 
 // GetSupportedTokenAs mocks base method.
-func (m *MockRepository) GetSupportedTokenAs(ctx context.Context, givenTokenBMint *string) ([]*model2.Token, error) {
+func (m *MockRepository) GetSupportedTokenAs(ctx context.Context, givenTokenBMint *string) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSupportedTokenAs", ctx, givenTokenBMint)
-	ret0, _ := ret[0].([]*model2.Token)
+	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -252,10 +251,10 @@ func (mr *MockRepositoryMockRecorder) GetSupportedTokenAs(ctx, givenTokenBMint i
 }
 
 // GetSupportedTokenBs mocks base method.
-func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMint string) ([]*model2.Token, error) {
+func (m *MockRepository) GetSupportedTokenBs(ctx context.Context, givenTokenAMint string) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSupportedTokenBs", ctx, givenTokenAMint)
-	ret0, _ := ret[0].([]*model2.Token)
+	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -267,10 +266,10 @@ func (mr *MockRepositoryMockRecorder) GetSupportedTokenBs(ctx, givenTokenAMint i
 }
 
 // GetTokenAccountBalancesByIDS mocks base method.
-func (m *MockRepository) GetTokenAccountBalancesByIDS(arg0 context.Context, arg1 []string) ([]*model2.TokenAccountBalance, error) {
+func (m *MockRepository) GetTokenAccountBalancesByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenAccountBalance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenAccountBalancesByIDS", arg0, arg1)
-	ret0, _ := ret[0].([]*model2.TokenAccountBalance)
+	ret0, _ := ret[0].([]*model.TokenAccountBalance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -282,10 +281,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenAccountBalancesByIDS(arg0, arg1 in
 }
 
 // GetTokenPair mocks base method.
-func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (*model2.TokenPair, error) {
+func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (*model.TokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenPair", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*model2.TokenPair)
+	ret0, _ := ret[0].(*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -297,10 +296,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenPair(arg0, arg1, arg2 interface{})
 }
 
 // GetTokenPairByID mocks base method.
-func (m *MockRepository) GetTokenPairByID(arg0 context.Context, arg1 string) (*model2.TokenPair, error) {
+func (m *MockRepository) GetTokenPairByID(arg0 context.Context, arg1 string) (*model.TokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenPairByID", arg0, arg1)
-	ret0, _ := ret[0].(*model2.TokenPair)
+	ret0, _ := ret[0].(*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -312,10 +311,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairByID(arg0, arg1 interface{}) *
 }
 
 // GetTokenPairs mocks base method.
-func (m *MockRepository) GetTokenPairs(arg0 context.Context, arg1, arg2 *string) ([]*model2.TokenPair, error) {
+func (m *MockRepository) GetTokenPairs(arg0 context.Context, arg1, arg2 *string) ([]*model.TokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenPairs", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*model2.TokenPair)
+	ret0, _ := ret[0].([]*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -327,10 +326,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}
 }
 
 // GetTokenPairsByIDS mocks base method.
-func (m *MockRepository) GetTokenPairsByIDS(arg0 context.Context, arg1 []string) ([]*model2.TokenPair, error) {
+func (m *MockRepository) GetTokenPairsByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenPair, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenPairsByIDS", arg0, arg1)
-	ret0, _ := ret[0].([]*model2.TokenPair)
+	ret0, _ := ret[0].([]*model.TokenPair)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -342,10 +341,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenPairsByIDS(arg0, arg1 interface{})
 }
 
 // GetTokenSwapByAddress mocks base method.
-func (m *MockRepository) GetTokenSwapByAddress(arg0 context.Context, arg1 string) (*model2.TokenSwap, error) {
+func (m *MockRepository) GetTokenSwapByAddress(arg0 context.Context, arg1 string) (*model.TokenSwap, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenSwapByAddress", arg0, arg1)
-	ret0, _ := ret[0].(*model2.TokenSwap)
+	ret0, _ := ret[0].(*model.TokenSwap)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -357,10 +356,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwapByAddress(arg0, arg1 interface
 }
 
 // GetTokenSwaps mocks base method.
-func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 []string) ([]*model2.TokenSwap, error) {
+func (m *MockRepository) GetTokenSwaps(arg0 context.Context, arg1 []string) ([]*model.TokenSwap, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenSwaps", arg0, arg1)
-	ret0, _ := ret[0].([]*model2.TokenSwap)
+	ret0, _ := ret[0].([]*model.TokenSwap)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -387,10 +386,10 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwapsWithBalance(ctx, tokenPairIDs
 }
 
 // GetTokensByMints mocks base method.
-func (m *MockRepository) GetTokensByMints(ctx context.Context, mints []string) ([]*model2.Token, error) {
+func (m *MockRepository) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokensByMints", ctx, mints)
-	ret0, _ := ret[0].([]*model2.Token)
+	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -402,10 +401,10 @@ func (mr *MockRepositoryMockRecorder) GetTokensByMints(ctx, mints interface{}) *
 }
 
 // GetVaultByAddress mocks base method.
-func (m *MockRepository) GetVaultByAddress(arg0 context.Context, arg1 string) (*model2.Vault, error) {
+func (m *MockRepository) GetVaultByAddress(arg0 context.Context, arg1 string) (*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultByAddress", arg0, arg1)
-	ret0, _ := ret[0].(*model2.Vault)
+	ret0, _ := ret[0].(*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -417,10 +416,10 @@ func (mr *MockRepositoryMockRecorder) GetVaultByAddress(arg0, arg1 interface{}) 
 }
 
 // GetVaultPeriodByAddress mocks base method.
-func (m *MockRepository) GetVaultPeriodByAddress(ctx context.Context, address string) (*model2.VaultPeriod, error) {
+func (m *MockRepository) GetVaultPeriodByAddress(ctx context.Context, address string) (*model.VaultPeriod, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultPeriodByAddress", ctx, address)
-	ret0, _ := ret[0].(*model2.VaultPeriod)
+	ret0, _ := ret[0].(*model.VaultPeriod)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -432,10 +431,10 @@ func (mr *MockRepositoryMockRecorder) GetVaultPeriodByAddress(ctx, address inter
 }
 
 // GetVaultPeriods mocks base method.
-func (m *MockRepository) GetVaultPeriods(arg0 context.Context, arg1 string, arg2 *string, arg3 PaginationParams) ([]*model2.VaultPeriod, error) {
+func (m *MockRepository) GetVaultPeriods(arg0 context.Context, arg1 string, arg2 *string, arg3 PaginationParams) ([]*model.VaultPeriod, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultPeriods", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].([]*model2.VaultPeriod)
+	ret0, _ := ret[0].([]*model.VaultPeriod)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -447,10 +446,10 @@ func (mr *MockRepositoryMockRecorder) GetVaultPeriods(arg0, arg1, arg2, arg3 int
 }
 
 // GetVaultWhitelistsByVaultAddress mocks base method.
-func (m *MockRepository) GetVaultWhitelistsByVaultAddress(arg0 context.Context, arg1 []string) ([]*model2.VaultWhitelist, error) {
+func (m *MockRepository) GetVaultWhitelistsByVaultAddress(arg0 context.Context, arg1 []string) ([]*model.VaultWhitelist, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultWhitelistsByVaultAddress", arg0, arg1)
-	ret0, _ := ret[0].([]*model2.VaultWhitelist)
+	ret0, _ := ret[0].([]*model.VaultWhitelist)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -462,10 +461,10 @@ func (mr *MockRepositoryMockRecorder) GetVaultWhitelistsByVaultAddress(arg0, arg
 }
 
 // GetVaultsWithFilter mocks base method.
-func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model2.Vault, error) {
+func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, arg3 *string) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetVaultsWithFilter", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].([]*model2.Vault)
+	ret0, _ := ret[0].([]*model.Vault)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -477,7 +476,7 @@ func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3
 }
 
 // InsertTokenPairs mocks base method.
-func (m *MockRepository) InsertTokenPairs(arg0 context.Context, arg1 ...*model2.TokenPair) error {
+func (m *MockRepository) InsertTokenPairs(arg0 context.Context, arg1 ...*model.TokenPair) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -496,7 +495,7 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 }
 
 // UpsertOrcaWhirlpools mocks base method.
-func (m *MockRepository) UpsertOrcaWhirlpools(arg0 context.Context, arg1 ...*model2.OrcaWhirlpool) error {
+func (m *MockRepository) UpsertOrcaWhirlpools(arg0 context.Context, arg1 ...*model.OrcaWhirlpool) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -515,7 +514,7 @@ func (mr *MockRepositoryMockRecorder) UpsertOrcaWhirlpools(arg0 interface{}, arg
 }
 
 // UpsertPositions mocks base method.
-func (m *MockRepository) UpsertPositions(arg0 context.Context, arg1 ...*model2.Position) error {
+func (m *MockRepository) UpsertPositions(arg0 context.Context, arg1 ...*model.Position) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -534,7 +533,7 @@ func (mr *MockRepositoryMockRecorder) UpsertPositions(arg0 interface{}, arg1 ...
 }
 
 // UpsertProtoConfigs mocks base method.
-func (m *MockRepository) UpsertProtoConfigs(arg0 context.Context, arg1 ...*model2.ProtoConfig) error {
+func (m *MockRepository) UpsertProtoConfigs(arg0 context.Context, arg1 ...*model.ProtoConfig) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -553,7 +552,7 @@ func (mr *MockRepositoryMockRecorder) UpsertProtoConfigs(arg0 interface{}, arg1 
 }
 
 // UpsertTokenAccountBalances mocks base method.
-func (m *MockRepository) UpsertTokenAccountBalances(arg0 context.Context, arg1 ...*model2.TokenAccountBalance) error {
+func (m *MockRepository) UpsertTokenAccountBalances(arg0 context.Context, arg1 ...*model.TokenAccountBalance) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -572,7 +571,7 @@ func (mr *MockRepositoryMockRecorder) UpsertTokenAccountBalances(arg0 interface{
 }
 
 // UpsertTokenSwaps mocks base method.
-func (m *MockRepository) UpsertTokenSwaps(arg0 context.Context, arg1 ...*model2.TokenSwap) error {
+func (m *MockRepository) UpsertTokenSwaps(arg0 context.Context, arg1 ...*model.TokenSwap) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -591,7 +590,7 @@ func (mr *MockRepositoryMockRecorder) UpsertTokenSwaps(arg0 interface{}, arg1 ..
 }
 
 // UpsertTokens mocks base method.
-func (m *MockRepository) UpsertTokens(arg0 context.Context, arg1 ...*model2.Token) error {
+func (m *MockRepository) UpsertTokens(arg0 context.Context, arg1 ...*model.Token) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -610,7 +609,7 @@ func (mr *MockRepositoryMockRecorder) UpsertTokens(arg0 interface{}, arg1 ...int
 }
 
 // UpsertVaultPeriods mocks base method.
-func (m *MockRepository) UpsertVaultPeriods(arg0 context.Context, arg1 ...*model2.VaultPeriod) error {
+func (m *MockRepository) UpsertVaultPeriods(arg0 context.Context, arg1 ...*model.VaultPeriod) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -629,7 +628,7 @@ func (mr *MockRepositoryMockRecorder) UpsertVaultPeriods(arg0 interface{}, arg1 
 }
 
 // UpsertVaultWhitelists mocks base method.
-func (m *MockRepository) UpsertVaultWhitelists(arg0 context.Context, arg1 ...*model2.VaultWhitelist) error {
+func (m *MockRepository) UpsertVaultWhitelists(arg0 context.Context, arg1 ...*model.VaultWhitelist) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
@@ -648,7 +647,7 @@ func (mr *MockRepositoryMockRecorder) UpsertVaultWhitelists(arg0 interface{}, ar
 }
 
 // UpsertVaults mocks base method.
-func (m *MockRepository) UpsertVaults(arg0 context.Context, arg1 ...*model2.Vault) error {
+func (m *MockRepository) UpsertVaults(arg0 context.Context, arg1 ...*model.Vault) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {
