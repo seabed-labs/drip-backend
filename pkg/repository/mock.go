@@ -130,6 +130,21 @@ func (mr *MockRepositoryMockRecorder) GetAdminPositions(ctx, isVaultEnabled, pos
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAdminPositions", reflect.TypeOf((*MockRepository)(nil).GetAdminPositions), ctx, isVaultEnabled, positionFilterParams, paginationParams)
 }
 
+// GetAllSupportTokens mocks base method.
+func (m *MockRepository) GetAllSupportTokens(ctx context.Context) ([]*model.Token, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllSupportTokens", ctx)
+	ret0, _ := ret[0].([]*model.Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllSupportTokens indicates an expected call of GetAllSupportTokens.
+func (mr *MockRepositoryMockRecorder) GetAllSupportTokens(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSupportTokens", reflect.TypeOf((*MockRepository)(nil).GetAllSupportTokens), ctx)
+}
+
 // GetAllSupportedTokenAs mocks base method.
 func (m *MockRepository) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
