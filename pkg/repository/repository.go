@@ -107,10 +107,11 @@ type PaginationParams struct {
 }
 
 type VaultFilterParams struct {
-	IsEnabled  *bool
-	LikeTokenA *string
-	LikeTokenB *string
-	LikeVault  *string
+	IsEnabled        *bool
+	TokenA           *string
+	TokenB           *string
+	Vault            *string
+	VaultProtoConfig *string
 }
 
 type PositionFilterParams struct {

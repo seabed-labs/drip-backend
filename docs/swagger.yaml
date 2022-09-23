@@ -113,9 +113,10 @@ paths:
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
         - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
-        - $ref: '#/components/parameters/likeVaultQueryParam'
-        - $ref: '#/components/parameters/likeTokenAQueryParam'
-        - $ref: '#/components/parameters/likeTokenBQueryParam'
+        - $ref: '#/components/parameters/vaultProtoConfigQueryParam'
+        - $ref: '#/components/parameters/vaultQueryParam'
+        - $ref: '#/components/parameters/tokenAQueryParam'
+        - $ref: '#/components/parameters/tokenBQueryParam'
         - $ref: '#/components/parameters/enabledQueryParam'
         - $ref: "#/components/parameters/offsetQueryParam"
         - $ref: "#/components/parameters/limitQueryParam"
@@ -513,24 +514,6 @@ components:
       schema:
         type: boolean
 
-    likeTokenAQueryParam:
-      name: tokenA
-      in: query
-      schema:
-        type: string
-
-    likeTokenBQueryParam:
-      name: tokenB
-      in: query
-      schema:
-        type: string
-
-    likeVaultQueryParam:
-      name: vault
-      in: query
-      schema:
-        type: string
-
     isClosedQueryParam:
       name: isClosed
       in: query
@@ -645,6 +628,12 @@ components:
 
     vaultQueryParam:
       name: vault
+      in: query
+      schema:
+        type: string
+
+    vaultProtoConfigQueryParam:
+      name: vaultProtoConfig
       in: query
       schema:
         type: string
