@@ -29,10 +29,11 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	// Get all Vaults
 	vaults, err := h.repo.AdminGetVaults(c.Request().Context(),
 		repository.VaultFilterParams{
-			IsEnabled:  (*bool)(params.Enabled),
-			LikeTokenA: (*string)(params.TokenA),
-			LikeTokenB: (*string)(params.TokenB),
-			LikeVault:  (*string)(params.Vault),
+			IsEnabled:        (*bool)(params.Enabled),
+			TokenA:           (*string)(params.TokenA),
+			TokenB:           (*string)(params.TokenB),
+			Vault:            (*string)(params.Vault),
+			VaultProtoConfig: (*string)(params.VaultProtoConfig),
 		},
 		repository.PaginationParams{
 			Limit:  (*int)(params.Limit),
