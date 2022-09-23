@@ -117,6 +117,30 @@ func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairI
 	return tokenSwaps, nil
 }
 
+// todo: dedupe with GetAllSupportedTokenAs
+func (d repositoryImpl) GetAllSupportTokens(ctx context.Context) ([]*model.Token, error) {
+	tokenPairs, err := d.repo.TokenPair.WithContext(ctx).
+		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
+		Where(d.repo.Vault.Enabled.Is(true)).
+		Find()
+	if err != nil {
+		return nil, err
+	}
+	tokenMintSet := make(map[string]bool)
+	for _, pair := range tokenPairs {
+		tokenMintSet[pair.TokenA] = true
+		tokenMintSet[pair.TokenB] = true
+	}
+	tokenMints := []string{}
+	for mint := range tokenMintSet {
+		tokenMints = append(tokenMints, mint)
+	}
+	if len(tokenMints) == 0 {
+		return []*model.Token{}, nil
+	}
+	return d.GetTokensByMints(ctx, tokenMints)
+}
+
 func (d repositoryImpl) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
 	tokenPairs, err := d.repo.TokenPair.WithContext(ctx).
 		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
