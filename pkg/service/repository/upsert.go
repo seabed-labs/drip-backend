@@ -1,14 +1,13 @@
 package repository
 
 import (
-	context "context"
+	"context"
 
-	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
-
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"gorm.io/gorm/clause"
 )
 
-func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model2.OrcaWhirlpool) error {
+func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model.OrcaWhirlpool) error {
 	return d.repo.OrcaWhirlpool.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -18,7 +17,7 @@ func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...
 		Create(whirlpools...)
 }
 
-func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model2.TokenSwap) error {
+func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*model.TokenSwap) error {
 	return d.repo.TokenSwap.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -28,7 +27,7 @@ func (d repositoryImpl) UpsertTokenSwaps(ctx context.Context, tokenSwaps ...*mod
 		Create(tokenSwaps...)
 }
 
-func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model2.VaultWhitelist) error {
+func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLists ...*model.VaultWhitelist) error {
 	if len(vaultWhiteLists) == 0 {
 		return nil
 	}
@@ -42,14 +41,14 @@ func (d repositoryImpl) UpsertVaultWhitelists(ctx context.Context, vaultWhiteLis
 		Create(vaultWhiteLists...)
 }
 
-func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*model2.TokenPair) error {
+func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*model.TokenPair) error {
 	return d.repo.TokenPair.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{DoNothing: true}).
 		Create(tokenPairs...)
 }
 
-func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model2.TokenAccountBalance) error {
+func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccountBalance) error {
 	return d.repo.TokenAccountBalance.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -58,21 +57,21 @@ func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAcc
 		Create(tokenAccountBalances...)
 }
 
-func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model2.ProtoConfig) error {
+func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error {
 	return d.repo.ProtoConfig.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{UpdateAll: true}).
 		Create(protoConfigs...)
 }
 
-func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model2.Token) error {
+func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model.Token) error {
 	return d.repo.Token.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{UpdateAll: true}).
 		Create(tokens...)
 }
 
-func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model2.Vault) error {
+func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model.Vault) error {
 	// Insert new vaults or update select fields on updates
 	return d.repo.Vault.
 		WithContext(ctx).
@@ -83,10 +82,10 @@ func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model2.Vaul
 		Create(vaults...)
 }
 
-func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...*model2.VaultPeriod) error {
+func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...*model.VaultPeriod) error {
 	return d.repo.VaultPeriod.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(vaultPeriods...)
 }
 
-func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model2.Position) error {
+func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model.Position) error {
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
 }

@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	configs2 "github.com/dcaf-labs/drip/pkg/service/configs"
-
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/jmoiron/sqlx"
@@ -20,7 +19,7 @@ const migrationDir = "./pkg/service/repository/database/migrations"
 
 // Importing DB mainly so that we can migrate a test db
 func RunMigrations(
-	db *sqlx.DB, config *configs2.PSQLConfig,
+	db *sqlx.DB, config *configs.PSQLConfig,
 ) (int, error) {
 	if err := db.Ping(); err != nil {
 		logrus.WithField("err", err.Error()).Error("could not ping DB")
@@ -33,7 +32,7 @@ func RunMigrations(
 	}
 	m, err := migrate.NewWithDatabaseInstance(
 		// file://path/to/directory
-		fmt.Sprintf("file://%s/%s", configs2.GetProjectRoot(), migrationDir),
+		fmt.Sprintf("file://%s/%s", configs.GetProjectRoot(), migrationDir),
 		config.DBName, driver)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("could not apply migrations")

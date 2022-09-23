@@ -5,10 +5,8 @@ import (
 	"strconv"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-
 	"github.com/dcaf-labs/drip/pkg/service/repository"
-	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
-
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -56,7 +54,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		logrus.WithError(err).Error("failed to get tokenPairs")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get token pairs"})
 	}
-	tokenPairsByID := make(map[string]*model2.TokenPair)
+	tokenPairsByID := make(map[string]*model.TokenPair)
 	for i := range tokenPairs {
 		tokenPair := tokenPairs[i]
 		tokenPairsByID[tokenPair.ID] = tokenPair
@@ -119,7 +117,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	tokenAccountBalancesByPubkey := make(map[string]*model2.TokenAccountBalance)
+	tokenAccountBalancesByPubkey := make(map[string]*model.TokenAccountBalance)
 	for i := range tokenAccountBalances {
 		tokeAccountBalance := tokenAccountBalances[i]
 		tokenAccountBalancesByPubkey[tokeAccountBalance.Pubkey] = tokeAccountBalance
@@ -137,7 +135,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	tokensByPubkey := make(map[string]*model2.Token)
+	tokensByPubkey := make(map[string]*model.Token)
 	for i := range tokens {
 		token := tokens[i]
 		tokensByPubkey[token.Pubkey] = token
@@ -148,7 +146,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		logrus.WithError(err).Error("failed to get protoConfigs")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	protoConfigsByPubkey := make(map[string]*model2.ProtoConfig)
+	protoConfigsByPubkey := make(map[string]*model.ProtoConfig)
 	for i := range protoConfigs {
 		protoConfig := protoConfigs[i]
 		protoConfigsByPubkey[protoConfig.Pubkey] = protoConfig
