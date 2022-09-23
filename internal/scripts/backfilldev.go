@@ -3,7 +3,8 @@ package scripts
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/sirupsen/logrus"
 )

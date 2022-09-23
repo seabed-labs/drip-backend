@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-labs/drip/pkg/apispec"
-	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 )

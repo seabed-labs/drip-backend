@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/disgo/webhook"

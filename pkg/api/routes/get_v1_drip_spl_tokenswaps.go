@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcaf-labs/drip/pkg/apispec"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
+
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -14,14 +16,14 @@ import (
 func (h Handler) GetV1DripSpltokenswapconfigs(c echo.Context, params apispec.GetV1DripSpltokenswapconfigsParams) error {
 	res := apispec.ListSplTokenSwapConfigs{}
 
-	var vaults []*model.Vault
+	var vaults []*model2.Vault
 	if params.Vault != nil {
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
 		if err != nil {
 			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vault by address")
 			return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: "invalid vault address"})
 		}
-		vaults = []*model.Vault{vault}
+		vaults = []*model2.Vault{vault}
 	} else {
 		var err error
 		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), nil, nil, nil)
@@ -42,11 +44,11 @@ func (h Handler) GetV1DripSpltokenswapconfigs(c echo.Context, params apispec.Get
 		logrus.WithError(err).Errorf("failed to get vault whitelists")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
-	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
+	vaultWhitelistsByVaultPubkey := make(map[string][]*model2.VaultWhitelist)
 	for i := range vaultWhitelists {
 		vaultWhitelist := vaultWhitelists[i]
 		if _, ok := vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey]; !ok {
-			vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = []*model.VaultWhitelist{}
+			vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = []*model2.VaultWhitelist{}
 		}
 		vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = append(vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey], vaultWhitelist)
 	}
@@ -93,7 +95,7 @@ func (h Handler) GetV1DripSpltokenswapconfigs(c echo.Context, params apispec.Get
 	return c.JSON(http.StatusOK, res)
 }
 
-func findTokenSwapForVault(vault *model.Vault, vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithBalance) (*repository.TokenSwapWithBalance, error) {
+func findTokenSwapForVault(vault *model2.Vault, vaultWhitelistsByVaultPubkey map[string][]*model2.VaultWhitelist, tokenSwapsByTokenPairID map[string][]*repository.TokenSwapWithBalance) (*repository.TokenSwapWithBalance, error) {
 	tokenSwaps, ok := tokenSwapsByTokenPairID[vault.TokenPairID]
 	if !ok {
 		logrus.

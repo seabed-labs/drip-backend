@@ -7,13 +7,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/utils"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
 
 	bin "github.com/gagliardetto/binary"
 
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/model"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
@@ -213,20 +214,41 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
-	protocolFeeOwedA, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
-	protocolFeeOwedB, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
-	rewardLastUpdatedTimestamp, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
-	liquidity, _ := decimal.NewFromString(orcaWhirlpool.Liquidity.String())
-	sqrtPrice, _ := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
-	feeGrowthGlobalA, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
-	feeGrowthGlobalB, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
-	oracle, _, _ := solana2.FindProgramAddress([][]byte{
-		[]byte("oracle"),
-		whirlpoolPubkey[:],
-	}, whirlpool.ProgramID)
+	protocolFeeOwedA, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
+	if err != nil {
+		return err
+	}
+	protocolFeeOwedB, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
+	if err != nil {
+		return err
+	}
+	rewardLastUpdatedTimestamp, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
+	if err != nil {
+		return err
+	}
+	liquidity, err := decimal.NewFromString(orcaWhirlpool.Liquidity.String())
+	if err != nil {
+		return err
+	}
+	sqrtPrice, err := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
+	if err != nil {
+		return err
+	}
+	feeGrowthGlobalA, err := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
+	if err != nil {
+		return err
+	}
+	feeGrowthGlobalB, err := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
+	if err != nil {
+		return err
+	}
+	oracle, err := utils.GetWhirlpoolPDA(whirlpoolPubkey.String())
+	if err != nil {
+		return err
+	}
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
-		&model.OrcaWhirlpool{
+		&model2.OrcaWhirlpool{
 			ID:                         uuid.New().String(),
 			TokenPairID:                tokenPair.ID,
 			Pubkey:                     whirlpoolPubkey.String(),
@@ -246,11 +268,11 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			SqrtPrice:                  sqrtPrice,
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
-			Oracle:                     oracle.String(),
+			Oracle:                     oracle,
 		},
 		// The only inverse is the token pair ID
 		// For token swap it makes sense to inverse the mints, but for whirlpool it doesn't
-		&model.OrcaWhirlpool{
+		&model2.OrcaWhirlpool{
 			ID:                         uuid.New().String(),
 			TokenPairID:                inverseTokenPair.ID,
 			Pubkey:                     whirlpoolPubkey.String(),
@@ -270,7 +292,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			SqrtPrice:                  sqrtPrice,
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
-			Oracle:                     oracle.String(),
+			Oracle:                     oracle,
 		},
 	); err != nil {
 		return err
@@ -300,7 +322,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model2.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -319,7 +341,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-	if err := p.repo.UpsertTokenSwaps(ctx, &model.TokenSwap{
+	if err := p.repo.UpsertTokenSwaps(ctx, &model2.TokenSwap{
 		ID:            uuid.New().String(),
 		Pubkey:        address,
 		Mint:          tokenSwap.TokenPool.String(),
@@ -370,7 +392,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
 		return fmt.Errorf("failed to UpsertTokenByAddress %s, err: %w", tokenAccount.Mint.String(), err)
 	}
-	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
+	return p.repo.UpsertTokenAccountBalances(ctx, &model2.TokenAccountBalance{
 		Pubkey: address,
 		Mint:   tokenAccount.Mint.String(),
 		Owner:  tokenAccount.Owner.String(),
@@ -401,7 +423,7 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 			symbol = existingTokens[0].Symbol
 			iconURL = existingTokens[0].IconURL
 		}
-		tokenModel := model.Token{
+		tokenModel := model2.Token{
 			Pubkey:   mintAddress,
 			Symbol:   symbol,
 			Decimals: int16(tokenMint.Decimals),
@@ -409,7 +431,7 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 		}
 		return p.repo.UpsertTokens(ctx, &tokenModel)
 	}
-	tokenModel := model.Token{
+	tokenModel := model2.Token{
 		Pubkey:   mintAddress,
 		Symbol:   &tokenMetadataAccount.Data.Symbol,
 		Decimals: int16(tokenMint.Decimals),
@@ -423,7 +445,7 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 	if err := p.client.GetAccount(ctx, address, &protoConfig); err != nil {
 		return err
 	}
-	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
+	return p.repo.UpsertProtoConfigs(ctx, &model2.ProtoConfig{
 		Pubkey:                  address,
 		Admin:                   protoConfig.Admin.String(),
 		Granularity:             protoConfig.Granularity,
@@ -446,7 +468,7 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 
-	if err := p.repo.UpsertVaults(ctx, &model.Vault{
+	if err := p.repo.UpsertVaults(ctx, &model2.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
@@ -462,13 +484,13 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 
-	var vaultWhitelists []*model.VaultWhitelist
+	var vaultWhitelists []*model2.VaultWhitelist
 	for i := range vaultAccount.WhitelistedSwaps {
 		whitelistedSwap := vaultAccount.WhitelistedSwaps[i]
 		if whitelistedSwap.IsZero() {
 			continue
 		}
-		vaultWhitelists = append(vaultWhitelists, &model.VaultWhitelist{
+		vaultWhitelists = append(vaultWhitelists, &model2.VaultWhitelist{
 			ID:              uuid.New().String(),
 			VaultPubkey:     address,
 			TokenSwapPubkey: whitelistedSwap.String(),
@@ -519,7 +541,7 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
 		return err
 	}
-	if err := p.repo.UpsertPositions(ctx, &model.Position{
+	if err := p.repo.UpsertPositions(ctx, &model2.Position{
 		Pubkey:                   address,
 		Vault:                    position.Vault.String(),
 		Authority:                position.PositionAuthority.String(),
@@ -579,7 +601,7 @@ func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, sh
 			return err
 		}
 	}
-	return p.repo.UpsertVaultPeriods(ctx, &model.VaultPeriod{
+	return p.repo.UpsertVaultPeriods(ctx, &model2.VaultPeriod{
 		Pubkey:      address,
 		Vault:       vaultPeriodAccount.Vault.String(),
 		PeriodID:    vaultPeriodAccount.PeriodId,
@@ -649,7 +671,7 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	if err := p.UpsertTokenByAddress(ctx, tokenBMint); err != nil {
 		return err
 	}
-	return p.repo.InsertTokenPairs(ctx, &model.TokenPair{
+	return p.repo.InsertTokenPairs(ctx, &model2.TokenPair{
 		ID:     uuid.New().String(),
 		TokenA: tokenAAMint,
 		TokenB: tokenBMint,
@@ -657,7 +679,7 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 }
 
 // todo: this should prob live in the repo layer
-func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*model.Token, *model.Token, error) {
+func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*model2.Token, *model2.Token, error) {
 	vault, err := p.ensureVault(ctx, vaultAddress)
 	if err != nil {
 		return nil, nil, err
@@ -737,7 +759,7 @@ func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool 
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys
-func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model.TokenPair, error) {
+func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) (*model2.TokenPair, error) {
 	tokenPair, err := p.repo.GetTokenPair(ctx, tokenAAMint, tokenBMint)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertTokenPair(ctx, tokenAAMint, tokenBMint); err != nil {
@@ -750,7 +772,7 @@ func (p impl) ensureTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 }
 
 // ensureVault - if vault exists return it , else upsert vault and all needed vault foreign keys
-func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, error) {
+func (p impl) ensureVault(ctx context.Context, address string) (*model2.Vault, error) {
 	vault, err := p.repo.AdminGetVaultByAddress(ctx, address)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
@@ -762,7 +784,7 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 }
 
 // ensureVaultPeriod - if vaultPeriod exists return it , else upsert vaultPeriods with a price of 0
-func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model.VaultPeriod, error) {
+func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model2.VaultPeriod, error) {
 	vaultPeriod, err := p.repo.GetVaultPeriodByAddress(ctx, address)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		if err := p.upsertVaultPeriodByAddress(ctx, address, false); err != nil {

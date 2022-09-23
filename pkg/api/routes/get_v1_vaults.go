@@ -4,7 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dcaf-labs/drip/pkg/apispec"
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )

@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dcaf-labs/drip/pkg/apispec"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
+
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -73,20 +75,20 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		vaultPubkeys = append(vaultPubkeys, position.Vault)
 	}
 
-	var vaults []*model.Vault
-	vaultsByPubkey := make(map[string]*model.Vault)
+	var vaults []*model2.Vault
+	vaultsByPubkey := make(map[string]*model2.Vault)
 
 	var protoConfigPubkeys []string
-	var protoConfigs []*model.ProtoConfig
-	protoConfigsByPubkey := make(map[string]*model.ProtoConfig)
+	var protoConfigs []*model2.ProtoConfig
+	protoConfigsByPubkey := make(map[string]*model2.ProtoConfig)
 
 	var tokenPairIDS []string
-	var tokenPairs []*model.TokenPair
-	tokenPairsByID := make(map[string]*model.TokenPair)
+	var tokenPairs []*model2.TokenPair
+	tokenPairsByID := make(map[string]*model2.TokenPair)
 
 	var tokenPubkeys []string
-	var tokens []*model.Token
-	tokensByPubkey := make(map[string]*model.Token)
+	var tokens []*model2.Token
+	tokensByPubkey := make(map[string]*model2.Token)
 
 	vaults, err = h.repo.AdminGetVaultsByAddresses(c.Request().Context(), vaultPubkeys...)
 	if err != nil {
@@ -131,7 +133,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		}
 	}
 	for i := range res {
-		var tokenPair *model.TokenPair
+		var tokenPair *model2.TokenPair
 		vault := vaultsByPubkey[res[i].Position.Vault]
 		if vault != nil {
 			tokenPair = tokenPairsByID[vault.TokenPairID]

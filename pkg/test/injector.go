@@ -4,14 +4,18 @@ import (
 	"context"
 	"os"
 
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
+
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/configs"
-	"github.com/dcaf-labs/drip/pkg/database/psql"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/query"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -28,8 +32,8 @@ func InjectDependencies(
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
-			psql.NewDatabase,
-			psql.NewGORMDatabase,
+			database.NewDatabase,
+			database.NewGORMDatabase,
 			query.Use,
 			solana.NewSolanaClient,
 			repository.NewRepository,
@@ -37,7 +41,7 @@ func InjectDependencies(
 			processor.NewProcessor,
 		),
 		fx.Invoke(
-			psql.RunMigrations,
+			database.RunMigrations,
 			testCase,
 		),
 		fx.NopLogger,
