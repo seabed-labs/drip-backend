@@ -256,6 +256,23 @@ func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, 
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetActiveTokenAccountBalancesByMint(ctx context.Context, mint string) ([]*model.TokenAccountBalance, error) {
+	return d.repo.TokenAccountBalance.WithContext(ctx).
+		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccountBalance.Mint)).
+		Where(d.repo.TokenAccountBalance.Amount.Gt(0)).
+		Where(d.repo.Position.Authority.Eq(mint)).
+		Find()
+}
+
+func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []string) ([]*model.TokenPair, error) {
+	stmt := d.repo.TokenPair.
+		WithContext(ctx)
+	if len(tokenPairIds) > 0 {
+		stmt = stmt.Where(d.repo.TokenPair.ID.In(tokenPairIds...))
+	}
+	return stmt.Find()
+}
+
 func (d repositoryImpl) GetVaultPeriodByAddress(
 	ctx context.Context,
 	address string,

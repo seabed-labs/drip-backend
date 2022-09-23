@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
+	"math"
 	"runtime/debug"
 	"strconv"
 	"time"
@@ -56,12 +57,14 @@ type impl struct {
 func NewProcessor(
 	repo repository.Repository,
 	client solana.Solana,
+	discordAlertService alert.Service,
 	tokenRegistryClient tokenregistry.TokenRegistry,
 ) Processor {
 	return impl{
 		repo:                repo,
-		solanaClient:        client,
+		client:              client,
 		tokenRegistryClient: tokenRegistryClient,
+		discordAlertService: discordAlertService,
 	}
 }
 
@@ -576,21 +579,37 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	return p.UpsertPosition(ctx, address, position)
 }
 
-func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Position, vault *model.Vault, tokenPair *model.TokenPair) {
+func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Position, vault *model.Vault, tokenPair *model.TokenPair) error {
 	// Build data and send new position alert on discord
-	tokenA, tokenAErr := p.repo.GetTokenByMint(ctx, tokenPair.TokenA)
-	tokenB, tokenBErr := p.repo.GetTokenByMint(ctx, tokenPair.TokenB)
-	protoConfig, protoConfigErr := p.repo.GetProtoConfigByAddress(ctx, vault.ProtoConfig)
-	if tokenAErr == nil && tokenBErr == nil && protoConfigErr == nil {
-		p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Build().Fields,
-			discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol},
-			discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol},
-			discord.EmbedField{Name: "Token A Deposit", Value: fmt.Sprint(position.DepositedTokenAAmount / uint64(tokenA.Decimals))},
-			discord.EmbedField{Name: "Granularity", Value: fmt.Sprint(protoConfig.Granularity)},
-			discord.EmbedField{Name: "Drip Amount", Value: fmt.Sprint(vault.DripAmount)},
-			discord.EmbedField{Name: "Wallet Address", Value: position.PositionAuthority.String()},
-		), alert.Success)
+	tokenA, err := p.repo.GetTokenByMint(ctx, tokenPair.TokenA)
+	if err != nil {
+		return err
 	}
+	tokenB, err := p.repo.GetTokenByMint(ctx, tokenPair.TokenB)
+	if err != nil {
+		return err
+	}
+	protoConfig, err := p.repo.GetProtoConfigByAddress(ctx, vault.ProtoConfig)
+	if err != nil {
+		return err
+	}
+
+	tokenADepositBigUnits := position.DepositedTokenAAmount / uint64(math.Pow(10, float64(tokenA.Decimals)))
+	periodicDripAmountBigUnits := position.PeriodicDripAmount / uint64(math.Pow(10, float64(tokenA.Decimals)))
+	var granularityStr string
+	if protoConfig.Granularity == 60 {
+		granularityStr = "Secondly"
+	} else if protoConfig.Granularity == 3600 {
+		granularityStr = "Hourly"
+	}
+	b := true
+	return p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Fields,
+		discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol, Inline: &b},
+		discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol, Inline: &b},
+		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatUint(tokenADepositBigUnits, 10)},
+		discord.EmbedField{Name: "Granularity", Value: granularityStr},
+		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatUint(periodicDripAmountBigUnits, 10)},
+	), alert.Success)
 }
 
 func (p impl) UpsertPosition(ctx context.Context, address string, position drip.Position) error {
@@ -610,7 +629,7 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	}
 
 	_, errGetPosition := p.repo.GetPositionByNFTMint(ctx, position.PositionAuthority.String())
-	if errGetPosition.Error() == repository.ErrRecordNotFound {
+	if errGetPosition != nil && errGetPosition.Error() == repository.ErrRecordNotFound {
 		p.sendNewPositionAlertDiscord(ctx, position, vault, tokenPair)
 	}
 
