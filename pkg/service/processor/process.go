@@ -594,8 +594,8 @@ func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Pos
 		return err
 	}
 
-	tokenADepositBigUnits := position.DepositedTokenAAmount / uint64(math.Pow(10, float64(tokenA.Decimals)))
-	periodicDripAmountBigUnits := position.PeriodicDripAmount / uint64(math.Pow(10, float64(tokenA.Decimals)))
+	tokenADepositBigUnits := float64(position.DepositedTokenAAmount) / math.Pow(10, float64(tokenA.Decimals))
+	periodicDripAmountBigUnits := float64(position.PeriodicDripAmount) / math.Pow(10, float64(tokenA.Decimals))
 	var granularityStr string
 	if protoConfig.Granularity == 60 {
 		granularityStr = "Secondly"
@@ -606,9 +606,9 @@ func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Pos
 	return p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Fields,
 		discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol, Inline: &b},
 		discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol, Inline: &b},
-		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatUint(tokenADepositBigUnits, 10)},
+		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(tokenADepositBigUnits, 'f', -1, 32)},
 		discord.EmbedField{Name: "Granularity", Value: granularityStr},
-		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatUint(periodicDripAmountBigUnits, 10)},
+		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(periodicDripAmountBigUnits, 'f', -1, 32)},
 	), alert.Success)
 }
 
