@@ -609,6 +609,7 @@ func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Pos
 		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(tokenADepositBigUnits, 'f', -1, 32)},
 		discord.EmbedField{Name: "Granularity", Value: granularityStr},
 		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(periodicDripAmountBigUnits, 'f', -1, 32)},
+		discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(position.NumberOfSwaps, 10)},
 	), alert.Success)
 }
 
