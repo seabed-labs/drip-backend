@@ -13,6 +13,7 @@ import (
 func (i impl) GetBestOrcaWhirlpoolForVaults(
 	ctx context.Context, vaults []*model.Vault,
 ) (map[string]*model.OrcaWhirlpool, error) {
+	vaults = filterVaultsWithZeroDripAmount(vaults)
 	vaultWhitelists, err := i.repo.GetVaultWhitelistsByVaultAddress(ctx, model.GetVaultPubkeys(vaults))
 	if err != nil {
 		return nil, err

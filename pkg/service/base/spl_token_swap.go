@@ -11,6 +11,7 @@ import (
 func (i impl) GetBestTokenSwapsForVaults(
 	ctx context.Context, vaults []*model.Vault,
 ) (map[string]*model.TokenSwap, error) {
+	vaults = filterVaultsWithZeroDripAmount(vaults)
 	vaultWhitelists, err := i.repo.GetVaultWhitelistsByVaultAddress(ctx, model.GetVaultPubkeys(vaults))
 	if err != nil {
 		return nil, err
