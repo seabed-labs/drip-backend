@@ -22,6 +22,14 @@ func GetOrcaWhirlpoolsByTokenPairID(whirlpools []*OrcaWhirlpool) map[string][]*O
 	return res
 }
 
+func GetOrcaWhirlpoolDeltaBQuoteByCompositeKey(deltaBQuotes []*OrcaWhirlpoolDeltaBQuote) map[string]*OrcaWhirlpoolDeltaBQuote {
+	res := make(map[string]*OrcaWhirlpoolDeltaBQuote)
+	for i := range deltaBQuotes {
+		res[deltaBQuotes[i].VaultPubkey+deltaBQuotes[i].WhirlpoolPubkey] = deltaBQuotes[i]
+	}
+	return res
+}
+
 func GetTokenAccountBalancesByPubkey(balances []*TokenAccountBalance) map[string]*TokenAccountBalance {
 	res := make(map[string]*TokenAccountBalance)
 	for i := range balances {

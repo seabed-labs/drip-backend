@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
+	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,8 +13,13 @@ func (i impl) GetBestOrcaWhirlpoolForVaults(
 	ctx context.Context, vaults []*model.Vault,
 ) (map[string]*model.OrcaWhirlpool, error) {
 	vaults = filterVaultsWithZeroDripAmount(vaults)
-	vaultWhitelists, err := i.repo.GetVaultWhitelistsByVaultAddress(ctx, model.GetVaultPubkeys(vaults))
+	vaultPubkeys := model.GetVaultPubkeys(vaults)
+	vaultWhitelists, err := i.repo.GetVaultWhitelistsByVaultAddress(ctx, vaultPubkeys)
 	if err != nil {
+		return nil, err
+	}
+	whirlpoolDeltaBQuotes, err := i.repo.GetOrcaWhirlpoolDeltaBQuoteByVaultAddresses(ctx, vaultPubkeys...)
+	if err != nil && err.Error() != repository.ErrRecordNotFound {
 		return nil, err
 	}
 	whirlpools, err := i.repo.GetOrcaWhirlpoolsByTokenPairIDs(ctx, model.GetTokenPairIDsForVaults(vaults)...)
@@ -26,14 +30,14 @@ func (i impl) GetBestOrcaWhirlpoolForVaults(
 		vaults,
 		model.GetVaultWhitelistsByVault(vaultWhitelists),
 		model.GetOrcaWhirlpoolsByTokenPairID(whirlpools),
-		i.network), nil
+		model.GetOrcaWhirlpoolDeltaBQuoteByCompositeKey(whirlpoolDeltaBQuotes)), nil
 }
 
 func getBestOrcaWhirlpoolForVaults(
 	vaults []*model.Vault,
 	vaultWhitelists map[string][]*model.VaultWhitelist,
 	orcaWhirlpoolByTokenPairID map[string][]*model.OrcaWhirlpool,
-	network configs.Network,
+	orcaWhirlpoolDeltaBQuoteByCompositeKey map[string]*model.OrcaWhirlpoolDeltaBQuote,
 ) map[string]*model.OrcaWhirlpool {
 	res := make(map[string]*model.OrcaWhirlpool)
 	for i := range vaults {
@@ -45,7 +49,7 @@ func getBestOrcaWhirlpoolForVaults(
 			log.Errorf("no whirlpools found")
 			continue
 		}
-		bestWhirlpool, err := getBestOrcaWhirlpoolForVault(vaults[i], whirlpools, network)
+		bestWhirlpool, err := getBestOrcaWhirlpoolForVault(vaults[i], whirlpools, orcaWhirlpoolDeltaBQuoteByCompositeKey)
 		if err != nil {
 			log.WithError(err).Errorf("whirlpools found, but error in choosing the best one")
 			continue
@@ -58,23 +62,26 @@ func getBestOrcaWhirlpoolForVaults(
 func getBestOrcaWhirlpoolForVault(
 	vault *model.Vault,
 	whirlpools []*model.OrcaWhirlpool,
-	network configs.Network,
+	orcaWhirlpoolDeltaBQuoteByCompositeKey map[string]*model.OrcaWhirlpoolDeltaBQuote,
 ) (*model.OrcaWhirlpool, error) {
-	if len(whirlpools) == 0 {
+	if len(whirlpools) == 0 || len(orcaWhirlpoolDeltaBQuoteByCompositeKey) == 0 {
 		return nil, fmt.Errorf("failed to get token_swap")
 	}
 	bestSwapDeltaB := uint64(0)
 	var bestSwap *model.OrcaWhirlpool
 	for _, eligibleSwap := range whirlpools {
-		// todo: this is inefficient, should we just calculate and cache this value on whirlpool state changes?
-		swapDeltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(eligibleSwap.Pubkey, vault, network)
-		if err != nil {
+		compositeKey := vault.Pubkey + eligibleSwap.Pubkey
+		whirlpoolDeltaBQuote, ok := orcaWhirlpoolDeltaBQuoteByCompositeKey[compositeKey]
+		if !ok {
+			err := fmt.Errorf(
+				"missing orca whirlpool deltaB estimate for whirlpool %s and vault %s with compositeKey %s",
+				eligibleSwap.Pubkey, vault.Pubkey, compositeKey)
 			return nil, err
 		}
 
-		if swapDeltaB > bestSwapDeltaB {
+		if whirlpoolDeltaBQuote.DeltaB > bestSwapDeltaB {
 			bestSwap = eligibleSwap
-			bestSwapDeltaB = swapDeltaB
+			bestSwapDeltaB = whirlpoolDeltaBQuote.DeltaB
 		}
 	}
 	if bestSwap == nil {

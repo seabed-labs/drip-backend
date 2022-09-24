@@ -52,6 +52,7 @@ type Repository interface {
 	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolDeltaBQuote(ctx context.Context, vaultPubkey, whirlpoolPubkey string) (*model.OrcaWhirlpoolDeltaBQuote, error)
+	GetOrcaWhirlpoolDeltaBQuoteByVaultAddresses(ctx context.Context, vaultPubkeys ...string) ([]*model.OrcaWhirlpoolDeltaBQuote, error)
 
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
