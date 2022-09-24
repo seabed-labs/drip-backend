@@ -134,6 +134,25 @@ func activeWalletModelsToAPI(activeWallets []repository.ActiveWallet) apispec.Li
 	return res
 }
 
+func vaultTokenSwapToAPI(vault *model.Vault, tokenSwap *model.TokenSwap) apispec.SplTokenSwapConfig {
+	return apispec.SplTokenSwapConfig{
+		Swap:              tokenSwap.Pubkey,
+		SwapAuthority:     tokenSwap.Authority,
+		SwapFeeAccount:    tokenSwap.FeeAccount,
+		SwapTokenAAccount: tokenSwap.TokenAAccount,
+		SwapTokenBAccount: tokenSwap.TokenBAccount,
+		SwapTokenMint:     tokenSwap.Mint,
+		DripCommon: apispec.DripCommon{
+			TokenAMint:         vault.TokenAMint,
+			TokenBMint:         vault.TokenBMint,
+			Vault:              vault.Pubkey,
+			VaultProtoConfig:   vault.ProtoConfig,
+			VaultTokenAAccount: vault.TokenAAccount,
+			VaultTokenBAccount: vault.TokenBAccount,
+		},
+	}
+}
+
 func getPaginationParamsFromAPI(offsetParam *apispec.OffsetQueryParam, limitParam *apispec.LimitQueryParam) repository.PaginationParams {
 	limit := defaultLimit
 	if limitParam != nil {

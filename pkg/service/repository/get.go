@@ -48,10 +48,10 @@ func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model
 		First()
 }
 
-func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string) ([]*model.TokenSwap, error) {
+func (d repositoryImpl) GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.TokenSwap, error) {
 	stmt := d.repo.TokenSwap.WithContext(ctx)
-	if len(tokenPairID) > 0 {
-		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairID...))
+	if len(tokenPairIDs) > 0 {
+		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairIDs...))
 	}
 	return stmt.Find()
 }
@@ -222,7 +222,7 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenAccountBalancesByIDS(ctx context.Context, tokenAccountPubkeys []string) ([]*model.TokenAccountBalance, error) {
+func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccountBalance, error) {
 	stmt := d.repo.TokenAccountBalance.
 		WithContext(ctx)
 	if len(tokenAccountPubkeys) > 0 {

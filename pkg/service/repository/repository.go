@@ -44,7 +44,7 @@ type Repository interface {
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 
 	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
-	GetTokenSwaps(context.Context, []string) ([]*model.TokenSwap, error)
+	GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.TokenSwap, error)
 	GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 
 	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error)
@@ -53,7 +53,7 @@ type Repository interface {
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
-	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
+	GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccountBalance, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)

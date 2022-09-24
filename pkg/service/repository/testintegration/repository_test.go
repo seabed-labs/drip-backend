@@ -11,7 +11,7 @@ package testintegration
 //GetTokenPair(context.Context, string, string) (*model2.TokenPair, error)
 //GetTokenPairByID(context.Context, string) (*model2.TokenPair, error)
 //GetTokenPairs(context.Context, *string, *string) ([]*model2.TokenPair, error)
-//GetTokenSwaps(context.Context, []string) ([]*model2.TokenSwap, error)
+//GetSPLTokenSwapsByTokenPairIDs(context.Context, []string) ([]*model2.TokenSwap, error)
 //GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 //GetTokenSwapForTokenAccount(context.Context, string) (*model2.TokenSwap, error)
 

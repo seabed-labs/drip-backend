@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/base"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
@@ -51,6 +53,7 @@ func getDependencies() []fx.Option {
 				controller.NewHandler,
 				processor.NewProcessor,
 				alert.NewService,
+				base.NewBase,
 			),
 			fx.Invoke(
 				// func() { log.SetFormatter(&log.JSONFormatter{}) },
@@ -73,6 +76,7 @@ func getDependencies() []fx.Option {
 				middleware.NewHandler,
 				controller.NewHandler,
 				processor.NewProcessor,
+				base.NewBase,
 			),
 			fx.Invoke(
 				// func() { log.SetFormatter(&log.JSONFormatter{}) },
