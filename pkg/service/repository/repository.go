@@ -47,7 +47,7 @@ type Repository interface {
 	GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.TokenSwap, error)
 	GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 
-	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error)
+	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
 
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)

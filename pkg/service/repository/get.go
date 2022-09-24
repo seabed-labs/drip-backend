@@ -187,7 +187,7 @@ func (d repositoryImpl) GetOrcaWhirlpoolByAddress(ctx context.Context, address s
 	return d.repo.OrcaWhirlpool.WithContext(ctx).Where(d.repo.OrcaWhirlpool.Pubkey.Eq(address)).First()
 }
 
-func (d repositoryImpl) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
+func (d repositoryImpl) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error) {
 	stmt := d.repo.OrcaWhirlpool.
 		WithContext(ctx).
 		Where(d.repo.OrcaWhirlpool.TokenPairID.In(tokenPairIDs...))
