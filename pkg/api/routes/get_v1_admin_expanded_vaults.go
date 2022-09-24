@@ -72,7 +72,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		tokenAccountPubkeys = append(tokenAccountPubkeys, vault.TreasuryTokenBAccount)
 	}
 
-	tokenAccountBalances, err := h.repo.GetTokenAccountBalancesByIDS(c.Request().Context(), tokenAccountPubkeys)
+	tokenAccountBalances, err := h.repo.GetTokenAccountBalancesByAddresses(c.Request().Context(), tokenAccountPubkeys...)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})

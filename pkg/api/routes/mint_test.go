@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/service/base"
+
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/configs"
 
@@ -38,7 +40,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
@@ -62,7 +64,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -91,7 +93,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -131,7 +133,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -186,7 +188,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -246,7 +248,7 @@ func TestHandler_PostMint(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, m, repository.NewMockRepository(ctrl))
+		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
