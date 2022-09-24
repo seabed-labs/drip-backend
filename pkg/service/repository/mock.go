@@ -176,18 +176,23 @@ func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolByAddress(ctx, address int
 }
 
 // GetOrcaWhirlpoolsByTokenPairIDs mocks base method.
-func (m *MockRepository) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs []string) ([]*model.OrcaWhirlpool, error) {
+func (m *MockRepository) GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolsByTokenPairIDs", ctx, tokenPairIDs)
+	varargs := []interface{}{ctx}
+	for _, a := range tokenPairIDs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolsByTokenPairIDs", varargs...)
 	ret0, _ := ret[0].([]*model.OrcaWhirlpool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrcaWhirlpoolsByTokenPairIDs indicates an expected call of GetOrcaWhirlpoolsByTokenPairIDs.
-func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolsByTokenPairIDs(ctx, tokenPairIDs interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolsByTokenPairIDs(ctx interface{}, tokenPairIDs ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolsByTokenPairIDs", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolsByTokenPairIDs), ctx, tokenPairIDs)
+	varargs := append([]interface{}{ctx}, tokenPairIDs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolsByTokenPairIDs", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolsByTokenPairIDs), varargs...)
 }
 
 // GetPositionByNFTMint mocks base method.
