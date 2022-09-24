@@ -57,7 +57,7 @@ type impl struct {
 func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
-	url := getURL(config.Network)
+	url := GetURL(config.Network)
 	solanaClient := impl{
 		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 2)),
 		network: config.Network,
@@ -434,7 +434,7 @@ func (s impl) signAndBroadcast(
 	return txHash.String(), nil
 }
 
-func getURL(env configs.Network) string {
+func GetURL(env configs.Network) string {
 	switch env {
 	case configs.DevnetNetwork:
 		return rpc.DevNet_RPC

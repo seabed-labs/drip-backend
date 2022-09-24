@@ -4,26 +4,26 @@ import {
     AccountFetcher,
     buildWhirlpoolClient,
     ORCA_WHIRLPOOL_PROGRAM_ID,
-    PDAUtil, swapQuoteByInputToken,
+    swapQuoteByInputToken,
     WhirlpoolContext
 } from "@orca-so/whirlpools-sdk";
 import {Percentage} from "@orca-so/common-sdk";
 import { PublicKey, Keypair, Connection } from "@solana/web3.js";
 
+// example usage
+// npx ts-node ./pkg/service/orcawhirlpool/orcaWhirlpoolQuoteEstimate.ts GSFnjnJ7TdSsGWb6JgFhWakWrv8VGZUAghnY3EA8Xj46 7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M 100000 https://api.devnet.solana.com
 async function getQuote() {
     const args = process.argv.slice(2);
-    if (args.length < 6) {
+    if (args.length != 4) {
         console.log(JSON.stringify({
             error: `invalid number of arguments ${args.length}, expected 6`
         }));
         return;
     }
-    const config = new PublicKey(args[0]);
-    const tokenAMint = new PublicKey(args[1]);
-    const tokenBMint = new PublicKey(args[2]);
-    const inputToken = new PublicKey(args[3]);
-    const tickSpacing = Number(args[4]);
-    const connectionUrl = args[5];
+    const whirlpoolPubkey = new PublicKey(args[0]);
+    const inputToken = new PublicKey(args[1]);
+    const inputAmount =  new BN(args[2]);
+    const connectionUrl = args[3];
 
     // Don't need to sign anything, so a random keypair is fine
     const wallet = new NodeWallet(Keypair.generate());
@@ -36,21 +36,13 @@ async function getQuote() {
     // @ts-ignore - orca uses an older anchor version, so the provider is incompatible
     const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID);
     const whirlpoolClient = buildWhirlpoolClient(ctx);
-    // console.log(config, tokenAMint, tokenBMint, )
-    const whirlpoolPda = PDAUtil.getWhirlpool(
-        ORCA_WHIRLPOOL_PROGRAM_ID,
-        config,
-        tokenAMint,
-        tokenBMint,
-        tickSpacing,
-    );
 
-    const whirlpool = await whirlpoolClient.getPool(whirlpoolPda.publicKey, true);
+    const whirlpool = await whirlpoolClient.getPool(whirlpoolPubkey, true);
 
     const swapQuote =  await swapQuoteByInputToken(
         whirlpool,
         inputToken,
-        new BN(100),
+        inputAmount,
         Percentage.fromFraction(0, 100),
         ORCA_WHIRLPOOL_PROGRAM_ID,
         fetcher,
@@ -79,7 +71,7 @@ async function main() {
         await getQuote();
     } catch(e) {
         console.log(JSON.stringify({
-            error: e.toString()
+            error: e
         }));
     }
 }
