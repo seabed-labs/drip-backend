@@ -13,88 +13,93 @@ import (
 
 func Use(db *gorm.DB) *Query {
 	return &Query{
-		db:                  db,
-		OrcaWhirlpool:       newOrcaWhirlpool(db),
-		Position:            newPosition(db),
-		ProtoConfig:         newProtoConfig(db),
-		SchemaMigration:     newSchemaMigration(db),
-		SourceReference:     newSourceReference(db),
-		Token:               newToken(db),
-		TokenAccountBalance: newTokenAccountBalance(db),
-		TokenPair:           newTokenPair(db),
-		TokenSwap:           newTokenSwap(db),
-		Vault:               newVault(db),
-		VaultPeriod:         newVaultPeriod(db),
-		VaultWhitelist:      newVaultWhitelist(db),
+		db:                       db,
+		OrcaWhirlpool:            newOrcaWhirlpool(db),
+		OrcaWhirlpoolDeltaBQuote: newOrcaWhirlpoolDeltaBQuote(db),
+		Position:                 newPosition(db),
+		ProtoConfig:              newProtoConfig(db),
+		SchemaMigration:          newSchemaMigration(db),
+		SourceReference:          newSourceReference(db),
+		Token:                    newToken(db),
+		TokenAccountBalance:      newTokenAccountBalance(db),
+		TokenPair:                newTokenPair(db),
+		TokenSwap:                newTokenSwap(db),
+		Vault:                    newVault(db),
+		VaultPeriod:              newVaultPeriod(db),
+		VaultWhitelist:           newVaultWhitelist(db),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	OrcaWhirlpool       orcaWhirlpool
-	Position            position
-	ProtoConfig         protoConfig
-	SchemaMigration     schemaMigration
-	SourceReference     sourceReference
-	Token               token
-	TokenAccountBalance tokenAccountBalance
-	TokenPair           tokenPair
-	TokenSwap           tokenSwap
-	Vault               vault
-	VaultPeriod         vaultPeriod
-	VaultWhitelist      vaultWhitelist
+	OrcaWhirlpool            orcaWhirlpool
+	OrcaWhirlpoolDeltaBQuote orcaWhirlpoolDeltaBQuote
+	Position                 position
+	ProtoConfig              protoConfig
+	SchemaMigration          schemaMigration
+	SourceReference          sourceReference
+	Token                    token
+	TokenAccountBalance      tokenAccountBalance
+	TokenPair                tokenPair
+	TokenSwap                tokenSwap
+	Vault                    vault
+	VaultPeriod              vaultPeriod
+	VaultWhitelist           vaultWhitelist
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                  db,
-		OrcaWhirlpool:       q.OrcaWhirlpool.clone(db),
-		Position:            q.Position.clone(db),
-		ProtoConfig:         q.ProtoConfig.clone(db),
-		SchemaMigration:     q.SchemaMigration.clone(db),
-		SourceReference:     q.SourceReference.clone(db),
-		Token:               q.Token.clone(db),
-		TokenAccountBalance: q.TokenAccountBalance.clone(db),
-		TokenPair:           q.TokenPair.clone(db),
-		TokenSwap:           q.TokenSwap.clone(db),
-		Vault:               q.Vault.clone(db),
-		VaultPeriod:         q.VaultPeriod.clone(db),
-		VaultWhitelist:      q.VaultWhitelist.clone(db),
+		db:                       db,
+		OrcaWhirlpool:            q.OrcaWhirlpool.clone(db),
+		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.clone(db),
+		Position:                 q.Position.clone(db),
+		ProtoConfig:              q.ProtoConfig.clone(db),
+		SchemaMigration:          q.SchemaMigration.clone(db),
+		SourceReference:          q.SourceReference.clone(db),
+		Token:                    q.Token.clone(db),
+		TokenAccountBalance:      q.TokenAccountBalance.clone(db),
+		TokenPair:                q.TokenPair.clone(db),
+		TokenSwap:                q.TokenSwap.clone(db),
+		Vault:                    q.Vault.clone(db),
+		VaultPeriod:              q.VaultPeriod.clone(db),
+		VaultWhitelist:           q.VaultWhitelist.clone(db),
 	}
 }
 
 type queryCtx struct {
-	OrcaWhirlpool       *orcaWhirlpoolDo
-	Position            *positionDo
-	ProtoConfig         *protoConfigDo
-	SchemaMigration     *schemaMigrationDo
-	SourceReference     *sourceReferenceDo
-	Token               *tokenDo
-	TokenAccountBalance *tokenAccountBalanceDo
-	TokenPair           *tokenPairDo
-	TokenSwap           *tokenSwapDo
-	Vault               *vaultDo
-	VaultPeriod         *vaultPeriodDo
-	VaultWhitelist      *vaultWhitelistDo
+	OrcaWhirlpool            *orcaWhirlpoolDo
+	OrcaWhirlpoolDeltaBQuote *orcaWhirlpoolDeltaBQuoteDo
+	Position                 *positionDo
+	ProtoConfig              *protoConfigDo
+	SchemaMigration          *schemaMigrationDo
+	SourceReference          *sourceReferenceDo
+	Token                    *tokenDo
+	TokenAccountBalance      *tokenAccountBalanceDo
+	TokenPair                *tokenPairDo
+	TokenSwap                *tokenSwapDo
+	Vault                    *vaultDo
+	VaultPeriod              *vaultPeriodDo
+	VaultWhitelist           *vaultWhitelistDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		OrcaWhirlpool:       q.OrcaWhirlpool.WithContext(ctx),
-		Position:            q.Position.WithContext(ctx),
-		ProtoConfig:         q.ProtoConfig.WithContext(ctx),
-		SchemaMigration:     q.SchemaMigration.WithContext(ctx),
-		SourceReference:     q.SourceReference.WithContext(ctx),
-		Token:               q.Token.WithContext(ctx),
-		TokenAccountBalance: q.TokenAccountBalance.WithContext(ctx),
-		TokenPair:           q.TokenPair.WithContext(ctx),
-		TokenSwap:           q.TokenSwap.WithContext(ctx),
-		Vault:               q.Vault.WithContext(ctx),
-		VaultPeriod:         q.VaultPeriod.WithContext(ctx),
-		VaultWhitelist:      q.VaultWhitelist.WithContext(ctx),
+		OrcaWhirlpool:            q.OrcaWhirlpool.WithContext(ctx),
+		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
+		Position:                 q.Position.WithContext(ctx),
+		ProtoConfig:              q.ProtoConfig.WithContext(ctx),
+		SchemaMigration:          q.SchemaMigration.WithContext(ctx),
+		SourceReference:          q.SourceReference.WithContext(ctx),
+		Token:                    q.Token.WithContext(ctx),
+		TokenAccountBalance:      q.TokenAccountBalance.WithContext(ctx),
+		TokenPair:                q.TokenPair.WithContext(ctx),
+		TokenSwap:                q.TokenSwap.WithContext(ctx),
+		Vault:                    q.Vault.WithContext(ctx),
+		VaultPeriod:              q.VaultPeriod.WithContext(ctx),
+		VaultWhitelist:           q.VaultWhitelist.WithContext(ctx),
 	}
 }
 

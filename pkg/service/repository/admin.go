@@ -20,6 +20,13 @@ func (d repositoryImpl) AdminGetVaultsByAddresses(ctx context.Context, addresses
 		Find()
 }
 
+func (d repositoryImpl) AdminGetVaultsByTokenPairID(ctx context.Context, tokenPairID string) ([]*model.Vault, error) {
+	return d.repo.
+		Vault.WithContext(ctx).
+		Where(d.repo.Vault.TokenPairID.Eq(tokenPairID)).
+		Find()
+}
+
 func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey string, enabled bool) (*model.Vault, error) {
 	var res model.Vault
 	_, err := d.repo.Vault.

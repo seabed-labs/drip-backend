@@ -35,6 +35,21 @@ func (m *MockBase) EXPECT() *MockBaseMockRecorder {
 	return m.recorder
 }
 
+// GetBestOrcaWhirlpoolForVaults mocks base method.
+func (m *MockBase) GetBestOrcaWhirlpoolForVaults(ctx context.Context, vaults []*model.Vault) (map[string]*model.OrcaWhirlpool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBestOrcaWhirlpoolForVaults", ctx, vaults)
+	ret0, _ := ret[0].(map[string]*model.OrcaWhirlpool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBestOrcaWhirlpoolForVaults indicates an expected call of GetBestOrcaWhirlpoolForVaults.
+func (mr *MockBaseMockRecorder) GetBestOrcaWhirlpoolForVaults(ctx, vaults interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBestOrcaWhirlpoolForVaults", reflect.TypeOf((*MockBase)(nil).GetBestOrcaWhirlpoolForVaults), ctx, vaults)
+}
+
 // GetBestTokenSwapsForVaults mocks base method.
 func (m *MockBase) GetBestTokenSwapsForVaults(ctx context.Context, vaults []*model.Vault) (map[string]*model.TokenSwap, error) {
 	m.ctrl.T.Helper()

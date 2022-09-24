@@ -33,6 +33,9 @@ type QuoteEstimate struct {
 const scriptPath = "./pkg/service/orcawhirlpool/orcaWhirlpoolQuoteEstimate.ts"
 
 func EvaluateOrcaWhirlpool(whirlpool string, vault *model.Vault, network configs.Network) (uint64, error) {
+	if vault.DripAmount == 0 {
+		return 0, fmt.Errorf("drip amount is 0")
+	}
 	swapEstimate, err := getOrcaWhirlpoolQuoteEstimate(whirlpool, vault.TokenAMint, vault.DripAmount, solana.GetURL(network))
 	if err != nil {
 		return 0, err

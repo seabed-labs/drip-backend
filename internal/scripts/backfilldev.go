@@ -12,6 +12,7 @@ func Backfill(
 	config *configs.AppConfig,
 	processor processor.Processor,
 ) error {
+	logrus.WithField("network", config.Network).Infof("starting backfill")
 	if configs.IsDevnet(config.Network) {
 		for _, address := range []string{
 			"35WMYrE8E4vbmm4phVxkRDTK5gE8db2KUVGFTYduE1Uz",

@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
-
 	"github.com/iancoleman/strcase"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gen"
@@ -97,6 +96,10 @@ func GenerateModels(
 		gen.FieldType("sqrt_price", "decimal.Decimal"),
 		gen.FieldType("fee_growth_global_a", "decimal.Decimal"),
 		gen.FieldType("fee_growth_global_b", "decimal.Decimal"),
+	).AddMethod(ModelUtil{})
+
+	g.GenerateModel("orca_whirlpool_delta_b_quote",
+		gen.FieldType("delta_b", "uint64"),
 	).AddMethod(ModelUtil{})
 
 	g.Execute()

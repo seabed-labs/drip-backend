@@ -7,6 +7,16 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+func (d repositoryImpl) UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error {
+	return d.repo.OrcaWhirlpoolDeltaBQuote.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "vault_pubkey"}, {Name: "whirlpool_pubkey"}},
+			UpdateAll: true,
+		}).
+		Create(quotes...)
+}
+
 func (d repositoryImpl) UpsertOrcaWhirlpools(ctx context.Context, whirlpools ...*model.OrcaWhirlpool) error {
 	return d.repo.OrcaWhirlpool.
 		WithContext(ctx).

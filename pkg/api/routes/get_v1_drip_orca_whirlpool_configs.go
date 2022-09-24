@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -14,7 +12,6 @@ import (
 func (h Handler) GetV1DripOrcawhirlpoolconfigs(c echo.Context, params apispec.GetV1DripOrcawhirlpoolconfigsParams) error {
 	res := apispec.ListOrcaWhirlpoolConfigs{}
 
-	// TODO(Mocha): Refactor this and a the token swap config controller
 	var vaults []*model.Vault
 	if params.Vault != nil {
 		vault, err := h.repo.GetVaultByAddress(c.Request().Context(), string(*params.Vault))
@@ -27,114 +24,27 @@ func (h Handler) GetV1DripOrcawhirlpoolconfigs(c echo.Context, params apispec.Ge
 		var err error
 		vaults, err = h.repo.GetVaultsWithFilter(c.Request().Context(), nil, nil, nil)
 		if err != nil {
-			logrus.WithError(err).WithField("vault", *params.Vault).Errorf("failed to get vaults")
+			logrus.WithError(err).Errorf("failed to get vaults")
 			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults"})
 		}
 	}
 
-	var tokenPairIDS []string
-	var vaultPubkeys []string
-	for i := range vaults {
-		vault := vaults[i]
-		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
-		vaultPubkeys = append(vaultPubkeys, vault.Pubkey)
-	}
-	vaultWhitelists, err := h.repo.GetVaultWhitelistsByVaultAddress(c.Request().Context(), vaultPubkeys)
+	whirlpoolsByVault, err := h.base.GetBestOrcaWhirlpoolForVaults(c.Request().Context(), vaults)
 	if err != nil {
-		logrus.WithError(err).Errorf("failed to get vault whitelists")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
+		logrus.WithError(err).Errorf("failed to GetBestOrcaWhirlpoolForVaults")
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "Internal Server Error"})
 	}
-	vaultWhitelistsByVaultPubkey := make(map[string][]*model.VaultWhitelist)
-	for i := range vaultWhitelists {
-		vaultWhitelist := vaultWhitelists[i]
-		if _, ok := vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey]; !ok {
-			vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = []*model.VaultWhitelist{}
+	vaultsByPubkey := model.GetVaultsByPubkey(vaults)
+	for vaultPubkey, orcaWhirlpool := range whirlpoolsByVault {
+		vault, ok := vaultsByPubkey[vaultPubkey]
+		if !ok {
+			logrus.
+				WithError(err).
+				WithField("vaultPubkey", vaultPubkey).
+				Errorf("invalid vaultPubkey in whirlpoolsByVault")
+			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "Internal Server Error"})
 		}
-		vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey] = append(vaultWhitelistsByVaultPubkey[vaultWhitelist.VaultPubkey], vaultWhitelist)
-	}
-
-	orcaWhirlpools, err := h.repo.GetOrcaWhirlpoolsByTokenPairIDs(c.Request().Context(), tokenPairIDS)
-	if err != nil {
-		logrus.WithError(err).Errorf("failed to get orca whirlpools")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
-	}
-
-	orcaWhirlpoolsByTokenPairID := make(map[string][]*model.OrcaWhirlpool)
-	for i := range orcaWhirlpools {
-		orcaWhirlpool := orcaWhirlpools[i]
-		if _, ok := orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID]; !ok {
-			orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID] = []*model.OrcaWhirlpool{}
-		}
-		orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID] = append(orcaWhirlpoolsByTokenPairID[orcaWhirlpool.TokenPairID], orcaWhirlpool)
-	}
-
-	for i := range vaults {
-		vault := vaults[i]
-		orcaWhirlpool, err := findOrcaWhirlpoolForVault(vault, vaultWhitelistsByVaultPubkey, orcaWhirlpoolsByTokenPairID, h.network)
-		if err != nil {
-			logrus.WithError(err).Errorf("failed to get orca whirlpool for vault")
-			continue
-		}
-		res = append(res, apispec.OrcaWhirlpoolConfig{
-			Oracle:      orcaWhirlpool.Oracle,
-			TokenVaultA: orcaWhirlpool.TokenVaultA,
-			TokenVaultB: orcaWhirlpool.TokenVaultB,
-			Whirlpool:   orcaWhirlpool.Pubkey,
-			DripCommon: apispec.DripCommon{
-				TokenAMint:         orcaWhirlpool.TokenMintA,
-				TokenBMint:         orcaWhirlpool.TokenMintB,
-				Vault:              vault.Pubkey,
-				VaultProtoConfig:   vault.ProtoConfig,
-				VaultTokenAAccount: vault.TokenAAccount,
-				VaultTokenBAccount: vault.TokenBAccount,
-			},
-		})
+		res = append(res, vaultWhirlpoolToAPI(vault, orcaWhirlpool))
 	}
 	return c.JSON(http.StatusOK, res)
-}
-
-func findOrcaWhirlpoolForVault(
-	vault *model.Vault,
-	vaultWhitelistsByVaultPubkey map[string][]*model.VaultWhitelist,
-	orcaWhirlpoolsByTokenPairID map[string][]*model.OrcaWhirlpool,
-	network configs.Network,
-) (*model.OrcaWhirlpool, error) {
-	orcaWhirlpools, ok := orcaWhirlpoolsByTokenPairID[vault.TokenPairID]
-	if !ok {
-		logrus.
-			WithField("vault", vault.Pubkey).
-			WithField("TokenPairID", vault.TokenPairID).
-			Infof("skipping vault swap config, missing swap")
-	}
-
-	var elgibleOrcaWhirlpools []*model.OrcaWhirlpool
-	vaultWhitelists, ok := vaultWhitelistsByVaultPubkey[vault.Pubkey]
-	if !ok || len(vaultWhitelists) == 0 {
-		elgibleOrcaWhirlpools = orcaWhirlpools
-	} else {
-		for _, swap := range orcaWhirlpools {
-			for _, vaultWhitelist := range vaultWhitelists {
-				if vaultWhitelist.TokenSwapPubkey == swap.Pubkey {
-					elgibleOrcaWhirlpools = append(elgibleOrcaWhirlpools, swap)
-				}
-			}
-		}
-	}
-
-	// TODO: Remove
-	if network == configs.MainnetNetwork {
-		var tempElgibleOrcaWhirlpools []*model.OrcaWhirlpool
-		for _, orcaWhirlpool := range elgibleOrcaWhirlpools {
-			if _, ok := mainnetOrcaWhirlpoolsMap[orcaWhirlpool.Pubkey]; ok {
-				tempElgibleOrcaWhirlpools = append(tempElgibleOrcaWhirlpools, orcaWhirlpool)
-			}
-		}
-		elgibleOrcaWhirlpools = tempElgibleOrcaWhirlpools
-	}
-
-	if len(elgibleOrcaWhirlpools) == 0 {
-		return nil, fmt.Errorf("failed to get orcaWhirlpool")
-	}
-
-	return elgibleOrcaWhirlpools[0], nil
 }

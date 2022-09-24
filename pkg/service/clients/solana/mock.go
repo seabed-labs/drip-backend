@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	configs "github.com/dcaf-labs/drip/pkg/service/configs"
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	solana "github.com/gagliardetto/solana-go"
 	token "github.com/gagliardetto/solana-go/programs/token"
@@ -94,6 +95,20 @@ func (m *MockSolana) GetLargestTokenAccounts(ctx context.Context, mint string) (
 func (mr *MockSolanaMockRecorder) GetLargestTokenAccounts(ctx, mint interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLargestTokenAccounts", reflect.TypeOf((*MockSolana)(nil).GetLargestTokenAccounts), ctx, mint)
+}
+
+// GetNetwork mocks base method.
+func (m *MockSolana) GetNetwork() configs.Network {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNetwork")
+	ret0, _ := ret[0].(configs.Network)
+	return ret0
+}
+
+// GetNetwork indicates an expected call of GetNetwork.
+func (mr *MockSolanaMockRecorder) GetNetwork() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetwork", reflect.TypeOf((*MockSolana)(nil).GetNetwork))
 }
 
 // GetProgramAccounts mocks base method.

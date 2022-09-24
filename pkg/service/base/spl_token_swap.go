@@ -5,11 +5,13 @@ import (
 	"fmt"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	log "github.com/sirupsen/logrus"
 )
 
 func (i impl) GetBestTokenSwapsForVaults(
 	ctx context.Context, vaults []*model.Vault,
 ) (map[string]*model.TokenSwap, error) {
+	vaults = filterVaultsWithZeroDripAmount(vaults)
 	vaultWhitelists, err := i.repo.GetVaultWhitelistsByVaultAddress(ctx, model.GetVaultPubkeys(vaults))
 	if err != nil {
 		return nil, err
@@ -38,15 +40,18 @@ func getBestTokenSwapForVaults(
 ) map[string]*model.TokenSwap {
 	res := make(map[string]*model.TokenSwap)
 	for i := range vaults {
+		log.WithField("vault", vaults[i].Pubkey).WithField("tokenPairID", vaults[i].TokenPairID)
 		tokenSwaps := filterNonWhitelistedTokenSwaps(
 			tokenSwapsByTokenPairId[vaults[i].TokenPairID],
 			vaultWhitelists[vaults[i].Pubkey])
 		if len(tokenSwaps) == 0 {
-			panic("todo")
+			log.Errorf("no tokenSwaps found")
+			continue
 		}
 		bestTokenSwap, err := getBestTokenSwapForVault(vaults[i], tokenSwaps, tokenAccountBalancesByPubkey)
 		if err != nil {
-			panic("todo")
+			log.WithError(err).Errorf("tokenSwaps found, but error in choosing the best one")
+			continue
 		}
 		res[vaults[i].Pubkey] = bestTokenSwap
 	}

@@ -71,7 +71,7 @@ async function main() {
         await getQuote();
     } catch(e) {
         console.log(JSON.stringify({
-            error: e
+            error: JSON.stringify(e)
         }));
     }
 }

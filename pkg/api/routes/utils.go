@@ -153,6 +153,23 @@ func vaultTokenSwapToAPI(vault *model.Vault, tokenSwap *model.TokenSwap) apispec
 	}
 }
 
+func vaultWhirlpoolToAPI(vault *model.Vault, orcaWhirlpool *model.OrcaWhirlpool) apispec.OrcaWhirlpoolConfig {
+	return apispec.OrcaWhirlpoolConfig{
+		Oracle:      orcaWhirlpool.Oracle,
+		TokenVaultA: orcaWhirlpool.TokenVaultA,
+		TokenVaultB: orcaWhirlpool.TokenVaultB,
+		Whirlpool:   orcaWhirlpool.Pubkey,
+		DripCommon: apispec.DripCommon{
+			TokenAMint:         vault.TokenAMint,
+			TokenBMint:         vault.TokenBMint,
+			Vault:              vault.Pubkey,
+			VaultProtoConfig:   vault.ProtoConfig,
+			VaultTokenAAccount: vault.TokenAAccount,
+			VaultTokenBAccount: vault.TokenBAccount,
+		},
+	}
+}
+
 func getPaginationParamsFromAPI(offsetParam *apispec.OffsetQueryParam, limitParam *apispec.LimitQueryParam) repository.PaginationParams {
 	limit := defaultLimit
 	if limitParam != nil {
