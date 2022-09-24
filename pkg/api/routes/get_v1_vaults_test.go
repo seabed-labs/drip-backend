@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/base"
+
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/configs"
 
@@ -67,7 +69,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, solana.NewMockSolana(ctrl), m)
+		}, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 
 		params := apispec.GetV1VaultsParams{
 			TokenA:      nil,
@@ -97,7 +99,7 @@ func TestHandler_GetVaults(t *testing.T) {
 			Network:     configs.DevnetNetwork,
 			Environment: configs.StagingEnv,
 			Wallet:      privKey,
-		}, solana.NewMockSolana(ctrl), m)
+		}, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 
 		params := apispec.GetV1VaultsParams{
 			TokenA:      nil,

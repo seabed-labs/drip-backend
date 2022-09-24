@@ -22,14 +22,14 @@ type Handler struct {
 
 func NewHandler(
 	config *configs.AppConfig,
-	base base.Base,
 	solanaClient solana.Solana,
+	base base.Base,
 	repo repository.Repository,
 ) *Handler {
 	return &Handler{
 		decoder:      schema.NewDecoder(),
-		base:         base,
 		solanaClient: solanaClient,
+		base:         base,
 		repo:         repo,
 		network:      config.Network,
 		env:          config.Environment,
