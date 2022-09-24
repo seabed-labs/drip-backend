@@ -183,6 +183,13 @@ func (d repositoryImpl) GetTokenSwapByAddress(ctx context.Context, address strin
 	return d.repo.TokenSwap.WithContext(ctx).Where(d.repo.TokenSwap.Pubkey.Eq(address)).First()
 }
 
+func (d repositoryImpl) GetOrcaWhirlpoolDeltaBQuote(ctx context.Context, vaultPubkey, whirlpoolPubkey string) (*model.OrcaWhirlpoolDeltaBQuote, error) {
+	return d.repo.OrcaWhirlpoolDeltaBQuote.WithContext(ctx).
+		Where(d.repo.OrcaWhirlpoolDeltaBQuote.VaultPubkey.Eq(vaultPubkey)).
+		Where(d.repo.OrcaWhirlpoolDeltaBQuote.WhirlpoolPubkey.Eq(whirlpoolPubkey)).
+		First()
+}
+
 func (d repositoryImpl) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	return d.repo.OrcaWhirlpool.WithContext(ctx).Where(d.repo.OrcaWhirlpool.Pubkey.Eq(address)).First()
 }

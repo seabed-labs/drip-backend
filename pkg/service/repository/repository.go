@@ -19,10 +19,12 @@ type Repository interface {
 	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
+	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
-	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
+	UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error
 
+	// These will only returned "enabled=true" vaults
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
 
@@ -49,6 +51,7 @@ type Repository interface {
 
 	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
+	GetOrcaWhirlpoolDeltaBQuote(ctx context.Context, vaultPubkey, whirlpoolPubkey string) (*model.OrcaWhirlpoolDeltaBQuote, error)
 
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
@@ -59,7 +62,7 @@ type Repository interface {
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
 	AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error)
-
+	AdminGetVaultsByTokenPairID(ctx context.Context, tokenPairID string) ([]*model.Vault, error)
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 }
 

@@ -85,6 +85,21 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultsByAddresses(ctx interface{},
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByAddresses", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByAddresses), varargs...)
 }
 
+// AdminGetVaultsByTokenPairID mocks base method.
+func (m *MockRepository) AdminGetVaultsByTokenPairID(ctx context.Context, tokenPairID string) ([]*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminGetVaultsByTokenPairID", ctx, tokenPairID)
+	ret0, _ := ret[0].([]*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaultsByTokenPairID indicates an expected call of AdminGetVaultsByTokenPairID.
+func (mr *MockRepositoryMockRecorder) AdminGetVaultsByTokenPairID(ctx, tokenPairID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultsByTokenPairID", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultsByTokenPairID), ctx, tokenPairID)
+}
+
 // AdminSetVaultEnabled mocks base method.
 func (m *MockRepository) AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error) {
 	m.ctrl.T.Helper()
@@ -173,6 +188,21 @@ func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address 
 func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolByAddress(ctx, address interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolByAddress", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolByAddress), ctx, address)
+}
+
+// GetOrcaWhirlpoolDeltaBQuote mocks base method.
+func (m *MockRepository) GetOrcaWhirlpoolDeltaBQuote(ctx context.Context, vaultPubkey, whirlpoolPubkey string) (*model.OrcaWhirlpoolDeltaBQuote, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrcaWhirlpoolDeltaBQuote", ctx, vaultPubkey, whirlpoolPubkey)
+	ret0, _ := ret[0].(*model.OrcaWhirlpoolDeltaBQuote)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrcaWhirlpoolDeltaBQuote indicates an expected call of GetOrcaWhirlpoolDeltaBQuote.
+func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolDeltaBQuote(ctx, vaultPubkey, whirlpoolPubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolDeltaBQuote", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolDeltaBQuote), ctx, vaultPubkey, whirlpoolPubkey)
 }
 
 // GetOrcaWhirlpoolsByTokenPairIDs mocks base method.
@@ -477,6 +507,25 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
+}
+
+// UpsertOrcaWhirlpoolDeltaBQuotes mocks base method.
+func (m *MockRepository) UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range quotes {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertOrcaWhirlpoolDeltaBQuotes", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertOrcaWhirlpoolDeltaBQuotes indicates an expected call of UpsertOrcaWhirlpoolDeltaBQuotes.
+func (mr *MockRepositoryMockRecorder) UpsertOrcaWhirlpoolDeltaBQuotes(ctx interface{}, quotes ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, quotes...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertOrcaWhirlpoolDeltaBQuotes", reflect.TypeOf((*MockRepository)(nil).UpsertOrcaWhirlpoolDeltaBQuotes), varargs...)
 }
 
 // UpsertOrcaWhirlpools mocks base method.
