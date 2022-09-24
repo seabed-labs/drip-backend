@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -30,10 +29,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 			IsClosed: (*bool)(params.IsClosed),
 			Wallet:   nil,
 		},
-		repository.PaginationParams{
-			Limit:  (*int)(params.Limit),
-			Offset: (*int)(params.Offset),
-		},
+		getPaginationParamsFromAPI(params.Offset, params.Limit),
 	)
 	if err != nil {
 		logrus.WithError(err).Error("failed to GetAdminPositions")
@@ -41,18 +37,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	}
 	for _, position := range positions {
 		res = append(res, apispec.ExpandedAdminPosition{
-			Position: apispec.Position{
-				Authority:                position.Authority,
-				DcaPeriodIdBeforeDeposit: strconv.FormatUint(position.DcaPeriodIDBeforeDeposit, 10),
-				DepositTimestamp:         strconv.FormatInt(position.DepositTimestamp.Unix(), 10),
-				DepositedTokenAAmount:    strconv.FormatUint(position.DepositedTokenAAmount, 10),
-				IsClosed:                 position.IsClosed,
-				NumberOfSwaps:            strconv.FormatUint(position.NumberOfSwaps, 10),
-				PeriodicDripAmount:       strconv.FormatUint(position.PeriodicDripAmount, 10),
-				Pubkey:                   position.Pubkey,
-				Vault:                    position.Vault,
-				WithdrawnTokenBAmount:    strconv.FormatUint(position.WithdrawnTokenBAmount, 10),
-			},
+			Position: positionModelToAPI(position),
 		})
 	}
 	if params.Expand == nil {
@@ -80,10 +65,6 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	var protoConfigs []*model.ProtoConfig
 	protoConfigsByPubkey := make(map[string]*model.ProtoConfig)
 
-	var tokenPairIDS []string
-	var tokenPairs []*model.TokenPair
-	tokenPairsByID := make(map[string]*model.TokenPair)
-
 	var tokenPubkeys []string
 	var tokens []*model.Token
 	tokensByPubkey := make(map[string]*model.Token)
@@ -97,16 +78,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		vault := vaults[i]
 		vaultsByPubkey[vault.Pubkey] = vault
 		protoConfigPubkeys = append(protoConfigPubkeys, vault.ProtoConfig)
-		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
-	}
-	tokenPairs, err = h.repo.GetTokenPairsByIDS(c.Request().Context(), tokenPairIDS)
-	if err != nil {
-		logrus.WithError(err).Error("failed to GetTokenPairsByIDS")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
-	}
-	for i := range tokenPairs {
-		tokenPairsByID[tokenPairs[i].ID] = tokenPairs[i]
-		tokenPubkeys = append(tokenPubkeys, tokenPairs[i].TokenA, tokenPairs[i].TokenB)
+		tokenPubkeys = append(tokenPubkeys, vault.TokenAMint, vault.TokenBMint)
 	}
 
 	if shouldExpandProtoConfig {
@@ -123,7 +95,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	if shouldExpandTokenA || shouldExpandTokenB {
 		tokens, err = h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)
 		if err != nil {
-			logrus.WithError(err).Error("failed to GetTokensByTokenPairIDS")
+			logrus.WithError(err).Error("failed to GetTokensByMints")
 			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 		}
 		for i := range tokens {
@@ -131,57 +103,31 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 		}
 	}
 	for i := range res {
-		var tokenPair *model.TokenPair
 		vault := vaultsByPubkey[res[i].Position.Vault]
-		if vault != nil {
-			tokenPair = tokenPairsByID[vault.TokenPairID]
-		}
-		if shouldExpandVault && vault != nil && tokenPair != nil {
-			res[i].Vault = &apispec.Vault{
-				DcaActivationTimestamp: strconv.FormatInt(vault.DcaActivationTimestamp.Unix(), 10),
-				DripAmount:             strconv.FormatUint(vault.DripAmount, 10),
-				LastDcaPeriod:          strconv.FormatUint(vault.LastDcaPeriod, 10),
-				ProtoConfig:            vault.ProtoConfig,
-				Pubkey:                 vault.Pubkey,
-				TokenAAccount:          vault.TokenAAccount,
-				TokenAMint:             tokenPair.TokenA,
-				TokenBAccount:          vault.TokenBAccount,
-				TokenBMint:             tokenPair.TokenB,
-				TreasuryTokenBAccount:  vault.TreasuryTokenBAccount,
-				Enabled:                vault.Enabled,
-			}
+
+		if shouldExpandVault && vault != nil {
+			apiVault := vaultModelToAPI(vault)
+			res[i].Vault = &apiVault
 		}
 
-		if shouldExpandTokenA && vault != nil && tokenPair != nil {
-			tokenA := tokensByPubkey[tokenPair.TokenA]
+		if shouldExpandTokenA && vault != nil {
+			tokenA := tokensByPubkey[vault.TokenAMint]
 			if tokenA != nil {
-				res[i].TokenA = &apispec.Token{
-					Decimals: int(tokenA.Decimals),
-					Pubkey:   tokenA.Pubkey,
-					Symbol:   tokenA.Symbol,
-				}
+				apiToken := tokenModelToApi(tokenA)
+				res[i].TokenA = &apiToken
 			}
 		}
-		if shouldExpandTokenB && vault != nil && tokenPair != nil {
-			tokenB := tokensByPubkey[tokenPair.TokenB]
+		if shouldExpandTokenB && vault != nil {
+			tokenB := tokensByPubkey[vault.TokenBMint]
 			if tokenB != nil {
-				res[i].TokenB = &apispec.Token{
-					Decimals: int(tokenB.Decimals),
-					Pubkey:   tokenB.Pubkey,
-					Symbol:   tokenB.Symbol,
-				}
+				apiToken := tokenModelToApi(tokenB)
+				res[i].TokenB = &apiToken
 			}
 		}
 		if shouldExpandProtoConfig && vault != nil {
 			protoConfig := protoConfigsByPubkey[vault.ProtoConfig]
-			res[i].ProtoConfig = &apispec.ProtoConfig{
-				Admin:                   protoConfig.Admin,
-				Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
-				Pubkey:                  protoConfig.Pubkey,
-				TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
-				TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
-				TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
-			}
+			apiProtoConfig := protoConfigModelToAPI(protoConfig)
+			res[i].ProtoConfig = &apiProtoConfig
 		}
 	}
 

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 
@@ -13,8 +12,6 @@ import (
 )
 
 func (h Handler) GetV1Protoconfigs(c echo.Context, params apispec.GetV1ProtoconfigsParams) error {
-	res := apispec.ListProtoConfigs{}
-
 	protoConfigModels, err := h.repo.GetProtoConfigs(c.Request().Context(), repository.ProtoConfigParams{
 		TokenA: (*string)(params.TokenA),
 		TokenB: (*string)(params.TokenB),
@@ -23,18 +20,5 @@ func (h Handler) GetV1Protoconfigs(c echo.Context, params apispec.GetV1Protoconf
 		logrus.WithError(err).Errorf("failed to get proto configs")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
-
-	for i := range protoConfigModels {
-		protoConfig := protoConfigModels[i]
-		res = append(res, apispec.ProtoConfig{
-			Pubkey:                  protoConfig.Pubkey,
-			Admin:                   protoConfig.Admin,
-			Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
-			TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
-			TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
-			TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
-		},
-		)
-	}
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, protoConfigModelsToAPI(protoConfigModels))
 }

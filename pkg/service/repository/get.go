@@ -48,17 +48,6 @@ func (d repositoryImpl) GetTokenPairByID(ctx context.Context, id string) (*model
 		First()
 }
 
-func (d repositoryImpl) GetTokenPairs(ctx context.Context, tokenAMint *string, tokenBMint *string) ([]*model.TokenPair, error) {
-	stmt := d.repo.TokenPair.WithContext(ctx)
-	if tokenAMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenA.Eq(*tokenAMint))
-	}
-	if tokenBMint != nil {
-		stmt = stmt.Where(d.repo.TokenPair.TokenB.Eq(*tokenBMint))
-	}
-	return stmt.Find()
-}
-
 func (d repositoryImpl) GetTokenSwaps(ctx context.Context, tokenPairID []string) ([]*model.TokenSwap, error) {
 	stmt := d.repo.TokenSwap.WithContext(ctx)
 	if len(tokenPairID) > 0 {

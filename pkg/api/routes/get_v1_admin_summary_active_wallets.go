@@ -14,7 +14,6 @@ import (
 func (h Handler) GetV1AdminSummaryActivewallets(
 	c echo.Context, params apispec.GetV1AdminSummaryActivewalletsParams,
 ) error {
-	res := []apispec.ActiveWallet{}
 	activeWallets, err := h.repo.GetActiveWallets(c.Request().Context(), repository.GetActiveWalletParams{
 		PositionIsClosed: (*bool)(params.IsClosed),
 		Owner:            (*string)(params.Owner),
@@ -24,11 +23,5 @@ func (h Handler) GetV1AdminSummaryActivewallets(
 		logrus.WithError(err).Error("failed to GetActiveWallets")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	for _, activeWallet := range activeWallets {
-		res = append(res, apispec.ActiveWallet{
-			Owner:         activeWallet.Owner,
-			PositionCount: activeWallet.PositionCount,
-		})
-	}
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, activeWalletModelsToAPI(activeWallets))
 }
