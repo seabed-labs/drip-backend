@@ -85,8 +85,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 
 	var tokenPubkeys []string
 	for i := range vaults {
-		tokenPubkeys = append(tokenPubkeys, vaults[i].TokenAMint)
-		tokenPubkeys = append(tokenPubkeys, vaults[i].TokenBMint)
+		tokenPubkeys = append(tokenPubkeys, vaults[i].TokenAMint, vaults[i].TokenBMint)
 	}
 
 	tokens, err := h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)
