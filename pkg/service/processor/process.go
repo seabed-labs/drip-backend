@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -205,7 +206,6 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	if err != nil {
 		return err
 	}
-
 	inverseTokenPair, err := p.ensureTokenPair(ctx, orcaWhirlpool.TokenMintB.String(), orcaWhirlpool.TokenMintA.String())
 	if err != nil {
 		return err
@@ -245,6 +245,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	}
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
+		// insert with token pair ID
 		&model.OrcaWhirlpool{
 			ID:                         uuid.New().String(),
 			TokenPairID:                tokenPair.ID,
@@ -267,8 +268,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
 			Oracle:                     oracle,
 		},
-		// The only inverse is the token pair ID
-		// For token swap it makes sense to inverse the mints, but for whirlpool it doesn't
+		// insert with inverse token pair ID
 		&model.OrcaWhirlpool{
 			ID:                         uuid.New().String(),
 			TokenPairID:                inverseTokenPair.ID,
@@ -301,7 +301,54 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
 		return err
 	}
+	go p.maybeUpdateOrcaWhirlPoolDeltaBCache(ctx, whirlpoolPubkey.String(), tokenPair.ID, inverseTokenPair.ID)
 	return nil
+}
+
+// this function is slow, it should be run in a go routine
+func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpoolPubkey string, tokenPairID string, inverseTokenPairID string) {
+	log := logrus.WithField("whirlpool", whirlpoolPubkey).WithField("tokenPairID", tokenPairID).WithField("inverseTokenPairID", inverseTokenPairID)
+	tokenPairVaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, tokenPairID)
+	if err != nil && err.Error() != repository.ErrRecordNotFound {
+		log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
+	}
+	vaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, inverseTokenPairID)
+	if err != nil && err.Error() != repository.ErrRecordNotFound {
+		log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
+	}
+	vaults = append(vaults, tokenPairVaults...)
+	quotes := []*model.OrcaWhirlpoolDeltaBQuote{}
+
+	for i := range vaults {
+		existingQuote, err := p.repo.GetOrcaWhirlpoolDeltaBQuote(ctx, vaults[i].Pubkey, whirlpoolPubkey)
+		if err != nil && err.Error() != repository.ErrRecordNotFound {
+			log.WithError(err).Error("failed to GetOrcaWhirlpoolDeltaBQuote")
+			continue
+		}
+		existingQuoteLastUpdateTime := utils.GetTimePtr(time.Now())
+		if existingQuote != nil {
+			existingQuoteLastUpdateTime = existingQuote.LastUpdated
+		}
+		// No need to constantly update this, lets only update every 10 minutes
+		if time.Now().Unix() > existingQuoteLastUpdateTime.Add(time.Minute*10).Unix() {
+			continue
+		}
+		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.client.GetNetwork())
+		if err != nil {
+			log.WithError(err).Error("failed to evaluate whirlpool")
+		}
+		quotes = append(quotes, &model.OrcaWhirlpoolDeltaBQuote{
+			VaultPubkey:     vaults[i].Pubkey,
+			WhirlpoolPubkey: whirlpoolPubkey,
+			TokenPairID:     vaults[i].TokenPairID,
+			DeltaB:          deltaB,
+			LastUpdated:     utils.GetTimePtr(time.Now()),
+		})
+	}
+
+	if err := p.repo.UpsertOrcaWhirlpoolDeltaBQuotes(ctx, quotes...); err != nil {
+		log.WithError(err).Error("failed to UpsertOrcaWhirlpoolDeltaBQuotes")
+	}
 }
 
 func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) error {
