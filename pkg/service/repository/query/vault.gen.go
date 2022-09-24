@@ -7,8 +7,6 @@ package query
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -17,6 +15,8 @@ import (
 	"gorm.io/gen/field"
 
 	"gorm.io/plugin/dbresolver"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 )
 
 func newVault(db *gorm.DB) vault {
@@ -38,6 +38,8 @@ func newVault(db *gorm.DB) vault {
 	_vault.Enabled = field.NewBool(tableName, "enabled")
 	_vault.TokenPairID = field.NewString(tableName, "token_pair_id")
 	_vault.MaxSlippageBps = field.NewInt32(tableName, "max_slippage_bps")
+	_vault.TokenAMint = field.NewString(tableName, "token_a_mint")
+	_vault.TokenBMint = field.NewString(tableName, "token_b_mint")
 
 	_vault.fillFieldMap()
 
@@ -59,6 +61,8 @@ type vault struct {
 	Enabled                field.Bool
 	TokenPairID            field.String
 	MaxSlippageBps         field.Int32
+	TokenAMint             field.String
+	TokenBMint             field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -86,6 +90,8 @@ func (v *vault) updateTableName(table string) *vault {
 	v.Enabled = field.NewBool(table, "enabled")
 	v.TokenPairID = field.NewString(table, "token_pair_id")
 	v.MaxSlippageBps = field.NewInt32(table, "max_slippage_bps")
+	v.TokenAMint = field.NewString(table, "token_a_mint")
+	v.TokenBMint = field.NewString(table, "token_b_mint")
 
 	v.fillFieldMap()
 
@@ -108,7 +114,7 @@ func (v *vault) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *vault) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 11)
+	v.fieldMap = make(map[string]field.Expr, 13)
 	v.fieldMap["pubkey"] = v.Pubkey
 	v.fieldMap["proto_config"] = v.ProtoConfig
 	v.fieldMap["token_a_account"] = v.TokenAAccount
@@ -120,6 +126,8 @@ func (v *vault) fillFieldMap() {
 	v.fieldMap["enabled"] = v.Enabled
 	v.fieldMap["token_pair_id"] = v.TokenPairID
 	v.fieldMap["max_slippage_bps"] = v.MaxSlippageBps
+	v.fieldMap["token_a_mint"] = v.TokenAMint
+	v.fieldMap["token_b_mint"] = v.TokenBMint
 }
 
 func (v vault) clone(db *gorm.DB) vault {

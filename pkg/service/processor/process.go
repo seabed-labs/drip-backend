@@ -468,6 +468,8 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	if err := p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
+		TokenAMint:             vaultAccount.TokenAMint.String(),
+		TokenBMint:             vaultAccount.TokenBMint.String(),
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
 		TokenBAccount:          vaultAccount.TokenBAccount.String(),
 		TreasuryTokenBAccount:  vaultAccount.TreasuryTokenBAccount.String(),

@@ -24,6 +24,8 @@ type Vault struct {
 	Enabled                bool      `gorm:"column:enabled;type:bool;not null" json:"enabled" db:"enabled"`
 	TokenPairID            string    `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 	MaxSlippageBps         int32     `gorm:"column:max_slippage_bps;type:int4;not null" json:"maxSlippageBps" db:"max_slippage_bps"`
+	TokenAMint             string    `gorm:"column:token_a_mint;type:varchar;not null" json:"tokenAMint" db:"token_a_mint"`
+	TokenBMint             string    `gorm:"column:token_b_mint;type:varchar;not null" json:"tokenBMint" db:"token_b_mint"`
 }
 
 // TableName Vault's table name
