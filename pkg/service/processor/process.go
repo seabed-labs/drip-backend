@@ -7,16 +7,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/utils"
-
-	bin "github.com/gagliardetto/binary"
-
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/model"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
+	bin "github.com/gagliardetto/binary"
 	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
@@ -213,17 +211,38 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
-	protocolFeeOwedA, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
-	protocolFeeOwedB, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
-	rewardLastUpdatedTimestamp, _ := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
-	liquidity, _ := decimal.NewFromString(orcaWhirlpool.Liquidity.String())
-	sqrtPrice, _ := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
-	feeGrowthGlobalA, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
-	feeGrowthGlobalB, _ := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
-	oracle, _, _ := solana2.FindProgramAddress([][]byte{
-		[]byte("oracle"),
-		whirlpoolPubkey[:],
-	}, whirlpool.ProgramID)
+	protocolFeeOwedA, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedA, 10))
+	if err != nil {
+		return err
+	}
+	protocolFeeOwedB, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.ProtocolFeeOwedB, 10))
+	if err != nil {
+		return err
+	}
+	rewardLastUpdatedTimestamp, err := decimal.NewFromString(strconv.FormatUint(orcaWhirlpool.RewardLastUpdatedTimestamp, 10))
+	if err != nil {
+		return err
+	}
+	liquidity, err := decimal.NewFromString(orcaWhirlpool.Liquidity.String())
+	if err != nil {
+		return err
+	}
+	sqrtPrice, err := decimal.NewFromString(orcaWhirlpool.SqrtPrice.String())
+	if err != nil {
+		return err
+	}
+	feeGrowthGlobalA, err := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalA.String())
+	if err != nil {
+		return err
+	}
+	feeGrowthGlobalB, err := decimal.NewFromString(orcaWhirlpool.FeeGrowthGlobalB.String())
+	if err != nil {
+		return err
+	}
+	oracle, err := utils.GetWhirlpoolPDA(whirlpoolPubkey.String())
+	if err != nil {
+		return err
+	}
 
 	if err := p.repo.UpsertOrcaWhirlpools(ctx,
 		&model.OrcaWhirlpool{
@@ -246,7 +265,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			SqrtPrice:                  sqrtPrice,
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
-			Oracle:                     oracle.String(),
+			Oracle:                     oracle,
 		},
 		// The only inverse is the token pair ID
 		// For token swap it makes sense to inverse the mints, but for whirlpool it doesn't
@@ -270,7 +289,7 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 			SqrtPrice:                  sqrtPrice,
 			FeeGrowthGlobalA:           feeGrowthGlobalA,
 			FeeGrowthGlobalB:           feeGrowthGlobalB,
-			Oracle:                     oracle.String(),
+			Oracle:                     oracle,
 		},
 	); err != nil {
 		return err
@@ -449,6 +468,8 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	if err := p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
+		TokenAMint:             vaultAccount.TokenAMint.String(),
+		TokenBMint:             vaultAccount.TokenBMint.String(),
 		TokenAAccount:          vaultAccount.TokenAAccount.String(),
 		TokenBAccount:          vaultAccount.TokenBAccount.String(),
 		TreasuryTokenBAccount:  vaultAccount.TreasuryTokenBAccount.String(),

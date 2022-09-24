@@ -3,16 +3,19 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
+
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/configs"
-	"github.com/dcaf-labs/drip/pkg/database/psql"
 	"github.com/dcaf-labs/drip/pkg/event"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/query"
-
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -33,8 +36,8 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
-			psql.NewDatabase,
-			psql.NewGORMDatabase,
+			database.NewDatabase,
+			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
 			solana.NewSolanaClient,

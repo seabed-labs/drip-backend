@@ -385,6 +385,8 @@ github.com/dave/jennifer v1.5.1/go.mod h1:AxTG893FiZKqxy3FP1kL80VMshSMuz2G+Egvsz
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dcaf-labs/drip-client/drip-go v0.0.0-20220923034700-59a10ecbc863 h1:lXm/LNRC3xHjnPsI/OMaumOMMnM2AvGT7X6Q6Ueo760=
+github.com/dcaf-labs/drip-client/drip-go v0.0.0-20220923034700-59a10ecbc863/go.mod h1:BsJnQ6h7Lyffilwjkhcw2fICNoAwMNHf/SL5L3UJFrk=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746 h1:eKU/trAhFQa4stQNlVoIoJ+y9PiJSdze2NTXA4tGxk0=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220813034420-90a476347746/go.mod h1:t4x3fOFS/BidtNeFKM+zxzH18k5cTGOgwNPbqGlaIqs=
 github.com/dcaf-labs/solana-go-clients v0.0.0-20220822224702-b657f391cd76 h1:yGhydbmKxUf6s1+qaFIt5xMmbEWCt5pOndcTSB1kEJE=
@@ -1585,6 +1587,7 @@ golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5/go.mod h1:KelEdhl1UZF7XfJ
 golang.org/x/oauth2 v0.0.0-20210218202405-ba52d332ba99/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
+golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210514164344-f6687ab2804c/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=
 golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a/go.mod h1:KelEdhl1UZF7XfJ4dDtk6s++YSgaE7mD/BuKKDLBl4A=

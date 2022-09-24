@@ -10,10 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/apispec"
-	solanaClient "github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/configs"
-	"github.com/dcaf-labs/drip/pkg/repository"
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"

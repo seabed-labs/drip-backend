@@ -6,8 +6,10 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/configs"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"

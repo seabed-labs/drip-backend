@@ -3,12 +3,16 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
+
 	"github.com/dcaf-labs/drip/internal/scripts"
-	"github.com/dcaf-labs/drip/pkg/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/configs"
-	psql2 "github.com/dcaf-labs/drip/pkg/database/psql"
-	"github.com/dcaf-labs/drip/pkg/repository"
-	"github.com/dcaf-labs/drip/pkg/repository/query"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -29,15 +33,15 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			configs.NewAppConfig,
 			configs.NewPSQLConfig,
-			psql2.NewDatabase,
-			psql2.NewGORMDatabase,
+			database.NewDatabase,
+			database.NewGORMDatabase,
 			query.Use,
 			solana.NewSolanaClient,
 			repository.NewRepository,
 			processor.NewProcessor,
 		),
 		fx.Invoke(
-			psql2.RunMigrations,
+			database.RunMigrations,
 			scripts.Backfill,
 		),
 		fx.NopLogger,
