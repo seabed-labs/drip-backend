@@ -40,6 +40,7 @@ type Solana interface {
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
+	GetNetwork() configs.Network
 }
 
 func NewSolanaClient(
@@ -52,6 +53,10 @@ type impl struct {
 	network configs.Network
 	client  *rpc.Client
 	wallet  *solana.Wallet
+}
+
+func (s impl) GetNetwork() configs.Network {
+	return s.network
 }
 
 func createClient(
