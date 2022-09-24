@@ -12,7 +12,6 @@ import (
 )
 
 func (h Handler) GetV1VaultTokens(c echo.Context, params apispec.GetV1VaultTokensParams) error {
-	res := apispec.ListTokens{}
 	if params.TokenA != nil && params.TokenB != nil {
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "both tokenA and tokenB cannot be set"})
 	}
@@ -27,14 +26,5 @@ func (h Handler) GetV1VaultTokens(c echo.Context, params apispec.GetV1VaultToken
 		logrus.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
-	for i := range tokens {
-		token := tokens[i]
-		res = append(res, apispec.Token{
-			Decimals: int(token.Decimals),
-			Pubkey:   token.Pubkey,
-			Symbol:   token.Symbol,
-			IconUrl:  token.IconURL,
-		})
-	}
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, tokenModelsToAPI(tokens))
 }

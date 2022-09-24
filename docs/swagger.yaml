@@ -422,35 +422,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-
-  /v1/vault/tokenpairs:
-    get:
-      summary: Get all Supported Token Pairs
-      description: Get supported token pairs with filters.
-      parameters:
-        - $ref: "#/components/parameters/tokenAQueryParam"
-        - $ref: "#/components/parameters/tokenBQueryParam"
-
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/listTokenPairs"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-        "500":
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/errorResponse"
-
   /v1/vault/tokens:
     get:
       summary: Get all Supported Tokens

@@ -35,56 +35,16 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 			Vault:            (*string)(params.Vault),
 			VaultProtoConfig: (*string)(params.VaultProtoConfig),
 		},
-		repository.PaginationParams{
-			Limit:  (*int)(params.Limit),
-			Offset: (*int)(params.Offset),
-		})
+		getPaginationParamsFromAPI(params.Offset, params.Limit),
+	)
 	if err != nil {
 		logrus.WithError(err).Error("failed to get vaults")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get vaults as admin"})
 	}
-	// Get and Map all TokenPairs
-	var tokenPairIDS []string
-	for i := range vaults {
-		vault := vaults[i]
-		tokenPairIDS = append(tokenPairIDS, vault.TokenPairID)
-	}
-	tokenPairs, err := h.repo.GetTokenPairsByIDS(c.Request().Context(), tokenPairIDS)
-	if err != nil {
-		logrus.WithError(err).Error("failed to get tokenPairs")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "failed to get token pairs"})
-	}
-	tokenPairsByID := make(map[string]*model.TokenPair)
-	for i := range tokenPairs {
-		tokenPair := tokenPairs[i]
-		tokenPairsByID[tokenPair.ID] = tokenPair
-	}
-
 	// Populate Base Result
 	for i := range vaults {
-		vault := vaults[i]
-		tokenPair, ok := tokenPairsByID[vault.TokenPairID]
-		if !ok {
-			logrus.
-				WithField("tokenPairID", vault.TokenPairID).
-				WithField("vault", vault.Pubkey).
-				Errorf("could not find token pair")
-			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
-		}
 		res = append(res, apispec.ExpandedAdminVault{
-			Vault: apispec.Vault{
-				DcaActivationTimestamp: strconv.FormatInt(vault.DcaActivationTimestamp.Unix(), 10),
-				DripAmount:             strconv.FormatUint(vault.DripAmount, 10),
-				LastDcaPeriod:          strconv.FormatUint(vault.LastDcaPeriod, 10),
-				ProtoConfig:            vault.ProtoConfig,
-				Pubkey:                 vault.Pubkey,
-				TokenAAccount:          vault.TokenAAccount,
-				TokenAMint:             tokenPair.TokenA,
-				TokenBAccount:          vault.TokenBAccount,
-				TokenBMint:             tokenPair.TokenB,
-				TreasuryTokenBAccount:  vault.TreasuryTokenBAccount,
-				Enabled:                vault.Enabled,
-			},
+			Vault:                      vaultModelToAPI(vaults[i]),
 			TokenAAccountValue:         nil,
 			TokenBAccountValue:         nil,
 			TreasuryTokenBAccountValue: nil,
@@ -124,10 +84,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	}
 
 	var tokenPubkeys []string
-	for i := range tokenPairs {
-		tokenPair := tokenPairs[i]
-		tokenPubkeys = append(tokenPubkeys, tokenPair.TokenA)
-		tokenPubkeys = append(tokenPubkeys, tokenPair.TokenB)
+	for i := range vaults {
+		tokenPubkeys = append(tokenPubkeys, vaults[i].TokenAMint, vaults[i].TokenBMint)
 	}
 
 	tokens, err := h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)

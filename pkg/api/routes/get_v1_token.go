@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
@@ -22,10 +21,5 @@ func (h Handler) GetV1TokenPubkeyPath(c echo.Context, pubkeyPath apispec.PubkeyP
 			WithError(err).Errorf("unexpected number of tokens returned")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
-	return c.JSON(http.StatusOK, apispec.Token{
-		Decimals: int(tokens[0].Decimals),
-		IconUrl:  tokens[0].IconURL,
-		Pubkey:   tokens[0].Pubkey,
-		Symbol:   tokens[0].Symbol,
-	})
+	return c.JSON(http.StatusOK, tokenModelToApi(tokens[0]))
 }
