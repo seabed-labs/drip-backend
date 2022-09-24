@@ -326,17 +326,18 @@ func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpool
 			log.WithError(err).Error("failed to GetOrcaWhirlpoolDeltaBQuote")
 			continue
 		}
-		existingQuoteLastUpdateTime := utils.GetTimePtr(time.Now())
+		existingQuoteLastUpdateTime := utils.GetTimePtr(time.Time{})
 		if existingQuote != nil {
 			existingQuoteLastUpdateTime = existingQuote.LastUpdated
 		}
 		// No need to constantly update this, lets only update every 10 minutes
-		if time.Now().Unix() > existingQuoteLastUpdateTime.Add(time.Minute*10).Unix() {
+		if time.Now().Before(existingQuoteLastUpdateTime.Add(time.Minute * 10)) {
 			continue
 		}
 		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.client.GetNetwork())
 		if err != nil {
 			log.WithError(err).Error("failed to evaluate whirlpool")
+			continue
 		}
 		quotes = append(quotes, &model.OrcaWhirlpoolDeltaBQuote{
 			VaultPubkey:     vaults[i].Pubkey,

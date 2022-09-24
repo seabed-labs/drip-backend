@@ -79,7 +79,7 @@ func getBestOrcaWhirlpoolForVault(
 			return nil, err
 		}
 
-		if whirlpoolDeltaBQuote.DeltaB > bestSwapDeltaB {
+		if whirlpoolDeltaBQuote.DeltaB >= bestSwapDeltaB {
 			bestSwap = eligibleSwap
 			bestSwapDeltaB = whirlpoolDeltaBQuote.DeltaB
 		}
