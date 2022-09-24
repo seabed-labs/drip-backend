@@ -301,11 +301,12 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
 		return err
 	}
-	go p.maybeUpdateOrcaWhirlPoolDeltaBCache(ctx, whirlpoolPubkey.String(), tokenPair.ID, inverseTokenPair.ID)
+	// this is hella slow
+	// todo: expose this to the backfill dev script so that the script isn't constrained by ctx timeout
+	p.maybeUpdateOrcaWhirlPoolDeltaBCache(ctx, whirlpoolPubkey.String(), tokenPair.ID, inverseTokenPair.ID)
 	return nil
 }
 
-// this function is slow, it should be run in a go routine
 func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpoolPubkey string, tokenPairID string, inverseTokenPairID string) {
 	log := logrus.WithField("whirlpool", whirlpoolPubkey).WithField("tokenPairID", tokenPairID).WithField("inverseTokenPairID", inverseTokenPairID)
 	tokenPairVaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, tokenPairID)
