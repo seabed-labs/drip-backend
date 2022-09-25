@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
@@ -37,6 +39,7 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			solana.NewSolanaClient,
+			tokenregistry.NewTokenRegistry,
 			repository.NewRepository,
 			processor.NewProcessor,
 		),
