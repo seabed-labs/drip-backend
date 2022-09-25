@@ -578,15 +578,11 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	if err != nil {
 		return fmt.Errorf("failed to ensureVault, err: %w", err)
 	}
-	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
-	if err != nil {
-		return fmt.Errorf("failed to GetTokenPairByID, err: %w", err)
-	}
 	// Get up to date token metadata info
-	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenA); err != nil {
+	if err := p.UpsertTokenByAddress(ctx, vault.TokenAMint); err != nil {
 		return fmt.Errorf("failed to UpsertTokenByAddress, err: %w", err)
 	}
-	if err := p.UpsertTokenByAddress(ctx, tokenPair.TokenB); err != nil {
+	if err := p.UpsertTokenByAddress(ctx, vault.TokenBMint); err != nil {
 		return err
 	}
 	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
@@ -729,24 +725,20 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 	})
 }
 
-// todo: this should prob live in the repo layer
+// returns vault tokens in order of tokenA, tokenB
 func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*model.Token, *model.Token, error) {
 	vault, err := p.ensureVault(ctx, vaultAddress)
 	if err != nil {
 		return nil, nil, err
 	}
-	tokenPair, err := p.repo.GetTokenPairByID(ctx, vault.TokenPairID)
-	if err != nil {
-		return nil, nil, err
-	}
-	tokens, err := p.repo.GetTokensByMints(ctx, []string{tokenPair.TokenA, tokenPair.TokenB})
+	tokens, err := p.repo.GetTokensByMints(ctx, []string{vault.TokenAMint, vault.TokenBMint})
 	if err != nil {
 		return nil, nil, err
 	}
 	if len(tokens) != 2 {
 		return nil, nil, fmt.Errorf("invalid number of tokens return for GetTokensByMints for id: %s", vault.TokenPairID)
 	}
-	if tokens[0].Pubkey == tokenPair.TokenA {
+	if tokens[0].Pubkey == vault.TokenAMint {
 		return tokens[0], tokens[1], nil
 	}
 	return tokens[1], tokens[0], nil
