@@ -45,7 +45,7 @@ type Repository interface {
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
 	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
-	GetTokenByMint(ctx context.Context, mint string) (*model.Token, error)
+	GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 	GetTokenByMint(ctx context.Context, mint string) (*model.Token, error)
 

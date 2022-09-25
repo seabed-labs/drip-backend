@@ -82,7 +82,6 @@ func (a serviceImpl) SendError(ctx context.Context, err error) error {
 
 type AlertColor int
 
-// string mapping
 const (
 	Success AlertColor = 1752220
 	Error              = 15158332

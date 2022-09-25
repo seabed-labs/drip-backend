@@ -227,7 +227,7 @@ func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys 
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
+func (d repositoryImpl) GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error) {
 	return d.repo.Token.
 		WithContext(ctx).
 		Where(d.repo.Token.Pubkey.Eq(mint)).

@@ -48,23 +48,22 @@ type Processor interface {
 
 type impl struct {
 	repo                repository.Repository
-	solanaClient        solana.Solana
 	tokenRegistryClient tokenregistry.TokenRegistry
-	client              solana.Solana
-	discordAlertService alert.Service
+	solanaClient        solana.Solana
+	alertService        alert.Service
 }
 
 func NewProcessor(
 	repo repository.Repository,
 	client solana.Solana,
-	discordAlertService alert.Service,
+	alertService alert.Service,
 	tokenRegistryClient tokenregistry.TokenRegistry,
 ) Processor {
 	return impl{
 		repo:                repo,
-		client:              client,
 		tokenRegistryClient: tokenRegistryClient,
-		discordAlertService: discordAlertService,
+		solanaClient:        client,
+		alertService:        alertService,
 	}
 }
 
@@ -579,13 +578,20 @@ func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error
 	return p.UpsertPosition(ctx, address, position)
 }
 
-func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Position, vault *model.Vault, tokenPair *model.TokenPair) error {
+func (p impl) sendPositionAlert(ctx context.Context, position drip.Position, vault *model.Vault) error {
+
+	_, errGetPosition := p.repo.GetPositionByNFTMint(ctx, position.PositionAuthority.String())
+	isNewPosition := errGetPosition != nil && errGetPosition.Error() == repository.ErrRecordNotFound
+	if !isNewPosition {
+		return nil
+	}
+
 	// Build data and send new position alert on discord
-	tokenA, err := p.repo.GetTokenByMint(ctx, tokenPair.TokenA)
+	tokenA, err := p.repo.GetTokenByAddress(ctx, vault.TokenAMint)
 	if err != nil {
 		return err
 	}
-	tokenB, err := p.repo.GetTokenByMint(ctx, tokenPair.TokenB)
+	tokenB, err := p.repo.GetTokenByAddress(ctx, vault.TokenBMint)
 	if err != nil {
 		return err
 	}
@@ -598,18 +604,18 @@ func (p impl) sendNewPositionAlertDiscord(ctx context.Context, position drip.Pos
 	periodicDripAmountBigUnits := float64(position.PeriodicDripAmount) / math.Pow(10, float64(tokenA.Decimals))
 	var granularityStr string
 	if protoConfig.Granularity == 60 {
-		granularityStr = "Secondly"
+		granularityStr = "Minutely"
 	} else if protoConfig.Granularity == 3600 {
 		granularityStr = "Hourly"
 	}
-	b := true
-	return p.discordAlertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Fields,
-		discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol, Inline: &b},
-		discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol, Inline: &b},
+	inline := true
+	return p.alertService.SendAlertWithFields(ctx, "New Position!", append(discord.NewEmbedBuilder().Fields,
+		discord.EmbedField{Name: "Token A", Value: *tokenA.Symbol, Inline: &inline},
+		discord.EmbedField{Name: "Token B", Value: *tokenB.Symbol, Inline: &inline},
 		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(tokenADepositBigUnits, 'f', -1, 32)},
 		discord.EmbedField{Name: "Granularity", Value: granularityStr},
-		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(periodicDripAmountBigUnits, 'f', -1, 32)},
-		discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(position.NumberOfSwaps, 10)},
+		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(periodicDripAmountBigUnits, 'f', -1, 32), Inline: &inline},
+		discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(position.NumberOfSwaps, 10), Inline: &inline},
 	), alert.Success)
 }
 
@@ -629,10 +635,7 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		return err
 	}
 
-	_, errGetPosition := p.repo.GetPositionByNFTMint(ctx, position.PositionAuthority.String())
-	if errGetPosition != nil && errGetPosition.Error() == repository.ErrRecordNotFound {
-		p.sendNewPositionAlertDiscord(ctx, position, vault, tokenPair)
-	}
+	go p.sendPositionAlert(ctx, position, vault)
 
 	if err := p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,
