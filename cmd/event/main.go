@@ -45,7 +45,7 @@ func getDependencies() []fx.Option {
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			processor.NewProcessor,
-			alert.NewService,
+			alert.NewAlertService,
 		),
 		fx.Invoke(
 			event.Server,

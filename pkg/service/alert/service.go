@@ -22,7 +22,7 @@ type Service interface {
 	SendNewPositionAlert(ctx context.Context, alertParams NewPositionAlert) error
 }
 
-func NewService(
+func NewAlertService(
 	config *configs.AppConfig,
 ) (Service, error) {
 	logrus.WithField("discordWebhookID", config.DiscordWebhookID).Info("initiating alert service")
@@ -45,9 +45,9 @@ func NewService(
 		)
 		service.client = client
 	}
-	if err := service.SendInfo(context.Background(), "Info", "initialized alert service"); err != nil {
-		return nil, err
-	}
+	//if err := service.SendInfo(context.Background(), "Info", "initialized alert service"); err != nil {
+	//	return nil, err
+	//}
 	return service, nil
 }
 
@@ -116,21 +116,53 @@ func (a serviceImpl) SendNewPositionAlert(
 	if alertParams.TokenBSymbol != nil {
 		tokenB = *alertParams.TokenBSymbol
 	}
+	inLineTrue := utils.GetBoolPtr(true)
+	embed := discord.NewEmbedBuilder().
+		SetTitle("New Position!").
+		SetColor(int(SuccessColor)).
+		SetFields(
+			discord.EmbedField{Name: "Token A", Value: tokenA, Inline: inLineTrue},
+			discord.EmbedField{Name: "Token B", Value: tokenB, Inline: inLineTrue},
+			discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: inLineTrue},
+			discord.EmbedField{Name: "Granularity", Value: granularityStr, Inline: inLineTrue},
+			discord.EmbedField{Name: "Drip Amount", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: inLineTrue},
+			discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(alertParams.NumberOfSwaps, 10), Inline: inLineTrue},
+			discord.EmbedField{Name: "Owner", Value: alertParams.Owner},
+		).
+		Build()
+	embeds := []discord.Embed{embed}
+	if alertParams.TokenAIconURL != nil && alertParams.TokenASymbol != nil {
+		tokenAEmbed := discord.NewEmbedBuilder().
+			SetTitle("TokenA").
+			SetColor(int(SuccessColor)).
+			SetFields(
+				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenASymbol},
+			).
+			SetEmbedFooter(&discord.EmbedFooter{
+				Text:         alertParams.TokenAMint,
+				IconURL:      *alertParams.TokenAIconURL,
+				ProxyIconURL: "",
+			}).
+			Build()
 
-	fields := append(discord.NewEmbedBuilder().Fields,
-		discord.EmbedField{Name: "Token A", Value: tokenA, Inline: utils.GetBoolPtr(true)},
-		discord.EmbedField{Name: "Token B", Value: tokenB, Inline: utils.GetBoolPtr(true)},
-		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32)},
-		discord.EmbedField{Name: "Granularity", Value: granularityStr},
-		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: utils.GetBoolPtr(true)},
-		discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(alertParams.NumberOfSwaps, 10), Inline: utils.GetBoolPtr(true)},
-	)
-	embed := discord.Embed{
-		Title:  "New Position!",
-		Color:  int(SuccessColor),
-		Fields: fields,
+		embeds = append(embeds, tokenAEmbed)
 	}
-	return a.send(ctx, embed)
+	if alertParams.TokenBIconURL != nil && alertParams.TokenBSymbol != nil {
+		tokenBEmbed := discord.NewEmbedBuilder().
+			SetTitle("TokenB").
+			SetColor(int(SuccessColor)).
+			SetFields(
+				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenBSymbol},
+			).
+			SetEmbedFooter(&discord.EmbedFooter{
+				Text:         alertParams.TokenBMint,
+				IconURL:      *alertParams.TokenBIconURL,
+				ProxyIconURL: "",
+			}).
+			Build()
+		embeds = append(embeds, tokenBEmbed)
+	}
+	return a.send(ctx, embeds...)
 }
 
 func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
@@ -141,7 +173,7 @@ func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
 			Build(),
 		// delay each request by 2 seconds
 		rest.WithDelay(2*time.Second),
-		rest.WithCtx(ctx),
+		//rest.WithCtx(ctx),
 	)
 	return err
 }

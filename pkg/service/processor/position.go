@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
-	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/sirupsen/logrus"
@@ -37,10 +36,11 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
 		return err
 	}
-	shouldAlert := func() bool {
-		_, err := p.repo.GetPositionByAddress(ctx, address)
-		return err != nil && err.Error() == repository.ErrRecordNotFound
-	}()
+	//shouldAlert := func() bool {
+	//	_, err := p.repo.GetPositionByAddress(ctx, address)
+	//	return err != nil && err.Error() == repository.ErrRecordNotFound
+	//}()
+	shouldAlert := true
 
 	if err := p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,
@@ -70,11 +70,9 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		}
 	}
 	if shouldAlert {
-		go func() {
-			if err := p.sendNewPositionAlert(ctx, address); err != nil {
-				log.WithError(err).Error("failed to sendNewPositionAlert")
-			}
-		}()
+		if err := p.sendNewPositionAlert(ctx, address); err != nil {
+			log.WithError(err).Error("failed to sendNewPositionAlert")
+		}
 
 	}
 	return nil
