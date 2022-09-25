@@ -31,6 +31,7 @@ type client struct {
 func newClient() *client {
 	rateLimiter := rate.NewLimiter(rate.Every(time.Second/callsPerSecond), 1)
 	httpClient := retryablehttp.NewClient()
+	httpClient.Logger = nil
 	httpClient.CheckRetry = clients.DefaultCheckRetry
 	httpClient.RetryWaitMin = clients.DefaultRetryMin
 	httpClient.RetryMax = clients.MaxRetries
