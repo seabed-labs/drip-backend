@@ -6,7 +6,7 @@ package processor
 //		Environment: configs.DevnetEnv,
 //		Wallet:      privKey,
 //	}
-//	client, err := solana.NewSolanaClient(&appConfig)
+//	solanaClient, err := solana.NewSolanaClient(&appConfig)
 //	assert.NoError(t, err)
 //	psqlConfig, err := configs.NewPSQLConfig()
 //	assert.NoError(t, err)
@@ -14,8 +14,8 @@ package processor
 //	assert.NoError(t, err)
 //	repo := query.Use(gormDB)
 //	processor := impl{
-//		repo:   repository.NewRepository(client, repo),
-//		client: client,
+//		repo:   repository.NewRepository(solanaClient, repo),
+//		solanaClient: solanaClient,
 //	}
 //	err = processor.UpsertTokenSwapByAddress(context.Background(), "8Vx5D6dKfv1vyLzL6hdxB1KNnRr5yiHSaw8bDh5LVNAE")
 //	assert.NoError(t, err)
