@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
 	"github.com/dcaf-labs/drip/pkg/service/configs"
 
 	"github.com/disgoorg/disgo/discord"
@@ -16,8 +18,8 @@ import (
 
 type Service interface {
 	SendError(ctx context.Context, err error) error
-	SendInfo(ctx context.Context, title string, message string, alertType AlertColor) error
-	SendAlertWithFields(ctx context.Context, title string, fields []discord.EmbedField, alertType AlertColor) error
+	SendInfo(ctx context.Context, title string, message string) error
+	SendNewPositionAlert(ctx context.Context, alertParams NewPositionAlert) error
 }
 
 func NewService(
@@ -42,9 +44,9 @@ func NewService(
 			}),
 		)
 		service.client = client
-		if err := service.SendInfo(context.Background(), "Info", "initialized alert service", Info); err != nil {
-			return nil, err
-		}
+	}
+	if err := service.SendInfo(context.Background(), "Info", "initialized alert service"); err != nil {
+		return nil, err
 	}
 	return service, nil
 }
@@ -61,78 +63,85 @@ func (a serviceImpl) SendError(ctx context.Context, err error) error {
 		logrus.WithError(err).Info("alert service disabled, skipping error alert")
 		return nil
 	}
-	if _, err := a.client.CreateMessage(
-		discord.NewWebhookMessageCreateBuilder().
-			SetAvatarURL("https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg").
-			SetEmbeds(
-				discord.Embed{
-					Title:       "Error",
-					Description: err.Error(),
-					Color:       15158332,
-				},
-			).
-			Build(),
-		// delay each request by 2 seconds
-		rest.WithDelay(2*time.Second),
-	); err != nil {
-		return err
-	}
-	return nil
+	return a.send(ctx, discord.Embed{
+		Title:       "Error",
+		Description: err.Error(),
+		Color:       int(InfoColor),
+	})
 }
 
-type AlertColor int
-
-const (
-	Success AlertColor = 1752220
-	Error              = 15158332
-	Warn               = 15844367
-	Info               = 0
-)
-
-func (a serviceImpl) SendInfo(ctx context.Context, title string, message string, alertType AlertColor) error {
+func (a serviceImpl) SendInfo(ctx context.Context, title string, message string) error {
 	if !a.enabled {
 		logrus.WithField("msg", message).Info("alert service disabled, skipping info alert")
 		return nil
 	}
-	if _, err := a.client.CreateMessage(
-		discord.NewWebhookMessageCreateBuilder().
-			SetAvatarURL("https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg").
-			SetEmbeds(
-				discord.Embed{
-					Title:       title,
-					Description: message,
-					Color:       int(alertType),
-				},
-			).
-			Build(),
-		// delay each request by 2 seconds
-		rest.WithDelay(2*time.Second),
-	); err != nil {
-		return err
-	}
-	return nil
+	return a.send(ctx, discord.Embed{
+		Title:       title,
+		Description: message,
+		Color:       int(InfoColor),
+	})
 }
 
-func (a serviceImpl) SendAlertWithFields(ctx context.Context, title string, embedFields []discord.EmbedField, alertType AlertColor) error {
-	if !a.enabled {
-		logrus.WithField("msg", title).Info("alert service disabled, skipping info alert")
-		return nil
+type NewPositionAlert struct {
+	TokenASymbol              *string
+	TokenAIconURL             *string
+	TokenAMint                string
+	TokenBSymbol              *string
+	TokenBIconURL             *string
+	TokenBMint                string
+	TokenAScaledDepositAmount float64
+	Granularity               uint64
+	ScaledDripAmount          float64
+	NumberOfSwaps             uint64
+	Owner                     string
+}
+
+func (a serviceImpl) SendNewPositionAlert(
+	ctx context.Context,
+	alertParams NewPositionAlert,
+) error {
+	granularityStr := strconv.FormatUint(alertParams.Granularity, 10)
+	if alertParams.Granularity == 60 {
+		granularityStr = "Minutely"
+	} else if alertParams.Granularity == 3600 {
+		granularityStr = "Hourly"
 	}
-	if _, err := a.client.CreateMessage(
+
+	tokenA := alertParams.TokenAMint
+	if alertParams.TokenASymbol != nil {
+		tokenA = *alertParams.TokenASymbol
+	}
+
+	tokenB := alertParams.TokenBMint
+	if alertParams.TokenBSymbol != nil {
+		tokenB = *alertParams.TokenBSymbol
+	}
+
+	fields := append(discord.NewEmbedBuilder().Fields,
+		discord.EmbedField{Name: "Token A", Value: tokenA, Inline: utils.GetBoolPtr(true)},
+		discord.EmbedField{Name: "Token B", Value: tokenB, Inline: utils.GetBoolPtr(true)},
+		discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32)},
+		discord.EmbedField{Name: "Granularity", Value: granularityStr},
+		discord.EmbedField{Name: "Position Drip Amount", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: utils.GetBoolPtr(true)},
+		discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(alertParams.NumberOfSwaps, 10), Inline: utils.GetBoolPtr(true)},
+	)
+	embed := discord.Embed{
+		Title:  "New Position!",
+		Color:  int(SuccessColor),
+		Fields: fields,
+	}
+	return a.send(ctx, embed)
+}
+
+func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
+	_, err := a.client.CreateMessage(
 		discord.NewWebhookMessageCreateBuilder().
 			SetAvatarURL("https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg").
-			SetEmbeds(
-				discord.Embed{
-					Title:  title,
-					Color:  int(alertType),
-					Fields: embedFields,
-				},
-			).
+			SetEmbeds(embeds...).
 			Build(),
 		// delay each request by 2 seconds
 		rest.WithDelay(2*time.Second),
-	); err != nil {
-		return err
-	}
-	return nil
+		rest.WithCtx(ctx),
+	)
+	return err
 }
