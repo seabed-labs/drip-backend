@@ -9,5 +9,5 @@ func filterVaultsWithZeroDripAmount(vaults []*model.Vault) []*model.Vault {
 			res = append(res, vaults[i])
 		}
 	}
-	return vaults
+	return res
 }
