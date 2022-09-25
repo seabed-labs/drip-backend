@@ -390,21 +390,6 @@ func (mr *MockRepositoryMockRecorder) GetTokenAccountBalancesByAddresses(ctx int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenAccountBalancesByAddresses", reflect.TypeOf((*MockRepository)(nil).GetTokenAccountBalancesByAddresses), varargs...)
 }
 
-// GetTokenAccountBalancesByIDS mocks base method.
-func (m *MockRepository) GetTokenAccountBalancesByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenAccountBalance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenAccountBalancesByIDS", arg0, arg1)
-	ret0, _ := ret[0].([]*model.TokenAccountBalance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTokenAccountBalancesByIDS indicates an expected call of GetTokenAccountBalancesByIDS.
-func (mr *MockRepositoryMockRecorder) GetTokenAccountBalancesByIDS(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenAccountBalancesByIDS", reflect.TypeOf((*MockRepository)(nil).GetTokenAccountBalancesByIDS), arg0, arg1)
-}
-
 // GetTokenByAddress mocks base method.
 func (m *MockRepository) GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error) {
 	m.ctrl.T.Helper()
@@ -448,36 +433,6 @@ func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (
 func (mr *MockRepositoryMockRecorder) GetTokenPair(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPair", reflect.TypeOf((*MockRepository)(nil).GetTokenPair), arg0, arg1, arg2)
-}
-
-// GetTokenPairs mocks base method.
-func (m *MockRepository) GetTokenPairs(arg0 context.Context, arg1, arg2 *string) ([]*model.TokenPair, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenPairs", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*model.TokenPair)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTokenPairs indicates an expected call of GetTokenPairs.
-func (mr *MockRepositoryMockRecorder) GetTokenPairs(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairs", reflect.TypeOf((*MockRepository)(nil).GetTokenPairs), arg0, arg1, arg2)
-}
-
-// GetTokenPairsByIDS mocks base method.
-func (m *MockRepository) GetTokenPairsByIDS(arg0 context.Context, arg1 []string) ([]*model.TokenPair, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenPairsByIDS", arg0, arg1)
-	ret0, _ := ret[0].([]*model.TokenPair)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTokenPairsByIDS indicates an expected call of GetTokenPairsByIDS.
-func (mr *MockRepositoryMockRecorder) GetTokenPairsByIDS(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenPairsByIDS", reflect.TypeOf((*MockRepository)(nil).GetTokenPairsByIDS), arg0, arg1)
 }
 
 // GetTokenSwapByAddress mocks base method.

@@ -43,8 +43,6 @@ type Repository interface {
 	GetSupportedTokenBs(ctx context.Context, givenTokenAMint string) ([]*model.Token, error)
 
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
-	GetTokenPairsByIDS(context.Context, []string) ([]*model.TokenPair, error)
-	GetTokenPairs(context.Context, *string, *string) ([]*model.TokenPair, error)
 	GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 	GetTokenByMint(ctx context.Context, mint string) (*model.Token, error)
@@ -62,7 +60,6 @@ type Repository interface {
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
 	GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccountBalance, error)
-	GetTokenAccountBalancesByIDS(context.Context, []string) ([]*model.TokenAccountBalance, error)
 	GetActiveTokenAccountBalancesByMint(context.Context, string) ([]*model.TokenAccountBalance, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)

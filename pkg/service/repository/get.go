@@ -264,15 +264,6 @@ func (d repositoryImpl) GetActiveTokenAccountBalancesByMint(ctx context.Context,
 		Find()
 }
 
-func (d repositoryImpl) GetTokenPairsByIDS(ctx context.Context, tokenPairIds []string) ([]*model.TokenPair, error) {
-	stmt := d.repo.TokenPair.
-		WithContext(ctx)
-	if len(tokenPairIds) > 0 {
-		stmt = stmt.Where(d.repo.TokenPair.ID.In(tokenPairIds...))
-	}
-	return stmt.Find()
-}
-
 func (d repositoryImpl) GetVaultPeriodByAddress(
 	ctx context.Context,
 	address string,
@@ -331,17 +322,6 @@ func (d repositoryImpl) GetActiveWallets(
 		Group(d.repo.TokenAccountBalance.Owner).
 		Scan(&res)
 	return res, err
-}
-
-func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
-	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
-	if tokenBMint != nil {
-		stmt = stmt.
-			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
-			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-			Where(d.repo.Vault.Enabled.Is(true))
-	}
-	return stmt.Find()
 }
 
 func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
