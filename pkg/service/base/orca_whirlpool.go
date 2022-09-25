@@ -64,8 +64,11 @@ func getBestOrcaWhirlpoolForVault(
 	whirlpools []*model.OrcaWhirlpool,
 	orcaWhirlpoolDeltaBQuoteByCompositeKey map[string]*model.OrcaWhirlpoolDeltaBQuote,
 ) (*model.OrcaWhirlpool, error) {
-	if len(whirlpools) == 0 || len(orcaWhirlpoolDeltaBQuoteByCompositeKey) == 0 {
-		return nil, fmt.Errorf("failed to get token_swap")
+	if len(whirlpools) == 0 {
+		return nil, fmt.Errorf("failed to get whirlpool")
+	}
+	if len(orcaWhirlpoolDeltaBQuoteByCompositeKey) == 0 {
+		return nil, fmt.Errorf("failed to get best whirlpool, missing deltaBQuoute")
 	}
 	bestSwapDeltaB := uint64(0)
 	var bestSwap *model.OrcaWhirlpool

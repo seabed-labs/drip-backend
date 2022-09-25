@@ -24,18 +24,6 @@ import (
 
 func TestHandler_GetVaults(t *testing.T) {
 	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
-	tokenPairs := []*model2.TokenPair{
-		{
-			ID:     "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
-			TokenA: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
-			TokenB: "ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8",
-		},
-		{
-			ID:     "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda",
-			TokenA: "ASuqwxvC4FXxJGT9XqZMXbCKDQBaRTApEhN2oN3VL3A8",
-			TokenB: "BfqATYbPZJFdEdYWkEbFRBnhv1LB6wtLn299HjMmE4uq",
-		},
-	}
 	vaults := []*model2.Vault{
 		{
 			Pubkey:                 "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV",
@@ -111,16 +99,6 @@ func TestHandler_GetVaults(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
-		m.
-			EXPECT().
-			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
-			Return(tokenPairs[0], nil).
-			AnyTimes()
-		m.
-			EXPECT().
-			GetTokenPairByID(gomock.Any(), "96b8b0ed-79a9-4972-bf5e-4ac8ab9e7fda").
-			Return(tokenPairs[1], nil).
-			AnyTimes()
 		m.
 			EXPECT().
 			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
