@@ -56,13 +56,13 @@ type impl struct {
 func NewProcessor(
 	repo repository.Repository,
 	client solana.Solana,
-	alertService alert.Service,
 	tokenRegistryClient tokenregistry.TokenRegistry,
+	alertService alert.Service,
 ) Processor {
 	return impl{
 		repo:                repo,
-		tokenRegistryClient: tokenRegistryClient,
 		solanaClient:        client,
+		tokenRegistryClient: tokenRegistryClient,
 		alertService:        alertService,
 	}
 }
@@ -114,14 +114,6 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		}
 		return
 	}
-	var protoConfig drip.VaultProtoConfig
-	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
-		// log.Infof("decoded as protoConfig")
-		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
-			log.WithError(err).Error("failed to upsert protoConfig")
-		}
-		return
-	}
 	var position drip.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		// log.Infof("decoded as position")
@@ -135,6 +127,14 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		// log.Infof("decoded as vault")
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert vault")
+		}
+		return
+	}
+	var protoConfig drip.VaultProtoConfig
+	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
+		// log.Infof("decoded as protoConfig")
+		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert protoConfig")
 		}
 		return
 	}
