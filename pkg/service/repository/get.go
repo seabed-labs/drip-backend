@@ -235,6 +235,10 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
+	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
+}
+
 func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccountBalance, error) {
 	stmt := d.repo.TokenAccountBalance.
 		WithContext(ctx)

@@ -44,6 +44,7 @@ type Repository interface {
 	GetTokenPairByID(context.Context, string) (*model.TokenPair, error)
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
+	GetTokenByMint(ctx context.Context, mint string) (*model.Token, error)
 
 	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
 	GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.TokenSwap, error)

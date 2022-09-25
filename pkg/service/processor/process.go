@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -43,23 +45,26 @@ type Processor interface {
 }
 
 type impl struct {
-	repo   repository.Repository
-	client solana.Solana
+	repo                repository.Repository
+	solanaClient        solana.Solana
+	tokenRegistryClient tokenregistry.TokenRegistry
 }
 
 func NewProcessor(
 	repo repository.Repository,
 	client solana.Solana,
+	tokenRegistryClient tokenregistry.TokenRegistry,
 ) Processor {
 	return impl{
-		repo:   repo,
-		client: client,
+		repo:                repo,
+		solanaClient:        client,
+		tokenRegistryClient: tokenRegistryClient,
 	}
 }
 
 func (p impl) Backfill(ctx context.Context, programID string, processor func(string, []byte)) {
 	log := logrus.WithField("program", programID).WithField("func", "Backfill")
-	accounts, err := p.client.GetProgramAccounts(ctx, programID)
+	accounts, err := p.solanaClient.GetProgramAccounts(ctx, programID)
 	if err != nil {
 		log.WithError(err).Error("failed to get accounts")
 	}
@@ -71,7 +76,7 @@ func (p impl) Backfill(ctx context.Context, programID string, processor func(str
 			WithField("pageSize", pageSize).
 			WithField("total", total)
 		log.Infof("backfilling program accounts")
-		err := p.client.GetAccounts(ctx, accounts[start:end], func(address string, data []byte) {
+		err := p.solanaClient.GetAccounts(ctx, accounts[start:end], func(address string, data []byte) {
 			processor(address, data)
 		})
 		if err != nil {
@@ -198,7 +203,7 @@ func (p impl) ProcessTokenEvent(address string, data []byte) {
 func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) error {
 	var orcaWhirlpool whirlpool.Whirlpool
 	whirlpoolPubkey := solana2.MustPublicKeyFromBase58(address)
-	if err := p.client.GetAccount(ctx, address, &orcaWhirlpool); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &orcaWhirlpool); err != nil {
 		return err
 	}
 
@@ -334,7 +339,7 @@ func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpool
 		if time.Now().Before(existingQuoteLastUpdateTime.Add(time.Minute * 10)) {
 			continue
 		}
-		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.client.GetNetwork())
+		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.solanaClient.GetNetwork())
 		if err != nil {
 			log.WithError(err).Error("failed to evaluate whirlpool")
 			continue
@@ -355,11 +360,11 @@ func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpool
 
 func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) error {
 	var tokenSwap tokenswap.TokenSwap
-	if err := p.client.GetAccount(ctx, address, &tokenSwap); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &tokenSwap); err != nil {
 		return err
 	}
 	var tokenLPMint token.Mint
-	if err := p.client.GetAccount(ctx, tokenSwap.TokenPool.String(), &tokenLPMint); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, tokenSwap.TokenPool.String(), &tokenLPMint); err != nil {
 		return err
 	}
 
@@ -414,7 +419,7 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 
 func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
 	var tokenAccount token.Account
-	if err := p.client.GetAccount(ctx, address, &tokenAccount); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &tokenAccount); err != nil {
 		return err
 	}
 	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
@@ -432,7 +437,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	}
 
 	var tokenMint token.Mint
-	if err := p.client.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
 		return fmt.Errorf("failed to GetAccount %s, err: %w", tokenAccount.Mint.String(), err)
 	}
 	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
@@ -448,47 +453,45 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 }
 
 func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
-	tokenMint, err := p.client.GetTokenMint(ctx, mintAddress)
+	tokenMint, err := p.solanaClient.GetTokenMint(ctx, mintAddress)
 	if err != nil {
 		return fmt.Errorf("failed to GetTokenMint %s, err: %w", mintAddress, err)
 	}
-	tokenMetadataAccount, err := p.client.GetTokenMetadataAccount(ctx, mintAddress)
-	if err != nil {
-		if err.Error() != solana.ErrNotFound {
-			logrus.WithError(err).WithField("mint", mintAddress).Error("failed to GetTokenMetadataAccount for mint")
-		}
-		// In case we manually added a token symbol, try and fetch that
-		var symbol *string = nil
-		var iconURL *string = nil
-		// TODO: replace this call with GetTokenByMint after https://github.com/dcaf-labs/drip-backend/pull/45
-		existingTokens, err := p.repo.GetTokensByMints(ctx, []string{mintAddress})
-		if len(existingTokens) > 1 || (err != nil && err.Error() != repository.ErrRecordNotFound) {
-			return fmt.Errorf("unexepcted error when fetching mints, err: %w", err)
-		}
-		if len(existingTokens) == 1 {
-			symbol = existingTokens[0].Symbol
-			iconURL = existingTokens[0].IconURL
-		}
-		tokenModel := model.Token{
-			Pubkey:   mintAddress,
-			Symbol:   symbol,
-			Decimals: int16(tokenMint.Decimals),
-			IconURL:  iconURL,
-		}
-		return p.repo.UpsertTokens(ctx, &tokenModel)
-	}
+	symbol, iconURL := p.getTokenMetadata(ctx, mintAddress)
 	tokenModel := model.Token{
 		Pubkey:   mintAddress,
-		Symbol:   &tokenMetadataAccount.Data.Symbol,
+		Symbol:   symbol,
 		Decimals: int16(tokenMint.Decimals),
-		IconURL:  nil, // TODO(Mocha): fetch the image via the URI if the URI is present
+		IconURL:  iconURL,
 	}
 	return p.repo.UpsertTokens(ctx, &tokenModel)
 }
 
+func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string) {
+	symbol := utils.GetStringPtr("")
+	iconURL := utils.GetStringPtr("")
+	existingToken, err := p.repo.GetTokenByMint(ctx, mint)
+	if err == nil {
+		symbol = existingToken.Symbol
+		iconURL = existingToken.IconURL
+	}
+	tokenMetadataAccount, err := p.solanaClient.GetTokenMetadataAccount(ctx, mint)
+	if err == nil && symbol == nil {
+		symbol = &tokenMetadataAccount.Data.Symbol
+	}
+	token, err := p.tokenRegistryClient.GetTokenRegistryToken(ctx, mint)
+	if err == nil && symbol == nil {
+		symbol = &token.Symbol
+	}
+	if err == nil && iconURL == nil {
+		iconURL = &token.LogoURI
+	}
+	return symbol, iconURL
+}
+
 func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) error {
 	var protoConfig drip.VaultProtoConfig
-	if err := p.client.GetAccount(ctx, address, &protoConfig); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &protoConfig); err != nil {
 		return err
 	}
 	return p.repo.UpsertProtoConfigs(ctx, &model.ProtoConfig{
@@ -503,7 +506,7 @@ func (p impl) UpsertProtoConfigByAddress(ctx context.Context, address string) er
 
 func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	var vaultAccount drip.Vault
-	if err := p.client.GetAccount(ctx, address, &vaultAccount); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &vaultAccount); err != nil {
 		return err
 	}
 	if err := p.UpsertProtoConfigByAddress(ctx, vaultAccount.ProtoConfig.String()); err != nil {
@@ -564,7 +567,7 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 
 func (p impl) UpsertPositionByAddress(ctx context.Context, address string) error {
 	var position drip.Position
-	if err := p.client.GetAccount(ctx, address, &position); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &position); err != nil {
 		return err
 	}
 	return p.UpsertPosition(ctx, address, position)
@@ -604,7 +607,7 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		logrus.WithError(err).Error("failed to UpsertPositions in UpsertPosition")
 		return err
 	}
-	largestAccounts, err := p.client.GetLargestTokenAccounts(ctx, position.PositionAuthority.String())
+	largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String())
 	if err != nil {
 		return err
 	}
@@ -628,7 +631,7 @@ func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) er
 // if shouldUpsertPrice is set to false, we will not calculate a price and will upsert it to 0
 func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, shouldUpsertPrice bool) error {
 	var vaultPeriodAccount drip.VaultPeriod
-	if err := p.client.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
 		return err
 	}
 	twap, err := decimal.NewFromString(vaultPeriodAccount.Twap.String())
@@ -706,11 +709,11 @@ func normalizePrice(rawPrice, tokenADecimals, tokenBDecimals decimal.Decimal) de
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
 	var tokenA token.Mint
-	if err := p.client.GetAccount(ctx, tokenAAMint, &tokenA); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, tokenAAMint, &tokenA); err != nil {
 		return err
 	}
 	var tokenB token.Mint
-	if err := p.client.GetAccount(ctx, tokenBMint, &tokenB); err != nil {
+	if err := p.solanaClient.GetAccount(ctx, tokenBMint, &tokenB); err != nil {
 		return err
 	}
 	if err := p.UpsertTokenByAddress(ctx, tokenAAMint); err != nil {
