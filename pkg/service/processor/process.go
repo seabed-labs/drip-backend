@@ -475,7 +475,7 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string) {
 	symbol := utils.GetStringPtr("")
 	iconURL := utils.GetStringPtr("")
-	existingToken, err := p.repo.GetTokenByMint(ctx, mint)
+	existingToken, err := p.repo.GetTokenByAddress(ctx, mint)
 	if err == nil {
 		symbol = existingToken.Symbol
 		iconURL = existingToken.IconURL

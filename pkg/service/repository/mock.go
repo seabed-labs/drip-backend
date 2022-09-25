@@ -405,21 +405,6 @@ func (mr *MockRepositoryMockRecorder) GetTokenByAddress(ctx, mint interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenByAddress", reflect.TypeOf((*MockRepository)(nil).GetTokenByAddress), ctx, mint)
 }
 
-// GetTokenByMint mocks base method.
-func (m *MockRepository) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokenByMint", ctx, mint)
-	ret0, _ := ret[0].(*model.Token)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetTokenByMint indicates an expected call of GetTokenByMint.
-func (mr *MockRepositoryMockRecorder) GetTokenByMint(ctx, mint interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenByMint", reflect.TypeOf((*MockRepository)(nil).GetTokenByMint), ctx, mint)
-}
-
 // GetTokenPair mocks base method.
 func (m *MockRepository) GetTokenPair(arg0 context.Context, arg1, arg2 string) (*model.TokenPair, error) {
 	m.ctrl.T.Helper()

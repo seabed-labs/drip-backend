@@ -228,10 +228,7 @@ func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys 
 }
 
 func (d repositoryImpl) GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error) {
-	return d.repo.Token.
-		WithContext(ctx).
-		Where(d.repo.Token.Pubkey.Eq(mint)).
-		First()
+	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
 }
 
 func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
@@ -241,10 +238,6 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 		stmt = stmt.Where(d.repo.Token.Pubkey.In(mints...))
 	}
 	return stmt.Find()
-}
-
-func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
-	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
 }
 
 func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccountBalance, error) {
