@@ -55,7 +55,7 @@ func getDependencies() []fx.Option {
 				middleware.NewHandler,
 				controller.NewHandler,
 				processor.NewProcessor,
-				alert.NewService,
+				alert.NewAlertService,
 				base.NewBase,
 			),
 			fx.Invoke(

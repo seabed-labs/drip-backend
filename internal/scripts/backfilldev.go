@@ -46,6 +46,16 @@ func Backfill(
 			}
 		}
 	}
+	if configs.IsDevnet(config.Network) && configs.IsStaging(config.Environment) {
+		for _, address := range []string{
+			"HhKqRDp2ooZPj8554rHtJLGiMsDrHy1zkZqidDM1h9kQ",
+		} {
+			log := logrus.WithField("address", address)
+			if err := processor.UpsertPositionByAddress(context.Background(), address); err != nil {
+				log.WithError(err).Error("failed to backfill position")
+			}
+		}
+	}
 	if configs.IsDevnet(config.Network) && configs.IsProd(config.Environment) {
 		for _, address := range []string{
 			"5VfSyiFenN99Nk3KTsuB93E6783cpB1rdJkjFdg9qSLK",

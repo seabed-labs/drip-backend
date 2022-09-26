@@ -27,6 +27,10 @@ func (d repositoryImpl) GetProtoConfigs(ctx context.Context, filterParams ProtoC
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetPositionByAddress(ctx context.Context, address string) (*model.Position, error) {
+	return d.repo.Position.WithContext(ctx).Where(d.repo.Position.Pubkey.Eq(address)).First()
+}
+
 func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	// The position_authority is the nft mint
 	return d.repo.Position.

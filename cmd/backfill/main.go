@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/alert"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
@@ -42,6 +44,7 @@ func getDependencies() []fx.Option {
 			tokenregistry.NewTokenRegistry,
 			repository.NewRepository,
 			processor.NewProcessor,
+			alert.NewAlertService,
 		),
 		fx.Invoke(
 			database.RunMigrations,
