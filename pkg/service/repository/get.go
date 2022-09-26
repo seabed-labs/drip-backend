@@ -27,6 +27,10 @@ func (d repositoryImpl) GetProtoConfigs(ctx context.Context, filterParams ProtoC
 	return stmt.Find()
 }
 
+func (d repositoryImpl) GetPositionByAddress(ctx context.Context, address string) (*model.Position, error) {
+	return d.repo.Position.WithContext(ctx).Where(d.repo.Position.Pubkey.Eq(address)).First()
+}
+
 func (d repositoryImpl) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	// The position_authority is the nft mint
 	return d.repo.Position.
@@ -211,6 +215,13 @@ func (d repositoryImpl) GetVaultWhitelistsByVaultAddress(ctx context.Context, va
 		Find()
 }
 
+func (d repositoryImpl) GetProtoConfigByAddress(ctx context.Context, pubkey string) (*model.ProtoConfig, error) {
+	return d.repo.ProtoConfig.
+		WithContext(ctx).
+		Where(d.repo.ProtoConfig.Pubkey.Eq(pubkey)).
+		First()
+}
+
 func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys []string) ([]*model.ProtoConfig, error) {
 	stmt := d.repo.ProtoConfig.
 		WithContext(ctx)
@@ -218,6 +229,10 @@ func (d repositoryImpl) GetProtoConfigsByAddresses(ctx context.Context, pubkeys 
 		stmt = stmt.Where(d.repo.ProtoConfig.Pubkey.In(pubkeys...))
 	}
 	return stmt.Find()
+}
+
+func (d repositoryImpl) GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error) {
+	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
 }
 
 func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
@@ -229,10 +244,6 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenByMint(ctx context.Context, mint string) (*model.Token, error) {
-	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
-}
-
 func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccountBalance, error) {
 	stmt := d.repo.TokenAccountBalance.
 		WithContext(ctx)
@@ -240,6 +251,14 @@ func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, 
 		stmt = stmt.Where(d.repo.TokenAccountBalance.Pubkey.In(tokenAccountPubkeys...))
 	}
 	return stmt.Find()
+}
+
+func (d repositoryImpl) GetActiveTokenAccountBalancesByMint(ctx context.Context, mint string) ([]*model.TokenAccountBalance, error) {
+	return d.repo.TokenAccountBalance.WithContext(ctx).
+		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccountBalance.Mint)).
+		Where(d.repo.TokenAccountBalance.Amount.Gt(0)).
+		Where(d.repo.Position.Authority.Eq(mint)).
+		Find()
 }
 
 func (d repositoryImpl) GetVaultPeriodByAddress(
@@ -300,17 +319,6 @@ func (d repositoryImpl) GetActiveWallets(
 		Group(d.repo.TokenAccountBalance.Owner).
 		Scan(&res)
 	return res, err
-}
-
-func (d repositoryImpl) GetTokensWithSupportedTokenB(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
-	stmt := d.repo.Token.WithContext(ctx).Distinct(d.repo.Token.ALL)
-	if tokenBMint != nil {
-		stmt = stmt.
-			Join(d.repo.TokenPair, d.repo.TokenPair.TokenB.EqCol(d.repo.Token.Pubkey)).
-			Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
-			Where(d.repo.Vault.Enabled.Is(true))
-	}
-	return stmt.Find()
 }
 
 func (d repositoryImpl) GetVaultsWithFilter(ctx context.Context, tokenAMint, tokenBMint, protoConfig *string) ([]*model.Vault, error) {
