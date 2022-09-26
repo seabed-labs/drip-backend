@@ -116,11 +116,12 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 		TokenBSymbol:              tokenB.Symbol,
 		TokenBIconURL:             tokenB.IconURL,
 		TokenBMint:                tokenB.Pubkey,
-		TokenAScaledDepositAmount: scaledTokenADepositAmount,
+		ScaledTokenADepositAmount: scaledTokenADepositAmount,
 		Granularity:               protoConfig.Granularity,
 		ScaledDripAmount:          scaledPeriodicDripAmount,
 		NumberOfSwaps:             position.NumberOfSwaps,
 		Owner:                     balances[0].Owner,
+		Position:                  positionAddr,
 	}
 
 	return p.alertService.SendNewPositionAlert(ctx, newPositionAlert)

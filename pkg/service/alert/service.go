@@ -2,6 +2,7 @@ package alert
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -29,6 +30,7 @@ func NewAlertService(
 	service := serviceImpl{}
 	if config.DiscordWebhookID != "" && config.DiscordWebhookAccessToken != "" {
 		service = serviceImpl{
+			network:                   config.Network,
 			enabled:                   true,
 			discordWebhookID:          config.DiscordWebhookID,
 			discordWebhookAccessToken: config.DiscordWebhookAccessToken,
@@ -52,6 +54,7 @@ func NewAlertService(
 }
 
 type serviceImpl struct {
+	network                   configs.Network
 	enabled                   bool
 	client                    webhook.Client
 	discordWebhookAccessToken string
@@ -89,11 +92,12 @@ type NewPositionAlert struct {
 	TokenBSymbol              *string
 	TokenBIconURL             *string
 	TokenBMint                string
-	TokenAScaledDepositAmount float64
-	Granularity               uint64
+	ScaledTokenADepositAmount float64
 	ScaledDripAmount          float64
+	Granularity               uint64
 	NumberOfSwaps             uint64
 	Owner                     string
+	Position                  string
 }
 
 func (a serviceImpl) SendNewPositionAlert(
@@ -120,10 +124,11 @@ func (a serviceImpl) SendNewPositionAlert(
 	embed := discord.NewEmbedBuilder().
 		SetTitle("New Position!").
 		SetColor(int(SuccessColor)).
+		SetURL(a.getExplorerURL(alertParams.Position)).
 		SetFields(
 			discord.EmbedField{Name: "Token A", Value: tokenA, Inline: inLineTrue},
 			discord.EmbedField{Name: "Token B", Value: tokenB, Inline: inLineTrue},
-			discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: inLineTrue},
+			discord.EmbedField{Name: "Token A Deposit", Value: strconv.FormatFloat(alertParams.ScaledTokenADepositAmount, 'f', -1, 32), Inline: inLineTrue},
 			discord.EmbedField{Name: "Granularity", Value: granularityStr, Inline: inLineTrue},
 			discord.EmbedField{Name: "Drip Amount", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: inLineTrue},
 			discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(alertParams.NumberOfSwaps, 10), Inline: inLineTrue},
@@ -135,6 +140,7 @@ func (a serviceImpl) SendNewPositionAlert(
 		tokenAEmbed := discord.NewEmbedBuilder().
 			SetTitle("TokenA").
 			SetColor(int(SuccessColor)).
+			SetURL(a.getExplorerURL(alertParams.TokenAMint)).
 			SetFields(
 				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenASymbol},
 			).
@@ -151,6 +157,7 @@ func (a serviceImpl) SendNewPositionAlert(
 		tokenBEmbed := discord.NewEmbedBuilder().
 			SetTitle("TokenB").
 			SetColor(int(SuccessColor)).
+			SetURL(a.getExplorerURL(alertParams.TokenBMint)).
 			SetFields(
 				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenBSymbol},
 			).
@@ -176,4 +183,15 @@ func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
 		//rest.WithCtx(ctx),
 	)
 	return err
+}
+
+func (a serviceImpl) getExplorerURL(account string) string {
+	switch a.network {
+	case configs.MainnetNetwork:
+		return fmt.Sprintf("https://explorer.solana.com/address/%s", account)
+	case configs.DevnetNetwork:
+		return fmt.Sprintf("https://explorer.solana.com/address/%s?cluster=devnet", account)
+	default:
+		return fmt.Sprintf("https://explorer.solana.com/address/%s?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899", account)
+	}
 }
