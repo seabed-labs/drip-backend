@@ -47,9 +47,9 @@ func NewAlertService(
 		)
 		service.client = client
 	}
-	//if err := service.SendInfo(context.Background(), "Info", "initialized alert service"); err != nil {
-	//	return nil, err
-	//}
+	if err := service.SendInfo(context.Background(), "Info", "Initialized alert service"); err != nil {
+		return nil, err
+	}
 	return service, nil
 }
 
@@ -180,7 +180,7 @@ func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
 			Build(),
 		// delay each request by 2 seconds
 		rest.WithDelay(2*time.Second),
-		//rest.WithCtx(ctx),
+		rest.WithCtx(ctx),
 	)
 	return err
 }

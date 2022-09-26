@@ -6,6 +6,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
@@ -36,11 +38,10 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 	if err := p.UpsertTokenByAddress(ctx, position.PositionAuthority.String()); err != nil {
 		return err
 	}
-	//shouldAlert := func() bool {
-	//	_, err := p.repo.GetPositionByAddress(ctx, address)
-	//	return err != nil && err.Error() == repository.ErrRecordNotFound
-	//}()
-	shouldAlert := true
+	shouldAlert := func() bool {
+		_, err := p.repo.GetPositionByAddress(ctx, address)
+		return err != nil && err.Error() == repository.ErrRecordNotFound
+	}()
 
 	if err := p.repo.UpsertPositions(ctx, &model.Position{
 		Pubkey:                   address,

@@ -13,39 +13,39 @@ func Backfill(
 	processor processor.Processor,
 ) error {
 	logrus.WithField("network", config.Network).Infof("starting backfill")
-	//if configs.IsDevnet(config.Network) {
-	//	for _, address := range []string{
-	//		"35WMYrE8E4vbmm4phVxkRDTK5gE8db2KUVGFTYduE1Uz",
-	//		"3MiLbpHuKHDEnMUNpDPhJmMQPzcJL2Gp8kQdGMRHPcwP",
-	//		"536VybxwBRjXP8JSQTjVsjMffkzgdRErZReCk1Ja7Psr",
-	//		"Bgn6dKZhWRYAGmsaE34h5tqgPg3iYUmUvqz2MBqr3hYA",
-	//		"BkMeyctybgU3yaboRrMjtgvqSXHaPBarYawcLejGeJg3",
-	//		"CyxNwQH1WPcH7NkCULdj4Xf6aMU3S9ws7YAoyzAZkU6h",
-	//		"Evy3P7kFy6epfbY3QZmwWiqWj1veZ87LQoCEWYzb3vW7",
-	//		"EZZTdHW9rskAJs4HGPwcM2CFeJ5BpRSdFmfTjZAVktwh",
-	//		"FcbTUmkEuizRjnr17iggHon9rAc2FeQ8uMdjxWBgFb58",
-	//		"GUr5RGCrS1bxvsiAHrLkQvK1WS6QFRCCy7V72mkN4b7s",
-	//		"H81dLAxwMFSy4HRqsDQWJq8BVtQW81sapENekRBSNUj7",
-	//	} {
-	//		log := logrus.WithField("address", address)
-	//		if err := processor.UpsertTokenSwapByAddress(context.Background(), address); err != nil {
-	//			log.WithError(err).Error("failed to backfill tokenSwap")
-	//		}
-	//	}
-	//	for _, address := range []string{
-	//		"2w9DNJRFGmvN2wuVi3CtLT49cM8DWdKfzAGas1XDw3Ve",
-	//		"5fkps3wttvX3ysprtWzLRuxajSkmdxEa12Ys8E4bMTPh",
-	//		"ADPEtfPLmn5Nb92dm6MFUEmmeFxyMXiX85JRfN5e8xyo",
-	//		"C5CBERnsLjFNDPC6xNtjyFR8HeDDcV9ZYKUgGUHNFKEE",
-	//		"Dr75jCuqpkYCGs4ATp2v31sU6bzDKoCdxJNvxXUUgb4S",
-	//		"GSFnjnJ7TdSsGWb6JgFhWakWrv8VGZUAghnY3EA8Xj46",
-	//	} {
-	//		log := logrus.WithField("address", address)
-	//		if err := processor.UpsertWhirlpoolByAddress(context.Background(), address); err != nil {
-	//			log.WithError(err).Error("failed to backfill whirlpool")
-	//		}
-	//	}
-	//}
+	if configs.IsDevnet(config.Network) {
+		for _, address := range []string{
+			"35WMYrE8E4vbmm4phVxkRDTK5gE8db2KUVGFTYduE1Uz",
+			"3MiLbpHuKHDEnMUNpDPhJmMQPzcJL2Gp8kQdGMRHPcwP",
+			"536VybxwBRjXP8JSQTjVsjMffkzgdRErZReCk1Ja7Psr",
+			"Bgn6dKZhWRYAGmsaE34h5tqgPg3iYUmUvqz2MBqr3hYA",
+			"BkMeyctybgU3yaboRrMjtgvqSXHaPBarYawcLejGeJg3",
+			"CyxNwQH1WPcH7NkCULdj4Xf6aMU3S9ws7YAoyzAZkU6h",
+			"Evy3P7kFy6epfbY3QZmwWiqWj1veZ87LQoCEWYzb3vW7",
+			"EZZTdHW9rskAJs4HGPwcM2CFeJ5BpRSdFmfTjZAVktwh",
+			"FcbTUmkEuizRjnr17iggHon9rAc2FeQ8uMdjxWBgFb58",
+			"GUr5RGCrS1bxvsiAHrLkQvK1WS6QFRCCy7V72mkN4b7s",
+			"H81dLAxwMFSy4HRqsDQWJq8BVtQW81sapENekRBSNUj7",
+		} {
+			log := logrus.WithField("address", address)
+			if err := processor.UpsertTokenSwapByAddress(context.Background(), address); err != nil {
+				log.WithError(err).Error("failed to backfill tokenSwap")
+			}
+		}
+		for _, address := range []string{
+			"2w9DNJRFGmvN2wuVi3CtLT49cM8DWdKfzAGas1XDw3Ve",
+			"5fkps3wttvX3ysprtWzLRuxajSkmdxEa12Ys8E4bMTPh",
+			"ADPEtfPLmn5Nb92dm6MFUEmmeFxyMXiX85JRfN5e8xyo",
+			"C5CBERnsLjFNDPC6xNtjyFR8HeDDcV9ZYKUgGUHNFKEE",
+			"Dr75jCuqpkYCGs4ATp2v31sU6bzDKoCdxJNvxXUUgb4S",
+			"GSFnjnJ7TdSsGWb6JgFhWakWrv8VGZUAghnY3EA8Xj46",
+		} {
+			log := logrus.WithField("address", address)
+			if err := processor.UpsertWhirlpoolByAddress(context.Background(), address); err != nil {
+				log.WithError(err).Error("failed to backfill whirlpool")
+			}
+		}
+	}
 	if configs.IsDevnet(config.Network) && configs.IsStaging(config.Environment) {
 		for _, address := range []string{
 			"HhKqRDp2ooZPj8554rHtJLGiMsDrHy1zkZqidDM1h9kQ",
