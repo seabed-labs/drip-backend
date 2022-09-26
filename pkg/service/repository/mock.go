@@ -260,6 +260,21 @@ func (mr *MockRepositoryMockRecorder) GetOrcaWhirlpoolsByTokenPairIDs(ctx interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrcaWhirlpoolsByTokenPairIDs", reflect.TypeOf((*MockRepository)(nil).GetOrcaWhirlpoolsByTokenPairIDs), varargs...)
 }
 
+// GetPositionByAddress mocks base method.
+func (m *MockRepository) GetPositionByAddress(ctx context.Context, address string) (*model.Position, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPositionByAddress", ctx, address)
+	ret0, _ := ret[0].(*model.Position)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPositionByAddress indicates an expected call of GetPositionByAddress.
+func (mr *MockRepositoryMockRecorder) GetPositionByAddress(ctx, address interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPositionByAddress", reflect.TypeOf((*MockRepository)(nil).GetPositionByAddress), ctx, address)
+}
+
 // GetPositionByNFTMint mocks base method.
 func (m *MockRepository) GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error) {
 	m.ctrl.T.Helper()
