@@ -39,54 +39,54 @@ func main() {
 }
 
 func getDependencies() []fx.Option {
-	config, _ := configs.NewAppConfig()
+	//config, _ := configs.NewAppConfig()
 	// Hack to save on dyno costs, this will run  the event server and api server in the same dyno for staging
-	if configs.IsStaging(config.Environment) {
-		return []fx.Option{
-			fx.Provide(
-				configs.NewAppConfig,
-				configs.NewPSQLConfig,
-				database.NewDatabase,
-				database.NewGORMDatabase,
-				query.Use,
-				solana.NewSolanaClient,
-				tokenregistry.NewTokenRegistry,
-				repository.NewRepository,
-				middleware.NewHandler,
-				controller.NewHandler,
-				processor.NewProcessor,
-				alert.NewAlertService,
-				base.NewBase,
-			),
-			fx.Invoke(
-				// func() { log.SetFormatter(&log.JSONFormatter{}) },
-				database.RunMigrations,
-				api.StartServer,
-				event.Server,
-			),
-			fx.NopLogger,
-		}
-	} else {
-		return []fx.Option{
-			fx.Provide(
-				configs.NewAppConfig,
-				configs.NewPSQLConfig,
-				database.NewDatabase,
-				database.NewGORMDatabase,
-				query.Use,
-				solana.NewSolanaClient,
-				repository.NewRepository,
-				middleware.NewHandler,
-				controller.NewHandler,
-				processor.NewProcessor,
-				base.NewBase,
-			),
-			fx.Invoke(
-				// func() { log.SetFormatter(&log.JSONFormatter{}) },
-				database.RunMigrations,
-				api.StartServer,
-			),
-			fx.NopLogger,
-		}
+	//if configs.IsStaging(config.Environment) {
+	return []fx.Option{
+		fx.Provide(
+			configs.NewAppConfig,
+			configs.NewPSQLConfig,
+			database.NewDatabase,
+			database.NewGORMDatabase,
+			query.Use,
+			solana.NewSolanaClient,
+			tokenregistry.NewTokenRegistry,
+			repository.NewRepository,
+			middleware.NewHandler,
+			controller.NewHandler,
+			processor.NewProcessor,
+			alert.NewAlertService,
+			base.NewBase,
+		),
+		fx.Invoke(
+			func() { log.SetFormatter(&log.JSONFormatter{}) },
+			database.RunMigrations,
+			api.StartServer,
+			event.Server,
+		),
+		fx.NopLogger,
 	}
+	//} else {
+	//	return []fx.Option{
+	//		fx.Provide(
+	//			configs.NewAppConfig,
+	//			configs.NewPSQLConfig,
+	//			database.NewDatabase,
+	//			database.NewGORMDatabase,
+	//			query.Use,
+	//			solana.NewSolanaClient,
+	//			repository.NewRepository,
+	//			middleware.NewHandler,
+	//			controller.NewHandler,
+	//			processor.NewProcessor,
+	//			base.NewBase,
+	//		),
+	//		fx.Invoke(
+	//			// func() { log.SetFormatter(&log.JSONFormatter{}) },
+	//			database.RunMigrations,
+	//			api.StartServer,
+	//		),
+	//		fx.NopLogger,
+	//	}
+	//}
 }
