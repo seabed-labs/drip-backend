@@ -58,6 +58,17 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		log.WithError(err).Error("failed to UpsertPositions in UpsertPosition")
 		return err
 	}
+	// Update existing account balances for this position if any (relevant when backfilling)
+	if existingBalances, err := p.repo.GetActiveTokenAccountBalancesByMint(ctx, position.PositionAuthority.String()); err != nil {
+		log.WithError(err).Warning("failed to GetActiveTokenAccountBalancesByMint")
+	} else {
+		for i := range existingBalances {
+			if err := p.UpsertTokenAccountBalanceByAddress(ctx, existingBalances[i].Pubkey); err != nil {
+				log.WithError(err).Warning("failed to UpsertTokenAccountBalanceByAddress")
+			}
+		}
+	}
+	// Add new token account balance if any
 	largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String())
 	if err != nil {
 		return err
