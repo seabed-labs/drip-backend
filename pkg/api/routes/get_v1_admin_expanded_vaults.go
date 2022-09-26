@@ -103,6 +103,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		protoConfigsByPubkey[protoConfig.Pubkey] = protoConfig
 	}
 
+	// todo: refactor this like expanded admin positions
 	for _, expandParam := range *params.Expand {
 		switch expandParam {
 		case string(protoConfigValue):
