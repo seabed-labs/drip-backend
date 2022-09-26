@@ -2,24 +2,22 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"strconv"
+	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	"github.com/gagliardetto/solana-go/programs/token"
-	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
 
-const backfillEvery = 3600
+const backfillEvery = time.Hour * 1
 
 type DripProgramProcessor struct {
 	client      solana.Solana
@@ -41,29 +39,22 @@ func Server(
 		cancel:      cancel,
 		environment: config.Environment,
 	}
-	job := cron.New()
-	if _, err := job.AddFunc(fmt.Sprintf("@every %ds", backfillEvery), dripProgramProcessor.runBackfill); err != nil {
-		logrus.WithError(err).Error("failed to addFunc to cronJob")
-		return err
-	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
-			go func() {
-				_ = dripProgramProcessor.start(ctx)
-			}()
-			job.Start()
+			if err := dripProgramProcessor.start(ctx); err != nil {
+				return err
+			}
 			return nil
 		},
 		OnStop: func(_ context.Context) error {
 			dripProgramProcessor.stop()
-			_ = job.Stop()
 			return nil
 		},
 	})
 	return nil
 }
 
-func (d DripProgramProcessor) start(ctx context.Context) error {
+func (d *DripProgramProcessor) start(ctx context.Context) error {
 	// Track Drip accounts
 	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processor.ProcessDripEvent); err != nil {
 		return err
@@ -90,17 +81,27 @@ func (d DripProgramProcessor) start(ctx context.Context) error {
 	if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {
 		return err
 	}
+
+	go d.runBackfill(ctx)
 	return nil
 }
 
-func (d DripProgramProcessor) runBackfill() {
-	id := rand.Int()
-	log := logrus.WithField("id", id)
-	log.Info("starting backfill")
-	d.processor.Backfill(context.Background(), drip.ProgramID.String(), d.processor.ProcessDripEvent)
-	log.Info("done backfill")
+func (d *DripProgramProcessor) stop() {
+	d.cancel()
 }
 
-func (d DripProgramProcessor) stop() {
-	d.cancel()
+func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
+	defer func() {
+		time.AfterFunc(backfillEvery, func() {
+			if ctx.Err() == context.Canceled {
+				return
+			}
+			d.runBackfill(ctx)
+		})
+	}()
+	id := strconv.FormatInt(int64(rand.Int()), 10)
+	log := logrus.WithField("id", id)
+	log.Info("starting backfill")
+	d.processor.Backfill(ctx, id, drip.ProgramID.String(), d.processor.ProcessDripEvent)
+	log.Info("done backfill")
 }
