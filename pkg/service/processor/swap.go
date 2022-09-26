@@ -3,10 +3,7 @@ package processor
 import (
 	"context"
 	"strconv"
-	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
-	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
@@ -15,7 +12,6 @@ import (
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
-	"github.com/sirupsen/logrus"
 )
 
 func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) error {
@@ -190,47 +186,49 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 }
 
 func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpoolPubkey string, tokenPairID string, inverseTokenPairID string) {
-	log := logrus.WithField("whirlpool", whirlpoolPubkey).WithField("tokenPairID", tokenPairID).WithField("inverseTokenPairID", inverseTokenPairID)
-	tokenPairVaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, tokenPairID)
-	if err != nil && err.Error() != repository.ErrRecordNotFound {
-		log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
-	}
-	vaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, inverseTokenPairID)
-	if err != nil && err.Error() != repository.ErrRecordNotFound {
-		log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
-	}
-	vaults = append(vaults, tokenPairVaults...)
-	quotes := []*model.OrcaWhirlpoolDeltaBQuote{}
-
-	for i := range vaults {
-		existingQuote, err := p.repo.GetOrcaWhirlpoolDeltaBQuote(ctx, vaults[i].Pubkey, whirlpoolPubkey)
-		if err != nil && err.Error() != repository.ErrRecordNotFound {
-			log.WithError(err).Error("failed to GetOrcaWhirlpoolDeltaBQuote")
-			continue
-		}
-		existingQuoteLastUpdateTime := utils.GetTimePtr(time.Time{})
-		if existingQuote != nil {
-			existingQuoteLastUpdateTime = existingQuote.LastUpdated
-		}
-		// No need to constantly update this, lets only update every 10 minutes
-		if time.Now().Before(existingQuoteLastUpdateTime.Add(time.Minute * 10)) {
-			continue
-		}
-		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.solanaClient.GetNetwork())
-		if err != nil {
-			log.WithError(err).Error("failed to evaluate whirlpool")
-			continue
-		}
-		quotes = append(quotes, &model.OrcaWhirlpoolDeltaBQuote{
-			VaultPubkey:     vaults[i].Pubkey,
-			WhirlpoolPubkey: whirlpoolPubkey,
-			TokenPairID:     vaults[i].TokenPairID,
-			DeltaB:          deltaB,
-			LastUpdated:     utils.GetTimePtr(time.Now()),
-		})
-	}
-
-	if err := p.repo.UpsertOrcaWhirlpoolDeltaBQuotes(ctx, quotes...); err != nil {
-		log.WithError(err).Error("failed to UpsertOrcaWhirlpoolDeltaBQuotes")
-	}
+	// todo: disable to debug mem leak
+	return
+	//log := logrus.WithField("whirlpool", whirlpoolPubkey).WithField("tokenPairID", tokenPairID).WithField("inverseTokenPairID", inverseTokenPairID)
+	//tokenPairVaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, tokenPairID)
+	//if err != nil && err.Error() != repository.ErrRecordNotFound {
+	//	log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
+	//}
+	//vaults, err := p.repo.AdminGetVaultsByTokenPairID(ctx, inverseTokenPairID)
+	//if err != nil && err.Error() != repository.ErrRecordNotFound {
+	//	log.WithError(err).Error("failed to get vaults wile updating whirlpool cache")
+	//}
+	//vaults = append(vaults, tokenPairVaults...)
+	//quotes := []*model.OrcaWhirlpoolDeltaBQuote{}
+	//
+	//for i := range vaults {
+	//	existingQuote, err := p.repo.GetOrcaWhirlpoolDeltaBQuote(ctx, vaults[i].Pubkey, whirlpoolPubkey)
+	//	if err != nil && err.Error() != repository.ErrRecordNotFound {
+	//		log.WithError(err).Error("failed to GetOrcaWhirlpoolDeltaBQuote")
+	//		continue
+	//	}
+	//	existingQuoteLastUpdateTime := utils.GetTimePtr(time.Time{})
+	//	if existingQuote != nil {
+	//		existingQuoteLastUpdateTime = existingQuote.LastUpdated
+	//	}
+	//	// No need to constantly update this, lets only update every 10 minutes
+	//	if time.Now().Before(existingQuoteLastUpdateTime.Add(time.Minute * 10)) {
+	//		continue
+	//	}
+	//	deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.solanaClient.GetNetwork())
+	//	if err != nil {
+	//		log.WithError(err).Error("failed to evaluate whirlpool")
+	//		continue
+	//	}
+	//	quotes = append(quotes, &model.OrcaWhirlpoolDeltaBQuote{
+	//		VaultPubkey:     vaults[i].Pubkey,
+	//		WhirlpoolPubkey: whirlpoolPubkey,
+	//		TokenPairID:     vaults[i].TokenPairID,
+	//		DeltaB:          deltaB,
+	//		LastUpdated:     utils.GetTimePtr(time.Now()),
+	//	})
+	//}
+	//
+	//if err := p.repo.UpsertOrcaWhirlpoolDeltaBQuotes(ctx, quotes...); err != nil {
+	//	log.WithError(err).Error("failed to UpsertOrcaWhirlpoolDeltaBQuotes")
+	//}
 }
