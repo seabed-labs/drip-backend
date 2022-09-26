@@ -29,7 +29,7 @@ type Processor interface {
 	UpsertTokenAccountBalanceByAddress(context.Context, string) error
 	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 
-	Backfill(ctx context.Context, programID string, processor func(string, []byte))
+	Backfill(ctx context.Context, logId string, programID string, processor func(string, []byte))
 	ProcessDripEvent(address string, data []byte)
 	ProcessTokenSwapEvent(address string, data []byte)
 	ProcessWhirlpoolEvent(address string, data []byte)
@@ -57,8 +57,8 @@ func NewProcessor(
 	}
 }
 
-func (p impl) Backfill(ctx context.Context, programID string, processor func(string, []byte)) {
-	log := logrus.WithField("program", programID).WithField("func", "Backfill")
+func (p impl) Backfill(ctx context.Context, logId string, programID string, processor func(string, []byte)) {
+	log := logrus.WithField("id", logId).WithField("program", programID).WithField("func", "Backfill")
 	accounts, err := p.solanaClient.GetProgramAccounts(ctx, programID)
 	if err != nil {
 		log.WithError(err).Error("failed to get accounts")
