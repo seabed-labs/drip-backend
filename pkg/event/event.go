@@ -61,7 +61,6 @@ func Server(
 			return nil
 		},
 	})
-	go dripProgramProcessor.runBackfill()
 	return nil
 }
 

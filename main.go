@@ -3,26 +3,20 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
-
-	"github.com/dcaf-labs/drip/pkg/service/base"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository"
-	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-
-	"github.com/dcaf-labs/drip/pkg/event"
-
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
+	"github.com/dcaf-labs/drip/pkg/event"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/base"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
+	_ "github.com/heroku/x/hmetrics/onload"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
