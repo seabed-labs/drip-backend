@@ -3,6 +3,7 @@ package alert
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -192,6 +193,9 @@ func (a serviceImpl) getExplorerURL(account string) string {
 	case configs.DevnetNetwork:
 		return fmt.Sprintf("https://explorer.solana.com/address/%s?cluster=devnet", account)
 	default:
-		return fmt.Sprintf("https://explorer.solana.com/address/%s?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899", account)
+		return fmt.Sprintf(
+			"https://explorer.solana.com/address/%s?cluster=%s",
+			account,
+			url.QueryEscape("custom&customUrl=http://localhost:8899"))
 	}
 }
