@@ -6,6 +6,7 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -75,13 +76,17 @@ func getBestOrcaWhirlpoolForVault(
 	for _, eligibleSwap := range whirlpools {
 		compositeKey := vault.Pubkey + eligibleSwap.Pubkey
 		whirlpoolDeltaBQuote, ok := orcaWhirlpoolDeltaBQuoteByCompositeKey[compositeKey]
-		if !ok {
-			err := fmt.Errorf(
-				"missing orca whirlpool deltaB estimate for whirlpool %s and vault %s with compositeKey %s",
-				eligibleSwap.Pubkey, vault.Pubkey, compositeKey)
-			return nil, err
+		if !ok || whirlpoolDeltaBQuote == nil {
+			logrus.
+				WithField("vault", vault.Pubkey).
+				WithField("whirlpool", eligibleSwap.Pubkey).
+				Error("missing orca whirlpool deltaB estimate ")
+			whirlpoolDeltaBQuote = &model.OrcaWhirlpoolDeltaBQuote{
+				VaultPubkey:     vault.Pubkey,
+				WhirlpoolPubkey: eligibleSwap.Pubkey,
+				TokenPairID:     vault.TokenPairID,
+			}
 		}
-
 		if whirlpoolDeltaBQuote.DeltaB >= bestSwapDeltaB {
 			bestSwap = eligibleSwap
 			bestSwapDeltaB = whirlpoolDeltaBQuote.DeltaB
