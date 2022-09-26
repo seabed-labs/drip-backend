@@ -12,7 +12,6 @@ import (
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
-	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -78,9 +77,10 @@ func (d *DripProgramProcessor) start(ctx context.Context) error {
 	}
 
 	// Track Balance Updates Live
-	if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {
-		return err
-	}
+	// Too many messages... need to implement an actual queue before we re-enable this
+	//if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {
+	//	return err
+	//}
 
 	go d.runBackfill(ctx)
 	return nil
