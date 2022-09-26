@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"sync"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
 
@@ -98,13 +97,7 @@ func (d DripProgramProcessor) runBackfill() {
 	id := rand.Int()
 	log := logrus.WithField("id", id)
 	log.Info("starting backfill")
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		d.processor.Backfill(context.Background(), drip.ProgramID.String(), d.processor.ProcessDripEvent)
-	}()
-	wg.Wait()
+	d.processor.Backfill(context.Background(), drip.ProgramID.String(), d.processor.ProcessDripEvent)
 	log.Info("done backfill")
 }
 
