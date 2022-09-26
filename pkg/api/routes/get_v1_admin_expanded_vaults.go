@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -44,13 +43,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	// Populate Base Result
 	for i := range vaults {
 		res = append(res, apispec.ExpandedAdminVault{
-			Vault:                      vaultModelToAPI(vaults[i]),
-			TokenAAccountValue:         nil,
-			TokenBAccountValue:         nil,
-			TreasuryTokenBAccountValue: nil,
-			ProtoConfigValue:           nil,
-			TokenAMintValue:            nil,
-			TokenBMintValue:            nil,
+			Vault: vaultModelToAPI(vaults[i]),
 		})
 	}
 	if params.Expand == nil {
@@ -123,14 +116,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 					continue
 				}
 				// TODO(Mocha): unsafe cast
-				res[i].ProtoConfigValue = &apispec.ProtoConfig{
-					Pubkey:                  protoConfig.Pubkey,
-					Admin:                   protoConfig.Admin,
-					Granularity:             strconv.FormatUint(protoConfig.Granularity, 10),
-					TokenADripTriggerSpread: int(protoConfig.TokenADripTriggerSpread),
-					TokenBWithdrawalSpread:  int(protoConfig.TokenBWithdrawalSpread),
-					TokenBReferralSpread:    int(protoConfig.TokenBReferralSpread),
-				}
+				apiProtoConfig := protoConfigModelToAPI(protoConfig)
+				res[i].ProtoConfigValue = &apiProtoConfig
 			}
 		case string(tokenAMintValue):
 			for i := range res {
@@ -142,12 +129,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenAMint")
 					continue
 				}
-				//TODO(Mocha): unsafe cast
-				res[i].TokenAMintValue = &apispec.Token{
-					Decimals: int(token.Decimals),
-					Pubkey:   token.Pubkey,
-					Symbol:   token.Symbol,
-				}
+				apiToken := tokenModelToApi(token)
+				res[i].TokenAMintValue = &apiToken
 			}
 		case string(tokenBMintValue):
 			for i := range res {
@@ -159,12 +142,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenBMint")
 					continue
 				}
-				res[i].TokenBMintValue = &apispec.Token{
-					//TODO(Mocha): unsafe cast
-					Decimals: int(token.Decimals),
-					Pubkey:   token.Pubkey,
-					Symbol:   token.Symbol,
-				}
+				apiToken := tokenModelToApi(token)
+				res[i].TokenBMintValue = &apiToken
 			}
 		case string(tokenAAccountValue):
 			for i := range res {
@@ -176,14 +155,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenAAccount")
 					continue
 				}
-				// TODO(Mocha): Unsafe cast
-				res[i].TokenAAccountValue = &apispec.TokenAccountBalance{
-					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
-					Mint:   tokenAccountBalance.Mint,
-					Owner:  tokenAccountBalance.Owner,
-					Pubkey: tokenAccountBalance.Pubkey,
-					State:  tokenAccountBalance.State,
-				}
+				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
+				res[i].TokenAAccountValue = &apiTokenAccountBalance
 			}
 		case string(tokenBAccountValue):
 			for i := range res {
@@ -195,14 +168,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenBAccount")
 					continue
 				}
-				// TODO(Mocha): Unsafe cast
-				res[i].TokenBAccountValue = &apispec.TokenAccountBalance{
-					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
-					Mint:   tokenAccountBalance.Mint,
-					Owner:  tokenAccountBalance.Owner,
-					Pubkey: tokenAccountBalance.Pubkey,
-					State:  tokenAccountBalance.State,
-				}
+				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
+				res[i].TokenBAccountValue = &apiTokenAccountBalance
 			}
 		case string(treasuryTokenBAccountValue):
 			for i := range res {
@@ -214,14 +181,8 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TreasuryTokenBAccount")
 					continue
 				}
-				// TODO(Mocha): Unsafe cast
-				res[i].TreasuryTokenBAccountValue = &apispec.TokenAccountBalance{
-					Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
-					Mint:   tokenAccountBalance.Mint,
-					Owner:  tokenAccountBalance.Owner,
-					Pubkey: tokenAccountBalance.Pubkey,
-					State:  tokenAccountBalance.State,
-				}
+				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
+				res[i].TreasuryTokenBAccountValue = &apiTokenAccountBalance
 			}
 		}
 	}

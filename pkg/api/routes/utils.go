@@ -81,6 +81,16 @@ func tokenModelsToAPI(tokenModels []*model.Token) apispec.ListTokens {
 	return res
 }
 
+func tokenAccountBalanceModelToAPI(tokenAccountBalance *model.TokenAccountBalance) apispec.TokenAccountBalance {
+	return apispec.TokenAccountBalance{
+		Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
+		Mint:   tokenAccountBalance.Mint,
+		Owner:  tokenAccountBalance.Owner,
+		Pubkey: tokenAccountBalance.Pubkey,
+		State:  tokenAccountBalance.State,
+	}
+}
+
 func protoConfigModelToAPI(protoConfigModel *model.ProtoConfig) apispec.ProtoConfig {
 	return apispec.ProtoConfig{
 		Pubkey:                  protoConfigModel.Pubkey,
