@@ -68,9 +68,6 @@ func getBestOrcaWhirlpoolForVault(
 	if len(whirlpools) == 0 {
 		return nil, fmt.Errorf("failed to get whirlpool")
 	}
-	if len(orcaWhirlpoolDeltaBQuoteByCompositeKey) == 0 {
-		return nil, fmt.Errorf("failed to get best whirlpool, missing deltaBQuoute")
-	}
 	bestSwapDeltaB := uint64(0)
 	var bestSwap *model.OrcaWhirlpool
 	for _, eligibleSwap := range whirlpools {
@@ -82,6 +79,7 @@ func getBestOrcaWhirlpoolForVault(
 				WithField("whirlpool", eligibleSwap.Pubkey).
 				Error("missing orca whirlpool deltaB estimate ")
 			whirlpoolDeltaBQuote = &model.OrcaWhirlpoolDeltaBQuote{
+				DeltaB:          uint64(0),
 				VaultPubkey:     vault.Pubkey,
 				WhirlpoolPubkey: eligibleSwap.Pubkey,
 				TokenPairID:     vault.TokenPairID,
