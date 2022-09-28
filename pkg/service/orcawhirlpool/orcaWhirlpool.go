@@ -36,7 +36,7 @@ func EvaluateOrcaWhirlpool(whirlpool string, vault *model.Vault, network configs
 	if vault.DripAmount == 0 {
 		return 0, fmt.Errorf("drip amount is 0")
 	}
-	swapEstimate, err := getOrcaWhirlpoolQuoteEstimate(whirlpool, vault.TokenAMint, vault.DripAmount, solana.GetURL(network))
+	swapEstimate, err := getOrcaWhirlpoolQuoteEstimate(whirlpool, vault.TokenAMint, vault.DripAmount, solana.GetURL(network, true))
 	if err != nil {
 		return 0, err
 	}

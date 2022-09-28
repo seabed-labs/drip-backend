@@ -50,9 +50,10 @@ func NewSolanaClient(
 }
 
 type impl struct {
-	network configs.Network
-	client  *rpc.Client
-	wallet  *solana.Wallet
+	network      configs.Network
+	wallet       *solana.Wallet
+	client       *rpc.Client
+	backupClient *rpc.Client // to support all the calls client doesn't support
 }
 
 func (s impl) GetNetwork() configs.Network {
@@ -62,11 +63,12 @@ func (s impl) GetNetwork() configs.Network {
 func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
-	url := GetURL(config.Network)
-	callsPerSecond := GetRequestsPerSecondLimit(config.Network)
+	primaryURL, primaryCallsPerSecond := getURLWithRateLimit(config.Network, true)
+	secondaryURL, secondaryCallsPerSecond := getURLWithRateLimit(config.Network, false)
 	solanaClient := impl{
-		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, callsPerSecond)),
-		network: config.Network,
+		client:       rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
+		backupClient: rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(secondaryURL, secondaryCallsPerSecond)),
+		network:      config.Network,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -75,9 +77,11 @@ func createClient(
 	}
 	logrus.
 		WithFields(logrus.Fields{
-			"version":        resp.SolanaCore,
-			"url":            url,
-			"callsPerSecond": callsPerSecond,
+			"version":                 resp.SolanaCore,
+			"primaryURL":              primaryURL,
+			"primaryCallsPerSecond":   primaryCallsPerSecond,
+			"secondaryURL":            secondaryURL,
+			"secondaryCallsPerSecond": secondaryCallsPerSecond,
 		}).
 		Info("created solana clients")
 
@@ -444,8 +448,13 @@ func (s impl) signAndBroadcast(
 
 	return txHash.String(), nil
 }
-
-func GetRequestsPerSecondLimit(network configs.Network) int {
+func getURLWithRateLimit(network configs.Network, primary bool) (string, int) {
+	return GetURL(network, primary), GetRequestsPerSecondLimit(network, primary)
+}
+func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
+	if !primary {
+		return 3
+	}
 	switch network {
 	case configs.MainnetNetwork:
 		return 30
@@ -453,7 +462,22 @@ func GetRequestsPerSecondLimit(network configs.Network) int {
 		return 3
 	}
 }
-func GetURL(env configs.Network) string {
+
+func GetURL(env configs.Network, primary bool) string {
+	if !primary {
+		switch env {
+		case configs.DevnetNetwork:
+			return rpc.DevNet_RPC
+		case configs.MainnetNetwork:
+			return rpc.MainNetBeta_RPC
+		case configs.NilNetwork:
+			fallthrough
+		case configs.LocalNetwork:
+			fallthrough
+		default:
+			return rpc.LocalNet_RPC
+		}
+	}
 	switch env {
 	case configs.DevnetNetwork:
 		return rpc.DevNet_RPC
