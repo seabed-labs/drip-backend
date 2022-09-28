@@ -65,7 +65,7 @@ func TestSolanaClient(t *testing.T) {
 	t.Run("getURL should return correct RPC url", func(t *testing.T) {
 		assert.Equal(t, GetURL(configs.NilNetwork, true), rpc.LocalNet_RPC)
 		assert.Equal(t, GetURL(configs.LocalNetwork, true), rpc.LocalNet_RPC)
-		assert.Equal(t, GetURL(configs.DevnetNetwork, true), "https://api.devnet.solana.com")
+		assert.Equal(t, GetURL(configs.DevnetNetwork, true), "https://solana-devnet.g.alchemy.com/v2/Uu4ruAh4jZkN1VcklmL0C0jUYACraght")
 		assert.Equal(t, GetURL(configs.MainnetNetwork, true), "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_")
 	})
 

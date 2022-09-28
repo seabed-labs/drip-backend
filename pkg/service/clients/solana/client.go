@@ -202,7 +202,8 @@ func (s impl) GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.
 	if err != nil {
 		return nil, err
 	}
-	out, err := s.client.GetTokenLargestAccounts(ctx, pubkey, "confirmed")
+	// this call is not supported on alchemy
+	out, err := s.backupClient.GetTokenLargestAccounts(ctx, pubkey, "confirmed")
 	if out == nil {
 		return nil, err
 	}
@@ -458,6 +459,8 @@ func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
 	switch network {
 	case configs.MainnetNetwork:
 		return 30
+	case configs.DevnetNetwork:
+		return 30
 	default:
 		return 3
 	}
@@ -480,7 +483,7 @@ func GetURL(env configs.Network, primary bool) string {
 	}
 	switch env {
 	case configs.DevnetNetwork:
-		return rpc.DevNet_RPC
+		return "https://solana-devnet.g.alchemy.com/v2/Uu4ruAh4jZkN1VcklmL0C0jUYACraght"
 	case configs.MainnetNetwork:
 		return "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_"
 	case configs.NilNetwork:
