@@ -460,7 +460,7 @@ func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
 	case configs.MainnetNetwork:
 		return 30
 	case configs.DevnetNetwork:
-		return 30
+		return 15
 	default:
 		return 3
 	}
