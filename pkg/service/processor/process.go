@@ -172,6 +172,7 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, wg *sync.
 
 func (p impl) processAccountUpdateQueueItem(ctx context.Context, queueItem *model.AccountUpdateQueueItem) {
 	log := logrus.WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
+	log.Infof("processing update queue item")
 	shouldRemoveItem := true
 	defer func() {
 		if !shouldRemoveItem {
