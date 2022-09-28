@@ -20,9 +20,8 @@ func (d repositoryImpl) AddItem(ctx context.Context, item *model.AccountUpdateQu
 func (d repositoryImpl) RemoveItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
 	info, err := d.repo.AccountUpdateQueueItem.
 		WithContext(ctx).
-		Where(
-			d.repo.AccountUpdateQueueItem.Pubkey.Eq(item.Pubkey),
-		).Delete()
+		Where(d.repo.AccountUpdateQueueItem.Pubkey.Eq(item.Pubkey)).
+		Delete()
 	if err != nil {
 		return err
 	}

@@ -182,10 +182,6 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, queueItem *mode
 		}
 	}()
 
-	if err := p.accountUpdateQueue.RemoveItem(ctx, queueItem); err != nil {
-		log.WithError(err).Error("failed to remove queue item")
-	}
-
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
 	if err != nil {
 		log.WithError(err).Error("failed to get accountInfo")
