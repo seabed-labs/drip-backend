@@ -151,11 +151,11 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
 			}
-			if depth, err := p.accountUpdateQueue.Depth(ctx); err != nil {
-				logrus.WithError(err).Error("failed to get queue depth")
-			} else {
-				logrus.WithField("depth", depth).Infof("queue depth")
-			}
+			//if depth, err := p.accountUpdateQueue.Depth(ctx); err != nil {
+			//	logrus.WithError(err).Error("failed to get queue depth")
+			//} else {
+			//	logrus.WithField("depth", depth).Infof("queue depth")
+			//}
 			ch <- queueItem
 		}
 	}
@@ -178,7 +178,6 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string
 
 func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queueItem *model.AccountUpdateQueueItem) {
 	log := logrus.WithField("id", id).WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
-	log.Infof("processing update queue item")
 	shouldReQeue := false
 	defer func() {
 		if !shouldReQeue {
