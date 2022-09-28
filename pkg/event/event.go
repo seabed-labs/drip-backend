@@ -54,7 +54,6 @@ func Server(
 	return nil
 }
 
-//XPTpRMkf.oKWhkoGfuAj8h0wPO8QwkqzqqcztqkLY
 func (d *DripProgramProcessor) start(ctx context.Context) error {
 	// Track Drip accounts
 	// We track drip accounts live
