@@ -56,7 +56,8 @@ func Server(
 
 func (d *DripProgramProcessor) start(ctx context.Context) error {
 	// Track Drip accounts
-	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, drip.ProgramID.String())); err != nil {
+	// We track drip accounts live
+	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processor.ProcessDripEvent); err != nil {
 		return err
 	}
 

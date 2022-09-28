@@ -43,10 +43,10 @@ type Processor interface {
 	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
 	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte)
 	ProcessAccountUpdateQueue(ctx context.Context)
-	//ProcessDripEvent(address string, data []byte)
-	//ProcessTokenSwapEvent(address string, data []byte)
-	//ProcessWhirlpoolEvent(address string, data []byte)
-	//ProcessTokenEvent(address string, data []byte)
+	ProcessDripEvent(address string, data []byte)
+	ProcessTokenSwapEvent(address string, data []byte)
+	ProcessWhirlpoolEvent(address string, data []byte)
+	ProcessTokenEvent(address string, data []byte)
 }
 
 type impl struct {
