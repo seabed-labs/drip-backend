@@ -70,9 +70,25 @@ type Repository interface {
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 }
 
+type AccountUpdateQueue interface {
+	AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
+	RemoveItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
+	GetNextItem(ctx context.Context) (*model.AccountUpdateQueueItem, error)
+}
+
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
+}
+
+func NewAccountUpdateQueue(
+	repo *query.Query,
+	db *sqlx.DB,
+) AccountUpdateQueue {
+	return repositoryImpl{
+		repo: repo,
+		db:   db,
+	}
 }
 
 func NewRepository(

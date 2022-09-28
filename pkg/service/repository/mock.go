@@ -763,3 +763,69 @@ func (mr *MockRepositoryMockRecorder) UpsertVaults(arg0 interface{}, arg1 ...int
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaults", reflect.TypeOf((*MockRepository)(nil).UpsertVaults), varargs...)
 }
+
+// MockAccountUpdateQueue is a mock of AccountUpdateQueue interface.
+type MockAccountUpdateQueue struct {
+	ctrl     *gomock.Controller
+	recorder *MockAccountUpdateQueueMockRecorder
+}
+
+// MockAccountUpdateQueueMockRecorder is the mock recorder for MockAccountUpdateQueue.
+type MockAccountUpdateQueueMockRecorder struct {
+	mock *MockAccountUpdateQueue
+}
+
+// NewMockAccountUpdateQueue creates a new mock instance.
+func NewMockAccountUpdateQueue(ctrl *gomock.Controller) *MockAccountUpdateQueue {
+	mock := &MockAccountUpdateQueue{ctrl: ctrl}
+	mock.recorder = &MockAccountUpdateQueueMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAccountUpdateQueue) EXPECT() *MockAccountUpdateQueueMockRecorder {
+	return m.recorder
+}
+
+// AddItem mocks base method.
+func (m *MockAccountUpdateQueue) AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddItem", ctx, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddItem indicates an expected call of AddItem.
+func (mr *MockAccountUpdateQueueMockRecorder) AddItem(ctx, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AddItem), ctx, item)
+}
+
+// GetNextItem mocks base method.
+func (m *MockAccountUpdateQueue) GetNextItem(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNextItem", ctx)
+	ret0, _ := ret[0].(*model.AccountUpdateQueueItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNextItem indicates an expected call of GetNextItem.
+func (mr *MockAccountUpdateQueueMockRecorder) GetNextItem(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNextItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).GetNextItem), ctx)
+}
+
+// RemoveItem mocks base method.
+func (m *MockAccountUpdateQueue) RemoveItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveItem", ctx, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveItem indicates an expected call of RemoveItem.
+func (mr *MockAccountUpdateQueueMockRecorder) RemoveItem(ctx, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).RemoveItem), ctx, item)
+}

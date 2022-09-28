@@ -30,7 +30,7 @@ type Solana interface {
 	GetAccount(context.Context, string, interface{}) error
 	GetAccounts(context.Context, []string, func(string, []byte)) error
 	GetProgramAccounts(context.Context, string) ([]string, error)
-	GetAccountInfo(context.Context, solana.PublicKey) (*rpc.GetAccountInfoResult, error)
+	GetAccountInfo(context.Context, string) (*rpc.GetAccountInfoResult, error)
 	ProgramSubscribe(context.Context, string, func(string, []byte)) error
 
 	GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error)
@@ -64,7 +64,7 @@ func createClient(
 ) (impl, error) {
 	url := GetURL(config.Network)
 	solanaClient := impl{
-		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 2)),
+		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 10)),
 		network: config.Network,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
@@ -386,9 +386,13 @@ func (s impl) GetTokenAccountBalance(
 }
 
 func (s impl) GetAccountInfo(
-	ctx context.Context, account solana.PublicKey,
+	ctx context.Context, account string,
 ) (*rpc.GetAccountInfoResult, error) {
-	return s.client.GetAccountInfo(ctx, account)
+	accountPubkey, err := solana.PublicKeyFromBase58(account)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.GetAccountInfo(ctx, accountPubkey)
 }
 
 func (s impl) GetVersion(ctx context.Context) (*rpc.GetVersionResult, error) {

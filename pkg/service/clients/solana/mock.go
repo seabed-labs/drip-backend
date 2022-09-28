@@ -54,7 +54,7 @@ func (mr *MockSolanaMockRecorder) GetAccount(arg0, arg1, arg2 interface{}) *gomo
 }
 
 // GetAccountInfo mocks base method.
-func (m *MockSolana) GetAccountInfo(arg0 context.Context, arg1 solana.PublicKey) (*rpc.GetAccountInfoResult, error) {
+func (m *MockSolana) GetAccountInfo(arg0 context.Context, arg1 string) (*rpc.GetAccountInfoResult, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccountInfo", arg0, arg1)
 	ret0, _ := ret[0].(*rpc.GetAccountInfoResult)

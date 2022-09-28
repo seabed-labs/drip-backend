@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"math/rand"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 	"go.uber.org/fx"
 )
 
-const backfillEvery = time.Hour * 1
+const backfillEvery = time.Hour * 24
 
 type DripProgramProcessor struct {
 	client      solana.Solana
@@ -55,25 +56,25 @@ func Server(
 
 func (d *DripProgramProcessor) start(ctx context.Context) error {
 	// Track Drip accounts
-	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processor.ProcessDripEvent); err != nil {
+	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, drip.ProgramID.String())); err != nil {
 		return err
 	}
 
 	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
 	if configs.IsProd(d.environment) {
 		// Track token_swap program accounts
-		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent); err != nil {
+		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
 			return err
 		}
 		// Don't need to constantly backfill these, just do it once
-		//go d.processor.Backfill(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
+		//go d.processor.BackfillProgramOwnedAccounts(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
 
 		// Track orca_whirlpool program accounts
-		if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent); err != nil {
+		if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, whirlpool.ProgramID.String())); err != nil {
 			return err
 		}
 		// Don't need to constantly backfill these, just do it once
-		//go d.processor.Backfill(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
+		//go d.processor.BackfillProgramOwnedAccounts(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
 	}
 
 	// Track Balance Updates Live
@@ -83,6 +84,7 @@ func (d *DripProgramProcessor) start(ctx context.Context) error {
 	//}
 
 	go d.runBackfill(ctx)
+	go d.processor.ProcessAccountUpdateQueue(ctx)
 	return nil
 }
 
@@ -92,8 +94,12 @@ func (d *DripProgramProcessor) stop() {
 
 func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
 	defer func() {
+		if r := recover(); r != nil {
+			debug.PrintStack()
+			logrus.WithField("stack", string(debug.Stack())).Errorf("panic in runBackfill")
+		}
 		time.AfterFunc(backfillEvery, func() {
-			if ctx.Err() == context.Canceled {
+			if ctx.Err() != nil {
 				return
 			}
 			d.runBackfill(ctx)
@@ -102,6 +108,6 @@ func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
 	id := strconv.FormatInt(int64(rand.Int()), 10)
 	log := logrus.WithField("id", id)
 	log.Info("starting backfill")
-	d.processor.Backfill(ctx, id, drip.ProgramID.String(), d.processor.ProcessDripEvent)
+	d.processor.BackfillProgramOwnedAccounts(ctx, id, drip.ProgramID.String())
 	log.Info("done backfill")
 }
