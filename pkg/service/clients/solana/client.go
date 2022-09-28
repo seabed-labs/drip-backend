@@ -458,7 +458,7 @@ func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
 	}
 	switch network {
 	case configs.MainnetNetwork:
-		return 30
+		return 20
 	case configs.DevnetNetwork:
 		return 15
 	default:
@@ -469,10 +469,10 @@ func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
 func GetURL(env configs.Network, primary bool) string {
 	if !primary {
 		switch env {
-		case configs.DevnetNetwork:
-			return rpc.DevNet_RPC
 		case configs.MainnetNetwork:
 			return rpc.MainNetBeta_RPC
+		case configs.DevnetNetwork:
+			return rpc.DevNet_RPC
 		case configs.NilNetwork:
 			fallthrough
 		case configs.LocalNetwork:
@@ -482,10 +482,10 @@ func GetURL(env configs.Network, primary bool) string {
 		}
 	}
 	switch env {
-	case configs.DevnetNetwork:
-		return "https://solana-devnet.g.alchemy.com/v2/Uu4ruAh4jZkN1VcklmL0C0jUYACraght"
 	case configs.MainnetNetwork:
-		return "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_"
+		return "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/"
+	case configs.DevnetNetwork:
+		return rpc.DevNet_RPC
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:
@@ -497,10 +497,10 @@ func GetURL(env configs.Network, primary bool) string {
 
 func getWSURL(env configs.Network) string {
 	switch env {
+	case configs.MainnetNetwork:
+		return "wss://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/"
 	case configs.DevnetNetwork:
 		return rpc.DevNet_WS
-	case configs.MainnetNetwork:
-		return rpc.MainNetBeta_WS
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:
