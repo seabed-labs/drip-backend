@@ -3,6 +3,14 @@ package processor
 import (
 	"context"
 	"runtime/debug"
+	"sync"
+	"time"
+
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+
+	"gorm.io/gorm"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -17,6 +25,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const processConcurrency = 100
+
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
@@ -29,15 +39,18 @@ type Processor interface {
 	UpsertTokenAccountBalanceByAddress(context.Context, string) error
 	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 
-	Backfill(ctx context.Context, logId string, programID string, processor func(string, []byte))
-	ProcessDripEvent(address string, data []byte)
-	ProcessTokenSwapEvent(address string, data []byte)
-	ProcessWhirlpoolEvent(address string, data []byte)
-	ProcessTokenEvent(address string, data []byte)
+	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string, processor func(string, []byte))
+	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte)
+	ProcessAccountUpdateQueue(ctx context.Context)
+	//ProcessDripEvent(address string, data []byte)
+	//ProcessTokenSwapEvent(address string, data []byte)
+	//ProcessWhirlpoolEvent(address string, data []byte)
+	//ProcessTokenEvent(address string, data []byte)
 }
 
 type impl struct {
 	repo                repository.Repository
+	accountUpdateQueue  repository.AccountUpdateQueue
 	tokenRegistryClient tokenregistry.TokenRegistry
 	solanaClient        solana.Solana
 	alertService        alert.Service
@@ -45,20 +58,22 @@ type impl struct {
 
 func NewProcessor(
 	repo repository.Repository,
+	accountUpdateQueue repository.AccountUpdateQueue,
 	client solana.Solana,
 	tokenRegistryClient tokenregistry.TokenRegistry,
 	alertService alert.Service,
 ) Processor {
 	return impl{
 		repo:                repo,
+		accountUpdateQueue:  accountUpdateQueue,
 		solanaClient:        client,
 		tokenRegistryClient: tokenRegistryClient,
 		alertService:        alertService,
 	}
 }
 
-func (p impl) Backfill(ctx context.Context, logId string, programID string, processor func(string, []byte)) {
-	log := logrus.WithField("id", logId).WithField("program", programID).WithField("func", "Backfill")
+func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string, processor func(string, []byte)) {
+	log := logrus.WithField("id", logId).WithField("program", programID).WithField("func", "BackfillProgramOwnedAccounts")
 	accounts, err := p.solanaClient.GetProgramAccounts(ctx, programID)
 	if err != nil {
 		log.WithError(err).Error("failed to get accounts")
@@ -80,6 +95,99 @@ func (p impl) Backfill(ctx context.Context, logId string, programID string, proc
 		}
 		page++
 		start, end = paginate(page, pageSize, total)
+	}
+}
+
+func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) {
+	return func(account string, data []byte) {
+		if err := p.accountUpdateQueue.AddItem(ctx, &model.AccountUpdateQueueItem{
+			Pubkey:    account,
+			ProgramID: programId,
+			Time:      utils.GetTimePtr(time.Now()),
+		}); err != nil {
+			logrus.
+				WithError(err).
+				WithField("programId", programId).
+				WithField("account", account).
+				Error("failed to add queue item")
+		}
+	}
+}
+
+func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
+	var wg sync.WaitGroup
+	ch := make(chan *model.AccountUpdateQueueItem)
+	for i := 0; i < processConcurrency; i++ {
+		wg.Add(1)
+		go p.processAccountUpdateQueueItemWorker(ctx, &wg, ch)
+	}
+
+	for ctx.Err() == nil {
+		queueItem, err := p.accountUpdateQueue.GetNextItem(ctx)
+		if err != nil && err == gorm.ErrRecordNotFound {
+			continue
+		} else if err != nil {
+			logrus.WithError(err).Error("failed to get next queue item")
+			continue
+		}
+		ch <- queueItem
+	}
+
+	wg.Wait()
+	logrus.Info("exiting ProcessAccountUpdateQueue")
+}
+
+func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
+	defer wg.Done()
+	logrus.Info("spawned processAccountUpdateQueueItemWorker goroutine")
+	for {
+		select {
+		case <-ctx.Done():
+			logrus.Info("exiting processAccountUpdateQueueItemWorker")
+			return
+		case queueItem := <-queueCh:
+			p.processAccountUpdateQueueItem(ctx, queueItem)
+		}
+	}
+
+}
+
+func (p impl) processAccountUpdateQueueItem(ctx context.Context, queueItem *model.AccountUpdateQueueItem) {
+	log := logrus.WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
+	shouldRemoveItem := true
+	defer func() {
+		if !shouldRemoveItem {
+			return
+		}
+		if err := p.accountUpdateQueue.RemoveItem(ctx, queueItem); err != nil {
+			log.WithError(err).Error("failed to remove queue item")
+		}
+	}()
+
+	if err := p.accountUpdateQueue.RemoveItem(ctx, queueItem); err != nil {
+		log.WithError(err).Error("failed to remove queue item")
+	}
+
+	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
+	if err != nil {
+		log.WithError(err).Error("failed to get accountInfo")
+		shouldRemoveItem = false
+	}
+	if accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
+		// todo: should we delete records from our db then?
+		log.Info("account is empty, nothing to process")
+	}
+	switch queueItem.ProgramID {
+	case drip.ProgramID.String():
+		p.ProcessDripEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+	case whirlpool.ProgramID.String():
+		p.ProcessWhirlpoolEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+	case tokenswap.ProgramID.String():
+		p.ProcessTokenSwapEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+	case token.ProgramID.String():
+		p.ProcessTokenEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+	default:
+		logrus.WithField("programId", queueItem.ProgramID).Error("invalid programID")
 	}
 }
 

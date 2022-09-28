@@ -14,6 +14,7 @@ import (
 func Use(db *gorm.DB) *Query {
 	return &Query{
 		db:                       db,
+		AccountUpdateQueueItem:   newAccountUpdateQueueItem(db),
 		OrcaWhirlpool:            newOrcaWhirlpool(db),
 		OrcaWhirlpoolDeltaBQuote: newOrcaWhirlpoolDeltaBQuote(db),
 		Position:                 newPosition(db),
@@ -33,6 +34,7 @@ func Use(db *gorm.DB) *Query {
 type Query struct {
 	db *gorm.DB
 
+	AccountUpdateQueueItem   accountUpdateQueueItem
 	OrcaWhirlpool            orcaWhirlpool
 	OrcaWhirlpoolDeltaBQuote orcaWhirlpoolDeltaBQuote
 	Position                 position
@@ -53,6 +55,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:                       db,
+		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.clone(db),
 		OrcaWhirlpool:            q.OrcaWhirlpool.clone(db),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.clone(db),
 		Position:                 q.Position.clone(db),
@@ -70,6 +73,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 }
 
 type queryCtx struct {
+	AccountUpdateQueueItem   *accountUpdateQueueItemDo
 	OrcaWhirlpool            *orcaWhirlpoolDo
 	OrcaWhirlpoolDeltaBQuote *orcaWhirlpoolDeltaBQuoteDo
 	Position                 *positionDo
@@ -87,6 +91,7 @@ type queryCtx struct {
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.WithContext(ctx),
 		OrcaWhirlpool:            q.OrcaWhirlpool.WithContext(ctx),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
 		Position:                 q.Position.WithContext(ctx),

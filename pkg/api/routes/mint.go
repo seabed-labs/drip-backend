@@ -9,7 +9,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -28,7 +27,7 @@ func (h Handler) PostMint(
 		logrus.WithError(err).Errorf(errMsg)
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: errMsg})
 	}
-	resp, err := h.solanaClient.GetAccountInfo(c.Request().Context(), solana.MustPublicKeyFromBase58(mintRequest.Mint))
+	resp, err := h.solanaClient.GetAccountInfo(c.Request().Context(), mintRequest.Mint)
 	if err != nil {
 		errMsg := "failed to get account info"
 		logrus.WithError(err).Errorf(errMsg)
