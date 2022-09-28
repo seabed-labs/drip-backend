@@ -189,10 +189,7 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queu
 	}()
 
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
-	if err != nil && err.Error() == solana.ErrNotFound {
-		log.WithError(err).Error("failed to get accountInfo")
-		return
-	} else if err != nil {
+	if err != nil {
 		log.WithError(err).Error("failed to get accountInfo, re-queueing")
 		shouldReQeue = true
 		return

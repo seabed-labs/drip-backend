@@ -66,7 +66,7 @@ func TestSolanaClient(t *testing.T) {
 		assert.Equal(t, GetURL(configs.NilNetwork, true), rpc.LocalNet_RPC)
 		assert.Equal(t, GetURL(configs.LocalNetwork, true), rpc.LocalNet_RPC)
 		assert.Equal(t, GetURL(configs.DevnetNetwork, true), rpc.DevNet_RPC)
-		assert.Equal(t, GetURL(configs.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
+		//assert.Equal(t, GetURL(configs.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
 	})
 
 	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {
