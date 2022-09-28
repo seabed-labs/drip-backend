@@ -11,7 +11,7 @@ func (d repositoryImpl) AddItem(ctx context.Context, item *model.AccountUpdateQu
 	return d.repo.AccountUpdateQueueItem.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "pubkey"}, {Name: "program_id"}},
+			Columns:   []clause.Column{{Name: "pubkey"}},
 			UpdateAll: true,
 		}).
 		Create(item)
@@ -22,7 +22,6 @@ func (d repositoryImpl) RemoveItem(ctx context.Context, item *model.AccountUpdat
 		WithContext(ctx).
 		Where(
 			d.repo.AccountUpdateQueueItem.Pubkey.Eq(item.Pubkey),
-			d.repo.AccountUpdateQueueItem.ProgramID.Eq(item.ProgramID),
 		).Delete()
 	if err != nil {
 		return err

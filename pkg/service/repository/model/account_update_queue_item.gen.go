@@ -13,7 +13,7 @@ const TableNameAccountUpdateQueueItem = "account_update_queue_item"
 // AccountUpdateQueueItem mapped from table <account_update_queue_item>
 type AccountUpdateQueueItem struct {
 	Pubkey    string     `gorm:"column:pubkey;primaryKey" json:"pubkey" db:"pubkey"`
-	ProgramID string     `gorm:"column:program_id;primaryKey" json:"programId" db:"program_id"`
+	ProgramID string     `gorm:"column:program_id;not null" json:"programId" db:"program_id"`
 	Time      *time.Time `gorm:"column:time;not null;default:now()" json:"time" db:"time"`
 }
 
