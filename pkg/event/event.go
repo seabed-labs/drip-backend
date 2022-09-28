@@ -3,6 +3,7 @@ package event
 import (
 	"context"
 	"math/rand"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 	"go.uber.org/fx"
 )
 
-const backfillEvery = time.Hour * 2
+const backfillEvery = time.Hour * 24
 
 type DripProgramProcessor struct {
 	client      solana.Solana
@@ -93,7 +94,10 @@ func (d *DripProgramProcessor) stop() {
 
 func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
 	defer func() {
-		// todo: catch panics
+		if r := recover(); r != nil {
+			debug.PrintStack()
+			logrus.WithField("stack", string(debug.Stack())).Errorf("panic in runBackfill")
+		}
 		time.AfterFunc(backfillEvery, func() {
 			if ctx.Err() != nil {
 				return
