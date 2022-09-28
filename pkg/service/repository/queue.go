@@ -41,3 +41,6 @@ func (d repositoryImpl) Pop(ctx context.Context) (*model.AccountUpdateQueueItem,
 	}
 	return queueitem, d.RemoveItem(ctx, queueitem)
 }
+func (d repositoryImpl) Depth(ctx context.Context) (int64, error) {
+	return d.repo.AccountUpdateQueueItem.WithContext(ctx).Count()
+}

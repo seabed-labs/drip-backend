@@ -151,6 +151,11 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
 			}
+			if depth, err := p.accountUpdateQueue.Depth(ctx); err != nil {
+				logrus.WithError(err).Error("failed to get queue depth")
+			} else {
+				logrus.WithField("depth", depth).Infof("queue depth")
+			}
 			ch <- queueItem
 		}
 	}

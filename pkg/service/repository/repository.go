@@ -72,6 +72,7 @@ type Repository interface {
 
 type AccountUpdateQueue interface {
 	AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
+	Depth(ctx context.Context) (int64, error)
 	Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error)
 }
 

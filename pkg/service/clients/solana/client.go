@@ -63,8 +63,9 @@ func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
 	url := GetURL(config.Network)
+	callsPerSecond := GetRequestsPerSecondLimit(config.Network)
 	solanaClient := impl{
-		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, 3)),
+		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(url, callsPerSecond)),
 		network: config.Network,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
@@ -74,8 +75,9 @@ func createClient(
 	}
 	logrus.
 		WithFields(logrus.Fields{
-			"version": resp.SolanaCore,
-			"url":     url,
+			"version":        resp.SolanaCore,
+			"url":            url,
+			"callsPerSecond": callsPerSecond,
 		}).
 		Info("created solana clients")
 
@@ -443,12 +445,20 @@ func (s impl) signAndBroadcast(
 	return txHash.String(), nil
 }
 
+func GetRequestsPerSecondLimit(network configs.Network) int {
+	switch network {
+	case configs.MainnetNetwork:
+		return 30
+	default:
+		return 3
+	}
+}
 func GetURL(env configs.Network) string {
 	switch env {
 	case configs.DevnetNetwork:
 		return rpc.DevNet_RPC
 	case configs.MainnetNetwork:
-		return rpc.MainNetBeta_RPC
+		return "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_"
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:

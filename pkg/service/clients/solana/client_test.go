@@ -66,7 +66,7 @@ func TestSolanaClient(t *testing.T) {
 		assert.Equal(t, GetURL(configs.NilNetwork), rpc.LocalNet_RPC)
 		assert.Equal(t, GetURL(configs.LocalNetwork), rpc.LocalNet_RPC)
 		assert.Equal(t, GetURL(configs.DevnetNetwork), "https://api.devnet.solana.com")
-		assert.Equal(t, GetURL(configs.MainnetNetwork), "https://api.mainnet-beta.solana.com")
+		assert.Equal(t, GetURL(configs.MainnetNetwork), "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_")
 	})
 
 	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {
