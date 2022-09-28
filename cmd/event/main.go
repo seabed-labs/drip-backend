@@ -42,6 +42,7 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
+			repository.NewAccountUpdateQueue,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			processor.NewProcessor,

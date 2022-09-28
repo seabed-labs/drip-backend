@@ -43,6 +43,7 @@ func getDependencies() []fx.Option {
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			repository.NewRepository,
+			repository.NewAccountUpdateQueue,
 			processor.NewProcessor,
 			alert.NewAlertService,
 		),
