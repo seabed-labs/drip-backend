@@ -39,7 +39,7 @@ type Processor interface {
 	UpsertTokenAccountBalanceByAddress(context.Context, string) error
 	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 
-	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string, processor func(string, []byte))
+	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
 	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte)
 	ProcessAccountUpdateQueue(ctx context.Context)
 	//ProcessDripEvent(address string, data []byte)
@@ -72,7 +72,7 @@ func NewProcessor(
 	}
 }
 
-func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string, processor func(string, []byte)) {
+func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string) {
 	log := logrus.WithField("id", logId).WithField("program", programID).WithField("func", "BackfillProgramOwnedAccounts")
 	accounts, err := p.solanaClient.GetProgramAccounts(ctx, programID)
 	if err != nil {
@@ -86,12 +86,14 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 			WithField("pageSize", pageSize).
 			WithField("total", total)
 		log.Infof("backfilling program accounts")
-		err := p.solanaClient.GetAccounts(ctx, accounts[start:end], func(address string, data []byte) {
-			processor(address, data)
-		})
-		if err != nil {
-			log.WithError(err).
-				Error("failed to get accounts")
+		for i := start; i < end; i++ {
+			if err := p.accountUpdateQueue.AddItem(ctx, &model.AccountUpdateQueueItem{
+				Pubkey:    accounts[i],
+				ProgramID: programID,
+				Time:      utils.GetTimePtr(time.Now()),
+			}); err != nil {
+				log.WithError(err).Error("failed to add backfill account to queue")
+			}
 		}
 		page++
 		start, end = paginate(page, pageSize, total)
@@ -100,10 +102,17 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 
 func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) {
 	return func(account string, data []byte) {
+		priority := int32(3)
+		if programId == drip.ProgramID.String() {
+			priority = 1
+		} else if programId == whirlpool.ProgramID.String() || programId == token.ProgramID.String() {
+			priority = 2
+		}
 		if err := p.accountUpdateQueue.AddItem(ctx, &model.AccountUpdateQueueItem{
 			Pubkey:    account,
 			ProgramID: programId,
 			Time:      utils.GetTimePtr(time.Now()),
+			Priority:  &priority,
 		}); err != nil {
 			logrus.
 				WithError(err).

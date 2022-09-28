@@ -104,6 +104,6 @@ func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
 	id := strconv.FormatInt(int64(rand.Int()), 10)
 	log := logrus.WithField("id", id)
 	log.Info("starting backfill")
-	d.processor.BackfillProgramOwnedAccounts(ctx, id, drip.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, drip.ProgramID.String()))
+	d.processor.BackfillProgramOwnedAccounts(ctx, id, drip.ProgramID.String())
 	log.Info("done backfill")
 }

@@ -30,6 +30,7 @@ func newAccountUpdateQueueItem(db *gorm.DB) accountUpdateQueueItem {
 	_accountUpdateQueueItem.Pubkey = field.NewString(tableName, "pubkey")
 	_accountUpdateQueueItem.ProgramID = field.NewString(tableName, "program_id")
 	_accountUpdateQueueItem.Time = field.NewTime(tableName, "time")
+	_accountUpdateQueueItem.Priority = field.NewInt32(tableName, "priority")
 
 	_accountUpdateQueueItem.fillFieldMap()
 
@@ -43,6 +44,7 @@ type accountUpdateQueueItem struct {
 	Pubkey    field.String
 	ProgramID field.String
 	Time      field.Time
+	Priority  field.Int32
 
 	fieldMap map[string]field.Expr
 }
@@ -62,6 +64,7 @@ func (a *accountUpdateQueueItem) updateTableName(table string) *accountUpdateQue
 	a.Pubkey = field.NewString(table, "pubkey")
 	a.ProgramID = field.NewString(table, "program_id")
 	a.Time = field.NewTime(table, "time")
+	a.Priority = field.NewInt32(table, "priority")
 
 	a.fillFieldMap()
 
@@ -86,10 +89,11 @@ func (a *accountUpdateQueueItem) GetFieldByName(fieldName string) (field.OrderEx
 }
 
 func (a *accountUpdateQueueItem) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 3)
+	a.fieldMap = make(map[string]field.Expr, 4)
 	a.fieldMap["pubkey"] = a.Pubkey
 	a.fieldMap["program_id"] = a.ProgramID
 	a.fieldMap["time"] = a.Time
+	a.fieldMap["priority"] = a.Priority
 }
 
 func (a accountUpdateQueueItem) clone(db *gorm.DB) accountUpdateQueueItem {

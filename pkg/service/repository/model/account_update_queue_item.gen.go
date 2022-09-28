@@ -15,6 +15,7 @@ type AccountUpdateQueueItem struct {
 	Pubkey    string     `gorm:"column:pubkey;primaryKey" json:"pubkey" db:"pubkey"`
 	ProgramID string     `gorm:"column:program_id;not null" json:"programId" db:"program_id"`
 	Time      *time.Time `gorm:"column:time;not null;default:now()" json:"time" db:"time"`
+	Priority  *int32     `gorm:"column:priority;not null;default:3" json:"priority" db:"priority"`
 }
 
 // TableName AccountUpdateQueueItem's table name
