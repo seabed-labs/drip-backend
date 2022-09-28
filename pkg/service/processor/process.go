@@ -91,6 +91,7 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 				Pubkey:    accounts[i],
 				ProgramID: programID,
 				Time:      utils.GetTimePtr(time.Now()),
+				Priority:  utils.GetIntPtr(3),
 			}); err != nil {
 				log.WithError(err).Error("failed to add backfill account to queue")
 			}
