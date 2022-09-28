@@ -95,7 +95,7 @@ func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
 	defer func() {
 		// todo: catch panics
 		time.AfterFunc(backfillEvery, func() {
-			if ctx.Err() == context.Canceled {
+			if ctx.Err() != nil {
 				return
 			}
 			d.runBackfill(ctx)

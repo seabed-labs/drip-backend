@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-
-	"gorm.io/gorm"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -117,24 +117,32 @@ func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string
 func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 	var wg sync.WaitGroup
 	ch := make(chan *model.AccountUpdateQueueItem)
+	defer func() {
+		close(ch)
+		logrus.Info("exiting ProcessAccountUpdateQueue...")
+		wg.Wait()
+	}()
+
 	for i := 0; i < processConcurrency; i++ {
 		wg.Add(1)
 		go p.processAccountUpdateQueueItemWorker(ctx, &wg, ch)
 	}
 
-	for ctx.Err() == nil {
-		queueItem, err := p.accountUpdateQueue.GetNextItem(ctx)
-		if err != nil && err == gorm.ErrRecordNotFound {
-			continue
-		} else if err != nil {
-			logrus.WithError(err).Error("failed to get next queue item")
-			continue
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			queueItem, err := p.accountUpdateQueue.GetNextItem(ctx)
+			if err != nil && err == gorm.ErrRecordNotFound {
+				continue
+			} else if err != nil {
+				logrus.WithError(err).Error("failed to get next queue item")
+				continue
+			}
+			ch <- queueItem
 		}
-		ch <- queueItem
 	}
-
-	wg.Wait()
-	logrus.Info("exiting ProcessAccountUpdateQueue")
 }
 
 func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
@@ -172,10 +180,12 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, queueItem *mode
 	if err != nil {
 		log.WithError(err).Error("failed to get accountInfo")
 		shouldRemoveItem = false
+		return
 	}
 	if accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
 		// todo: should we delete records from our db then?
 		log.Info("account is empty, nothing to process")
+		return
 	}
 	switch queueItem.ProgramID {
 	case drip.ProgramID.String():
