@@ -185,13 +185,15 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queu
 	}()
 
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
-	if err != nil && err.Error() != solana.ErrNotFound {
+	if err != nil && err.Error() == solana.ErrNotFound {
 		log.WithError(err).Error("failed to get accountInfo")
+		return
+	} else if err != nil {
+		log.WithError(err).Error("failed to get accountInfo, re-queueing")
 		shouldReQeue = true
 		return
-	} else if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
-		// todo: should we delete records from our db then?
-		log.WithError(err).Info("failed to get account or it is empty")
+	} else if accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
+		log.Info("account is empty")
 		return
 	}
 	switch queueItem.ProgramID {
