@@ -31,9 +31,13 @@ func (d repositoryImpl) RemoveItem(ctx context.Context, item *model.AccountUpdat
 	return nil
 }
 
-func (d repositoryImpl) GetNextItem(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
-	return d.repo.AccountUpdateQueueItem.
+func (d repositoryImpl) Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
+	queueitem, err := d.repo.AccountUpdateQueueItem.
 		WithContext(ctx).
 		Order(d.repo.AccountUpdateQueueItem.Priority, d.repo.AccountUpdateQueueItem.Time).
 		First()
+	if err != nil {
+		return nil, err
+	}
+	return queueitem, d.RemoveItem(ctx, queueitem)
 }

@@ -72,8 +72,7 @@ type Repository interface {
 
 type AccountUpdateQueue interface {
 	AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	RemoveItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	GetNextItem(ctx context.Context) (*model.AccountUpdateQueueItem, error)
+	Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error)
 }
 
 type repositoryImpl struct {

@@ -802,9 +802,9 @@ func (mr *MockAccountUpdateQueueMockRecorder) AddItem(ctx, item interface{}) *go
 }
 
 // GetNextItem mocks base method.
-func (m *MockAccountUpdateQueue) GetNextItem(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
+func (m *MockAccountUpdateQueue) Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNextItem", ctx)
+	ret := m.ctrl.Call(m, "Pop", ctx)
 	ret0, _ := ret[0].(*model.AccountUpdateQueueItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -813,7 +813,7 @@ func (m *MockAccountUpdateQueue) GetNextItem(ctx context.Context) (*model.Accoun
 // GetNextItem indicates an expected call of GetNextItem.
 func (mr *MockAccountUpdateQueueMockRecorder) GetNextItem(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNextItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).GetNextItem), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pop", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Pop), ctx)
 }
 
 // RemoveItem mocks base method.

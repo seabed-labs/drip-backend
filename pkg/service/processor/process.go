@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 
@@ -135,7 +136,7 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 
 	for i := 0; i < processConcurrency; i++ {
 		wg.Add(1)
-		go p.processAccountUpdateQueueItemWorker(ctx, &wg, ch)
+		go p.processAccountUpdateQueueItemWorker(ctx, strconv.FormatInt(int64(i), 10), &wg, ch)
 	}
 
 	for {
@@ -143,10 +144,10 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			queueItem, err := p.accountUpdateQueue.GetNextItem(ctx)
+			queueItem, err := p.accountUpdateQueue.Pop(ctx)
 			if err != nil && err == gorm.ErrRecordNotFound {
 				continue
-			} else if err != nil {
+			} else if queueItem == nil {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
 			}
@@ -155,7 +156,7 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 	}
 }
 
-func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
+func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
 	defer wg.Done()
 	logrus.Info("spawned processAccountUpdateQueueItemWorker goroutine")
 	for {
@@ -164,34 +165,33 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, wg *sync.
 			logrus.Info("exiting processAccountUpdateQueueItemWorker")
 			return
 		case queueItem := <-queueCh:
-			p.processAccountUpdateQueueItem(ctx, queueItem)
+			p.processAccountUpdateQueueItem(ctx, id, queueItem)
 		}
 	}
 
 }
 
-func (p impl) processAccountUpdateQueueItem(ctx context.Context, queueItem *model.AccountUpdateQueueItem) {
-	log := logrus.WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
+func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queueItem *model.AccountUpdateQueueItem) {
+	log := logrus.WithField("id", id).WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
 	log.Infof("processing update queue item")
-	shouldRemoveItem := true
+	shouldReQeue := false
 	defer func() {
-		if !shouldRemoveItem {
+		if !shouldReQeue {
 			return
 		}
-		if err := p.accountUpdateQueue.RemoveItem(ctx, queueItem); err != nil {
-			log.WithError(err).Error("failed to remove queue item")
+		if err := p.accountUpdateQueue.AddItem(ctx, queueItem); err != nil {
+			log.WithError(err).Error("failed to add item to queue")
 		}
 	}()
 
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
-	if err != nil {
+	if err != nil && err.Error() != solana.ErrNotFound {
 		log.WithError(err).Error("failed to get accountInfo")
-		shouldRemoveItem = false
+		shouldReQeue = true
 		return
-	}
-	if accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
+	} else if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
 		// todo: should we delete records from our db then?
-		log.Info("account is empty, nothing to process")
+		log.WithError(err).Info("failed to get account or it is empty")
 		return
 	}
 	switch queueItem.ProgramID {
