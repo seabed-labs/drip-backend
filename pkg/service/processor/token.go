@@ -72,10 +72,11 @@ func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *stri
 	return symbol, iconURL
 }
 
-func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccount token.Account) bool {
+func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {
 	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
 		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
 		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isVaultTreasuryAccount(ctx, tokenAccountAddress) ||
 		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
 		return true
 	}
@@ -91,7 +92,7 @@ func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address st
 }
 
 func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
-	if !p.shouldIngestTokenBalance(ctx, tokenAccount) {
+	if !p.shouldIngestTokenBalance(ctx, address, tokenAccount) {
 		return nil
 	}
 	state := "initialized"
@@ -144,6 +145,17 @@ func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner
 
 func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
 	_, err := p.repo.AdminGetVaultByAddress(ctx, tokenAccountOwner)
+	if err != nil {
+		if err.Error() != repository.ErrRecordNotFound {
+			logrus.WithError(err).Error("failed to query for vault")
+		}
+		return false
+	}
+	return true
+}
+
+func (p impl) isVaultTreasuryAccount(ctx context.Context, tokenAccount string) bool {
+	_, err := p.repo.AdminGetVaultByTreasuryTokenBAccount(ctx, tokenAccount)
 	if err != nil {
 		if err.Error() != repository.ErrRecordNotFound {
 			logrus.WithError(err).Error("failed to query for vault")

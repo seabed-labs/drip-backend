@@ -65,6 +65,7 @@ type Repository interface {
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)
 	AdminGetVaultByAddress(ctx context.Context, address string) (*model.Vault, error)
+	AdminGetVaultByTreasuryTokenBAccount(ctx context.Context, pubkey string) (*model.Vault, error)
 	AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error)
 	AdminGetVaultsByTokenPairID(ctx context.Context, tokenPairID string) ([]*model.Vault, error)
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
