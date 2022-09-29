@@ -801,7 +801,22 @@ func (mr *MockAccountUpdateQueueMockRecorder) AddItem(ctx, item interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AddItem), ctx, item)
 }
 
-// GetNextItem mocks base method.
+// Depth mocks base method.
+func (m *MockAccountUpdateQueue) Depth(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Depth", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Depth indicates an expected call of Depth.
+func (mr *MockAccountUpdateQueueMockRecorder) Depth(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Depth", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Depth), ctx)
+}
+
+// Pop mocks base method.
 func (m *MockAccountUpdateQueue) Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Pop", ctx)
@@ -810,22 +825,22 @@ func (m *MockAccountUpdateQueue) Pop(ctx context.Context) (*model.AccountUpdateQ
 	return ret0, ret1
 }
 
-// GetNextItem indicates an expected call of GetNextItem.
-func (mr *MockAccountUpdateQueueMockRecorder) GetNextItem(ctx interface{}) *gomock.Call {
+// Pop indicates an expected call of Pop.
+func (mr *MockAccountUpdateQueueMockRecorder) Pop(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pop", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Pop), ctx)
 }
 
-// RemoveItem mocks base method.
-func (m *MockAccountUpdateQueue) RemoveItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+// ReQueue mocks base method.
+func (m *MockAccountUpdateQueue) ReQueue(ctx context.Context, item *model.AccountUpdateQueueItem) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveItem", ctx, item)
+	ret := m.ctrl.Call(m, "ReQueue", ctx, item)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RemoveItem indicates an expected call of RemoveItem.
-func (mr *MockAccountUpdateQueueMockRecorder) RemoveItem(ctx, item interface{}) *gomock.Call {
+// ReQueue indicates an expected call of ReQueue.
+func (mr *MockAccountUpdateQueueMockRecorder) ReQueue(ctx, item interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).RemoveItem), ctx, item)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReQueue", reflect.TypeOf((*MockAccountUpdateQueue)(nil).ReQueue), ctx, item)
 }

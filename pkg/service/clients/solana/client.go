@@ -31,7 +31,7 @@ type Solana interface {
 	GetAccounts(context.Context, []string, func(string, []byte)) error
 	GetProgramAccounts(context.Context, string) ([]string, error)
 	GetAccountInfo(context.Context, string) (*rpc.GetAccountInfoResult, error)
-	ProgramSubscribe(context.Context, string, func(string, []byte)) error
+	ProgramSubscribe(context.Context, string, func(string, []byte) error) error
 
 	GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error)
 	GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error)
@@ -293,7 +293,7 @@ func (s impl) MintToWallet(
 }
 
 func (s impl) ProgramSubscribe(
-	ctx context.Context, program string, onReceive func(string, []byte),
+	ctx context.Context, program string, onReceive func(string, []byte) error,
 ) error {
 	url := getWSURL(s.network)
 	client, err := ws.Connect(ctx, url)
