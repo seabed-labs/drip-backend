@@ -7,10 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
 	"github.com/dcaf-labs/drip/pkg/service/configs"
-
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/disgo/webhook"
@@ -105,11 +103,20 @@ func (a serviceImpl) SendNewPositionAlert(
 	ctx context.Context,
 	alertParams NewPositionAlert,
 ) error {
+	log := logrus.WithField("msg", "new position").WithField("position", alertParams.Position)
+	if !a.enabled {
+		log.Info("alert service disabled, skipping info alert")
+		return nil
+	}
+	log.Info("attempting to send notification")
+
 	granularityStr := strconv.FormatUint(alertParams.Granularity, 10)
 	if alertParams.Granularity == 60 {
 		granularityStr = "Minutely"
 	} else if alertParams.Granularity == 3600 {
 		granularityStr = "Hourly"
+	} else if alertParams.Granularity == 86400 {
+		granularityStr = "Daily"
 	}
 
 	tokenA := alertParams.TokenAMint

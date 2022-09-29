@@ -69,16 +69,16 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		}
 	}
 	// Add new token account balance if any
-	largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String())
-	if err != nil {
-		return err
-	}
-	for _, account := range largestAccounts {
-		if account == nil {
-			continue
-		}
-		if err := p.UpsertTokenAccountBalanceByAddress(ctx, account.Address.String()); err != nil {
-			log.WithError(err).Error("failed to UpsertTokenAccountBalanceByAddress in UpsertPosition")
+	if largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String()); err != nil {
+		log.WithError(err).Error("failed to GetLargestTokenAccounts")
+	} else {
+		for _, account := range largestAccounts {
+			if account == nil {
+				continue
+			}
+			if err := p.UpsertTokenAccountBalanceByAddress(ctx, account.Address.String()); err != nil {
+				log.WithError(err).Error("failed to UpsertTokenAccountBalanceByAddress in UpsertPosition")
+			}
 		}
 	}
 	if shouldAlert {
@@ -95,7 +95,7 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 	if err != nil {
 		return err
 	}
-	vault, err := p.repo.GetVaultByAddress(ctx, position.Vault)
+	vault, err := p.ensureVault(ctx, position.Vault)
 	if err != nil {
 		return err
 	}
@@ -115,8 +115,9 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 	if err != nil {
 		return err
 	}
-	if len(balances) != 1 {
-		return fmt.Errorf("invalid number of balnaces returned for mint %s, len(balances %d", position.Authority, len(balances))
+	owner := "unknown"
+	if len(balances) == 1 {
+		owner = balances[0].Owner
 	}
 	scaledTokenADepositAmount := float64(position.DepositedTokenAAmount) / math.Pow(10, float64(tokenA.Decimals))
 	scaledPeriodicDripAmount := float64(position.PeriodicDripAmount) / math.Pow(10, float64(tokenA.Decimals))
@@ -132,7 +133,7 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 		Granularity:               protoConfig.Granularity,
 		ScaledDripAmount:          scaledPeriodicDripAmount,
 		NumberOfSwaps:             position.NumberOfSwaps,
-		Owner:                     balances[0].Owner,
+		Owner:                     owner,
 		Position:                  positionAddr,
 	}
 
