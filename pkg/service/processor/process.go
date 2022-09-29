@@ -41,12 +41,12 @@ type Processor interface {
 	UpsertTokenAccountBalance(context.Context, string, token.Account) error
 
 	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
-	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte)
+	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error
 	ProcessAccountUpdateQueue(ctx context.Context)
-	ProcessDripEvent(address string, data []byte)
-	ProcessTokenSwapEvent(address string, data []byte)
-	ProcessWhirlpoolEvent(address string, data []byte)
-	ProcessTokenEvent(address string, data []byte)
+	ProcessDripEvent(address string, data []byte) error
+	ProcessTokenSwapEvent(address string, data []byte) error
+	ProcessWhirlpoolEvent(address string, data []byte) error
+	ProcessTokenEvent(address string, data []byte) error
 }
 
 type impl struct {
@@ -93,6 +93,8 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 				ProgramID: programID,
 				Time:      utils.GetTimePtr(time.Now()),
 				Priority:  utils.GetIntPtr(3),
+				Try:       0,
+				MaxTry:    utils.GetIntPtr(4),
 			}); err != nil {
 				log.WithError(err).Error("failed to add backfill account to queue")
 			}
@@ -102,8 +104,8 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 	}
 }
 
-func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) {
-	return func(account string, data []byte) {
+func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error {
+	return func(account string, data []byte) error {
 		priority := int32(3)
 		if programId == drip.ProgramID.String() {
 			priority = 1
@@ -121,7 +123,9 @@ func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string
 				WithField("programId", programId).
 				WithField("account", account).
 				Error("failed to add queue item")
+			return err
 		}
+		return nil
 	}
 }
 
@@ -163,7 +167,6 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 
 func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
 	defer wg.Done()
-	logrus.Info("spawned processAccountUpdateQueueItemWorker goroutine")
 	for {
 		select {
 		case <-ctx.Done():
@@ -178,42 +181,38 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string
 
 func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queueItem *model.AccountUpdateQueueItem) {
 	log := logrus.WithField("id", id).WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
-	shouldReQeue := false
-	defer func() {
-		if !shouldReQeue {
-			return
-		}
-		if err := p.accountUpdateQueue.AddItem(ctx, queueItem); err != nil {
-			log.WithError(err).Error("failed to add item to queue")
-		}
-	}()
-
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
-	if err != nil {
-		log.WithError(err).Error("failed to get accountInfo, re-queueing")
-		shouldReQeue = true
-		return
-	} else if accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
-		log.Info("account is empty")
+	if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
+		log.WithError(err).Error("error or invalid account")
+		if requeueErr := p.accountUpdateQueue.ReQueue(ctx, queueItem); requeueErr != nil {
+			log.WithError(requeueErr).Error("failed to add item to queue")
+		}
 		return
 	}
 	switch queueItem.ProgramID {
 	case drip.ProgramID.String():
-		p.ProcessDripEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.ProcessDripEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	case whirlpool.ProgramID.String():
-		p.ProcessWhirlpoolEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.ProcessWhirlpoolEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	case tokenswap.ProgramID.String():
-		p.ProcessTokenSwapEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.ProcessTokenSwapEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	case token.ProgramID.String():
-		p.ProcessTokenEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.ProcessTokenEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	default:
-		logrus.WithField("programId", queueItem.ProgramID).Error("invalid programID")
+		log.Error("invalid programID")
+	}
+	if err != nil {
+		log.WithError(err).Error("failed to process update")
+		if requeueErr := p.accountUpdateQueue.ReQueue(ctx, queueItem); requeueErr != nil {
+			log.WithError(requeueErr).Error("failed to add item to queue")
+		}
 	}
 }
 
-func (p impl) ProcessDripEvent(address string, data []byte) {
+func (p impl) ProcessDripEvent(address string, data []byte) error {
 	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
+		return nil
 	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
@@ -229,39 +228,45 @@ func (p impl) ProcessDripEvent(address string, data []byte) {
 		// log.Infof("decoded as vaultPeriod")
 		if err := p.UpsertVaultPeriodByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert vaultPeriod")
+			return err
 		}
-		return
+		return nil
 	}
 	var position drip.Position
 	if err := bin.NewBinDecoder(data).Decode(&position); err == nil {
 		// log.Infof("decoded as position")
 		if err := p.UpsertPosition(ctx, address, position); err != nil {
 			log.WithError(err).Error("failed to upsert position")
+			return err
 		}
-		return
+		return nil
 	}
 	var vault drip.Vault
 	if err := bin.NewBinDecoder(data).Decode(&vault); err == nil {
 		// log.Infof("decoded as vault")
 		if err := p.UpsertVaultByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert vault")
+			return err
 		}
-		return
+		return nil
 	}
 	var protoConfig drip.VaultProtoConfig
 	if err := bin.NewBinDecoder(data).Decode(&protoConfig); err == nil {
 		// log.Infof("decoded as protoConfig")
 		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert protoConfig")
+			return err
 		}
-		return
+		return nil
 	}
 	log.Errorf("failed to decode drip account to known types")
+	return nil
 }
 
-func (p impl) ProcessTokenSwapEvent(address string, data []byte) {
+func (p impl) ProcessTokenSwapEvent(address string, data []byte) error {
 	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
+		return nil
 	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
@@ -275,15 +280,18 @@ func (p impl) ProcessTokenSwapEvent(address string, data []byte) {
 	if err == nil {
 		if err := p.UpsertTokenSwapByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert tokenSwap")
+			return err
 		}
-		return
+		return nil
 	}
+	return nil
 	// log.WithError(err).Errorf("failed to decode token swap account")
 }
 
-func (p impl) ProcessWhirlpoolEvent(address string, data []byte) {
+func (p impl) ProcessWhirlpoolEvent(address string, data []byte) error {
 	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
+		return nil
 	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
@@ -296,15 +304,18 @@ func (p impl) ProcessWhirlpoolEvent(address string, data []byte) {
 	err := bin.NewBinDecoder(data).Decode(&whirlpoolAccount)
 	if err == nil {
 		if err := p.UpsertWhirlpoolByAddress(ctx, address); err != nil {
-			log.WithError(err).Error("failed to upsert tokenSwap")
+			log.WithError(err).Error("failed to upsert whirlpool")
+			return err
 		}
-		return
+		return nil
 	}
+	return nil
 }
 
-func (p impl) ProcessTokenEvent(address string, data []byte) {
+func (p impl) ProcessTokenEvent(address string, data []byte) error {
 	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
+		return nil
 	}
 	ctx := context.Background()
 	log := logrus.WithField("address", address)
@@ -318,9 +329,11 @@ func (p impl) ProcessTokenEvent(address string, data []byte) {
 	if err == nil {
 		if err := p.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
 			log.WithError(err).Error("failed to upsert tokenAccountBalance")
+			return err
 		}
-		return
+		return nil
 	}
+	return nil
 }
 
 func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {

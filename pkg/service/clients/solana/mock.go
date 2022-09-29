@@ -216,7 +216,7 @@ func (mr *MockSolanaMockRecorder) MintToWallet(arg0, arg1, arg2, arg3 interface{
 }
 
 // ProgramSubscribe mocks base method.
-func (m *MockSolana) ProgramSubscribe(arg0 context.Context, arg1 string, arg2 func(string, []byte)) error {
+func (m *MockSolana) ProgramSubscribe(arg0 context.Context, arg1 string, arg2 func(string, []byte) error) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ProgramSubscribe", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
