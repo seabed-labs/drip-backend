@@ -181,7 +181,6 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string
 
 func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queueItem *model.AccountUpdateQueueItem) {
 	log := logrus.WithField("id", id).WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
-	log.Infof("got item")
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
 	if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
 		log.WithError(err).Error("error or invalid account")

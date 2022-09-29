@@ -73,9 +73,10 @@ func TestSolanaClient(t *testing.T) {
 		timeout := time.Second * 5
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
-		err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) {
+		err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) error {
 			assert.NotEmpty(t, address)
 			assert.NotEmpty(t, data)
+			return nil
 		})
 		assert.NoError(t, err)
 		time.Sleep(timeout)
