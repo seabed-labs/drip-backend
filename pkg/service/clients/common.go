@@ -14,7 +14,7 @@ const (
 )
 
 func DefaultCheckRetry(_ context.Context, resp *http.Response, err error) (bool, error) {
-	if resp.StatusCode >= http.StatusTooManyRequests {
+	if resp != nil && resp.StatusCode >= http.StatusTooManyRequests {
 		if err != nil {
 			log.WithFields(
 				log.Fields{

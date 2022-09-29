@@ -364,7 +364,7 @@ func (s impl) ProgramSubscribe(
 					Warning("event ws msg decoded binary is nil")
 				continue
 			}
-			onReceive(msg.Value.Pubkey.String(), decodedBinary)
+			_ = onReceive(msg.Value.Pubkey.String(), decodedBinary)
 		}
 	}()
 	return nil

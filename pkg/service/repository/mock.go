@@ -50,6 +50,21 @@ func (mr *MockRepositoryMockRecorder) AdminGetVaultByAddress(ctx, address interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultByAddress", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultByAddress), ctx, address)
 }
 
+// AdminGetVaultByTreasuryTokenBAccount mocks base method.
+func (m *MockRepository) AdminGetVaultByTreasuryTokenBAccount(ctx context.Context, pubkey string) (*model.Vault, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AdminGetVaultByTreasuryTokenBAccount", ctx, pubkey)
+	ret0, _ := ret[0].(*model.Vault)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AdminGetVaultByTreasuryTokenBAccount indicates an expected call of AdminGetVaultByTreasuryTokenBAccount.
+func (mr *MockRepositoryMockRecorder) AdminGetVaultByTreasuryTokenBAccount(ctx, pubkey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdminGetVaultByTreasuryTokenBAccount", reflect.TypeOf((*MockRepository)(nil).AdminGetVaultByTreasuryTokenBAccount), ctx, pubkey)
+}
+
 // AdminGetVaults mocks base method.
 func (m *MockRepository) AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error) {
 	m.ctrl.T.Helper()
