@@ -203,9 +203,9 @@ func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpool
 	quotes := []*model.OrcaWhirlpoolDeltaBQuote{}
 
 	for i := range vaults {
-		if vaults[i].DripAmount == 0 {
-			continue
-		}
+		//if vaults[i].DripAmount == 0 {
+		//	continue
+		//}
 		existingQuote, err := p.repo.GetOrcaWhirlpoolDeltaBQuote(ctx, vaults[i].Pubkey, whirlpoolPubkey)
 		if err != nil && err.Error() != repository.ErrRecordNotFound {
 			log.WithError(err).Error("failed to GetOrcaWhirlpoolDeltaBQuote")
