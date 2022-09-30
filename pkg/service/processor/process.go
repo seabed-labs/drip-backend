@@ -26,7 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const processConcurrency = 100
+const processConcurrency = 20
 
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
