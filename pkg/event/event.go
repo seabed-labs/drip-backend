@@ -94,6 +94,10 @@ func (d *DripProgramProcessor) stop() {
 }
 
 func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
+	if d.environment == configs.StagingEnv {
+		logrus.Infof("skipping backfill on staging")
+		return
+	}
 	defer func() {
 		if r := recover(); r != nil {
 			debug.PrintStack()
