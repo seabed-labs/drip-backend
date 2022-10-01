@@ -7,18 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
-
-	"gorm.io/gorm"
-
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-
 	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
@@ -26,6 +21,7 @@ import (
 	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 const processConcurrency = 10

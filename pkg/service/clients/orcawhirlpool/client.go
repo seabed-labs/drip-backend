@@ -6,12 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
 	dripextension "github.com/dcaf-labs/drip-client/drip-extension-go"
 	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/hashicorp/go-retryablehttp"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"

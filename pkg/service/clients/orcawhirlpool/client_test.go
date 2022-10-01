@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
-
 	"github.com/test-go/testify/assert"
 )
 
