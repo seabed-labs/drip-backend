@@ -22,9 +22,9 @@ type OrcaWhirlpoolClient interface {
 }
 
 func NewOrcaWhirlpoolClient(
-	network configs.Network,
+	config *configs.AppConfig,
 ) OrcaWhirlpoolClient {
-	return newClient(network)
+	return newClient(config.Network)
 }
 
 type client struct {
@@ -76,9 +76,10 @@ func (c *client) GetOrcaWhirlpoolQuoteEstimate(
 		Execute()
 	if err != nil {
 		return nil, err
-	}
-	if httpRes.StatusCode != http.StatusOK {
+	} else if httpRes.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("V1OrcawhirlpoolQuoteExecute returned non-200, statusCode: %d", httpRes.StatusCode)
+	} else if res == nil {
+		return nil, fmt.Errorf("nil V1OrcawhirlpoolQuote200Response with 200 status")
 	}
 	return res, nil
 }

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
+
 	"gorm.io/gorm"
 
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -53,6 +55,7 @@ type impl struct {
 	repo                repository.Repository
 	accountUpdateQueue  repository.AccountUpdateQueue
 	tokenRegistryClient tokenregistry.TokenRegistry
+	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient
 	solanaClient        solana.Solana
 	alertService        alert.Service
 }
@@ -62,6 +65,7 @@ func NewProcessor(
 	accountUpdateQueue repository.AccountUpdateQueue,
 	client solana.Solana,
 	tokenRegistryClient tokenregistry.TokenRegistry,
+	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient,
 	alertService alert.Service,
 ) Processor {
 	return impl{
@@ -69,6 +73,7 @@ func NewProcessor(
 		accountUpdateQueue:  accountUpdateQueue,
 		solanaClient:        client,
 		tokenRegistryClient: tokenRegistryClient,
+		orcaWhirlpoolClient: orcaWhirlpoolClient,
 		alertService:        alertService,
 	}
 }

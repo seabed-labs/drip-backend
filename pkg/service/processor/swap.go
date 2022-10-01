@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -219,11 +218,18 @@ func (p impl) maybeUpdateOrcaWhirlPoolDeltaBCache(ctx context.Context, whirlpool
 		if time.Now().Before(existingQuoteLastUpdateTime.Add(time.Minute * 10)) {
 			continue
 		}
-		deltaB, err := orcawhirlpool.EvaluateOrcaWhirlpool(whirlpoolPubkey, vaults[i], p.solanaClient.GetNetwork())
+
+		swapQuoteEstimate, err := p.orcaWhirlpoolClient.GetOrcaWhirlpoolQuoteEstimate(ctx, whirlpoolPubkey, vaults[i].TokenAMint, strconv.FormatUint(vaults[i].DripAmount, 10))
+		if err != nil {
+			log.WithError(err).Error("failed to fetch orcaWhirlpoolQuoteEstimate")
+			continue
+		}
+		deltaB, err := strconv.ParseUint(swapQuoteEstimate.Amount, 10, 64)
 		if err != nil {
 			log.WithError(err).Error("failed to evaluate whirlpool")
 			continue
 		}
+
 		quotes = append(quotes, &model.OrcaWhirlpoolDeltaBQuote{
 			VaultPubkey:     vaults[i].Pubkey,
 			WhirlpoolPubkey: whirlpoolPubkey,

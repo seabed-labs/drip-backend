@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
+
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
@@ -42,6 +44,7 @@ func getDependencies() []fx.Option {
 			query.Use,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
+			orcawhirlpool.NewOrcaWhirlpoolClient,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
 			processor.NewProcessor,

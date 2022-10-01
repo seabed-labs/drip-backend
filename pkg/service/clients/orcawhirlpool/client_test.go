@@ -12,7 +12,9 @@ import (
 
 func TestOrcaWhirlpoolClient(t *testing.T) {
 
-	client := NewOrcaWhirlpoolClient(configs.DevnetNetwork)
+	client := NewOrcaWhirlpoolClient(&configs.AppConfig{
+		Network: configs.DevnetNetwork,
+	})
 
 	t.Run("GetOrcaWhirlpoolQuoteEstimate should swap estimate", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
