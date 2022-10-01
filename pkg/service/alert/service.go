@@ -120,12 +120,12 @@ func (a serviceImpl) SendNewPositionAlert(
 	}
 
 	tokenA := alertParams.TokenAMint
-	if alertParams.TokenASymbol != nil {
+	if alertParams.TokenASymbol != nil && *alertParams.TokenASymbol != "" {
 		tokenA = *alertParams.TokenASymbol
 	}
 
 	tokenB := alertParams.TokenBMint
-	if alertParams.TokenBSymbol != nil {
+	if alertParams.TokenBSymbol != nil && *alertParams.TokenBSymbol != "" {
 		tokenB = *alertParams.TokenBSymbol
 	}
 	inLineTrue := utils.GetBoolPtr(true)
@@ -144,7 +144,7 @@ func (a serviceImpl) SendNewPositionAlert(
 		).
 		Build()
 	embeds := []discord.Embed{embed}
-	if alertParams.TokenAIconURL != nil && alertParams.TokenASymbol != nil {
+	if alertParams.TokenAIconURL != nil && *alertParams.TokenAIconURL != "" && alertParams.TokenASymbol != nil && *alertParams.TokenASymbol != "" {
 		tokenAEmbed := discord.NewEmbedBuilder().
 			SetTitle("TokenA").
 			SetColor(int(SuccessColor)).
@@ -161,7 +161,7 @@ func (a serviceImpl) SendNewPositionAlert(
 
 		embeds = append(embeds, tokenAEmbed)
 	}
-	if alertParams.TokenBIconURL != nil && alertParams.TokenBSymbol != nil {
+	if alertParams.TokenBIconURL != nil && *alertParams.TokenBIconURL != "" && alertParams.TokenBSymbol != nil && *alertParams.TokenBSymbol != "" {
 		tokenBEmbed := discord.NewEmbedBuilder().
 			SetTitle("TokenB").
 			SetColor(int(SuccessColor)).
