@@ -61,8 +61,6 @@ func (c *client) GetOrcaWhirlpoolQuoteEstimate(
 	ctx context.Context,
 	whirlpool, inputTokenMint, inputAmount string,
 ) (res *dripextension.V1OrcawhirlpoolQuote200Response, err error) {
-	//
-
 	res, httpRes, err := c.DefaultApi.
 		V1OrcawhirlpoolQuote(ctx).
 		V1OrcawhirlpoolQuoteRequest(dripextension.V1OrcawhirlpoolQuoteRequest{
