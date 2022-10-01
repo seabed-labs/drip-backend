@@ -7,16 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"gorm.io/gorm"
-
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-
 	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
@@ -24,6 +21,7 @@ import (
 	solana2 "github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 const processConcurrency = 10
@@ -53,6 +51,7 @@ type impl struct {
 	repo                repository.Repository
 	accountUpdateQueue  repository.AccountUpdateQueue
 	tokenRegistryClient tokenregistry.TokenRegistry
+	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient
 	solanaClient        solana.Solana
 	alertService        alert.Service
 }
@@ -62,6 +61,7 @@ func NewProcessor(
 	accountUpdateQueue repository.AccountUpdateQueue,
 	client solana.Solana,
 	tokenRegistryClient tokenregistry.TokenRegistry,
+	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient,
 	alertService alert.Service,
 ) Processor {
 	return impl{
@@ -69,6 +69,7 @@ func NewProcessor(
 		accountUpdateQueue:  accountUpdateQueue,
 		solanaClient:        client,
 		tokenRegistryClient: tokenRegistryClient,
+		orcaWhirlpoolClient: orcaWhirlpoolClient,
 		alertService:        alertService,
 	}
 }

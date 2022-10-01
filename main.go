@@ -9,6 +9,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/event"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/base"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/configs"
@@ -45,6 +46,7 @@ func getDependencies() []fx.Option {
 			query.Use,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
+			orcawhirlpool.NewOrcaWhirlpoolClient,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
 			middleware.NewHandler,

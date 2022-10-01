@@ -3,21 +3,16 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/alert"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository"
-	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-
 	"github.com/dcaf-labs/drip/internal/scripts"
+	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -42,6 +37,7 @@ func getDependencies() []fx.Option {
 			query.Use,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
+			orcawhirlpool.NewOrcaWhirlpoolClient,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
 			processor.NewProcessor,

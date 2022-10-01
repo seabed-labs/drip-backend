@@ -3,21 +3,16 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository"
-	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-
-	"github.com/dcaf-labs/drip/pkg/service/alert"
-	"github.com/dcaf-labs/drip/pkg/service/processor"
-
 	"github.com/dcaf-labs/drip/pkg/event"
+	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -45,6 +40,7 @@ func getDependencies() []fx.Option {
 			repository.NewAccountUpdateQueue,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
+			orcawhirlpool.NewOrcaWhirlpoolClient,
 			processor.NewProcessor,
 			alert.NewAlertService,
 		),
