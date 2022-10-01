@@ -34,7 +34,7 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/dave/jennifer v1.5.1 // indirect
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb // indirect
-	github.com/dcaf-labs/drip-client/drip-go v0.0.0-20220923034700-59a10ecbc863 // indirect
+	github.com/dcaf-labs/drip-client/drip-go v0.0.0-20221001224830-925650c045bb // indirect
 	github.com/disgoorg/disgo v0.13.19 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.0 // indirect
