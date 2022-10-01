@@ -347,7 +347,7 @@ func (s impl) ProgramSubscribe(
 				}
 				continue
 			}
-			if msg.Value.Account == nil || msg.Value.Account.Data == nil {
+			if msg == nil || msg.Value.Account == nil || msg.Value.Account.Data == nil {
 				logrus.
 					WithFields(logrus.Fields{
 						"event": program,
