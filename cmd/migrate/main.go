@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-
 	"github.com/dcaf-labs/drip/pkg/service/configs"
-
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
