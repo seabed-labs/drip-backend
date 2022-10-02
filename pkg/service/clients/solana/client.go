@@ -48,10 +48,9 @@ func NewSolanaClient(
 }
 
 type impl struct {
-	network      configs.Network
-	wallet       *solana.Wallet
-	client       *rpc.Client
-	backupClient *rpc.Client // to support all the calls client doesn't support
+	network configs.Network
+	wallet  *solana.Wallet
+	client  *rpc.Client
 }
 
 func (s impl) GetNetwork() configs.Network {
@@ -61,12 +60,10 @@ func (s impl) GetNetwork() configs.Network {
 func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
-	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.Network, true)
-	secondaryURL, secondaryCallsPerSecond := GetURLWithRateLimit(config.Network, false)
+	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.Network)
 	solanaClient := impl{
-		client:       rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
-		backupClient: rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(secondaryURL, secondaryCallsPerSecond)),
-		network:      config.Network,
+		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
+		network: config.Network,
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -75,11 +72,9 @@ func createClient(
 	}
 	logrus.
 		WithFields(logrus.Fields{
-			"version":                 resp.SolanaCore,
-			"primaryURL":              primaryURL,
-			"primaryCallsPerSecond":   primaryCallsPerSecond,
-			"secondaryURL":            secondaryURL,
-			"secondaryCallsPerSecond": secondaryCallsPerSecond,
+			"version":               resp.SolanaCore,
+			"primaryURL":            primaryURL,
+			"primaryCallsPerSecond": primaryCallsPerSecond,
 		}).
 		Info("created solana clients")
 
@@ -201,7 +196,7 @@ func (s impl) GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.
 		return nil, err
 	}
 	// this call is not supported on alchemy
-	out, err := s.backupClient.GetTokenLargestAccounts(ctx, pubkey, "confirmed")
+	out, err := s.client.GetTokenLargestAccounts(ctx, pubkey, "confirmed")
 	if out == nil {
 		return nil, err
 	}
@@ -448,21 +443,7 @@ func (s impl) signAndBroadcast(
 	return txHash.String(), nil
 }
 
-func GetURLWithRateLimit(env configs.Network, primary bool) (string, int) {
-	if !primary {
-		switch env {
-		case configs.MainnetNetwork:
-			return rpc.MainNetBeta_RPC, 3
-		case configs.DevnetNetwork:
-			return rpc.DevNet_RPC, 3
-		case configs.NilNetwork:
-			fallthrough
-		case configs.LocalNetwork:
-			fallthrough
-		default:
-			return rpc.LocalNet_RPC, 3
-		}
-	}
+func GetURLWithRateLimit(env configs.Network) (string, int) {
 	switch env {
 	case configs.MainnetNetwork:
 		return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
