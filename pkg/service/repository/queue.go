@@ -3,7 +3,6 @@ package repository
 import (
 	context "context"
 	"fmt"
-	"math"
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
@@ -30,7 +29,7 @@ func (d repositoryImpl) ReQueue(ctx context.Context, item *model.AccountUpdateQu
 	if item.RetryTime != nil {
 		retryTimeUnix = item.RetryTime.Unix()
 	}
-	retryTimeUnix += int64(math.Pow(2, float64(item.Try)))
+	retryTimeUnix += 30
 	item.RetryTime = utils.GetTimePtr(time.Unix(retryTimeUnix, 0))
 	return d.AddItem(ctx, item)
 }
