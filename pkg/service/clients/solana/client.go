@@ -7,9 +7,7 @@ import (
 	"strings"
 
 	"github.com/dcaf-labs/drip/pkg/service/configs"
-
 	"github.com/dcaf-labs/drip/pkg/service/utils"
-
 	bin "github.com/gagliardetto/binary"
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	"github.com/gagliardetto/solana-go"
@@ -63,8 +61,8 @@ func (s impl) GetNetwork() configs.Network {
 func createClient(
 	config *configs.AppConfig,
 ) (impl, error) {
-	primaryURL, primaryCallsPerSecond := getURLWithRateLimit(config.Network, true)
-	secondaryURL, secondaryCallsPerSecond := getURLWithRateLimit(config.Network, false)
+	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.Network, true)
+	secondaryURL, secondaryCallsPerSecond := GetURLWithRateLimit(config.Network, false)
 	solanaClient := impl{
 		client:       rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
 		backupClient: rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(secondaryURL, secondaryCallsPerSecond)),
@@ -449,59 +447,42 @@ func (s impl) signAndBroadcast(
 
 	return txHash.String(), nil
 }
-func getURLWithRateLimit(network configs.Network, primary bool) (string, int) {
-	return GetURL(network, primary), GetRequestsPerSecondLimit(network, primary)
-}
-func GetRequestsPerSecondLimit(network configs.Network, primary bool) int {
-	if !primary {
-		return 3
-	}
-	switch network {
-	case configs.MainnetNetwork:
-		return 20
-	case configs.DevnetNetwork:
-		return 3
-	default:
-		return 3
-	}
-}
 
-func GetURL(env configs.Network, primary bool) string {
+func GetURLWithRateLimit(env configs.Network, primary bool) (string, int) {
 	if !primary {
 		switch env {
 		case configs.MainnetNetwork:
-			return rpc.MainNetBeta_RPC
+			return rpc.MainNetBeta_RPC, 3
 		case configs.DevnetNetwork:
-			return rpc.DevNet_RPC
+			return rpc.DevNet_RPC, 3
 		case configs.NilNetwork:
 			fallthrough
 		case configs.LocalNetwork:
 			fallthrough
 		default:
-			return rpc.LocalNet_RPC
+			return rpc.LocalNet_RPC, 3
 		}
 	}
 	switch env {
 	case configs.MainnetNetwork:
-		//return "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/"
-		return "https://solana-mainnet.g.alchemy.com/v2/-w2AkT6sEpRaHuaxgFcjlaW-Nv3hUiH_"
+		return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
 	case configs.DevnetNetwork:
-		return rpc.DevNet_RPC
+		return "https://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7", 15
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:
 		fallthrough
 	default:
-		return rpc.LocalNet_RPC
+		return rpc.LocalNet_RPC, 5
 	}
 }
 
 func getWSURL(env configs.Network) string {
 	switch env {
 	case configs.MainnetNetwork:
-		return rpc.MainNetBeta_WS
+		return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
 	case configs.DevnetNetwork:
-		return rpc.DevNet_WS
+		return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:

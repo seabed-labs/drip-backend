@@ -51,9 +51,10 @@ func newClient(network configs.Network) *client {
 	config.UserAgent = "drip-backend"
 	config.Scheme = "https"
 
+	connectionUrl, _ := solana.GetURLWithRateLimit(network, true)
 	return &client{
 		APIClient:     dripextension.NewAPIClient(config),
-		connectionUrl: solana.GetURL(network, true),
+		connectionUrl: connectionUrl,
 	}
 }
 
