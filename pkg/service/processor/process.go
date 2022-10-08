@@ -95,7 +95,7 @@ func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, pr
 				Time:      utils.GetTimePtr(time.Now()),
 				Priority:  utils.GetIntPtr(3),
 				Try:       0,
-				MaxTry:    utils.GetIntPtr(4),
+				MaxTry:    utils.GetIntPtr(10),
 			}); err != nil {
 				log.WithError(err).Error("failed to add backfill account to queue")
 			}
@@ -118,6 +118,7 @@ func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string
 			ProgramID: programId,
 			Time:      utils.GetTimePtr(time.Now()),
 			Priority:  &priority,
+			MaxTry:    utils.GetIntPtr(10),
 		}); err != nil {
 			logrus.
 				WithError(err).
