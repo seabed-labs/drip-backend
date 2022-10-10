@@ -433,7 +433,10 @@ func (s impl) signAndBroadcast(
 	logrus.WithFields(logFields).Info("signed transaction")
 
 	txHash, err := s.client.SendTransactionWithOpts(
-		ctx, tx, false, commitment,
+		ctx, tx, rpc.TransactionOpts{
+			SkipPreflight:       false,
+			PreflightCommitment: commitment,
+		},
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to send transaction, err %s", err)
