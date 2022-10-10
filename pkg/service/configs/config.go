@@ -71,7 +71,7 @@ func NewAppConfig() (*AppConfig, error) {
 		return nil, err
 	}
 	log.Info("loaded drip-backend app configs")
-	drip.ProgramID = ag_solanago.MustPublicKeyFromBase58(config.DripProgramID)
+	drip.SetProgramID(ag_solanago.MustPublicKeyFromBase58(config.DripProgramID))
 	log.
 		WithField("programID", drip.ProgramID.String()).
 		Info("set programID")
