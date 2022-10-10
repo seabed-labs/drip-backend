@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
+
+	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients"
-	"github.com/hashicorp/go-retryablehttp"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/time/rate"
 )
 
 type TokenRegistry interface {
@@ -24,27 +22,12 @@ func NewTokenRegistry() TokenRegistry {
 }
 
 type client struct {
-	*retryablehttp.Client
-	*rate.Limiter
+	jsonrpc.HTTPClient
 }
 
 func newClient() *client {
-	rateLimiter := rate.NewLimiter(rate.Every(time.Second/callsPerSecond), 1)
-	httpClient := retryablehttp.NewClient()
-	httpClient.Logger = nil
-	httpClient.CheckRetry = clients.DefaultCheckRetry
-	httpClient.RetryWaitMin = clients.DefaultRetryMin
-	httpClient.RetryMax = clients.MaxRetries
-	apiClient := client{
-		Client:  httpClient,
-		Limiter: rateLimiter,
-	}
-	apiClient.RequestLogHook = func(logger retryablehttp.Logger, req *http.Request, retry int) {
-		if err := apiClient.Limiter.Wait(context.Background()); err != nil {
-			log.WithError(err).Errorf("waiting for rate limit")
-			return
-		}
-	}
+	httpClient := clients.GetRateLimitedHTTPClient(callsPerSecond)
+	apiClient := client{httpClient}
 	return &apiClient
 }
 
@@ -79,9 +62,5 @@ func (apiClient *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlS
 	if err != nil {
 		return nil, err
 	}
-	retryableRequest, err := retryablehttp.FromRequest(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	return apiClient.Do(retryableRequest)
+	return apiClient.Do(httpReq)
 }
