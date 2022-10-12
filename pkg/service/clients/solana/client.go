@@ -26,7 +26,9 @@ type Solana interface {
 	signAndBroadcast(context.Context, rpc.CommitmentType, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	GetAccount(context.Context, string, interface{}) error
-	GetAccounts(context.Context, []string, func(string, []byte)) error
+	GetSignaturesForAccount(ctx context.Context, address string, before, until *string) ([]*rpc.TransactionSignature, error)
+	GetTransaction(ctx context.Context, tx string) (*rpc.GetTransactionResult, error)
+	//GetAccounts(context.Context, []string, func(string, []byte)) error
 	GetProgramAccounts(context.Context, string) ([]string, error)
 	GetAccountInfo(context.Context, string) (*rpc.GetAccountInfoResult, error)
 	ProgramSubscribe(context.Context, string, func(string, []byte) error) error
@@ -95,35 +97,41 @@ func createClient(
 	return solanaClient, nil
 }
 
-func (s impl) GetAccounts(ctx context.Context, addresses []string, decode func(string, []byte)) error {
-	var pubkeys []solana.PublicKey
-	for _, address := range addresses {
-		pubkey, err := solana.PublicKeyFromBase58(address)
-		if err != nil {
-			return err
-		}
-		pubkeys = append(pubkeys, pubkey)
-	}
-	resp, err := s.client.GetMultipleAccountsWithOpts(ctx, pubkeys, &rpc.GetMultipleAccountsOpts{
-		Encoding:   solana.EncodingBase64,
-		Commitment: "confirmed",
-	})
+func (s impl) GetSignaturesForAccount(ctx context.Context, address string, before, until *string) ([]*rpc.TransactionSignature, error) {
+	addressPubkey, err := solana.PublicKeyFromBase58(address)
 	if err != nil {
-		logrus.
-			WithError(err).
-			Errorf("couldn't get multiple account infos")
-		return err
+		return nil, err
 	}
-	if len(resp.Value) != len(addresses) {
-		return fmt.Errorf("response does not match length of addresses")
-	}
-	for i, val := range resp.Value {
-		if val == nil || val.Data == nil {
-			continue
+	beforeSignature := solana.Signature{}
+	untilSignature := solana.Signature{}
+	if before != nil {
+		beforeSignature, err = solana.SignatureFromBase58(*before)
+		if err != nil {
+			return nil, err
 		}
-		decode(addresses[i], val.Data.GetBinary())
 	}
-	return nil
+	if until != nil {
+		untilSignature, err = solana.SignatureFromBase58(*until)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return s.client.GetSignaturesForAddressWithOpts(ctx, addressPubkey, &rpc.GetSignaturesForAddressOpts{
+		Before:     beforeSignature,
+		Until:      untilSignature,
+		Commitment: rpc.CommitmentConfirmed,
+	})
+}
+
+func (s impl) GetTransaction(ctx context.Context, tx string) (*rpc.GetTransactionResult, error) {
+	txSignature, err := solana.SignatureFromBase58(tx)
+	if err != nil {
+		return nil, err
+	}
+	return s.client.GetTransaction(ctx, txSignature, &rpc.GetTransactionOpts{
+		Encoding:   solana.EncodingBase64,
+		Commitment: rpc.CommitmentConfirmed,
+	})
 }
 
 func (s impl) GetTokenMint(ctx context.Context, mintAddress string) (token.Mint, error) {

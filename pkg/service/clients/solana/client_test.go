@@ -6,8 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 
+	bin "github.com/gagliardetto/binary"
+
+	"github.com/dcaf-labs/drip/pkg/service/configs"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/rpc"
@@ -15,6 +18,7 @@ import (
 )
 
 func TestSolanaClient(t *testing.T) {
+	drip.SetProgramID(solana.MustPublicKeyFromBase58("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"))
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
 	config := configs.AppConfig{
@@ -44,6 +48,30 @@ func TestSolanaClient(t *testing.T) {
 		versionResponse, err := client.GetVersion(context.Background())
 		assert.NoError(t, err)
 		assert.NotEmpty(t, versionResponse.FeatureSet)
+	})
+
+	t.Run("should return signatures for drip program", func(t *testing.T) {
+		signatures, err := client.GetSignaturesForAccount(context.Background(), "dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk", nil, nil)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signatures)
+		assert.Len(t, signatures, 1000)
+		fmt.Println(signatures[0].Signature.String())
+	})
+
+	t.Run("should decode signatures from GetSignaturesForAccount", func(t *testing.T) {
+		tx, err := client.GetTransaction(context.Background(), "4wB9S59RhK9EuowZpE8MyqYshEQvgi5xUtSWPhxXJcTiqqN5ogd4y9uS12xhpyMuNhkTo4ax3r6efzeTDPAERWQ7")
+		assert.NoError(t, err)
+		assert.NotNil(t, tx)
+		assert.NotNil(t, tx.Transaction)
+		txDecoded, err := solana.TransactionFromDecoder(bin.NewBinDecoder(tx.Transaction.GetBinary()))
+		assert.NoError(t, err)
+		fmt.Println(txDecoded.String())
+		var dripOrcaWhilrpool drip.Instruction
+		err = bin.NewBinDecoder(tx.Transaction.GetBinary()).Decode(&dripOrcaWhilrpool)
+		assert.NoError(t, err)
+		assert.NotNil(t, dripOrcaWhilrpool)
+		fmt.Println(dripOrcaWhilrpool.TypeID)
+		assert.Equal(t, "DripOrcaWhirlpool", drip.InstructionIDToName(dripOrcaWhilrpool.TypeID))
 	})
 
 	t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
