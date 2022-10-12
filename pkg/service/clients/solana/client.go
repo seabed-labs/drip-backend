@@ -449,9 +449,11 @@ func (s impl) signAndBroadcast(
 func GetURLWithRateLimit(env configs.Network) (string, int) {
 	switch env {
 	case configs.MainnetNetwork:
-		return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
+		return rpc.MainNetBeta_RPC, 3
+		//return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
 	case configs.DevnetNetwork:
-		return "https://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7", 15
+		return rpc.DevNet_RPC, 3
+		//return "https://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7", 15
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:
@@ -464,9 +466,11 @@ func GetURLWithRateLimit(env configs.Network) (string, int) {
 func getWSURL(env configs.Network) string {
 	switch env {
 	case configs.MainnetNetwork:
-		return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
+		return rpc.MainNetBeta_WS
+		//return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
 	case configs.DevnetNetwork:
-		return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
+		return rpc.DevNet_WS
+		//return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
 	case configs.NilNetwork:
 		fallthrough
 	case configs.LocalNetwork:
