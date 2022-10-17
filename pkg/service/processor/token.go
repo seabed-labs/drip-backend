@@ -40,23 +40,26 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 	if err != nil {
 		return fmt.Errorf("failed to GetTokenMint %s, err: %w", mintAddress, err)
 	}
-	symbol, iconURL := p.getTokenMetadata(ctx, mintAddress)
+	symbol, iconURL, coinGeckoID := p.getTokenMetadata(ctx, mintAddress)
 	tokenModel := model.Token{
-		Pubkey:   mintAddress,
-		Symbol:   symbol,
-		Decimals: int16(tokenMint.Decimals),
-		IconURL:  iconURL,
+		Pubkey:      mintAddress,
+		Symbol:      symbol,
+		Decimals:    int16(tokenMint.Decimals),
+		IconURL:     iconURL,
+		CoinGeckoID: coinGeckoID,
 	}
 	return p.repo.UpsertTokens(ctx, &tokenModel)
 }
 
-func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string) {
+func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string, *string) {
 	symbol := utils.GetStringPtr("")
 	iconURL := utils.GetStringPtr("")
+	coinGeckoID := utils.GetStringPtr("")
 	existingToken, err := p.repo.GetTokenByAddress(ctx, mint)
 	if err == nil {
 		symbol = existingToken.Symbol
 		iconURL = existingToken.IconURL
+		coinGeckoID = existingToken.CoinGeckoID
 	}
 	tokenMetadataAccount, err := p.solanaClient.GetTokenMetadataAccount(ctx, mint)
 	if err == nil && symbol == nil {
@@ -69,7 +72,12 @@ func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *stri
 	if err == nil && iconURL == nil {
 		iconURL = &tokenRegistryMetadata.LogoURI
 	}
-	return symbol, iconURL
+	if coinGeckoID == nil {
+		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, mint); err == nil {
+			coinGeckoID = &coinGeckoMeta.Id
+		}
+	}
+	return symbol, iconURL, coinGeckoID
 }
 
 func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {

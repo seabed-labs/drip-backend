@@ -1,4 +1,4 @@
-package coinGecko
+package coingecko
 
 import (
 	"context"

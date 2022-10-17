@@ -1,8 +1,9 @@
-package coinGecko
+package coingecko
 
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -30,7 +31,7 @@ func newClient() *client {
 
 func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error) {
 
-	urlString := baseUrl + "/coins/solana/contract/" + contractAddress
+	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
 		return nil, err

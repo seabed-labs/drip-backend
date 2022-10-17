@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
@@ -54,6 +55,7 @@ type impl struct {
 	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient
 	solanaClient        solana.Solana
 	alertService        alert.Service
+	coinGeckoClient     coingecko.CoinGeckoClient
 }
 
 func NewProcessor(
