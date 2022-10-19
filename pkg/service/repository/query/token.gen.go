@@ -31,6 +31,7 @@ func newToken(db *gorm.DB) token {
 	_token.Symbol = field.NewString(tableName, "symbol")
 	_token.Decimals = field.NewInt16(tableName, "decimals")
 	_token.IconURL = field.NewString(tableName, "icon_url")
+	_token.CoinGeckoID = field.NewString(tableName, "coin_gecko_id")
 
 	_token.fillFieldMap()
 
@@ -40,11 +41,12 @@ func newToken(db *gorm.DB) token {
 type token struct {
 	tokenDo tokenDo
 
-	ALL      field.Field
-	Pubkey   field.String
-	Symbol   field.String
-	Decimals field.Int16
-	IconURL  field.String
+	ALL         field.Field
+	Pubkey      field.String
+	Symbol      field.String
+	Decimals    field.Int16
+	IconURL     field.String
+	CoinGeckoID field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -65,6 +67,7 @@ func (t *token) updateTableName(table string) *token {
 	t.Symbol = field.NewString(table, "symbol")
 	t.Decimals = field.NewInt16(table, "decimals")
 	t.IconURL = field.NewString(table, "icon_url")
+	t.CoinGeckoID = field.NewString(table, "coin_gecko_id")
 
 	t.fillFieldMap()
 
@@ -87,11 +90,12 @@ func (t *token) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *token) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 4)
+	t.fieldMap = make(map[string]field.Expr, 5)
 	t.fieldMap["pubkey"] = t.Pubkey
 	t.fieldMap["symbol"] = t.Symbol
 	t.fieldMap["decimals"] = t.Decimals
 	t.fieldMap["icon_url"] = t.IconURL
+	t.fieldMap["coin_gecko_id"] = t.CoinGeckoID
 }
 
 func (t token) clone(db *gorm.DB) token {
