@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Drip Backend
-  description: | 
+  description: |
     Drip backend service.
     All API's have a IP rate limit of 10 requests per second.
   contact:
@@ -113,11 +113,11 @@ paths:
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
         - $ref: "#/components/parameters/expandAdminVaultsQueryParam"
-        - $ref: '#/components/parameters/vaultProtoConfigQueryParam'
-        - $ref: '#/components/parameters/vaultQueryParam'
-        - $ref: '#/components/parameters/tokenAQueryParam'
-        - $ref: '#/components/parameters/tokenBQueryParam'
-        - $ref: '#/components/parameters/enabledQueryParam'
+        - $ref: "#/components/parameters/vaultProtoConfigQueryParam"
+        - $ref: "#/components/parameters/vaultQueryParam"
+        - $ref: "#/components/parameters/tokenAQueryParam"
+        - $ref: "#/components/parameters/tokenBQueryParam"
+        - $ref: "#/components/parameters/enabledQueryParam"
         - $ref: "#/components/parameters/offsetQueryParam"
         - $ref: "#/components/parameters/limitQueryParam"
       responses:
@@ -180,8 +180,8 @@ paths:
       parameters:
         - $ref: "#/components/parameters/googleTokenIdHeaderParam"
         - $ref: "#/components/parameters/expandAdminPositionsQueryParam"
-        - $ref: '#/components/parameters/enabledQueryParam'
-        - $ref: '#/components/parameters/isClosedQueryParam'
+        - $ref: "#/components/parameters/enabledQueryParam"
+        - $ref: "#/components/parameters/isClosedQueryParam"
         - $ref: "#/components/parameters/offsetQueryParam"
         - $ref: "#/components/parameters/limitQueryParam"
       responses:
@@ -268,7 +268,7 @@ paths:
       description: Get all user positions.
       parameters:
         - $ref: "#/components/parameters/requiredWalletQueryParam"
-        - $ref: '#/components/parameters/isClosedQueryParam'
+        - $ref: "#/components/parameters/isClosedQueryParam"
         - $ref: "#/components/parameters/offsetQueryParam"
         - $ref: "#/components/parameters/limitQueryParam"
       responses:
@@ -540,14 +540,7 @@ components:
         type: array
         items:
           type: string
-          enum:
-            [
-              "all",
-              "vault",
-              "protoConfig",
-              "tokenA",
-              "tokenB",
-            ]
+          enum: ["all", "vault", "protoConfig", "tokenA", "tokenB"]
 
     googleTokenIdHeaderParam:
       name: token-id
@@ -640,7 +633,6 @@ components:
         type: string
 
   schemas:
-
     #   API RESPONSES
     listAdminPositions:
       type: array
@@ -1066,6 +1058,8 @@ components:
           type: string
           example: "SOL"
         iconUrl:
+          type: string
+        coinGeckoId:
           type: string
 
     vault:
