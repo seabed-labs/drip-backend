@@ -15,11 +15,11 @@ import (
 
 func TestHandler_GetSwaggerJson(t *testing.T) {
 
-	t.Run("getURL should return correct api URL", func(t *testing.T) {
-		assert.True(t, strings.Contains(getURL(config.NilNetwork, config.StagingEnv, 0), "localhost"))
-		assert.True(t, strings.Contains(getURL(config.LocalNetwork, config.StagingEnv, 0), "localhost"))
-		assert.True(t, strings.Contains(getURL(config.DevnetNetwork, config.StagingEnv, 0), "devnet"))
-		assert.True(t, strings.Contains(getURL(config.MainnetNetwork, config.StagingEnv, 0), "mainnet"))
+	t.Run("getServerURL should return correct api URL", func(t *testing.T) {
+		assert.True(t, strings.Contains(getServerURL(config.NilNetwork, config.StagingEnv, 0), "localhost"))
+		assert.True(t, strings.Contains(getServerURL(config.LocalNetwork, config.StagingEnv, 0), "localhost"))
+		assert.True(t, strings.Contains(getServerURL(config.DevnetNetwork, config.StagingEnv, 0), "devnet"))
+		assert.True(t, strings.Contains(getServerURL(config.MainnetNetwork, config.StagingEnv, 0), "mainnet"))
 	})
 
 	t.Run("should return json from handler", func(t *testing.T) {
