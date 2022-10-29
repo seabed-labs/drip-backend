@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
+
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+	"github.com/dcaf-labs/drip/pkg/unittest"
 
 	"github.com/labstack/echo/v4"
 
@@ -12,12 +13,17 @@ import (
 
 func TestHandler_Get(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	h := Handler{}
-	assert.NoError(t, h.Get(c))
-	assert.Equal(t, rec.Code, 200)
-	assert.Equal(t, "{\"message\":\"pong\"}\n", rec.Body.String())
+
+	t.Run("should return pong", func(t *testing.T) {
+		c, rec := unittest.GetTestRequestRecorder(e, nil)
+
+		h := Handler{}
+
+		assert.NoError(t, h.Get(c))
+		assert.Equal(t, rec.Code, 200)
+		pingRes, err := apispec.ParseGetResponse(rec.Result())
+		assert.NoError(t, err)
+		assert.NotNil(t, pingRes.JSON200)
+		assert.Equal(t, pingRes.JSON200.Message, "pong")
+	})
 }
