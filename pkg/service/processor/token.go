@@ -117,7 +117,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
 		return fmt.Errorf("failed to UpsertTokenByAddress %s, err: %w", tokenAccount.Mint.String(), err)
 	}
-	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccountBalance{
+	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccount{
 		Pubkey: address,
 		Mint:   tokenAccount.Mint.String(),
 		Owner:  tokenAccount.Owner.String(),

@@ -131,10 +131,10 @@ func (mr *MockRepositoryMockRecorder) AdminSetVaultEnabled(ctx, pubkey, enabled 
 }
 
 // GetActiveTokenAccountBalancesByMint mocks base method.
-func (m *MockRepository) GetActiveTokenAccountBalancesByMint(arg0 context.Context, arg1 string) ([]*model.TokenAccountBalance, error) {
+func (m *MockRepository) GetActiveTokenAccountBalancesByMint(arg0 context.Context, arg1 string) ([]*model.TokenAccount, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetActiveTokenAccountBalancesByMint", arg0, arg1)
-	ret0, _ := ret[0].([]*model.TokenAccountBalance)
+	ret0, _ := ret[0].([]*model.TokenAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -401,14 +401,14 @@ func (mr *MockRepositoryMockRecorder) GetSupportedTokenBs(ctx, givenTokenAMint i
 }
 
 // GetTokenAccountBalancesByAddresses mocks base method.
-func (m *MockRepository) GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccountBalance, error) {
+func (m *MockRepository) GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccount, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx}
 	for _, a := range addresses {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "GetTokenAccountBalancesByAddresses", varargs...)
-	ret0, _ := ret[0].([]*model.TokenAccountBalance)
+	ret0, _ := ret[0].([]*model.TokenAccount)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -666,7 +666,7 @@ func (mr *MockRepositoryMockRecorder) UpsertProtoConfigs(arg0 interface{}, arg1 
 }
 
 // UpsertTokenAccountBalances mocks base method.
-func (m *MockRepository) UpsertTokenAccountBalances(arg0 context.Context, arg1 ...*model.TokenAccountBalance) error {
+func (m *MockRepository) UpsertTokenAccountBalances(arg0 context.Context, arg1 ...*model.TokenAccount) error {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{arg0}
 	for _, a := range arg1 {

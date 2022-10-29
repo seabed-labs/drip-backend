@@ -36,7 +36,7 @@ func getBestTokenSwapForVaults(
 	vaults []*model.Vault,
 	vaultWhitelists map[string][]*model.VaultWhitelist,
 	tokenSwapsByTokenPairId map[string][]*model.TokenSwap,
-	tokenAccountBalancesByPubkey map[string]*model.TokenAccountBalance,
+	tokenAccountBalancesByPubkey map[string]*model.TokenAccount,
 ) map[string]*model.TokenSwap {
 	res := make(map[string]*model.TokenSwap)
 	for i := range vaults {
@@ -61,7 +61,7 @@ func getBestTokenSwapForVaults(
 func getBestTokenSwapForVault(
 	vault *model.Vault,
 	tokenSwaps []*model.TokenSwap,
-	tokenAccountBalancesByPubkey map[string]*model.TokenAccountBalance,
+	tokenAccountBalancesByPubkey map[string]*model.TokenAccount,
 ) (*model.TokenSwap, error) {
 	if len(tokenSwaps) == 0 {
 		return nil, fmt.Errorf("failed to get token_swap")

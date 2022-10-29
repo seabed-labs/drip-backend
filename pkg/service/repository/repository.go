@@ -19,7 +19,7 @@ type Repository interface {
 	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
-	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccountBalance) error
+	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccount) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error
@@ -48,7 +48,6 @@ type Repository interface {
 
 	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)
 	GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.TokenSwap, error)
-	GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error)
 
 	GetOrcaWhirlpoolsByTokenPairIDs(ctx context.Context, tokenPairIDs ...string) ([]*model.OrcaWhirlpool, error)
 	GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error)
@@ -59,8 +58,8 @@ type Repository interface {
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
-	GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccountBalance, error)
-	GetActiveTokenAccountBalancesByMint(context.Context, string) ([]*model.TokenAccountBalance, error)
+	GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccount, error)
+	GetActiveTokenAccountBalancesByMint(context.Context, string) ([]*model.TokenAccount, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)

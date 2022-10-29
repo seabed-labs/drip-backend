@@ -81,7 +81,7 @@ func tokenModelsToAPI(tokenModels []*model.Token) apispec.ListTokens {
 	return res
 }
 
-func tokenAccountBalanceModelToAPI(tokenAccountBalance *model.TokenAccountBalance) apispec.TokenAccountBalance {
+func tokenAccountBalanceModelToAPI(tokenAccountBalance *model.TokenAccount) apispec.TokenAccountBalance {
 	return apispec.TokenAccountBalance{
 		Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
 		Mint:   tokenAccountBalance.Mint,

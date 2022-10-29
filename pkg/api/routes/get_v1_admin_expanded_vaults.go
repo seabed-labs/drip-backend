@@ -70,7 +70,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		logrus.WithError(err).Error("failed to get tokenAccountBalances")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	tokenAccountBalancesByPubkey := make(map[string]*model.TokenAccountBalance)
+	tokenAccountBalancesByPubkey := make(map[string]*model.TokenAccount)
 	for i := range tokenAccountBalances {
 		tokeAccountBalance := tokenAccountBalances[i]
 		tokenAccountBalancesByPubkey[tokeAccountBalance.Pubkey] = tokeAccountBalance

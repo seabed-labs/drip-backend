@@ -58,8 +58,8 @@ func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*mod
 		Create(tokenPairs...)
 }
 
-func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccountBalance) error {
-	return d.repo.TokenAccountBalance.
+func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccount) error {
+	return d.repo.TokenAccount.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
 			UpdateAll: true,
