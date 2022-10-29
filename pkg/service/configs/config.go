@@ -16,6 +16,7 @@ type AppConfig struct {
 	Port                      int         `yaml:"port"        env:"PORT"`
 	DiscordWebhookID          string      `yaml:"discordWebhookID" env:"DISCORD_WEBHOOK_ID"`
 	DiscordWebhookAccessToken string      `yaml:"discordWebhookAccessToken" env:"DISCORD_ACCESS_TOKEN"`
+	ShouldByPassAdminAuth     bool        `yaml:"shouldBypassAdminAuth" env:"SHOULD_BYPASS_ADMIN_AUTH" env-default:"false"`
 }
 
 type PSQLConfig struct {
@@ -74,6 +75,7 @@ func NewAppConfig() (*AppConfig, error) {
 	drip.ProgramID = ag_solanago.MustPublicKeyFromBase58(config.DripProgramID)
 	log.
 		WithField("programID", drip.ProgramID.String()).
+		WithField("ShouldByPassAdminAuth", config.ShouldByPassAdminAuth).
 		Info("set programID")
 	return &config, nil
 }

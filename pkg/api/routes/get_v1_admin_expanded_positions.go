@@ -33,8 +33,10 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	)
 	if err != nil {
 		logrus.WithError(err).Error("failed to GetAdminPositions")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: err.Error()})
 	}
+
+	// Populate Base Result
 	for _, position := range positions {
 		res = append(res, apispec.ExpandedAdminPosition{
 			Position: positionModelToAPI(position),
