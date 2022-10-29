@@ -1,6 +1,6 @@
 package testintegration
 
-// TODO(Mocha): these tests all take a long time because each test fn creates a new DB and runs fresh migrations
+// TODO(Mocha): these tests all take a long time because each integrationtest fn creates a new DB and runs fresh migrations
 // the db setup and migrations can be done once per file opposed to once per fn
 
 //GetVaultByAddress(context.Context, string) (*model2.Vault, error)
@@ -20,7 +20,7 @@ package testintegration
 
 //nolint:funlen
 //func TestUpsertProtoConfigs(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -134,7 +134,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertUpsertTokens(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -248,7 +248,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertTokenPairs(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -362,7 +362,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertVaults(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -526,7 +526,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertVaultPeriod(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -674,7 +674,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertPositions(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -854,7 +854,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertTokenSwaps(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {
@@ -965,7 +965,7 @@ package testintegration
 //
 ////nolint:funlen
 //func TestUpsertTokenAccountBalances(t *testing.T) {
-//	test.InjectDependencies(func(
+//	integrationtest.InjectDependencies(func(
 //		repo *query.Query,
 //		db *sqlx.DB,
 //	) {

@@ -17,7 +17,7 @@ import (
 
 const migrationDir = "./pkg/service/repository/database/migrations"
 
-// Importing DB mainly so that we can migrate a test db
+// Importing DB mainly so that we can migrate a integrationtest db
 func RunMigrations(
 	db *sqlx.DB, config *configs.PSQLConfig,
 ) (int, error) {

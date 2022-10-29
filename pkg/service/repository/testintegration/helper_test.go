@@ -9,7 +9,7 @@ package testintegration
 //
 //	"github.com/google/uuid"
 //	"github.com/jmoiron/sqlx"
-//	"github.com/test-go/testify/assert"
+//	"github.com/integrationtest-go/testify/assert"
 //)
 //
 //func truncateDB(t *testing.T, db *sqlx.DB) {

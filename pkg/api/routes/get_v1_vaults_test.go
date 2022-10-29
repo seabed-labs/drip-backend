@@ -7,23 +7,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/base"
+	"github.com/dcaf-labs/drip/pkg/unittest"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
+	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	model2 "github.com/dcaf-labs/drip/pkg/service/repository/model"
-
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"
 )
 
 func TestHandler_GetVaults(t *testing.T) {
-	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
 	vaults := []*model2.Vault{
 		{
 			Pubkey:                 "3iz6nZVjiGZtdEffAUDrVh4A5BnwN6ZoHj3nPPZtKJfV",
@@ -51,13 +47,9 @@ func TestHandler_GetVaults(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	e := echo.New()
 
-	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
+	t.Run("should return internal server error if `GetVaultsWithFilter` returns an error", func(t *testing.T) {
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		h := NewHandler(unittest.GetTestAppConfig(), solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 
 		params := apispec.GetV1VaultsParams{
 			TokenA:      nil,
@@ -83,11 +75,7 @@ func TestHandler_GetVaults(t *testing.T) {
 
 	t.Run("should return vaults without filter", func(t *testing.T) {
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		h := NewHandler(unittest.GetTestAppConfig(), solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 
 		params := apispec.GetV1VaultsParams{
 			TokenA:      nil,
