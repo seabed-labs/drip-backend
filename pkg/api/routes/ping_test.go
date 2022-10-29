@@ -20,7 +20,7 @@ func TestHandler_Get(t *testing.T) {
 		h := Handler{}
 
 		assert.NoError(t, h.Get(c))
-		assert.Equal(t, rec.Code, 200)
+		assert.Equal(t, 200, rec.Code)
 		pingRes, err := apispec.ParseGetResponse(rec.Result())
 		assert.NoError(t, err)
 		assert.NotNil(t, pingRes.JSON200)

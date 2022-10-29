@@ -9,17 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/unittest"
-
-	"github.com/dcaf-labs/drip/pkg/service/base"
-
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-	"github.com/dcaf-labs/drip/pkg/service/config"
-
+	"github.com/dcaf-labs/drip/pkg/service/base"
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
-
+	"github.com/dcaf-labs/drip/pkg/unittest"
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
@@ -51,10 +46,12 @@ func TestHandler_PostMint(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
 		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 
-		err = h.PostMint(c)
+		assert.NoError(t, h.PostMint(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"invalid amount, must be float64\"}\n", rec.Body.String())
+		assert.NotNil(t, res.JSON500)
+		assert.Equal(t, "invalid amount, must be float64", res.JSON500.Error)
 	})
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
@@ -73,16 +70,17 @@ func TestHandler_PostMint(t *testing.T) {
 			EXPECT().
 			GetAccountInfo(gomock.Any(), gomock.Any()).
 			Return(nil, fmt.Errorf("some error")).
-			AnyTimes()
+			Times(1)
 
-		err = h.PostMint(c)
+		assert.NoError(t, h.PostMint(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"failed to get account info\"}\n", rec.Body.String())
+		assert.NotNil(t, res.JSON500)
+		assert.Equal(t, "failed to get account info", res.JSON500.Error)
 	})
 
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
-
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -108,12 +106,14 @@ func TestHandler_PostMint(t *testing.T) {
 					RentEpoch:  0,
 				},
 			}, nil).
-			AnyTimes()
+			Times(1)
 
-		err = h.PostMint(c)
+		assert.NoError(t, h.PostMint(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"failed to decode mint\"}\n", rec.Body.String())
+		assert.NotNil(t, res.JSON500)
+		assert.Equal(t, "failed to decode mint", res.JSON500.Error)
 	})
 
 	t.Run("should return an error when api wallet is not mint authority", func(t *testing.T) {
@@ -144,7 +144,7 @@ func TestHandler_PostMint(t *testing.T) {
 			EXPECT().
 			GetWalletPubKey().
 			Return(solana.MustPublicKeyFromBase58("J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")).
-			AnyTimes()
+			Times(2)
 		m.
 			EXPECT().
 			GetAccountInfo(gomock.Any(), gomock.Any()).
@@ -157,16 +157,17 @@ func TestHandler_PostMint(t *testing.T) {
 					RentEpoch:  0,
 				},
 			}, nil).
-			AnyTimes()
+			Times(1)
 
-		err = h.PostMint(c)
+		assert.NoError(t, h.PostMint(c))
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"invalid mint, J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer is not MintAuthority\"}\n", rec.Body.String())
+		assert.NotNil(t, res.JSON500)
+		assert.Equal(t, "invalid mint, J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer is not MintAuthority", res.JSON500.Error)
 	})
 
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
-
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -194,7 +195,7 @@ func TestHandler_PostMint(t *testing.T) {
 			EXPECT().
 			GetWalletPubKey().
 			Return(solana.MustPublicKeyFromBase58("J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")).
-			AnyTimes()
+			Times(1)
 		m.
 			EXPECT().
 			GetAccountInfo(gomock.Any(), gomock.Any()).
@@ -207,21 +208,23 @@ func TestHandler_PostMint(t *testing.T) {
 					RentEpoch:  0,
 				},
 			}, nil).
-			AnyTimes()
+			Times(1)
 		m.
 			EXPECT().
 			MintToWallet(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return("", fmt.Errorf("some error")).
-			AnyTimes()
+			Times(1)
 
 		err = h.PostMint(c)
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusInternalServerError)
-		assert.Equal(t, "{\"error\":\"failed to mint\"}\n", rec.Body.String())
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
+		assert.NoError(t, err)
+		assert.NotNil(t, res.JSON500)
+		assert.Equal(t, "failed to mint", res.JSON500.Error)
 	})
 
 	t.Run("should return success", func(t *testing.T) {
-
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -249,7 +252,7 @@ func TestHandler_PostMint(t *testing.T) {
 			EXPECT().
 			GetWalletPubKey().
 			Return(solana.MustPublicKeyFromBase58("J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")).
-			AnyTimes()
+			Times(1)
 		m.
 			EXPECT().
 			GetAccountInfo(gomock.Any(), gomock.Any()).
@@ -262,16 +265,20 @@ func TestHandler_PostMint(t *testing.T) {
 					RentEpoch:  0,
 				},
 			}, nil).
-			AnyTimes()
+			Times(1)
 		m.
 			EXPECT().
 			MintToWallet(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			Return("some tx hash", nil).
-			AnyTimes()
+			Times(1)
+
 		err = h.PostMint(c)
 		assert.NoError(t, err)
-		assert.Equal(t, rec.Code, http.StatusOK)
-		assert.Equal(t, "{\"txHash\":\"some tx hash\"}\n", rec.Body.String())
+		assert.Equal(t, http.StatusOK, rec.Code)
+		res, err := apispec.ParsePostMintResponse(rec.Result())
+		assert.NoError(t, err)
+		assert.NotNil(t, res.JSON200)
+		assert.Equal(t, "some tx hash", res.JSON200.TxHash)
 	})
 }
 
