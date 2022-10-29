@@ -1,13 +1,29 @@
 package controller
 
 import (
+	"fmt"
 	"strconv"
+
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 )
+
+func getServerURL(network config.Network, env config.Environment, port int) string {
+	if config.IsMainnetNetwork(network) {
+		return "drip-backend-mainnet.herokuapp.com"
+	} else if config.IsDevnetNetwork(network) {
+		if config.IsStagingEnvironment(env) {
+			return "drip-backend-devnet-staging.herokuapp.com"
+		} else if config.IsProductionEnvironment(env) {
+			return "drip-backend-devnet.herokuapp.com"
+		}
+	}
+	return fmt.Sprintf("http://localhost:%d", port)
+}
 
 func hasValue(params []string, value string) bool {
 	for _, v := range params {
