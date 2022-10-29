@@ -59,12 +59,12 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		return err
 	}
 	// Update existing account balances for this position if any (relevant when backfilling)
-	if existingBalances, err := p.repo.GetActiveTokenAccountBalancesByMint(ctx, position.PositionAuthority.String()); err != nil {
-		log.WithError(err).Warning("failed to GetActiveTokenAccountBalancesByMint")
+	if existingBalances, err := p.repo.GetActiveTokenAccountsByMint(ctx, position.PositionAuthority.String()); err != nil {
+		log.WithError(err).Warning("failed to GetActiveTokenAccountsByMint")
 	} else {
 		for i := range existingBalances {
-			if err := p.UpsertTokenAccountBalanceByAddress(ctx, existingBalances[i].Pubkey); err != nil {
-				log.WithError(err).Warning("failed to UpsertTokenAccountBalanceByAddress")
+			if err := p.UpsertTokenAccountByAddress(ctx, existingBalances[i].Pubkey); err != nil {
+				log.WithError(err).Warning("failed to UpsertTokenAccountByAddress")
 			}
 		}
 	}
@@ -76,8 +76,8 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 			if account == nil {
 				continue
 			}
-			if err := p.UpsertTokenAccountBalanceByAddress(ctx, account.Address.String()); err != nil {
-				log.WithError(err).Error("failed to UpsertTokenAccountBalanceByAddress in UpsertPosition")
+			if err := p.UpsertTokenAccountByAddress(ctx, account.Address.String()); err != nil {
+				log.WithError(err).Error("failed to UpsertTokenAccountByAddress in UpsertPosition")
 			}
 		}
 	}
@@ -111,7 +111,7 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 	if err != nil {
 		return err
 	}
-	balances, err := p.repo.GetActiveTokenAccountBalancesByMint(ctx, position.Authority)
+	balances, err := p.repo.GetActiveTokenAccountsByMint(ctx, position.Authority)
 	if err != nil {
 		return err
 	}

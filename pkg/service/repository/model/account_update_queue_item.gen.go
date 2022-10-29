@@ -17,7 +17,7 @@ type AccountUpdateQueueItem struct {
 	Time      *time.Time `gorm:"column:time;type:timestamp;not null;default:now()" json:"time" db:"time"`
 	Priority  *int32     `gorm:"column:priority;type:int4;not null;default:3" json:"priority" db:"priority"`
 	Try       int32      `gorm:"column:try;type:int4;not null" json:"try" db:"try"`
-	MaxTry    *int32     `gorm:"column:max_try;type:int4;not null;default:3" json:"maxTry" db:"max_try"`
+	MaxTry    *int32     `gorm:"column:max_try;type:int4;not null;default:10" json:"maxTry" db:"max_try"`
 	RetryTime *time.Time `gorm:"column:retry_time;type:timestamp" json:"retryTime" db:"retry_time"`
 }
 

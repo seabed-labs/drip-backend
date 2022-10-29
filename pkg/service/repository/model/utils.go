@@ -30,8 +30,8 @@ func GetOrcaWhirlpoolDeltaBQuoteByCompositeKey(deltaBQuotes []*OrcaWhirlpoolDelt
 	return res
 }
 
-func GetTokenAccountBalancesByPubkey(balances []*TokenAccountBalance) map[string]*TokenAccountBalance {
-	res := make(map[string]*TokenAccountBalance)
+func GetTokenAccountsByPubkey(balances []*TokenAccount) map[string]*TokenAccount {
+	res := make(map[string]*TokenAccount)
 	for i := range balances {
 		res[balances[i].Pubkey] = balances[i]
 	}

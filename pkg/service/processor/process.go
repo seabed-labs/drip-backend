@@ -36,8 +36,8 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokenAccountBalanceByAddress(context.Context, string) error
-	UpsertTokenAccountBalance(context.Context, string, token.Account) error
+	UpsertTokenAccountByAddress(context.Context, string) error
+	UpsertTokenAccount(context.Context, string, token.Account) error
 
 	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
 	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error
@@ -332,8 +332,8 @@ func (p impl) ProcessTokenEvent(address string, data []byte) error {
 	var tokenAccount token.Account
 	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
 	if err == nil {
-		if err := p.UpsertTokenAccountBalance(ctx, address, tokenAccount); err != nil {
-			log.WithError(err).Error("failed to upsert tokenAccountBalance")
+		if err := p.UpsertTokenAccount(ctx, address, tokenAccount); err != nil {
+			log.WithError(err).Error("failed to upsert tokenAccount")
 			return err
 		}
 		return nil

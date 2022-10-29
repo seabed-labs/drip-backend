@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 func (d repositoryImpl) GetProtoConfigs(ctx context.Context, filterParams ProtoConfigParams) ([]*model.ProtoConfig, error) {
@@ -52,56 +50,6 @@ func (d repositoryImpl) GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, toke
 		stmt = stmt.Where(d.repo.TokenSwap.TokenPairID.In(tokenPairIDs...))
 	}
 	return stmt.Find()
-}
-
-func (d repositoryImpl) GetTokenSwapsWithBalance(ctx context.Context, tokenPairIDs []string) ([]TokenSwapWithBalance, error) {
-	var tokenSwaps []TokenSwapWithBalance
-	// TODO(Mocha): No clue how to do this in gorm-gen
-	if len(tokenPairIDs) > 0 {
-		var temp []uuid.UUID
-		for _, tokenPairID := range tokenPairIDs {
-			tokenPairUUID, _ := uuid.Parse(tokenPairID)
-			temp = append(temp, tokenPairUUID)
-		}
-		// We should sort by liquidity ratio descending, so that the largest ratio is at the beginning of the list
-		if err := d.db.SelectContext(ctx,
-			&tokenSwaps,
-			`SELECT token_swap.*, token_account_a_balance.amount as token_account_a_balance_amount, token_account_b_balance.amount as token_account_b_balance_amount
-				FROM token_swap
-				JOIN vault
-				ON vault.token_pair_id = token_swap.token_pair_id
-				JOIN token_account_balance token_account_a_balance
-				ON token_account_a_balance.pubkey = token_swap.token_a_account
-				JOIN token_account_balance token_account_b_balance
-				ON token_account_b_balance.pubkey = token_swap.token_b_account
-				WHERE token_account_a_balance.amount != 0
-				AND token_account_b_balance.amount != 0
-				AND vault.enabled = true
-				AND token_swap.token_pair_id=ANY($1)
-				ORDER BY token_swap.token_pair_id desc;`,
-			pq.Array(temp),
-		); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := d.db.SelectContext(ctx,
-			&tokenSwaps,
-			`SELECT token_swap.*, token_account_a_balance.amount as token_account_a_balance_amount, token_account_b_balance.amount as token_account_b_balance_amount
-				FROM token_swap
-				JOIN vault
-				ON vault.token_pair_id = token_swap.token_pair_id
-				JOIN token_account_balance token_account_a_balance
-				ON token_account_a_balance.pubkey = token_swap.token_a_account
-				JOIN token_account_balance token_account_b_balance
-				ON token_account_b_balance.pubkey = token_swap.token_b_account
-				WHERE token_account_a_balance.amount != 0
-				AND token_account_b_balance.amount != 0
-				AND vault.enabled = true;`,
-		); err != nil {
-			return nil, err
-		}
-	}
-	return tokenSwaps, nil
 }
 
 // todo: dedupe with GetAllSupportedTokenAs
@@ -244,19 +192,19 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccountBalance, error) {
-	stmt := d.repo.TokenAccountBalance.
+func (d repositoryImpl) GetTokenAccountsByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccount, error) {
+	stmt := d.repo.TokenAccount.
 		WithContext(ctx)
 	if len(tokenAccountPubkeys) > 0 {
-		stmt = stmt.Where(d.repo.TokenAccountBalance.Pubkey.In(tokenAccountPubkeys...))
+		stmt = stmt.Where(d.repo.TokenAccount.Pubkey.In(tokenAccountPubkeys...))
 	}
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetActiveTokenAccountBalancesByMint(ctx context.Context, mint string) ([]*model.TokenAccountBalance, error) {
-	return d.repo.TokenAccountBalance.WithContext(ctx).
-		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccountBalance.Mint)).
-		Where(d.repo.TokenAccountBalance.Amount.Gt(0)).
+func (d repositoryImpl) GetActiveTokenAccountsByMint(ctx context.Context, mint string) ([]*model.TokenAccount, error) {
+	return d.repo.TokenAccount.WithContext(ctx).
+		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccount.Mint)).
+		Where(d.repo.TokenAccount.Amount.Gt(0)).
 		Where(d.repo.Position.Authority.Eq(mint)).
 		Find()
 }
@@ -297,17 +245,17 @@ func (d repositoryImpl) GetActiveWallets(
 	ctx context.Context, params GetActiveWalletParams,
 ) ([]ActiveWallet, error) {
 	var res []ActiveWallet
-	stmt := d.repo.TokenAccountBalance.WithContext(ctx).
+	stmt := d.repo.TokenAccount.WithContext(ctx).
 		Select(
-			d.repo.TokenAccountBalance.Owner.As("owner"),
-			d.repo.TokenAccountBalance.Owner.Count().As("position_count"),
+			d.repo.TokenAccount.Owner.As("owner"),
+			d.repo.TokenAccount.Owner.Count().As("position_count"),
 		).
-		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccountBalance.Mint)).
+		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccount.Mint)).
 		Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault)).
 		Where(d.repo.Vault.Enabled.Is(true))
 
 	if params.Owner != nil {
-		stmt = stmt.Where(d.repo.TokenAccountBalance.Owner.Eq(*params.Owner))
+		stmt = stmt.Where(d.repo.TokenAccount.Owner.Eq(*params.Owner))
 	}
 	if params.PositionIsClosed != nil {
 		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*params.PositionIsClosed))
@@ -316,7 +264,7 @@ func (d repositoryImpl) GetActiveWallets(
 		stmt = stmt.Where(d.repo.Vault.Pubkey.Eq(*params.Vault))
 	}
 	err := stmt.
-		Group(d.repo.TokenAccountBalance.Owner).
+		Group(d.repo.TokenAccount.Owner).
 		Scan(&res)
 	return res, err
 }
@@ -360,7 +308,7 @@ func (d repositoryImpl) GetAdminPositions(
 	}
 	if positionFilterParams.Wallet != nil {
 		stmt = stmt.
-			Join(d.repo.TokenAccountBalance, d.repo.TokenAccountBalance.Mint.EqCol(d.repo.Position.Authority))
+			Join(d.repo.TokenAccount, d.repo.TokenAccount.Mint.EqCol(d.repo.Position.Authority))
 	}
 
 	// Apply Filters
@@ -370,8 +318,8 @@ func (d repositoryImpl) GetAdminPositions(
 	if positionFilterParams.Wallet != nil {
 		stmt = stmt.
 			Where(
-				d.repo.TokenAccountBalance.Owner.Eq(*positionFilterParams.Wallet),
-				d.repo.TokenAccountBalance.Amount.Gt(0))
+				d.repo.TokenAccount.Owner.Eq(*positionFilterParams.Wallet),
+				d.repo.TokenAccount.Amount.Gt(0))
 	}
 	if positionFilterParams.IsClosed != nil {
 		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*positionFilterParams.IsClosed))

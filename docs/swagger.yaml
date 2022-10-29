@@ -762,11 +762,11 @@ components:
             tokenBMintValue:
               $ref: "#/components/schemas/token"
             tokenAAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
+              $ref: "#/components/schemas/tokenAccount"
             tokenBAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
+              $ref: "#/components/schemas/tokenAccount"
             treasuryTokenBAccountValue:
-              $ref: "#/components/schemas/tokenAccountBalance"
+              $ref: "#/components/schemas/tokenAccount"
 
     expandedAdminPosition:
       description: Get Position with Expanded Data
@@ -973,7 +973,7 @@ components:
               type: string
               example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"
 
-    tokenAccountBalance:
+    tokenAccount:
       type: object
       required:
         - pubkey
