@@ -19,9 +19,10 @@ import (
 )
 
 type Handler struct {
-	googleClientID string
-	repo           repository.Repository
-	rateLimiter    *limiter.Limiter
+	googleClientID        string
+	repo                  repository.Repository
+	rateLimiter           *limiter.Limiter
+	shouldByPassAdminAuth bool
 }
 
 func NewHandler(
@@ -37,15 +38,22 @@ func NewHandler(
 	rateLimiter := limiter.New(store, rate)
 
 	return &Handler{
-		googleClientID: config.GoogleClientID,
-		repo:           repo,
-		rateLimiter:    rateLimiter,
+		googleClientID:        config.GoogleClientID,
+		repo:                  repo,
+		rateLimiter:           rateLimiter,
+		shouldByPassAdminAuth: config.ShouldByPassAdminAuth,
 	}
 }
 
 func (h *Handler) ValidateAccessToken(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !strings.Contains(c.Request().RequestURI, "admin") {
+			return next(c)
+		}
+		if h.shouldByPassAdminAuth {
+			logrus.
+				WithField("shouldByPassAdminAuth", h.shouldByPassAdminAuth).
+				Warning("skipping admin auth")
 			return next(c)
 		}
 		accessToken := c.Request().Header.Get("token-id")
