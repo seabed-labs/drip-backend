@@ -6,7 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/unittest"
+	"github.com/golang/mock/gomock"
+
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
@@ -16,13 +19,14 @@ import (
 
 func TestSolanaClient(t *testing.T) {
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
-	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
-	config := configs.AppConfig{
-		Network:     configs.DevnetNetwork,
-		Environment: configs.StagingEnv,
-		Wallet:      privKey,
-	}
-	client, err := NewSolanaClient(&config)
+	ctrl := gomock.NewController(t)
+	mockConfig := config.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+
+	client, err := NewSolanaClient(mockConfig)
 	assert.NoError(t, err)
 
 	// Genesys go devnet RPC doesn't support airdrops for some reason
@@ -63,10 +67,10 @@ func TestSolanaClient(t *testing.T) {
 	//})
 
 	//t.Run("getURL should return correct RPC url", func(t *testing.T) {
-	//assert.Equal(t, Get(configs.NilNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(configs.LocalNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(configs.DevnetNetwork, true), rpc.DevNet_RPC)
-	//assert.Equal(t, GetURL(configs.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
+	//assert.Equal(t, Get(config.NilNetwork, true), rpc.LocalNet_RPC)
+	//assert.Equal(t, GetURL(config.LocalNetwork, true), rpc.LocalNet_RPC)
+	//assert.Equal(t, GetURL(config.DevnetNetwork, true), rpc.DevNet_RPC)
+	//assert.Equal(t, GetURL(config.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
 	//})
 
 	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {

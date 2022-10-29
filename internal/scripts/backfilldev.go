@@ -3,17 +3,17 @@ package scripts
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/sirupsen/logrus"
 )
 
 func Backfill(
-	config *configs.AppConfig,
+	appConfig config.AppConfig,
 	processor processor.Processor,
 ) error {
-	logrus.WithField("network", config.Network).Infof("starting backfill")
-	if configs.IsDevnet(config.Network) {
+	logrus.WithField("network", appConfig.GetNetwork()).Infof("starting backfill")
+	if config.IsDevnetNetwork(appConfig.GetNetwork()) {
 		for _, address := range []string{
 			"35WMYrE8E4vbmm4phVxkRDTK5gE8db2KUVGFTYduE1Uz",
 			"3MiLbpHuKHDEnMUNpDPhJmMQPzcJL2Gp8kQdGMRHPcwP",
@@ -46,7 +46,7 @@ func Backfill(
 			}
 		}
 	}
-	if configs.IsDevnet(config.Network) && configs.IsStaging(config.Environment) {
+	if config.IsDevnetNetwork(appConfig.GetNetwork()) && config.IsStagingEnvironment(appConfig.GetEnvironment()) {
 		for _, address := range []string{
 			"HhKqRDp2ooZPj8554rHtJLGiMsDrHy1zkZqidDM1h9kQ",
 		} {
@@ -56,7 +56,7 @@ func Backfill(
 			}
 		}
 	}
-	if configs.IsDevnet(config.Network) && configs.IsProd(config.Environment) {
+	if config.IsDevnetNetwork(appConfig.GetNetwork()) && config.IsProductionEnvironment(appConfig.GetEnvironment()) {
 		for _, address := range []string{
 			"5VfSyiFenN99Nk3KTsuB93E6783cpB1rdJkjFdg9qSLK",
 			"J3nPeD3VrP3i23pDgsG9uXiPURd7ptRXoixL8CJRQbRW",

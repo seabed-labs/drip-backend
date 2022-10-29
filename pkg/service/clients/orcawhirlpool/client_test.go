@@ -5,15 +5,22 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/unittest"
+	"github.com/golang/mock/gomock"
+
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/test-go/testify/assert"
 )
 
 func TestOrcaWhirlpoolClient(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockConfig := config.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 
-	client := NewOrcaWhirlpoolClient(&configs.AppConfig{
-		Network: configs.DevnetNetwork,
-	})
+	client := NewOrcaWhirlpoolClient(mockConfig)
 
 	t.Run("GetOrcaWhirlpoolQuoteEstimate should swap estimate", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)

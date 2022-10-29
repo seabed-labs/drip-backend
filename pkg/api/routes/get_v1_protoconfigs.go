@@ -17,7 +17,7 @@ func (h Handler) GetV1Protoconfigs(c echo.Context, params apispec.GetV1Protoconf
 		TokenB: (*string)(params.TokenB),
 	})
 	if err != nil {
-		logrus.WithError(err).Errorf("failed to get proto configs")
+		logrus.WithError(err).Errorf("failed to get proto config")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})
 	}
 	return c.JSON(http.StatusOK, protoConfigModelsToAPI(protoConfigModels))

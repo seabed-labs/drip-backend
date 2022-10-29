@@ -8,7 +8,7 @@ import (
 	dripextension "github.com/dcaf-labs/drip-client/drip-extension-go"
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 )
 
 type OrcaWhirlpoolClient interface {
@@ -16,9 +16,9 @@ type OrcaWhirlpoolClient interface {
 }
 
 func NewOrcaWhirlpoolClient(
-	config *configs.AppConfig,
+	appConfig config.AppConfig,
 ) OrcaWhirlpoolClient {
-	return newClient(config.Network)
+	return newClient(appConfig.GetNetwork())
 }
 
 type client struct {
@@ -26,7 +26,7 @@ type client struct {
 	connectionUrl string
 }
 
-func newClient(network configs.Network) *client {
+func newClient(network config.Network) *client {
 	httpClient := clients.GetRateLimitedHTTPClient(callsPerSecond)
 	config := dripextension.NewConfiguration()
 	config.HTTPClient = httpClient.StandardClient()

@@ -1,21 +1,16 @@
-package test
+package integrationtest
 
 import (
 	"context"
 	"os"
 
-	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-
-	"github.com/dcaf-labs/drip/pkg/service/configs"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/repository"
-	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
-
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/service/repository/database"
+	"github.com/dcaf-labs/drip/pkg/service/repository/query"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -30,8 +25,8 @@ func InjectDependencies(
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	opts := []fx.Option{
 		fx.Provide(
-			configs.NewAppConfig,
-			configs.NewPSQLConfig,
+			config.NewAppConfig,
+			config.NewPSQLConfig,
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
@@ -49,7 +44,7 @@ func InjectDependencies(
 	app := fx.New(opts...)
 	defer func() {
 		if err := app.Stop(context.Background()); err != nil {
-			logrus.WithError(err).Errorf("failed to stop test app")
+			logrus.WithError(err).Errorf("failed to stop integrationtest app")
 		}
 	}()
 	if err := app.Start(context.Background()); err != nil {

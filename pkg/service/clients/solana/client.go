@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	bin "github.com/gagliardetto/binary"
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
@@ -38,32 +38,32 @@ type Solana interface {
 	GetWalletPubKey() solana.PublicKey
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
-	GetNetwork() configs.Network
+	GetNetwork() config.Network
 }
 
 func NewSolanaClient(
-	config *configs.AppConfig,
+	appConfig config.AppConfig,
 ) (Solana, error) {
-	return createClient(config)
+	return createClient(appConfig)
 }
 
 type impl struct {
-	network configs.Network
+	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
 }
 
-func (s impl) GetNetwork() configs.Network {
+func (s impl) GetNetwork() config.Network {
 	return s.network
 }
 
 func createClient(
-	config *configs.AppConfig,
+	appConfig config.AppConfig,
 ) (impl, error) {
-	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.Network)
+	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(appConfig.GetNetwork())
 	solanaClient := impl{
 		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
-		network: config.Network,
+		network: appConfig.GetNetwork(),
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -79,7 +79,7 @@ func createClient(
 		Info("created solana clients")
 
 	var accountBytes []byte
-	if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {
+	if err := json.Unmarshal([]byte(appConfig.GetWalletPrivateKey()), &accountBytes); err != nil {
 		return impl{}, err
 	}
 	priv := base58.Encode(accountBytes)
@@ -446,34 +446,34 @@ func (s impl) signAndBroadcast(
 	return txHash.String(), nil
 }
 
-func GetURLWithRateLimit(env configs.Network) (string, int) {
+func GetURLWithRateLimit(env config.Network) (string, int) {
 	switch env {
-	case configs.MainnetNetwork:
+	case config.MainnetNetwork:
 		return rpc.MainNetBeta_RPC, 3
 		//return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
-	case configs.DevnetNetwork:
+	case config.DevnetNetwork:
 		return rpc.DevNet_RPC, 3
 		//return "https://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7", 15
-	case configs.NilNetwork:
+	case config.NilNetwork:
 		fallthrough
-	case configs.LocalNetwork:
+	case config.LocalNetwork:
 		fallthrough
 	default:
 		return rpc.LocalNet_RPC, 5
 	}
 }
 
-func getWSURL(env configs.Network) string {
+func getWSURL(env config.Network) string {
 	switch env {
-	case configs.MainnetNetwork:
+	case config.MainnetNetwork:
 		return rpc.MainNetBeta_WS
 		//return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
-	case configs.DevnetNetwork:
+	case config.DevnetNetwork:
 		return rpc.DevNet_WS
 		//return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
-	case configs.NilNetwork:
+	case config.NilNetwork:
 		fallthrough
-	case configs.LocalNetwork:
+	case config.LocalNetwork:
 		fallthrough
 	default:
 		return rpc.LocalNet_WS

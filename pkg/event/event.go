@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
@@ -23,21 +23,21 @@ type DripProgramProcessor struct {
 	client      solana.Solana
 	processor   processor.Processor
 	cancel      context.CancelFunc
-	environment configs.Environment
+	environment config.Environment
 }
 
 func Server(
 	lifecycle fx.Lifecycle,
 	client solana.Solana,
 	processor processor.Processor,
-	config *configs.AppConfig,
+	appConfig config.AppConfig,
 ) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	dripProgramProcessor := DripProgramProcessor{
 		client:      client,
 		processor:   processor,
 		cancel:      cancel,
-		environment: config.Environment,
+		environment: appConfig.GetEnvironment(),
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
@@ -62,7 +62,7 @@ func (d *DripProgramProcessor) start(ctx context.Context) error {
 	}
 
 	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
-	if configs.IsProd(d.environment) {
+	if config.IsProductionEnvironment(d.environment) {
 		// Track token_swap program accounts
 		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
 			return err
@@ -94,7 +94,7 @@ func (d *DripProgramProcessor) stop() {
 }
 
 func (d *DripProgramProcessor) runBackfill(ctx context.Context) {
-	if d.environment == configs.StagingEnv {
+	if d.environment == config.StagingEnv {
 		logrus.Infof("skipping backfill on staging")
 		return
 	}

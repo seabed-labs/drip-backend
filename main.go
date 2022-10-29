@@ -12,7 +12,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
@@ -34,13 +34,13 @@ func main() {
 }
 
 func getDependencies() []fx.Option {
-	//config, _ := configs.NewAppConfig()
+	//config, _ := config.NewAppConfig()
 	// Hack to save on dyno costs, this will run  the event server and api server in the same dyno for staging
-	//if configs.IsStaging(config.Environment) {
+	//if config.IsStagingEnvironment(config.Environment) {
 	return []fx.Option{
 		fx.Provide(
-			configs.NewAppConfig,
-			configs.NewPSQLConfig,
+			config.NewAppConfig,
+			config.NewPSQLConfig,
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
@@ -66,8 +66,8 @@ func getDependencies() []fx.Option {
 	//} else {
 	//	return []fx.Option{
 	//		fx.Provide(
-	//			configs.NewAppConfig,
-	//			configs.NewPSQLConfig,
+	//			config.NewAppConfig,
+	//			config.NewPSQLConfig,
 	//			database.NewDatabase,
 	//			database.NewGORMDatabase,
 	//			query.Use,
