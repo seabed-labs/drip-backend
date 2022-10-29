@@ -14,3 +14,6 @@ mockgen -source=repository.go -destination=mock.go -package=repository
 
 cd ../base || exit
 mockgen -source=base.go -destination=mock.go -package=base
+
+cd ../configs || exit
+mockgen -source=type.go -destination=mock.go -package=configs

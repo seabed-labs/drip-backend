@@ -42,7 +42,7 @@ type Solana interface {
 }
 
 func NewSolanaClient(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 ) (Solana, error) {
 	return createClient(config)
 }
@@ -58,12 +58,12 @@ func (s impl) GetNetwork() configs.Network {
 }
 
 func createClient(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 ) (impl, error) {
-	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.Network)
+	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(config.GetNetwork())
 	solanaClient := impl{
 		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
-		network: config.Network,
+		network: config.GetNetwork(),
 	}
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
@@ -79,7 +79,7 @@ func createClient(
 		Info("created solana clients")
 
 	var accountBytes []byte
-	if err := json.Unmarshal([]byte(config.Wallet), &accountBytes); err != nil {
+	if err := json.Unmarshal([]byte(config.GetWalletPrivateKey()), &accountBytes); err != nil {
 		return impl{}, err
 	}
 	priv := base58.Encode(accountBytes)

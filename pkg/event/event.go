@@ -30,14 +30,14 @@ func Server(
 	lifecycle fx.Lifecycle,
 	client solana.Solana,
 	processor processor.Processor,
-	config *configs.AppConfig,
+	config configs.AppConfig,
 ) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	dripProgramProcessor := DripProgramProcessor{
 		client:      client,
 		processor:   processor,
 		cancel:      cancel,
-		environment: config.Environment,
+		environment: config.GetEnvironment(),
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
@@ -62,7 +62,7 @@ func (d *DripProgramProcessor) start(ctx context.Context) error {
 	}
 
 	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
-	if configs.IsProd(d.environment) {
+	if configs.IsProductionEnvironment(d.environment) {
 		// Track token_swap program accounts
 		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
 			return err

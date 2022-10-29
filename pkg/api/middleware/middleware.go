@@ -6,8 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/configs"
+
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 
@@ -26,7 +27,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 	repo repository.Repository,
 ) *Handler {
 	// 20 requests / second
@@ -38,10 +39,10 @@ func NewHandler(
 	rateLimiter := limiter.New(store, rate)
 
 	return &Handler{
-		googleClientID:        config.GoogleClientID,
+		googleClientID:        config.GetGoogleClientID(),
 		repo:                  repo,
 		rateLimiter:           rateLimiter,
-		shouldByPassAdminAuth: config.ShouldByPassAdminAuth,
+		shouldByPassAdminAuth: config.GetShouldByPassAdminAuth(),
 	}
 }
 

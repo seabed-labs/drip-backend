@@ -16,9 +16,9 @@ type OrcaWhirlpoolClient interface {
 }
 
 func NewOrcaWhirlpoolClient(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 ) OrcaWhirlpoolClient {
-	return newClient(config.Network)
+	return newClient(config.GetNetwork())
 }
 
 type client struct {

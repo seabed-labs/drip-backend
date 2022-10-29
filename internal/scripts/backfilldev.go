@@ -9,11 +9,11 @@ import (
 )
 
 func Backfill(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 	processor processor.Processor,
 ) error {
-	logrus.WithField("network", config.Network).Infof("starting backfill")
-	if configs.IsDevnet(config.Network) {
+	logrus.WithField("network", config.GetNetwork()).Infof("starting backfill")
+	if configs.IsDevnetNetwork(config.GetNetwork()) {
 		for _, address := range []string{
 			"35WMYrE8E4vbmm4phVxkRDTK5gE8db2KUVGFTYduE1Uz",
 			"3MiLbpHuKHDEnMUNpDPhJmMQPzcJL2Gp8kQdGMRHPcwP",
@@ -46,7 +46,7 @@ func Backfill(
 			}
 		}
 	}
-	if configs.IsDevnet(config.Network) && configs.IsStaging(config.Environment) {
+	if configs.IsDevnetNetwork(config.GetNetwork()) && configs.IsStagingEnvironment(config.GetEnvironment()) {
 		for _, address := range []string{
 			"HhKqRDp2ooZPj8554rHtJLGiMsDrHy1zkZqidDM1h9kQ",
 		} {
@@ -56,7 +56,7 @@ func Backfill(
 			}
 		}
 	}
-	if configs.IsDevnet(config.Network) && configs.IsProd(config.Environment) {
+	if configs.IsDevnetNetwork(config.GetNetwork()) && configs.IsProductionEnvironment(config.GetEnvironment()) {
 		for _, address := range []string{
 			"5VfSyiFenN99Nk3KTsuB93E6783cpB1rdJkjFdg9qSLK",
 			"J3nPeD3VrP3i23pDgsG9uXiPURd7ptRXoixL8CJRQbRW",

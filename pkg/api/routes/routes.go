@@ -21,7 +21,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 	solanaClient solana.Solana,
 	base base.Base,
 	repo repository.Repository,
@@ -31,8 +31,8 @@ func NewHandler(
 		solanaClient: solanaClient,
 		base:         base,
 		repo:         repo,
-		network:      config.Network,
-		env:          config.Environment,
-		port:         config.Port,
+		network:      config.GetNetwork(),
+		env:          config.GetEnvironment(),
+		port:         config.GetServerPort(),
 	}
 }

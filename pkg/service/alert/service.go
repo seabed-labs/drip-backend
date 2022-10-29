@@ -23,16 +23,16 @@ type Service interface {
 }
 
 func NewAlertService(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 ) (Service, error) {
-	logrus.WithField("discordWebhookID", config.DiscordWebhookID).Info("initiating alert service")
+	logrus.WithField("discordWebhookID", config.GetDiscordWebhookID()).Info("initiating alert service")
 	service := serviceImpl{}
-	if config.DiscordWebhookID != "" && config.DiscordWebhookAccessToken != "" {
+	if config.GetDiscordWebhookID() != "" && config.GetDiscordWebhookAccessToken() != "" {
 		service = serviceImpl{
-			network:                   config.Network,
+			network:                   config.GetNetwork(),
 			enabled:                   true,
-			discordWebhookID:          config.DiscordWebhookID,
-			discordWebhookAccessToken: config.DiscordWebhookAccessToken,
+			discordWebhookID:          config.GetDiscordWebhookID(),
+			discordWebhookAccessToken: config.GetDiscordWebhookAccessToken(),
 		}
 		webhookID, err := strconv.ParseInt(service.discordWebhookID, 10, 64)
 		if err != nil {

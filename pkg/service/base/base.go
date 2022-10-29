@@ -15,10 +15,10 @@ type Base interface {
 }
 
 func NewBase(
-	config *configs.AppConfig,
+	config configs.AppConfig,
 	repo repository.Repository,
 ) Base {
-	return newBaseService(repo, config.Network)
+	return newBaseService(repo, config.GetNetwork())
 }
 
 type impl struct {

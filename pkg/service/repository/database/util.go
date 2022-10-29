@@ -6,15 +6,15 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/configs"
 )
 
-func getConnectionString(config *configs.PSQLConfig) string {
-	if config.URL != "" {
-		return config.URL
+func getConnectionString(config configs.PSQLConfig) string {
+	if config.GetURL() != "" {
+		return config.GetURL()
 	}
 	return fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		config.Host,
-		config.Port,
-		config.User,
-		config.Password,
-		config.DBName)
+		config.GetHost(),
+		config.GetPort(),
+		config.GetUser(),
+		config.GetPassword(),
+		config.GetDBName())
 }

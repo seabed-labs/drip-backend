@@ -36,7 +36,7 @@ func main() {
 func getDependencies() []fx.Option {
 	//config, _ := configs.NewAppConfig()
 	// Hack to save on dyno costs, this will run  the event server and api server in the same dyno for staging
-	//if configs.IsStaging(config.Environment) {
+	//if configs.IsStagingEnvironment(config.Environment) {
 	return []fx.Option{
 		fx.Provide(
 			configs.NewAppConfig,

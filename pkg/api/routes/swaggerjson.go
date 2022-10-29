@@ -25,12 +25,12 @@ func (h Handler) GetSwaggerJson(
 }
 
 func getURL(network configs.Network, env configs.Environment, port int) string {
-	if configs.IsMainnet(network) {
+	if configs.IsMainnetNetwork(network) {
 		return "drip-backend-mainnet.herokuapp.com"
-	} else if configs.IsDevnet(network) {
-		if configs.IsStaging(env) {
+	} else if configs.IsDevnetNetwork(network) {
+		if configs.IsStagingEnvironment(env) {
 			return "drip-backend-devnet-staging.herokuapp.com"
-		} else if configs.IsProd(env) {
+		} else if configs.IsProductionEnvironment(env) {
 			return "drip-backend-devnet.herokuapp.com"
 		}
 	}

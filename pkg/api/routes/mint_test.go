@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/unittest"
+
 	"github.com/dcaf-labs/drip/pkg/service/base"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
@@ -29,18 +31,18 @@ import (
 )
 
 func TestHandler_PostMint(t *testing.T) {
-	privKey := "[95,189,40,215,74,154,138,123,245,115,184,90,2,187,104,25,241,164,79,247,14,69,207,235,40,245,13,157,149,20,13,227,252,155,201,43,89,96,76,119,162,241,148,53,80,193,126,159,80,213,140,166,144,139,205,143,160,238,11,34,192,249,59,31]"
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
+	mockConfig := configs.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(configs.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(configs.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 	e := echo.New()
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "xyz",
 			Mint:   mint,
@@ -60,11 +62,7 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to get account info", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -89,11 +87,7 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to decode borsh", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -129,11 +123,7 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when api wallet is not mint authority", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -184,11 +174,7 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return an error when failing to mint", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
@@ -244,11 +230,7 @@ func TestHandler_PostMint(t *testing.T) {
 
 	t.Run("should return success", func(t *testing.T) {
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(&configs.AppConfig{
-			Network:     configs.DevnetNetwork,
-			Environment: configs.StagingEnv,
-			Wallet:      privKey,
-		}, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
 		reqBody, err := json.Marshal(apispec.MintRequest{
 			Amount: "100",
 			Mint:   mint,
