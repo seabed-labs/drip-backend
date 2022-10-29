@@ -1,167 +1,173 @@
 # drip-backend
 
-<a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/maintainability"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/maintainability" /></a>
-<a href="https://codeclimate.com/repos/62c905f4ef60b5563400002b/test_coverage"><img src="https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/test_coverage" /></a>
+[![Maintainability](https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/maintainability)](https://codeclimate.com/repos/62c905f4ef60b5563400002b/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/252814ca6aba27f4dc3d/test_coverage)](https://codeclimate.com/repos/62c905f4ef60b5563400002b/test_coverage)
 [![CI](https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/dcaf-labs/drip-backend/actions/workflows/ci.yaml)
 
-## Mainnet
+| 	            | Devnet                                                                                                                                      	 | Mainnet                                                                                                                                 	 |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Staging    	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/isy8.svg)](https://betteruptime.com/?utm_source=status_badge)     	 | n/a                                                                                                                                     	 |
+| Production 	 | [ ![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg) ]( https://betteruptime.com/?utm_source=status_badge ) 	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge) 	 |
 
-[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge)
+## Deploy Process 
 
-## Devnet
+> TODO: Update production env's via a github action 
 
-[![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg)](https://betteruptime.com/?utm_source=status_badge)
-
-## Deploy Process
-
-### Devnet Staging
-
-- merge into `main`
-
-### Devnet Prod
-
-- merge into `devnet`
-
-### Mainnet Prod
-
-- upgrade devnet prod via pipeline
+| 	            | Devnet                                                                                                                                      	 | Mainnet                                                                                                                                 	 |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| Staging    	 | Merge to `main`    	                                                                                                                          | n/a                                                                                                                                     	 |
+| Production 	 | Rebase `devnet` with `main` 	                                                                                                                 | Rebase `mainnet` with `main` 	                                                                                                            |
 
 ## Setup
 
-- install go 1.18
-- install all packages
+- [^1] install go 1.18 
+- [^2] install all packages with
+- [^3] install the `oapi-codegen` cli 
+- [^4] install `docker` and `docker-compose`
+- [^5] setup a `.env` file
 
-```bash
-# Add to ZSHRC
-export GOPRIVATE=github.com/dcaf-labs/solana-go-clients
-go get -u ./...
-```
-
-Add the following to ~/.gitconfig
-
-```txt
-[url "ssh://git@github.com/"]
-insteadOf = https://github.com/
-```
-
-- setup a `.env` file
-- ex:
-
-```env
-
-# Devnet Staging
-ENV="STAGING"
-NETWORK="DEVNET"
-DRIP_PROGRAM_ID="F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo"
-# random wallet, this is the mint auth
-DRIP_BACKEND_WALLET="[141,241,173,131,255,186,170,216,65,246,24,196,173,94,39,225,161,108,251,102,177,20,166,223,13,69,103,38,242,107,72,194,177,170,44,204,179,183,235,4,231,51,88,169,156,153,132,247,235,166,41,123,87,219,139,204,95,1,176,98,72,90,51,82]"
-
-# Test Channel
-DISCORD_WEBHOOK_ID=1021592812954857492
-DISCORD_ACCESS_TOKEN=qPeOyI4e4k6kYah44k9_PXFQDsuLO7lbHcazLrsKcvzqvrQh_lr1PK21kB3GZCSTv2Xg
-
-PORT="8080"
-PSQL_USER="dcaf"
-PSQL_PASS="drip"
-PSQL_DBNAME="drip"
-PSQL_PORT="5432"
-PSQL_HOST="localhost"
-PSQL_SSLMODE=disable
-OUTPUT=./internal/pkg/repository/models
-GOOGLE_KEY="540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"
-GOOGLE_SECRET="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"
-```
-
-- run all tests
-
-```bash
-go test ./...
-```
-
-- run the server
-
-```bash
-ENV=DEVNET go run main.go
-```
+## Start the Server
+- [^6] start the database
+- [^8] start the api and event server
+  - This also runs db migrations  
 
 ## Tests
 
-If an interface is changed, the associated mocks need to be re-generated.
-
-```bash
-# ex: from inside drip-backend/pkg/clients/solana
-./scripts/create-mocks.sh
-```
+- [^13] run all tests
+- [^14] If an interface is changed, the associated mocks need to be re-generated
 
 ## API Docs
 
-We use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
-
-```bash
-go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen
-```
-
-To update the spec run the following from root:
-
-```bash
- oapi-codegen -package apispec ./docs/swagger.yaml > pkg/api/apispec/generated.go
-```
-
-API docs are viewable at `http://localhost:8080/swagger.json`.
+- [^3] use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
+- [^15] if the api docs are updated, we need to update the api codegen'd files
+- API docs are viewable at `http://localhost:8080/swagger.json`.
 
 ## Database
 
-Locally the db can be started with
-
-```bash
-docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up
-```
-
-and stopped with
-
-```bash
-docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down
-```
+- [^6] spin up a local database via docker
+- [^7] stop the local docker database
 
 > **_NOTE:_** TODO(mocha) do codegen in a dockerized db that is setup and destroyed automatically in the script.
 
 ### Migrations
 
 - located in `internal/database/psql/migrations`
-- All migrations that are a number larger then what the db version is will be run automatically on startup or during codegen
-- Running the migrations will automatically increment the schema version in the db
+- all migrations that are a number larger than what the db version is will be run automatically on startup or during codegen
+- [^12] running the migrations will automatically increment the schema version in the db
 
-```bash
-go run cmd/migrate/main.go
-```
-
-> **_NOTE:_** The DB must be running prior to running this script.
+> **_NOTE:_** The [^6]database must be running prior to running this script.
 
 ### Codegen
 
 - Database [models](app/internal/data/psql/generated) are generated using the database schema via [go-gorm/gen](https://github.com/go-gorm/gen)
-- Before generating the models, the database needs to be running
-- The codegen script will also run migrations if needed
+- Before generating the models, the [^6]database needs to be running
+- The [^11]codegen script will also run migrations if new migrations are detected 
 
 ```bash
 go run cmd/codegen/main.go
 ```
 
-> **_NOTE:_** The DB must be running prior to running this script.
+> **_NOTE:_** The [^6]database must be running prior to running this script.
 
 ### Process for Creating/Updating Database Models
 
-- Create a migration file under `internal/database/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
-- Run the migration + codegen script `go run cmd/codegen/main.go`
+- create a migration file under `internal/database/psql/migrations`, and name it appropriately (ex. `2_new_migration.up.sql`)
+- [^11] Run the migration + codegen script 
 
-> **_NOTE:_** The DB must be running prior to running this script.
+> **_NOTE:_** The [^6]database must be running prior to running this script.
 
-### Backfill DB for Devnet
+### Manually backfill the DB with known data/addresses
 
-Run the following script
+- [^10] Backfilling is done via the backfill script
+- View the code to see how it is done
 
-```bash
-go run cmd/backfill/main.go
-```
+[^1]: Install go 
+    [brew formula](https://formulae.brew.sh/formula/go)
+    Verify with `go version`
 
-> **_NOTE:_** This backfills based on the content of `devnet.yaml`.
+[^2]: Install all go packages
+    `go get -u ./...`
+
+[^3]: Install the oapi-codegen cli
+    `go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen`
+
+[^4]: Install Docker/Docker-compose
+    [Docs](https://docs.docker.com/compose/install/)
+
+[^5]: Example `.env`
+    ```env
+    
+    # Devnet Staging
+    ENV="STAGING"
+    NETWORK="DEVNET"
+    DRIP_PROGRAM_ID="F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo"
+    # random wallet, this is the mint auth
+    DRIP_BACKEND_WALLET="[141,241,173,131,255,186,170,216,65,246,24,196,173,94,39,225,161,108,251,102,177,20,166,223,13,69,103,38,242,107,72,194,177,170,44,204,179,183,235,4,231,51,88,169,156,153,132,247,235,166,41,123,87,219,139,204,95,1,176,98,72,90,51,82]"
+    
+    # Test Channel
+    DISCORD_WEBHOOK_ID=1021592812954857492
+    DISCORD_ACCESS_TOKEN=qPeOyI4e4k6kYah44k9_PXFQDsuLO7lbHcazLrsKcvzqvrQh_lr1PK21kB3GZCSTv2Xg
+    
+    PORT="8080"
+    PSQL_USER="dcaf"
+    PSQL_PASS="drip"
+    PSQL_DBNAME="drip"
+    PSQL_PORT="5432"
+    PSQL_HOST="localhost"
+    PSQL_SSLMODE=disable
+    OUTPUT=./internal/pkg/repository/models
+    GOOGLE_KEY="540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"
+    GOOGLE_SECRET="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"
+    ```
+[^6]: Start the database via `docker-compose`
+    `docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up`
+
+[^7]: Stop the database via `docker-compose`
+    `docker-compose --file ./build/docker-compose.yaml  --env-file ./.env down`
+
+[^8]: Start the api-server and event server
+    `go run main.go`
+
+[^9]: Start just the event server
+    `go run cmd/event/main.go`
+
+[^10]: Run the backfill data script
+    `go run cmd/backfill/main.go`
+
+[^11]: Run migrations and codegen db models
+    `go run cmd/codegen/main.go`
+
+[^12]: Just run db migrations
+    `go run cmd/migrate/main.go`
+
+[^13]: Run unit and integration tests
+    `go test ./...`
+
+[^14]: Update mock files
+    `./scripts/create-mocks.sh`
+
+[^15]: Update api-docs codegen'd files
+    `oapi-codegen -package apispec ./docs/swagger.yaml > pkg/api/apispec/generated.go`
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # (# Add to ZSHRC)
+
+[//]: # (export GOPRIVATE=github.com/dcaf-labs/solana-go-clients)
+
+[//]: # (go get -u ./...)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (Add the following to ~/.gitconfig )
+
+[//]: # ()
+[//]: # (```txt)
+
+[//]: # ([url "ssh://git@github.com/"])
+
+[//]: # (insteadOf = https://github.com/)
+
+[//]: # (```)
