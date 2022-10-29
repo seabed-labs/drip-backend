@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/pkg/event"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
@@ -43,6 +44,7 @@ func getDependencies() []fx.Option {
 			orcawhirlpool.NewOrcaWhirlpoolClient,
 			processor.NewProcessor,
 			alert.NewAlertService,
+			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			event.Server,

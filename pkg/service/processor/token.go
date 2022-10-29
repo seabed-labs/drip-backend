@@ -8,7 +8,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
 )
@@ -52,9 +51,11 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 }
 
 func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string, *string) {
-	symbol := utils.GetStringPtr("")
-	iconURL := utils.GetStringPtr("")
-	coinGeckoID := utils.GetStringPtr("")
+	var (
+		symbol      *string
+		iconURL     *string
+		coinGeckoID *string
+	)
 	existingToken, err := p.repo.GetTokenByAddress(ctx, mint)
 	if err == nil {
 		symbol = existingToken.Symbol
