@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	configs "github.com/dcaf-labs/drip/pkg/service/configs"
+	config "github.com/dcaf-labs/drip/pkg/service/config"
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	solana "github.com/gagliardetto/solana-go"
 	token "github.com/gagliardetto/solana-go/programs/token"
@@ -98,10 +98,10 @@ func (mr *MockSolanaMockRecorder) GetLargestTokenAccounts(ctx, mint interface{})
 }
 
 // GetNetwork mocks base method.
-func (m *MockSolana) GetNetwork() configs.Network {
+func (m *MockSolana) GetNetwork() config.Network {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetNetwork")
-	ret0, _ := ret[0].(configs.Network)
+	ret0, _ := ret[0].(config.Network)
 	return ret0
 }
 

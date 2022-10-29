@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 
@@ -22,7 +22,7 @@ import (
 
 func StartServer(
 	lc fx.Lifecycle,
-	config configs.AppConfig,
+	appConfig config.AppConfig,
 	middlewareHandler *middleware.Handler,
 	apiHandler *controller.Handler,
 ) {
@@ -30,7 +30,7 @@ func StartServer(
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			var err error
-			httpSrv, err = listenAndServe(config, middlewareHandler, apiHandler)
+			httpSrv, err = listenAndServe(appConfig, middlewareHandler, apiHandler)
 			return err
 		},
 		OnStop: func(ctx context.Context) error {
@@ -40,7 +40,7 @@ func StartServer(
 }
 
 func listenAndServe(
-	config configs.AppConfig,
+	appConfig config.AppConfig,
 	middlewareHandler *middleware.Handler,
 	apiHandler *controller.Handler,
 ) (*http.Server, error) {
@@ -56,10 +56,10 @@ func listenAndServe(
 	e.Use(oapiMiddleware.OapiRequestValidator(swaggerSpec))
 	apispec.RegisterHandlers(e, apiHandler)
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.GetServerPort()),
+		Addr:    fmt.Sprintf(":%d", appConfig.GetServerPort()),
 		Handler: cors.AllowAll().Handler(e),
 	}
-	log.WithField("port", config.GetServerPort()).Infof("starting api")
+	log.WithField("port", appConfig.GetServerPort()).Infof("starting api")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.WithField("err", err.Error()).Fatalf("api listening")

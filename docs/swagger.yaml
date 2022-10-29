@@ -323,7 +323,7 @@ paths:
   /v1/drip/spltokenswapconfigs:
     get:
       summary: Get Token Swaps Configs
-      description: Get token swap configs for DripSPLTokenSwap.
+      description: Get token swap config for DripSPLTokenSwap.
       parameters:
         - $ref: "#/components/parameters/vaultQueryParam"
       responses:
@@ -349,7 +349,7 @@ paths:
   /v1/drip/orcawhirlpoolconfigs:
     get:
       summary: Get Orca Whirlpool Swap Configs
-      description: Get whirlpool configs for dripOrcaWhirlpool.
+      description: Get whirlpool config for dripOrcaWhirlpool.
       parameters:
         - $ref: "#/components/parameters/vaultQueryParam"
       responses:

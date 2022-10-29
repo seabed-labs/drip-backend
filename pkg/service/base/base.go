@@ -3,7 +3,7 @@ package base
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
@@ -15,20 +15,20 @@ type Base interface {
 }
 
 func NewBase(
-	config configs.AppConfig,
+	appConfig config.AppConfig,
 	repo repository.Repository,
 ) Base {
-	return newBaseService(repo, config.GetNetwork())
+	return newBaseService(repo, appConfig.GetNetwork())
 }
 
 type impl struct {
 	repo    repository.Repository
-	network configs.Network
+	network config.Network
 }
 
 func newBaseService(
 	repo repository.Repository,
-	network configs.Network,
+	network config.Network,
 ) impl {
 	return impl{
 		repo:    repo,

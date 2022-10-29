@@ -8,16 +8,16 @@ import (
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/test-go/testify/assert"
 )
 
 func TestOrcaWhirlpoolClient(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	mockConfig := configs.NewMockAppConfig(ctrl)
+	mockConfig := config.NewMockAppConfig(ctrl)
 	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(configs.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(configs.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 
 	client := NewOrcaWhirlpoolClient(mockConfig)

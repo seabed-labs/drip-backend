@@ -9,7 +9,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
@@ -20,10 +20,10 @@ import (
 func TestSolanaClient(t *testing.T) {
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
-	mockConfig := configs.NewMockAppConfig(ctrl)
+	mockConfig := config.NewMockAppConfig(ctrl)
 	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(configs.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(configs.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 
 	client, err := NewSolanaClient(mockConfig)
@@ -67,10 +67,10 @@ func TestSolanaClient(t *testing.T) {
 	//})
 
 	//t.Run("getURL should return correct RPC url", func(t *testing.T) {
-	//assert.Equal(t, Get(configs.NilNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(configs.LocalNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(configs.DevnetNetwork, true), rpc.DevNet_RPC)
-	//assert.Equal(t, GetURL(configs.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
+	//assert.Equal(t, Get(config.NilNetwork, true), rpc.LocalNet_RPC)
+	//assert.Equal(t, GetURL(config.LocalNetwork, true), rpc.LocalNet_RPC)
+	//assert.Equal(t, GetURL(config.DevnetNetwork, true), rpc.DevNet_RPC)
+	//assert.Equal(t, GetURL(config.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
 	//})
 
 	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {

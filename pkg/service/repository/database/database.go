@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
@@ -12,26 +12,26 @@ import (
 )
 
 func NewDatabase(
-	config configs.PSQLConfig,
+	dbConfig config.PSQLConfig,
 ) (*sqlx.DB, error) {
-	if config.GetIsTestDB() {
-		db, err := sqlx.Connect("postgres", getConnectionString(config))
+	if dbConfig.GetIsTestDB() {
+		db, err := sqlx.Connect("postgres", getConnectionString(dbConfig))
 		if err != nil {
 			return nil, err
 		}
-		config.SetDBName("test_" + uuid.New().String()[0:4])
-		_, err = db.Exec(fmt.Sprintf("create database %s", config.GetDBName()))
+		dbConfig.SetDBName("test_" + uuid.New().String()[0:4])
+		_, err = db.Exec(fmt.Sprintf("create database %s", dbConfig.GetDBName()))
 		if err != nil {
 			return nil, err
 		}
-		logrus.WithField("database", config.GetDBName()).Info("created new DB")
+		logrus.WithField("database", dbConfig.GetDBName()).Info("created new DB")
 	}
-	return sqlx.Connect("postgres", getConnectionString(config))
+	return sqlx.Connect("postgres", getConnectionString(dbConfig))
 }
 
 // NewGORMDatabase has a dummy import of  _ *sqlx.DB to ensure that NewDatabase is called first
 func NewGORMDatabase(
-	config configs.PSQLConfig, _ *sqlx.DB,
+	dbConfig config.PSQLConfig, _ *sqlx.DB,
 ) (*gorm.DB, error) {
-	return gorm.Open(postgres.Open(getConnectionString(config)), &gorm.Config{Logger: gormLogger{}})
+	return gorm.Open(postgres.Open(getConnectionString(dbConfig)), &gorm.Config{Logger: gormLogger{}})
 }

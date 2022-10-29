@@ -10,7 +10,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/unittest"
@@ -45,10 +45,10 @@ func TestHandler_GetVaults(t *testing.T) {
 		},
 	}
 	ctrl := gomock.NewController(t)
-	mockConfig := configs.NewMockAppConfig(ctrl)
+	mockConfig := config.NewMockAppConfig(ctrl)
 	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(configs.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(configs.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 	e := echo.New()
 

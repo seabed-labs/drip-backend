@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/rest"
@@ -23,16 +23,16 @@ type Service interface {
 }
 
 func NewAlertService(
-	config configs.AppConfig,
+	appConfig config.AppConfig,
 ) (Service, error) {
-	logrus.WithField("discordWebhookID", config.GetDiscordWebhookID()).Info("initiating alert service")
+	logrus.WithField("discordWebhookID", appConfig.GetDiscordWebhookID()).Info("initiating alert service")
 	service := serviceImpl{}
-	if config.GetDiscordWebhookID() != "" && config.GetDiscordWebhookAccessToken() != "" {
+	if appConfig.GetDiscordWebhookID() != "" && appConfig.GetDiscordWebhookAccessToken() != "" {
 		service = serviceImpl{
-			network:                   config.GetNetwork(),
+			network:                   appConfig.GetNetwork(),
 			enabled:                   true,
-			discordWebhookID:          config.GetDiscordWebhookID(),
-			discordWebhookAccessToken: config.GetDiscordWebhookAccessToken(),
+			discordWebhookID:          appConfig.GetDiscordWebhookID(),
+			discordWebhookAccessToken: appConfig.GetDiscordWebhookAccessToken(),
 		}
 		webhookID, err := strconv.ParseInt(service.discordWebhookID, 10, 64)
 		if err != nil {
@@ -53,7 +53,7 @@ func NewAlertService(
 }
 
 type serviceImpl struct {
-	network                   configs.Network
+	network                   config.Network
 	enabled                   bool
 	client                    webhook.Client
 	discordWebhookAccessToken string
@@ -195,9 +195,9 @@ func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
 
 func (a serviceImpl) getExplorerURL(account string) string {
 	switch a.network {
-	case configs.MainnetNetwork:
+	case config.MainnetNetwork:
 		return fmt.Sprintf("https://explorer.solana.com/address/%s", account)
-	case configs.DevnetNetwork:
+	case config.DevnetNetwork:
 		return fmt.Sprintf("https://explorer.solana.com/address/%s?cluster=devnet", account)
 	default:
 		return fmt.Sprintf(

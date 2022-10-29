@@ -15,7 +15,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/base"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 
@@ -33,10 +33,10 @@ import (
 func TestHandler_PostMint(t *testing.T) {
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
-	mockConfig := configs.NewMockAppConfig(ctrl)
+	mockConfig := config.NewMockAppConfig(ctrl)
 	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(configs.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(configs.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 	e := echo.New()
 

@@ -1,4 +1,11 @@
-package configs
+package config
+
+import (
+	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	ag_solanago "github.com/gagliardetto/solana-go"
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
+)
 
 type Network string
 
@@ -138,4 +145,41 @@ func (p *psqlConfig) GetHost() string {
 
 func (p *psqlConfig) GetIsTestDB() bool {
 	return p.IsTestDB
+}
+
+func NewAppConfig() (AppConfig, error) {
+	var config appConfig
+	if err := parseToConfig(&config, ""); err != nil {
+		return nil, err
+	}
+	// Sane defaults
+	if config.Environment == NilEnv {
+		config.Environment = StagingEnv
+	}
+	if config.Network == NilNetwork {
+		config.Network = DevnetNetwork
+	}
+
+	log.Info("loaded drip-backend app config")
+	drip.ProgramID = ag_solanago.MustPublicKeyFromBase58(config.DripProgramID)
+	log.
+		WithField("programID", drip.ProgramID.String()).
+		WithField("ShouldByPassAdminAuth", config.ShouldByPassAdminAuth).
+		Info("set programID")
+	return config, nil
+}
+
+func NewPSQLConfig() (PSQLConfig, error) {
+	var config psqlConfig
+	if err := parseToConfig(&config, ""); err != nil {
+		return nil, err
+	}
+	if config.IsTestDB {
+		config.DBName = "test_" + uuid.New().String()[0:4]
+	}
+	log.
+		WithField("IsTestDB", config.IsTestDB).
+		WithField("DBName", config.DBName).
+		Info("loaded drip-backend app config")
+	return &config, nil
 }

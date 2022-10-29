@@ -3,18 +3,18 @@ package database
 import (
 	"fmt"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 )
 
-func getConnectionString(config configs.PSQLConfig) string {
-	if config.GetURL() != "" {
-		return config.GetURL()
+func getConnectionString(dbConfig config.PSQLConfig) string {
+	if dbConfig.GetURL() != "" {
+		return dbConfig.GetURL()
 	}
 	return fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		config.GetHost(),
-		config.GetPort(),
-		config.GetUser(),
-		config.GetPassword(),
-		config.GetDBName())
+		dbConfig.GetHost(),
+		dbConfig.GetPort(),
+		dbConfig.GetUser(),
+		dbConfig.GetPassword(),
+		dbConfig.GetDBName())
 }

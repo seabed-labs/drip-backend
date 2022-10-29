@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/jmoiron/sqlx"
@@ -19,21 +19,21 @@ const migrationDir = "./pkg/service/repository/database/migrations"
 
 // Importing DB mainly so that we can migrate a integrationtest db
 func RunMigrations(
-	db *sqlx.DB, config configs.PSQLConfig,
+	db *sqlx.DB, dbConfig config.PSQLConfig,
 ) (int, error) {
 	if err := db.Ping(); err != nil {
 		logrus.WithField("err", err.Error()).Error("could not ping DB")
 		return 0, err
 	}
-	driver, err := postgres.WithInstance(db.DB, &postgres.Config{DatabaseName: config.GetDBName()})
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{DatabaseName: dbConfig.GetDBName()})
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("could not get DB driver")
 		return 0, err
 	}
 	m, err := migrate.NewWithDatabaseInstance(
 		// file://path/to/directory
-		fmt.Sprintf("file://%s/%s", configs.GetProjectRoot(), migrationDir),
-		config.GetDBName(), driver)
+		fmt.Sprintf("file://%s/%s", config.GetProjectRoot(), migrationDir),
+		dbConfig.GetDBName(), driver)
 	if err != nil {
 		logrus.WithField("err", err.Error()).Error("could not apply migrations")
 		return 0, err

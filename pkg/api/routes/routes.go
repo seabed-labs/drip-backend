@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/gorilla/schema"
 )
@@ -15,13 +15,13 @@ type Handler struct {
 	base         base.Base
 	solanaClient solana.Solana
 	repo         repository.Repository
-	network      configs.Network
-	env          configs.Environment
+	network      config.Network
+	env          config.Environment
 	port         int
 }
 
 func NewHandler(
-	config configs.AppConfig,
+	appConfig config.AppConfig,
 	solanaClient solana.Solana,
 	base base.Base,
 	repo repository.Repository,
@@ -31,8 +31,8 @@ func NewHandler(
 		solanaClient: solanaClient,
 		base:         base,
 		repo:         repo,
-		network:      config.GetNetwork(),
-		env:          config.GetEnvironment(),
-		port:         config.GetServerPort(),
+		network:      appConfig.GetNetwork(),
+		env:          appConfig.GetEnvironment(),
+		port:         appConfig.GetServerPort(),
 	}
 }

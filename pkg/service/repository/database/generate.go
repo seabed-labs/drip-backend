@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/iancoleman/strcase"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gen"
@@ -31,8 +31,8 @@ func (t ModelUtil) GetAllColumns() []string {
 func GenerateModels(
 	db *gorm.DB,
 ) {
-	modelPkgPath := fmt.Sprintf("%s/%s", configs.GetProjectRoot(), modelDir)
-	queryPkgPath := fmt.Sprintf("%s/%s", configs.GetProjectRoot(), queryDir)
+	modelPkgPath := fmt.Sprintf("%s/%s", config.GetProjectRoot(), modelDir)
+	queryPkgPath := fmt.Sprintf("%s/%s", config.GetProjectRoot(), queryDir)
 	logrus.
 		WithField("modelPkgPath", modelPkgPath).
 		WithField("outPath", queryPkgPath).

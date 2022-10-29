@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/labstack/echo/v4"
 
@@ -16,10 +16,10 @@ import (
 func TestHandler_GetSwaggerJson(t *testing.T) {
 
 	t.Run("getURL should return correct api URL", func(t *testing.T) {
-		assert.True(t, strings.Contains(getURL(configs.NilNetwork, configs.StagingEnv, 0), "localhost"))
-		assert.True(t, strings.Contains(getURL(configs.LocalNetwork, configs.StagingEnv, 0), "localhost"))
-		assert.True(t, strings.Contains(getURL(configs.DevnetNetwork, configs.StagingEnv, 0), "devnet"))
-		assert.True(t, strings.Contains(getURL(configs.MainnetNetwork, configs.StagingEnv, 0), "mainnet"))
+		assert.True(t, strings.Contains(getURL(config.NilNetwork, config.StagingEnv, 0), "localhost"))
+		assert.True(t, strings.Contains(getURL(config.LocalNetwork, config.StagingEnv, 0), "localhost"))
+		assert.True(t, strings.Contains(getURL(config.DevnetNetwork, config.StagingEnv, 0), "devnet"))
+		assert.True(t, strings.Contains(getURL(config.MainnetNetwork, config.StagingEnv, 0), "mainnet"))
 	})
 
 	t.Run("should return json from handler", func(t *testing.T) {

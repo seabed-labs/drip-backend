@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/configs"
+	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -22,7 +22,7 @@ func main() {
 func getDependencies() []fx.Option {
 	return []fx.Option{
 		fx.Provide(
-			configs.NewPSQLConfig,
+			config.NewPSQLConfig,
 			database.NewDatabase,
 		),
 		fx.Invoke(
