@@ -81,13 +81,13 @@ func tokenModelsToAPI(tokenModels []*model.Token) apispec.ListTokens {
 	return res
 }
 
-func tokenAccountBalanceModelToAPI(tokenAccountBalance *model.TokenAccount) apispec.TokenAccountBalance {
-	return apispec.TokenAccountBalance{
-		Amount: strconv.FormatUint(tokenAccountBalance.Amount, 10),
-		Mint:   tokenAccountBalance.Mint,
-		Owner:  tokenAccountBalance.Owner,
-		Pubkey: tokenAccountBalance.Pubkey,
-		State:  tokenAccountBalance.State,
+func tokenAccountModelToAPI(tokenAccount *model.TokenAccount) apispec.TokenAccount {
+	return apispec.TokenAccount{
+		Amount: strconv.FormatUint(tokenAccount.Amount, 10),
+		Mint:   tokenAccount.Mint,
+		Owner:  tokenAccount.Owner,
+		Pubkey: tokenAccount.Pubkey,
+		State:  tokenAccount.State,
 	}
 }
 

@@ -192,7 +192,7 @@ func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccount, error) {
+func (d repositoryImpl) GetTokenAccountsByAddresses(ctx context.Context, tokenAccountPubkeys ...string) ([]*model.TokenAccount, error) {
 	stmt := d.repo.TokenAccount.
 		WithContext(ctx)
 	if len(tokenAccountPubkeys) > 0 {
@@ -201,7 +201,7 @@ func (d repositoryImpl) GetTokenAccountBalancesByAddresses(ctx context.Context, 
 	return stmt.Find()
 }
 
-func (d repositoryImpl) GetActiveTokenAccountBalancesByMint(ctx context.Context, mint string) ([]*model.TokenAccount, error) {
+func (d repositoryImpl) GetActiveTokenAccountsByMint(ctx context.Context, mint string) ([]*model.TokenAccount, error) {
 	return d.repo.TokenAccount.WithContext(ctx).
 		Join(d.repo.Position, d.repo.Position.Authority.EqCol(d.repo.TokenAccount.Mint)).
 		Where(d.repo.TokenAccount.Amount.Gt(0)).

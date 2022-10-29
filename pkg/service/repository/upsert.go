@@ -58,13 +58,13 @@ func (d repositoryImpl) InsertTokenPairs(ctx context.Context, tokenPairs ...*mod
 		Create(tokenPairs...)
 }
 
-func (d repositoryImpl) UpsertTokenAccountBalances(ctx context.Context, tokenAccountBalances ...*model.TokenAccount) error {
+func (d repositoryImpl) UpsertTokenAccounts(ctx context.Context, tokenAccounts ...*model.TokenAccount) error {
 	return d.repo.TokenAccount.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).
-		Create(tokenAccountBalances...)
+		Create(tokenAccounts...)
 }
 
 func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...*model.ProtoConfig) error {

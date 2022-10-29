@@ -19,7 +19,7 @@ type Repository interface {
 	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
 	UpsertVaultPeriods(context.Context, ...*model.VaultPeriod) error
 	UpsertPositions(context.Context, ...*model.Position) error
-	UpsertTokenAccountBalances(context.Context, ...*model.TokenAccount) error
+	UpsertTokenAccounts(context.Context, ...*model.TokenAccount) error
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error
@@ -58,8 +58,8 @@ type Repository interface {
 	GetPositionByNFTMint(ctx context.Context, nftMint string) (*model.Position, error)
 	GetAdminPositions(ctx context.Context, isVaultEnabled *bool, positionFilterParams PositionFilterParams, paginationParams PaginationParams) ([]*model.Position, error)
 
-	GetTokenAccountBalancesByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccount, error)
-	GetActiveTokenAccountBalancesByMint(context.Context, string) ([]*model.TokenAccount, error)
+	GetTokenAccountsByAddresses(ctx context.Context, addresses ...string) ([]*model.TokenAccount, error)
+	GetActiveTokenAccountsByMint(context.Context, string) ([]*model.TokenAccount, error)
 
 	AdminSetVaultEnabled(ctx context.Context, pubkey string, enabled bool) (*model.Vault, error)
 	AdminGetVaults(ctx context.Context, vaultFilterParams VaultFilterParams, paginationParams PaginationParams) ([]*model.Vault, error)

@@ -91,15 +91,15 @@ func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccountAddress 
 	return false
 }
 
-func (p impl) UpsertTokenAccountBalanceByAddress(ctx context.Context, address string) error {
+func (p impl) UpsertTokenAccountByAddress(ctx context.Context, address string) error {
 	var tokenAccount token.Account
 	if err := p.solanaClient.GetAccount(ctx, address, &tokenAccount); err != nil {
 		return err
 	}
-	return p.UpsertTokenAccountBalance(ctx, address, tokenAccount)
+	return p.UpsertTokenAccount(ctx, address, tokenAccount)
 }
 
-func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tokenAccount token.Account) error {
+func (p impl) UpsertTokenAccount(ctx context.Context, address string, tokenAccount token.Account) error {
 	if !p.shouldIngestTokenBalance(ctx, address, tokenAccount) {
 		return nil
 	}
@@ -117,7 +117,7 @@ func (p impl) UpsertTokenAccountBalance(ctx context.Context, address string, tok
 	if err := p.UpsertTokenByAddress(ctx, tokenAccount.Mint.String()); err != nil {
 		return fmt.Errorf("failed to UpsertTokenByAddress %s, err: %w", tokenAccount.Mint.String(), err)
 	}
-	return p.repo.UpsertTokenAccountBalances(ctx, &model.TokenAccount{
+	return p.repo.UpsertTokenAccounts(ctx, &model.TokenAccount{
 		Pubkey: address,
 		Mint:   tokenAccount.Mint.String(),
 		Owner:  tokenAccount.Owner.String(),

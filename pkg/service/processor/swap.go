@@ -67,10 +67,10 @@ func (p impl) UpsertTokenSwapByAddress(ctx context.Context, address string) erro
 	}
 
 	// Upsert balances
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
+	if err := p.UpsertTokenAccountByAddress(ctx, tokenSwap.TokenAccountA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
+	if err := p.UpsertTokenAccountByAddress(ctx, tokenSwap.TokenAccountB.String()); err != nil {
 		return err
 	}
 	return nil
@@ -176,10 +176,10 @@ func (p impl) UpsertWhirlpoolByAddress(ctx context.Context, address string) erro
 		return err
 	}
 
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultA.String()); err != nil {
+	if err := p.UpsertTokenAccountByAddress(ctx, orcaWhirlpool.TokenVaultA.String()); err != nil {
 		return err
 	}
-	if err := p.UpsertTokenAccountBalanceByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
+	if err := p.UpsertTokenAccountByAddress(ctx, orcaWhirlpool.TokenVaultB.String()); err != nil {
 		return err
 	}
 	// this is hella slow

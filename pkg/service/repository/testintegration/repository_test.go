@@ -982,7 +982,7 @@ package testintegration
 //				Amount: 10,
 //				State:  "initialized",
 //			}
-//			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance)
+//			err := newRepository.UpsertTokenAccounts(context.Background(), &tokenAccountBalance)
 //			assert.NoError(t, err)
 //
 //			var insertedTokenAccountBalance model.TokenAccountBalance
@@ -1012,7 +1012,7 @@ package testintegration
 //				Amount: 6,
 //				State:  "initialized",
 //			}
-//			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance1, &tokenAccountBalance2)
+//			err := newRepository.UpsertTokenAccounts(context.Background(), &tokenAccountBalance1, &tokenAccountBalance2)
 //			assert.NoError(t, err)
 //
 //			var insertedTokenAccountBalance model.TokenAccountBalance
@@ -1044,7 +1044,7 @@ package testintegration
 //				Amount: 1000,
 //				State:  "initialized",
 //			}
-//			err := newRepository.UpsertTokenAccountBalances(context.Background(), &tokenAccountBalance)
+//			err := newRepository.UpsertTokenAccounts(context.Background(), &tokenAccountBalance)
 //			assert.NoError(t, err)
 //
 //			var insertedTokenAccountBalance model.TokenAccountBalance

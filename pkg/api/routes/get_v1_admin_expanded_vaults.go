@@ -65,15 +65,15 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		tokenAccountPubkeys = append(tokenAccountPubkeys, vault.TreasuryTokenBAccount)
 	}
 
-	tokenAccountBalances, err := h.repo.GetTokenAccountBalancesByAddresses(c.Request().Context(), tokenAccountPubkeys...)
+	tokenAccounts, err := h.repo.GetTokenAccountsByAddresses(c.Request().Context(), tokenAccountPubkeys...)
 	if err != nil {
-		logrus.WithError(err).Error("failed to get tokenAccountBalances")
+		logrus.WithError(err).Error("failed to get tokenAccounts")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
-	tokenAccountBalancesByPubkey := make(map[string]*model.TokenAccount)
-	for i := range tokenAccountBalances {
-		tokeAccountBalance := tokenAccountBalances[i]
-		tokenAccountBalancesByPubkey[tokeAccountBalance.Pubkey] = tokeAccountBalance
+	tokenAccountsByPubkey := make(map[string]*model.TokenAccount)
+	for i := range tokenAccounts {
+		tokeAccountBalance := tokenAccounts[i]
+		tokenAccountsByPubkey[tokeAccountBalance.Pubkey] = tokeAccountBalance
 	}
 
 	var tokenPubkeys []string
@@ -83,7 +83,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 
 	tokens, err := h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)
 	if err != nil {
-		logrus.WithError(err).Error("failed to get tokenAccountBalances")
+		logrus.WithError(err).Error("failed to get tokenAccounts")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})
 	}
 	tokensByPubkey := make(map[string]*model.Token)
@@ -148,7 +148,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 			}
 		case string(tokenAAccountValue):
 			for i := range res {
-				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TokenAAccount]
+				tokenAccount, ok := tokenAccountsByPubkey[res[i].TokenAAccount]
 				if !ok {
 					logrus.
 						WithField("vault", res[i].Vault).
@@ -156,12 +156,12 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenAAccount")
 					continue
 				}
-				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
-				res[i].TokenAAccountValue = &apiTokenAccountBalance
+				apiTokenAccount := tokenAccountModelToAPI(tokenAccount)
+				res[i].TokenAAccountValue = &apiTokenAccount
 			}
 		case string(tokenBAccountValue):
 			for i := range res {
-				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TokenBAccount]
+				tokenAccount, ok := tokenAccountsByPubkey[res[i].TokenBAccount]
 				if !ok {
 					logrus.
 						WithField("vault", res[i].Vault).
@@ -169,12 +169,12 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TokenBAccount")
 					continue
 				}
-				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
-				res[i].TokenBAccountValue = &apiTokenAccountBalance
+				apiTokenAccount := tokenAccountModelToAPI(tokenAccount)
+				res[i].TokenBAccountValue = &apiTokenAccount
 			}
 		case string(treasuryTokenBAccountValue):
 			for i := range res {
-				tokenAccountBalance, ok := tokenAccountBalancesByPubkey[res[i].TreasuryTokenBAccount]
+				tokenAccountBalance, ok := tokenAccountsByPubkey[res[i].TreasuryTokenBAccount]
 				if !ok {
 					logrus.
 						WithField("vault", res[i].Vault).
@@ -182,7 +182,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 						Error("missing TreasuryTokenBAccount")
 					continue
 				}
-				apiTokenAccountBalance := tokenAccountBalanceModelToAPI(tokenAccountBalance)
+				apiTokenAccountBalance := tokenAccountModelToAPI(tokenAccountBalance)
 				res[i].TreasuryTokenBAccountValue = &apiTokenAccountBalance
 			}
 		}

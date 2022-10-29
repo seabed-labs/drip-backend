@@ -20,7 +20,7 @@ func (i impl) GetBestTokenSwapsForVaults(
 	if err != nil {
 		return nil, err
 	}
-	tokenSwapAccountBalances, err := i.repo.GetTokenAccountBalancesByAddresses(
+	tokenSwapAccounts, err := i.repo.GetTokenAccountsByAddresses(
 		ctx, model.GetTokenAccountPubkeysForTokenSwaps(tokenSwaps)...)
 	if err != nil {
 		return nil, err
@@ -29,14 +29,14 @@ func (i impl) GetBestTokenSwapsForVaults(
 		vaults,
 		model.GetVaultWhitelistsByVault(vaultWhitelists),
 		model.GetTokenSwapsByTokenPairID(tokenSwaps),
-		model.GetTokenAccountBalancesByPubkey(tokenSwapAccountBalances)), nil
+		model.GetTokenAccountsByPubkey(tokenSwapAccounts)), nil
 }
 
 func getBestTokenSwapForVaults(
 	vaults []*model.Vault,
 	vaultWhitelists map[string][]*model.VaultWhitelist,
 	tokenSwapsByTokenPairId map[string][]*model.TokenSwap,
-	tokenAccountBalancesByPubkey map[string]*model.TokenAccount,
+	tokenAccountsByPubkey map[string]*model.TokenAccount,
 ) map[string]*model.TokenSwap {
 	res := make(map[string]*model.TokenSwap)
 	for i := range vaults {
@@ -48,7 +48,7 @@ func getBestTokenSwapForVaults(
 			log.Errorf("no tokenSwaps found")
 			continue
 		}
-		bestTokenSwap, err := getBestTokenSwapForVault(vaults[i], tokenSwaps, tokenAccountBalancesByPubkey)
+		bestTokenSwap, err := getBestTokenSwapForVault(vaults[i], tokenSwaps, tokenAccountsByPubkey)
 		if err != nil {
 			log.WithError(err).Errorf("tokenSwaps found, but error in choosing the best one")
 			continue
@@ -61,7 +61,7 @@ func getBestTokenSwapForVaults(
 func getBestTokenSwapForVault(
 	vault *model.Vault,
 	tokenSwaps []*model.TokenSwap,
-	tokenAccountBalancesByPubkey map[string]*model.TokenAccount,
+	tokenAccountsByPubkey map[string]*model.TokenAccount,
 ) (*model.TokenSwap, error) {
 	if len(tokenSwaps) == 0 {
 		return nil, fmt.Errorf("failed to get token_swap")
@@ -69,15 +69,15 @@ func getBestTokenSwapForVault(
 	bestSwapDeltaB := uint64(0)
 	var bestSwap *model.TokenSwap = nil
 	for _, eligibleSwap := range tokenSwaps {
-		tokenAAccountBalance, ok := tokenAccountBalancesByPubkey[eligibleSwap.TokenAAccount]
+		tokenAAccount, ok := tokenAccountsByPubkey[eligibleSwap.TokenAAccount]
 		if !ok {
 			return nil, fmt.Errorf("missing tokenAAcountBalance %s for tokenSwap %s", eligibleSwap.TokenAAccount, eligibleSwap.Pubkey)
 		}
-		tokenBAccountBalance, ok := tokenAccountBalancesByPubkey[eligibleSwap.TokenBAccount]
+		tokenBAccount, ok := tokenAccountsByPubkey[eligibleSwap.TokenBAccount]
 		if !ok {
-			return nil, fmt.Errorf("missing tokenBAccountBalance %s for tokenSwap %s", eligibleSwap.TokenBAccount, eligibleSwap.Pubkey)
+			return nil, fmt.Errorf("missing tokenBAccount %s for tokenSwap %s", eligibleSwap.TokenBAccount, eligibleSwap.Pubkey)
 		}
-		swapDeltaB := evaluateTokenSwap(vault.DripAmount, tokenAAccountBalance.Amount, tokenBAccountBalance.Amount)
+		swapDeltaB := evaluateTokenSwap(vault.DripAmount, tokenAAccount.Amount, tokenBAccount.Amount)
 
 		if swapDeltaB > bestSwapDeltaB {
 			bestSwap = eligibleSwap
