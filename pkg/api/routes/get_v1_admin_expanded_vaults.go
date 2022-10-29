@@ -13,7 +13,7 @@ import (
 type GetAdminVaultsExpandParams string
 
 const (
-	expandAll                             = GetAdminVaultsExpandParams("all")
+	expandVaultAll                        = GetAdminVaultsExpandParams("all")
 	expandVaultProtoConfigValue           = GetAdminVaultsExpandParams("protoConfigValue")
 	expandVaultTokenAMintValue            = GetAdminVaultsExpandParams("tokenAMintValue")
 	expandVaultTokenBMintValue            = GetAdminVaultsExpandParams("tokenBMintValue")
@@ -49,7 +49,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 	if params.Expand == nil {
 		return c.JSON(http.StatusOK, res)
 	}
-	if hasValue(*params.Expand, string(expandAll)) {
+	if hasValue(*params.Expand, string(expandVaultAll)) {
 		newParams := apispec.ExpandAdminVaultsQueryParam{string(expandVaultProtoConfigValue), string(expandVaultTokenAMintValue), string(expandVaultTokenBMintValue), string(expandVaultTokenAAccountValue), string(expandVaultTokenBAccountValue), string(expandVaultTreasuryTokenBAccountValue)}
 		params.Expand = &newParams
 	}
