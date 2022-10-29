@@ -5,7 +5,10 @@ env:
 
 on:
   pull_request:
-  push: { branches: main }
+    types: [opened, edited, reopened]
+  push:
+    branches:
+      - 'main'
 
 jobs:
   build:
