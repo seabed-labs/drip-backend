@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
-
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -18,7 +17,7 @@ func (h Handler) PutV1AdminVaultPubkeyPathEnable(
 ) error {
 	vault, err := h.repo.AdminGetVaultByAddress(c.Request().Context(), string(pubkeyPath))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: "invalid vault pubkey"})
+		return c.JSON(http.StatusBadRequest, apispec.ErrorResponse{Error: err.Error()})
 	}
 	updatedVault, err := h.repo.AdminSetVaultEnabled(c.Request().Context(), string(pubkeyPath), !vault.Enabled)
 	if err != nil {
@@ -26,7 +25,8 @@ func (h Handler) PutV1AdminVaultPubkeyPathEnable(
 			WithError(err).
 			WithField("vault", string(pubkeyPath)).
 			Error("failed to enable vault")
-		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "something went wrong"})
+		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: err.Error()})
 	}
-	return c.JSON(http.StatusOK, updatedVault)
+
+	return c.JSON(http.StatusOK, vaultModelToAPI(updatedVault))
 }

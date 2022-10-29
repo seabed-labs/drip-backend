@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -53,6 +52,7 @@ func TestHandler_GetVaults(t *testing.T) {
 	e := echo.New()
 
 	t.Run("should return internal server error if `GetVaultsWithFilter` returns an error", func(t *testing.T) {
+		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
 		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 
@@ -61,10 +61,6 @@ func TestHandler_GetVaults(t *testing.T) {
 			TokenB:      nil,
 			ProtoConfig: nil,
 		}
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
 
 		m.
 			EXPECT().
@@ -79,24 +75,21 @@ func TestHandler_GetVaults(t *testing.T) {
 	})
 
 	t.Run("should return vaults without filter", func(t *testing.T) {
+		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
 		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
-
-		params := apispec.GetV1VaultsParams{
-			TokenA:      nil,
-			TokenB:      nil,
-			ProtoConfig: nil,
-		}
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
 
 		m.
 			EXPECT().
 			GetVaultsWithFilter(gomock.Any(), nil, nil, nil).
 			Return(vaults, nil).
 			AnyTimes()
+
+		params := apispec.GetV1VaultsParams{
+			TokenA:      nil,
+			TokenB:      nil,
+			ProtoConfig: nil,
+		}
 
 		err := h.GetV1Vaults(c, params)
 		assert.NoError(t, err)
