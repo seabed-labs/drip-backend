@@ -4,10 +4,10 @@
 
 package model
 
-const TableNameTokenAccountBalance = "token_account_balance"
+const TableNameTokenAccount = "token_account"
 
-// TokenAccountBalance mapped from table <token_account_balance>
-type TokenAccountBalance struct {
+// TokenAccount mapped from table <token_account>
+type TokenAccount struct {
 	Pubkey string `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
 	Mint   string `gorm:"column:mint;type:varchar;not null" json:"mint" db:"mint"`
 	Owner  string `gorm:"column:owner;type:varchar;not null" json:"owner" db:"owner"`
@@ -15,7 +15,7 @@ type TokenAccountBalance struct {
 	State  string `gorm:"column:state;type:varchar;not null" json:"state" db:"state"`
 }
 
-// TableName TokenAccountBalance's table name
-func (*TokenAccountBalance) TableName() string {
-	return TableNameTokenAccountBalance
+// TableName TokenAccount's table name
+func (*TokenAccount) TableName() string {
+	return TableNameTokenAccount
 }

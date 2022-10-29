@@ -22,7 +22,7 @@ func Use(db *gorm.DB) *Query {
 		SchemaMigration:          newSchemaMigration(db),
 		SourceReference:          newSourceReference(db),
 		Token:                    newToken(db),
-		TokenAccountBalance:      newTokenAccountBalance(db),
+		TokenAccount:             newTokenAccount(db),
 		TokenPair:                newTokenPair(db),
 		TokenSwap:                newTokenSwap(db),
 		Vault:                    newVault(db),
@@ -42,7 +42,7 @@ type Query struct {
 	SchemaMigration          schemaMigration
 	SourceReference          sourceReference
 	Token                    token
-	TokenAccountBalance      tokenAccountBalance
+	TokenAccount             tokenAccount
 	TokenPair                tokenPair
 	TokenSwap                tokenSwap
 	Vault                    vault
@@ -63,7 +63,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		SchemaMigration:          q.SchemaMigration.clone(db),
 		SourceReference:          q.SourceReference.clone(db),
 		Token:                    q.Token.clone(db),
-		TokenAccountBalance:      q.TokenAccountBalance.clone(db),
+		TokenAccount:             q.TokenAccount.clone(db),
 		TokenPair:                q.TokenPair.clone(db),
 		TokenSwap:                q.TokenSwap.clone(db),
 		Vault:                    q.Vault.clone(db),
@@ -81,7 +81,7 @@ type queryCtx struct {
 	SchemaMigration          *schemaMigrationDo
 	SourceReference          *sourceReferenceDo
 	Token                    *tokenDo
-	TokenAccountBalance      *tokenAccountBalanceDo
+	TokenAccount             *tokenAccountDo
 	TokenPair                *tokenPairDo
 	TokenSwap                *tokenSwapDo
 	Vault                    *vaultDo
@@ -99,7 +99,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		SchemaMigration:          q.SchemaMigration.WithContext(ctx),
 		SourceReference:          q.SourceReference.WithContext(ctx),
 		Token:                    q.Token.WithContext(ctx),
-		TokenAccountBalance:      q.TokenAccountBalance.WithContext(ctx),
+		TokenAccount:             q.TokenAccount.WithContext(ctx),
 		TokenPair:                q.TokenPair.WithContext(ctx),
 		TokenSwap:                q.TokenSwap.WithContext(ctx),
 		Vault:                    q.Vault.WithContext(ctx),

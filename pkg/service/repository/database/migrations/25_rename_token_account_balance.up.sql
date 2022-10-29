@@ -1,0 +1,1 @@
+ALTER TABLE token_account_balance RENAME TO token_account;
