@@ -28,12 +28,12 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 )
 
-type RecordOptions struct {
+type APIRecorderOptions struct {
 	Path string
 }
 
 func InjectDependencies(
-	recordOptions *RecordOptions,
+	recordOptions *APIRecorderOptions,
 	testCase interface{},
 ) {
 	err := os.Setenv("IS_TEST_DB", "true")

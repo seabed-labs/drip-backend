@@ -14,7 +14,7 @@ import (
 func TestHandler_UpsertPositionByAddress(t *testing.T) {
 	// this takes 21 seconds ☠️
 	integrationtest.InjectDependencies(
-		&integrationtest.RecordOptions{
+		&integrationtest.APIRecorderOptions{
 			Path: "./fixtures/upsert-position-by-address",
 		},
 		func(
