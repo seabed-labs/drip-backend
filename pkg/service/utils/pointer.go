@@ -17,7 +17,12 @@ func GetTimePtr(val time.Time) *time.Time {
 	return &temp
 }
 
-func GetIntPtr(val int32) *int32 {
+func GetIntPtr(val int) *int {
+	temp := val
+	return &temp
+}
+
+func GetInt32Ptr(val int32) *int32 {
 	temp := val
 	return &temp
 }
