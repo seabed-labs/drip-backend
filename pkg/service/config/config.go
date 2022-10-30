@@ -161,7 +161,7 @@ func NewAppConfig() (AppConfig, error) {
 	}
 
 	log.Info("loaded drip-backend app config")
-	drip.ProgramID = ag_solanago.MustPublicKeyFromBase58(config.DripProgramID)
+	drip.SetProgramID(ag_solanago.MustPublicKeyFromBase58(config.DripProgramID))
 	log.
 		WithField("programID", drip.ProgramID.String()).
 		WithField("ShouldByPassAdminAuth", config.ShouldByPassAdminAuth).
