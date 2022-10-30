@@ -132,6 +132,7 @@ jobs:
           ENV: STAGING
           NETWORK: DEVNET
           DRIP_PROGRAM_ID: F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo
+          DRIP_BACKEND_WALLET: ${{ secrets.DRIP_BACKEND_WALLET }}
         run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Generate Code Coverage HTMl Report
