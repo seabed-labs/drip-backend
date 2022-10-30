@@ -73,7 +73,7 @@ func (d repositoryImpl) GetAllSupportTokens(ctx context.Context) ([]*model.Token
 	if len(tokenMints) == 0 {
 		return []*model.Token{}, nil
 	}
-	return d.GetTokensByMints(ctx, tokenMints)
+	return d.GetTokensByAddresses(ctx, tokenMints...)
 }
 
 func (d repositoryImpl) GetAllSupportedTokenAs(ctx context.Context) ([]*model.Token, error) {
@@ -95,7 +95,7 @@ func (d repositoryImpl) GetAllSupportedTokenAs(ctx context.Context) ([]*model.To
 	if len(tokenMints) == 0 {
 		return []*model.Token{}, nil
 	}
-	return d.GetTokensByMints(ctx, tokenMints)
+	return d.GetTokensByAddresses(ctx, tokenMints...)
 }
 
 func (d repositoryImpl) GetSupportedTokenAs(ctx context.Context, tokenBMint *string) ([]*model.Token, error) {
@@ -183,7 +183,7 @@ func (d repositoryImpl) GetTokenByAddress(ctx context.Context, mint string) (*mo
 	return d.repo.Token.WithContext(ctx).Where(d.repo.Token.Pubkey.Eq(mint)).First()
 }
 
-func (d repositoryImpl) GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error) {
+func (d repositoryImpl) GetTokensByAddresses(ctx context.Context, mints ...string) ([]*model.Token, error) {
 	stmt := d.repo.Token.
 		WithContext(ctx)
 	if len(mints) > 0 {
