@@ -22,7 +22,7 @@
 
 - [^1] install go 1.18 
 - [^2] install all packages with
-- [^3] install the `oapi-codegen` cli 
+- [^3] install the `oapi-codegen` cli, version `v1.10.1`
 - [^4] install `docker` and `docker-compose`
 - [^5] setup a `.env` file
 
