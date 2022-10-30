@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/internal/codegen"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	log "github.com/sirupsen/logrus"
@@ -28,7 +30,8 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
-			database.GenerateModels,
+			codegen.GenerateModels,
+			codegen.GenerateAPIServer,
 		),
 		fx.NopLogger,
 	}

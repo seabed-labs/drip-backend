@@ -13,11 +13,11 @@ const TableNameOrcaWhirlpoolDeltaBQuote = "orca_whirlpool_delta_b_quote"
 
 // OrcaWhirlpoolDeltaBQuote mapped from table <orca_whirlpool_delta_b_quote>
 type OrcaWhirlpoolDeltaBQuote struct {
-	VaultPubkey     string     `gorm:"column:vault_pubkey;primaryKey" json:"vaultPubkey" db:"vault_pubkey"`
-	WhirlpoolPubkey string     `gorm:"column:whirlpool_pubkey;primaryKey" json:"whirlpoolPubkey" db:"whirlpool_pubkey"`
-	TokenPairID     string     `gorm:"column:token_pair_id;not null" json:"tokenPairId" db:"token_pair_id"`
-	DeltaB          uint64     `gorm:"column:delta_b;not null" json:"deltaB" db:"delta_b"`
-	LastUpdated     *time.Time `gorm:"column:last_updated;not null;default:now()" json:"lastUpdated" db:"last_updated"`
+	VaultPubkey     string     `gorm:"column:vault_pubkey;type:varchar;primaryKey" json:"vaultPubkey" db:"vault_pubkey"`
+	WhirlpoolPubkey string     `gorm:"column:whirlpool_pubkey;type:varchar;primaryKey" json:"whirlpoolPubkey" db:"whirlpool_pubkey"`
+	TokenPairID     string     `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
+	DeltaB          uint64     `gorm:"column:delta_b;type:numeric;not null" json:"deltaB" db:"delta_b"`
+	LastUpdated     *time.Time `gorm:"column:last_updated;type:timestamp;not null;default:now()" json:"lastUpdated" db:"last_updated"`
 }
 
 // TableName OrcaWhirlpoolDeltaBQuote's table name
