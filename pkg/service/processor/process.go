@@ -65,6 +65,7 @@ func NewProcessor(
 	tokenRegistryClient tokenregistry.TokenRegistry,
 	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient,
 	alertService alert.Service,
+	coinGeckoClient coingecko.CoinGeckoClient,
 ) Processor {
 	return impl{
 		repo:                repo,
@@ -73,6 +74,7 @@ func NewProcessor(
 		tokenRegistryClient: tokenRegistryClient,
 		orcaWhirlpoolClient: orcaWhirlpoolClient,
 		alertService:        alertService,
+		coinGeckoClient:     coinGeckoClient,
 	}
 }
 

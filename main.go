@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
@@ -54,6 +55,7 @@ func getDependencies() []fx.Option {
 			processor.NewProcessor,
 			alert.NewAlertService,
 			base.NewBase,
+			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			func() { log.SetFormatter(&log.JSONFormatter{}) },
