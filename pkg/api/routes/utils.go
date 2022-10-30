@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -58,24 +60,22 @@ func vaultModelsToAPI(vaultModels []*model.Vault) apispec.ListVaults {
 	return res
 }
 
+func vaultPeriodModelToAPI(vaultPeriod *model.VaultPeriod) apispec.VaultPeriod {
+	return apispec.VaultPeriod{
+		Pubkey:      vaultPeriod.Pubkey,
+		Vault:       vaultPeriod.Vault,
+		PeriodId:    strconv.FormatUint(vaultPeriod.PeriodID, 10),
+		Twap:        vaultPeriod.Twap.String(),
+		Dar:         strconv.FormatUint(vaultPeriod.Dar, 10),
+		PriceBOverA: utils.GetStringPtr(vaultPeriod.PriceBOverA.String()),
+	}
+}
+
 func vaultPeriodModelsToAPI(vaultPeriodModels []*model.VaultPeriod) apispec.ListVaultPeriods {
 	res := apispec.ListVaultPeriods{}
 	for i := range vaultPeriodModels {
 		vaultPeriod := vaultPeriodModels[i]
-		res = append(res, struct {
-			Dar      string `json:"dar"`
-			PeriodId string `json:"periodId"`
-			Pubkey   string `json:"pubkey"`
-			Twap     string `json:"twap"`
-			Vault    string `json:"vault"`
-		}{
-			Pubkey:   vaultPeriod.Pubkey,
-			Vault:    vaultPeriod.Vault,
-			PeriodId: strconv.FormatUint(vaultPeriod.PeriodID, 10),
-			Twap:     vaultPeriod.Twap.String(),
-			Dar:      strconv.FormatUint(vaultPeriod.Dar, 10),
-		},
-		)
+		res = append(res, vaultPeriodModelToAPI(vaultPeriod))
 	}
 	return res
 }

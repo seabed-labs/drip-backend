@@ -1144,3 +1144,6 @@ components:
         dar:
           type: string
           example: "123"
+        priceBOverA:
+            type: string
+            example: "1.5"
