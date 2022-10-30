@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dcaf-labs/drip/pkg/service/config"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -15,11 +14,13 @@ func NewDatabase(
 	dbConfig config.PSQLConfig,
 ) (*sqlx.DB, error) {
 	if dbConfig.GetIsTestDB() {
+		dbName := dbConfig.GetDBName()
+		dbConfig.SetDBName("postgres")
 		db, err := sqlx.Connect("postgres", getConnectionString(dbConfig))
 		if err != nil {
 			return nil, err
 		}
-		dbConfig.SetDBName("test_" + uuid.New().String()[0:4])
+		dbConfig.SetDBName(dbName)
 		_, err = db.Exec(fmt.Sprintf("create database %s", dbConfig.GetDBName()))
 		if err != nil {
 			return nil, err

@@ -4,6 +4,13 @@ import (
 	"context"
 	"os"
 
+	"github.com/dcaf-labs/drip/pkg/api/middleware"
+	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/base"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
+	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
@@ -20,7 +27,8 @@ func InjectDependencies(
 ) {
 	err := os.Setenv("IS_TEST_DB", "true")
 	if err != nil {
-		panic("could not set IS_TEST_DB env var")
+		logrus.WithError(err).Error("could not set IS_TEST_DB env var")
+		os.Exit(1)
 	}
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	opts := []fx.Option{
@@ -31,9 +39,16 @@ func InjectDependencies(
 			database.NewGORMDatabase,
 			query.Use,
 			solana.NewSolanaClient,
+			tokenregistry.NewTokenRegistry,
+			orcawhirlpool.NewOrcaWhirlpoolClient,
 			repository.NewRepository,
+			repository.NewAccountUpdateQueue,
+			middleware.NewHandler,
 			controller.NewHandler,
 			processor.NewProcessor,
+			alert.NewAlertService,
+			base.NewBase,
+			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			database.RunMigrations,
