@@ -90,7 +90,7 @@ func (h Handler) GetV1AdminVaults(c echo.Context, params apispec.GetV1AdminVault
 		}
 	}
 	if shouldExpandTokenAMint || shouldExpandTokenBMint {
-		tokens, err = h.repo.GetTokensByMints(c.Request().Context(), tokenPubkeys)
+		tokens, err = h.repo.GetTokensByAddresses(c.Request().Context(), tokenPubkeys...)
 		if err != nil {
 			logrus.WithError(err).Error("failed to GetTokensByAddresses")
 			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: err.Error()})

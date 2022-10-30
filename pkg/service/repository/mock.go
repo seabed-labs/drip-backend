@@ -466,18 +466,23 @@ func (mr *MockRepositoryMockRecorder) GetTokenSwapByAddress(arg0, arg1 interface
 }
 
 // GetTokensByAddresses mocks base method.
-func (m *MockRepository) GetTokensByAddresses(ctx context.Context, mints []string) ([]*model.Token, error) {
+func (m *MockRepository) GetTokensByAddresses(ctx context.Context, mints ...string) ([]*model.Token, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTokensByAddresses", ctx, mints)
+	varargs := []interface{}{ctx}
+	for _, a := range mints {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTokensByAddresses", varargs...)
 	ret0, _ := ret[0].([]*model.Token)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTokensByAddresses indicates an expected call of GetTokensByAddresses.
-func (mr *MockRepositoryMockRecorder) GetTokensByAddresses(ctx, mints interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) GetTokensByAddresses(ctx interface{}, mints ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensByAddresses", reflect.TypeOf((*MockRepository)(nil).GetTokensByAddresses), ctx, mints)
+	varargs := append([]interface{}{ctx}, mints...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokensByAddresses", reflect.TypeOf((*MockRepository)(nil).GetTokensByAddresses), varargs...)
 }
 
 // GetVaultByAddress mocks base method.

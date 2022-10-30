@@ -95,7 +95,7 @@ func (h Handler) GetV1AdminPositions(c echo.Context, params apispec.GetV1AdminPo
 	}
 
 	if shouldExpandTokenA || shouldExpandTokenB {
-		tokens, err = h.repo.GetTokensByAddresses(c.Request().Context(), tokenPubkeys)
+		tokens, err = h.repo.GetTokensByAddresses(c.Request().Context(), tokenPubkeys...)
 		if err != nil {
 			logrus.WithError(err).Error("failed to GetTokensByAddresses")
 			return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal server error"})

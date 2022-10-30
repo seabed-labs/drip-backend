@@ -102,7 +102,7 @@ func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*mode
 	if err != nil {
 		return nil, nil, err
 	}
-	tokens, err := p.repo.GetTokensByAddresses(ctx, []string{vault.TokenAMint, vault.TokenBMint})
+	tokens, err := p.repo.GetTokensByAddresses(ctx, vault.TokenAMint, vault.TokenBMint)
 	if err != nil {
 		return nil, nil, err
 	}
