@@ -102,12 +102,12 @@ func (p impl) getTokensForVault(ctx context.Context, vaultAddress string) (*mode
 	if err != nil {
 		return nil, nil, err
 	}
-	tokens, err := p.repo.GetTokensByMints(ctx, []string{vault.TokenAMint, vault.TokenBMint})
+	tokens, err := p.repo.GetTokensByAddresses(ctx, vault.TokenAMint, vault.TokenBMint)
 	if err != nil {
 		return nil, nil, err
 	}
 	if len(tokens) != 2 {
-		return nil, nil, fmt.Errorf("invalid number of tokens return for GetTokensByMints for id: %s", vault.TokenPairID)
+		return nil, nil, fmt.Errorf("invalid number of tokens return for GetTokensByAddresses for id: %s", vault.TokenPairID)
 	}
 	if tokens[0].Pubkey == vault.TokenAMint {
 		return tokens[0], tokens[1], nil
