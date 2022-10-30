@@ -4,12 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+
 	"github.com/test-go/testify/assert"
 )
 
 func TestTokenRegistry(t *testing.T) {
 
-	client := NewCoinGeckoClient()
+	client := NewCoinGeckoClient(clients.DefaultClientProvider())
 
 	t.Run("GetCoinGeckoMeta should return the required meta data", func(t *testing.T) {
 		tokenAddress := "So11111111111111111111111111111111111111112"

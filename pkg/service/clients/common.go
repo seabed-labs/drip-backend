@@ -16,6 +16,35 @@ const (
 	maxRetries      = 3
 )
 
+type RetryableHTTPClient struct {
+	*retryablehttp.Client
+}
+
+type RateLimitHTTPClientOptions struct {
+	CallsPerSecond *int
+	HttpClient     *http.Client
+}
+
+type RetryableHTTPClientProvider func(options RateLimitHTTPClientOptions) RetryableHTTPClient
+
+func DefaultClientProvider() RetryableHTTPClientProvider {
+	return func(options RateLimitHTTPClientOptions) RetryableHTTPClient {
+		return getRateLimitedHTTPClient(options)
+	}
+}
+
+func (r RetryableHTTPClient) Do(request *http.Request) (*http.Response, error) {
+	retryableRequest, err := retryablehttp.FromRequest(request)
+	if err != nil {
+		return nil, err
+	}
+	return r.Client.Do(retryableRequest)
+}
+
+func (r RetryableHTTPClient) CloseIdleConnections() {
+	r.HTTPClient.CloseIdleConnections()
+}
+
 func defaultCheckRetry(_ context.Context, resp *http.Response, err error) (bool, error) {
 	if resp != nil && resp.StatusCode >= http.StatusTooManyRequests {
 		if err != nil {
@@ -35,34 +64,29 @@ func defaultCheckRetry(_ context.Context, resp *http.Response, err error) (bool,
 	return false, nil
 }
 
-type RetryableHTTPClient struct {
-	*retryablehttp.Client
-}
-
-func (r RetryableHTTPClient) Do(request *http.Request) (*http.Response, error) {
-	retryableRequest, err := retryablehttp.FromRequest(request)
-	if err != nil {
-		return nil, err
+func getRateLimitedHTTPClient(options RateLimitHTTPClientOptions) RetryableHTTPClient {
+	callsPerSecond := 1
+	if options.CallsPerSecond != nil {
+		callsPerSecond = *options.CallsPerSecond
 	}
-	return r.Client.Do(retryableRequest)
-}
+	httpClient := retryablehttp.NewClient().HTTPClient
+	if options.HttpClient != nil {
+		httpClient = options.HttpClient
+	}
 
-func (r RetryableHTTPClient) CloseIdleConnections() {
-	r.HTTPClient.CloseIdleConnections()
-}
+	client := retryablehttp.NewClient()
+	client.Logger = nil
+	client.CheckRetry = defaultCheckRetry
+	client.RetryWaitMin = defaultRetryMin
+	client.RetryMax = maxRetries
+	client.HTTPClient = httpClient
 
-func GetRateLimitedHTTPClient(callsPerSecond int) RetryableHTTPClient {
 	rateLimiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(callsPerSecond)), 1)
-	httpClient := retryablehttp.NewClient()
-	httpClient.Logger = nil
-	httpClient.CheckRetry = defaultCheckRetry
-	httpClient.RetryWaitMin = defaultRetryMin
-	httpClient.RetryMax = maxRetries
-	httpClient.RequestLogHook = func(logger retryablehttp.Logger, req *http.Request, retry int) {
+	client.RequestLogHook = func(logger retryablehttp.Logger, req *http.Request, retry int) {
 		if err := rateLimiter.Wait(context.Background()); err != nil {
 			log.WithError(err).Errorf("waiting for rate limit")
 			return
 		}
 	}
-	return RetryableHTTPClient{httpClient}
+	return RetryableHTTPClient{client}
 }

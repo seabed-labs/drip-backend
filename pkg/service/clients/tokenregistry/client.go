@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients"
@@ -17,17 +19,19 @@ type TokenRegistry interface {
 	GetTokenRegistryToken(ctx context.Context, mint string) (*Token, error)
 }
 
-func NewTokenRegistry() TokenRegistry {
-	return newClient()
+func NewTokenRegistry(retryClientProvider clients.RetryableHTTPClientProvider) TokenRegistry {
+	return newClient(retryClientProvider)
 }
 
 type client struct {
 	jsonrpc.HTTPClient
 }
 
-func newClient() *client {
-	httpClient := clients.GetRateLimitedHTTPClient(callsPerSecond)
-	apiClient := client{httpClient}
+func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
+	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
+		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
+	})
+	apiClient := client{retryClient}
 	return &apiClient
 }
 

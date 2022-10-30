@@ -4,12 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+
 	"github.com/test-go/testify/assert"
 )
 
 func TestTokenRegistry(t *testing.T) {
 
-	client := NewTokenRegistry()
+	client := NewTokenRegistry(clients.DefaultClientProvider())
 
 	t.Run("GetTokenRegistry should return all tokens", func(t *testing.T) {
 		tokenRegistry, err := client.GetTokenRegistry(context.Background())

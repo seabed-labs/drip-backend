@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 )
 
@@ -15,17 +17,19 @@ type CoinGeckoClient interface {
 	sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error)
 }
 
-func NewCoinGeckoClient() CoinGeckoClient {
-	return newClient()
+func NewCoinGeckoClient(retryClientProvider clients.RetryableHTTPClientProvider) CoinGeckoClient {
+	return newClient(retryClientProvider)
 }
 
 type client struct {
 	clients.RetryableHTTPClient
 }
 
-func newClient() *client {
-	httpClient := clients.GetRateLimitedHTTPClient(callsPerSecond)
-	apiClient := client{httpClient}
+func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
+	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
+		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
+	})
+	apiClient := client{retryClient}
 	return &apiClient
 }
 

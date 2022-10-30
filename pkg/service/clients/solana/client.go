@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	bin "github.com/gagliardetto/binary"
@@ -43,8 +47,9 @@ type Solana interface {
 
 func NewSolanaClient(
 	appConfig config.AppConfig,
+	retryClientProvider clients.RetryableHTTPClientProvider,
 ) (Solana, error) {
-	return createClient(appConfig)
+	return createClient(appConfig, retryClientProvider)
 }
 
 type impl struct {
@@ -57,14 +62,19 @@ func (s impl) GetNetwork() config.Network {
 	return s.network
 }
 
-func createClient(
-	appConfig config.AppConfig,
-) (impl, error) {
-	primaryURL, primaryCallsPerSecond := GetURLWithRateLimit(appConfig.GetNetwork())
+func createClient(appConfig config.AppConfig, retryClientProvider clients.RetryableHTTPClientProvider) (impl, error) {
+	url, callsPerSecond := GetURLWithRateLimit(appConfig.GetNetwork())
+	opts := &jsonrpc.RPCClientOpts{
+		HTTPClient: retryClientProvider(clients.RateLimitHTTPClientOptions{
+			CallsPerSecond: utils.GetIntPtr(callsPerSecond),
+		}),
+	}
+	rpcClient := rpc.NewWithCustomRPCClient(jsonrpc.NewClientWithOpts(url, opts))
 	solanaClient := impl{
-		client:  rpc.NewWithCustomRPCClient(rpc.NewWithRateLimit(primaryURL, primaryCallsPerSecond)),
+		client:  rpcClient,
 		network: appConfig.GetNetwork(),
 	}
+
 	resp, err := solanaClient.GetVersion(context.Background())
 	if err != nil {
 		logrus.WithError(err).Fatalf("failed to get clients version info")
@@ -72,9 +82,9 @@ func createClient(
 	}
 	logrus.
 		WithFields(logrus.Fields{
-			"version":               resp.SolanaCore,
-			"primaryURL":            primaryURL,
-			"primaryCallsPerSecond": primaryCallsPerSecond,
+			"version":        resp.SolanaCore,
+			"url":            url,
+			"callsPerSecond": callsPerSecond,
 		}).
 		Info("created solana clients")
 

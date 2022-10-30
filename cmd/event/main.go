@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+
+	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/pkg/event"
@@ -34,17 +36,21 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			config.NewAppConfig,
 			config.NewPSQLConfig,
+
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
+
+			clients.DefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,
+			coingecko.NewCoinGeckoClient,
+
 			processor.NewProcessor,
 			alert.NewAlertService,
-			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			event.Server,
