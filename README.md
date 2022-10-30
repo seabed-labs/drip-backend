@@ -22,7 +22,6 @@
 
 - [^1] install go 1.18 
 - [^2] install all packages with
-- [^3] install the `oapi-codegen` cli, version `v1.10.1`
 - [^4] install `docker` and `docker-compose`
 - [^5] setup a `.env` file
 
@@ -38,8 +37,7 @@
 
 ## API Docs
 
-- [^3] use [oapi-codegen](https://github.com/deepmap/oapi-codegen) to code gen our api go types.
-- [^15] if the api docs are updated, we need to update the api codegen'd files
+- [^11] if the api docs are updated, we need to update the api codegen'd files
 - API docs are viewable at `http://localhost:8080/swagger.json`.
 
 ## Database
@@ -87,9 +85,6 @@ go run cmd/codegen/main.go
 
 [^2]: Install all go packages
     `go get -u ./...`
-
-[^3]: Install the oapi-codegen cli
-    `go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen`
 
 [^4]: Install Docker/Docker-compose
     [Docs](https://docs.docker.com/compose/install/)
@@ -148,9 +143,6 @@ go run cmd/codegen/main.go
 
 [^14]: Update mock files
     `./scripts/create-mocks.sh`
-
-[^15]: Update api-docs codegen'd files
-    `oapi-codegen -package apispec ./docs/swagger.yaml > pkg/api/apispec/generated.go`
 
 [//]: # ()
 [//]: # (```bash)

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/api/apispec"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	log "github.com/sirupsen/logrus"
@@ -29,6 +31,7 @@ func getDependencies() []fx.Option {
 		fx.Invoke(
 			database.RunMigrations,
 			database.GenerateModels,
+			apispec.GenerateAPIServer,
 		),
 		fx.NopLogger,
 	}
