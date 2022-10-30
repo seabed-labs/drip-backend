@@ -1,4 +1,4 @@
-package apispec
+package codegen
 
 import (
 	"fmt"

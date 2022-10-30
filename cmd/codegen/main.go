@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/api/apispec"
+	"github.com/dcaf-labs/drip/internal/codegen"
 
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
@@ -30,8 +30,8 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
-			database.GenerateModels,
-			apispec.GenerateAPIServer,
+			codegen.GenerateModels,
+			codegen.GenerateAPIServer,
 		),
 		fx.NopLogger,
 	}
