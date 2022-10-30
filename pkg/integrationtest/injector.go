@@ -51,7 +51,12 @@ func InjectDependencies(
 			logrus.WithError(err).Error("could not get recorder")
 			os.Exit(1)
 		}
-		defer r.Stop()
+		defer func(r *recorder.Recorder) {
+			if err := r.Stop(); err != nil {
+				logrus.WithError(err).Error("could stop recorder")
+				os.Exit(1)
+			}
+		}(r)
 		if r.Mode() != recorder.ModeRecordOnce {
 			logrus.Error("recorder should be in ModeRecordOnce")
 			os.Exit(1)
@@ -68,6 +73,8 @@ func InjectDependencies(
 		}
 	}
 
+	// comment out below for logs
+	logrus.SetOutput(ioutil.Discard)
 	opts := []fx.Option{
 		fx.Provide(
 			// configs
