@@ -1067,6 +1067,9 @@ components:
           example: "SOL"
         iconUrl:
           type: string
+        coinGeckoId:
+          type: string
+          example: wrapped-solana
 
     vault:
       type: object

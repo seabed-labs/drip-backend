@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/internal/scripts"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
@@ -42,6 +43,7 @@ func getDependencies() []fx.Option {
 			repository.NewAccountUpdateQueue,
 			processor.NewProcessor,
 			alert.NewAlertService,
+			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			database.RunMigrations,
