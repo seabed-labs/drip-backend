@@ -129,6 +129,9 @@ jobs:
           PSQL_PASS: drip
           PSQL_PORT: ${{ job.services.postgres.ports[5432] }}
           PSQL_HOST: postgres
+          ENV: STAGING
+          NETWORK: DEVNET
+          DRIP_PROGRAM_ID: F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo
         run: go test -v -coverpkg ./... ./... -coverprofile ./c.out $(go list ./...) || exit $?
 
       - name: Generate Code Coverage HTMl Report
