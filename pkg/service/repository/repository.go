@@ -44,6 +44,8 @@ type Repository interface {
 
 	GetTokenPair(context.Context, string, string) (*model.TokenPair, error)
 	GetTokenByAddress(ctx context.Context, mint string) (*model.Token, error)
+	// TODO: pass in ...string for
+	// TODO: rename mint to addresses to be consistent
 	GetTokensByMints(ctx context.Context, mints []string) ([]*model.Token, error)
 
 	GetTokenSwapByAddress(context.Context, string) (*model.TokenSwap, error)

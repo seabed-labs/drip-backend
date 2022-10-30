@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/internal/scripts"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
@@ -33,17 +34,21 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			config.NewAppConfig,
 			config.NewPSQLConfig,
+
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
+			repository.NewRepository,
+			repository.NewAccountUpdateQueue,
+
+			clients.DefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,
-			repository.NewRepository,
-			repository.NewAccountUpdateQueue,
+			coingecko.NewCoinGeckoClient,
+
 			processor.NewProcessor,
 			alert.NewAlertService,
-			coingecko.NewCoinGeckoClient,
 		),
 		fx.Invoke(
 			database.RunMigrations,

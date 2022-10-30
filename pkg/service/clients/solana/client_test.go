@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
@@ -26,7 +28,7 @@ func TestSolanaClient(t *testing.T) {
 	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 
-	client, err := NewSolanaClient(mockConfig)
+	client, err := NewSolanaClient(mockConfig, clients.DefaultClientProvider())
 	assert.NoError(t, err)
 
 	// Genesys go devnet RPC doesn't support airdrops for some reason

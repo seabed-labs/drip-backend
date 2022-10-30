@@ -9,6 +9,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 )
 
 type OrcaWhirlpoolClient interface {
@@ -17,8 +18,9 @@ type OrcaWhirlpoolClient interface {
 
 func NewOrcaWhirlpoolClient(
 	appConfig config.AppConfig,
+	retryClientProvider clients.RetryableHTTPClientProvider,
 ) OrcaWhirlpoolClient {
-	return newClient(appConfig.GetNetwork())
+	return newClient(appConfig.GetNetwork(), retryClientProvider)
 }
 
 type client struct {
@@ -26,10 +28,12 @@ type client struct {
 	connectionUrl string
 }
 
-func newClient(network config.Network) *client {
-	httpClient := clients.GetRateLimitedHTTPClient(callsPerSecond)
+func newClient(network config.Network, retryClientProvider clients.RetryableHTTPClientProvider) *client {
+	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
+		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
+	})
 	config := dripextension.NewConfiguration()
-	config.HTTPClient = httpClient.StandardClient()
+	config.HTTPClient = retryClient.StandardClient()
 	config.Host = host
 	config.UserAgent = "drip-backend"
 	config.Scheme = "https"

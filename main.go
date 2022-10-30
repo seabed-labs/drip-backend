@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
@@ -10,6 +9,8 @@ import (
 	"github.com/dcaf-labs/drip/pkg/event"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/base"
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
@@ -42,20 +43,25 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			config.NewAppConfig,
 			config.NewPSQLConfig,
+
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
+			repository.NewRepository,
+			repository.NewAccountUpdateQueue,
+
+			clients.DefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,
-			repository.NewRepository,
-			repository.NewAccountUpdateQueue,
-			middleware.NewHandler,
-			controller.NewHandler,
+			coingecko.NewCoinGeckoClient,
+
 			processor.NewProcessor,
 			alert.NewAlertService,
 			base.NewBase,
-			coingecko.NewCoinGeckoClient,
+
+			middleware.NewHandler,
+			controller.NewHandler,
 		),
 		fx.Invoke(
 			func() { log.SetFormatter(&log.JSONFormatter{}) },

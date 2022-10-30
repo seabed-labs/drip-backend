@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients"
+
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
@@ -20,7 +22,7 @@ func TestOrcaWhirlpoolClient(t *testing.T) {
 	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
 
-	client := NewOrcaWhirlpoolClient(mockConfig)
+	client := NewOrcaWhirlpoolClient(mockConfig, clients.DefaultClientProvider())
 
 	t.Run("GetOrcaWhirlpoolQuoteEstimate should swap estimate", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
