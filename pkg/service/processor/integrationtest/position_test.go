@@ -36,7 +36,7 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Len(t, tokenAccounts, 3)
 			// by extension vault tokens should exist
-			mints, err := repo.GetTokensByMints(context.Background(), []string{vault.TokenAMint, vault.TokenBMint})
+			mints, err := repo.GetTokensByAddresses(context.Background(), []string{vault.TokenAMint, vault.TokenBMint})
 			assert.NoError(t, err)
 			assert.Len(t, mints, 2)
 			// position should exist

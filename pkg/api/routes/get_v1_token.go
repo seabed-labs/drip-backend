@@ -10,7 +10,7 @@ import (
 
 func (h Handler) GetV1TokenPubkeyPath(c echo.Context, pubkeyPath apispec.PubkeyPathParam) error {
 	log := logrus.WithField("handler", "GetV1TokenPubkeyPath").WithField("pubkey", string(pubkeyPath))
-	tokens, err := h.repo.GetTokensByMints(c.Request().Context(), []string{string(pubkeyPath)})
+	tokens, err := h.repo.GetTokensByAddresses(c.Request().Context(), []string{string(pubkeyPath)})
 	if err != nil {
 		log.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})

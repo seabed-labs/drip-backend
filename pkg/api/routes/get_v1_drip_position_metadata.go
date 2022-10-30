@@ -47,7 +47,7 @@ func (h Handler) GetV1DripPositionPubkeyPathMetadata(
 		log.WithError(err).Error("failed to find vault for position")
 		return c.JSON(http.StatusOK, defaultTokenMetadata)
 	}
-	tokenMints, err := h.repo.GetTokensByMints(c.Request().Context(), []string{
+	tokenMints, err := h.repo.GetTokensByAddresses(c.Request().Context(), []string{
 		vault.TokenAMint, vault.TokenBMint,
 	})
 	if err != nil {
