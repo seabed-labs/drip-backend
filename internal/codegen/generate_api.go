@@ -41,6 +41,10 @@ func GenerateAPIServer() {
 		ImportMapping:      nil,
 		ExcludeSchemas:     nil,
 	})
+	if err != nil {
+		logrus.WithError(err).Error("failed to Generate")
+		os.Exit(1)
+	}
 
 	err = ioutil.WriteFile(outputPath, []byte(code), 0644)
 	if err != nil {
