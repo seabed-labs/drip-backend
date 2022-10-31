@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
@@ -50,7 +51,7 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 				assert.Equal(t, "JB4DSzoQ5SyxLETtGUrC5s1MvS6Y78PTmzczszZ7ZPtB", position.Authority)
 				assert.Equal(t, uint64(101000000), position.DepositedTokenAAmount)
 				assert.Equal(t, uint64(0), position.WithdrawnTokenBAmount)
-				assert.Equal(t, int64(1667137701), position.DepositTimestamp.Unix())
+				assert.Equal(t, time.Unix(1667152101, 0).Unix(), position.DepositTimestamp.Unix())
 				assert.Equal(t, uint64(1847), position.DcaPeriodIDBeforeDeposit)
 				assert.Equal(t, uint64(4), position.NumberOfSwaps)
 				assert.Equal(t, uint64(25250000), position.PeriodicDripAmount)

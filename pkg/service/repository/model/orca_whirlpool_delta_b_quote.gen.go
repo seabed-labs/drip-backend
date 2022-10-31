@@ -17,7 +17,7 @@ type OrcaWhirlpoolDeltaBQuote struct {
 	WhirlpoolPubkey string     `gorm:"column:whirlpool_pubkey;type:varchar;primaryKey" json:"whirlpoolPubkey" db:"whirlpool_pubkey"`
 	TokenPairID     string     `gorm:"column:token_pair_id;type:uuid;not null" json:"tokenPairId" db:"token_pair_id"`
 	DeltaB          uint64     `gorm:"column:delta_b;type:numeric;not null" json:"deltaB" db:"delta_b"`
-	LastUpdated     *time.Time `gorm:"column:last_updated;type:timestamp;not null;default:now()" json:"lastUpdated" db:"last_updated"`
+	LastUpdated     *time.Time `gorm:"column:last_updated;type:timestamptz;not null;default:now()" json:"lastUpdated" db:"last_updated"`
 }
 
 // TableName OrcaWhirlpoolDeltaBQuote's table name
