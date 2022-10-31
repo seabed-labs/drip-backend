@@ -18,7 +18,7 @@ type Position struct {
 	Authority                string    `gorm:"column:authority;type:varchar;not null" json:"authority" db:"authority"`
 	DepositedTokenAAmount    uint64    `gorm:"column:deposited_token_a_amount;type:numeric;not null" json:"depositedTokenAAmount" db:"deposited_token_a_amount"`
 	WithdrawnTokenBAmount    uint64    `gorm:"column:withdrawn_token_b_amount;type:numeric;not null" json:"withdrawnTokenBAmount" db:"withdrawn_token_b_amount"`
-	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;type:timestamp;not null" json:"depositTimestamp" db:"deposit_timestamp"`
+	DepositTimestamp         time.Time `gorm:"column:deposit_timestamp;type:timestamptz;not null" json:"depositTimestamp" db:"deposit_timestamp"`
 	DcaPeriodIDBeforeDeposit uint64    `gorm:"column:dca_period_id_before_deposit;type:numeric;not null" json:"dcaPeriodIdBeforeDeposit" db:"dca_period_id_before_deposit"`
 	NumberOfSwaps            uint64    `gorm:"column:number_of_swaps;type:numeric;not null" json:"numberOfSwaps" db:"number_of_swaps"`
 	PeriodicDripAmount       uint64    `gorm:"column:periodic_drip_amount;type:numeric;not null" json:"periodicDripAmount" db:"periodic_drip_amount"`
