@@ -40,3 +40,65 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 			})
 	})
 }
+
+func TestHandler_UpsertVaultByAddress(t *testing.T) {
+	t.Run("should upsert vault and all related accounts", func(t *testing.T) {
+		integrationtest.InjectDependencies(
+			&integrationtest.APIRecorderOptions{
+				Path: "./fixtures/upsert-vault-by-address",
+			},
+			func(
+				processor processor.Processor,
+				repo repository.Repository,
+			) {
+				vaultAddress := "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8"
+				// protoConfig: https://explorer.solana.com/address/BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8?cluster=devnet
+				assert.NoError(t, processor.UpsertVaultByAddress(context.Background(), vaultAddress))
+
+				// vault should exist
+				vault, err := repo.AdminGetVaultByAddress(context.Background(), "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8")
+				assert.NoError(t, err)
+				assert.NotNil(t, vault)
+
+				// by extension proto config should exist
+				protoConfig, err := repo.GetProtoConfigByAddress(context.Background(), "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr")
+				assert.NoError(t, err)
+				assert.NotNil(t, protoConfig)
+
+				// by extension vault token accounts should exist
+				tokenAccounts, err := repo.GetTokenAccountsByAddresses(context.Background(), vault.TokenAAccount, vault.TokenBAccount, vault.TreasuryTokenBAccount)
+				assert.NoError(t, err)
+				assert.Len(t, tokenAccounts, 3)
+
+				// by extension vault tokens should exist
+				mints, err := repo.GetTokensByAddresses(context.Background(), vault.TokenAMint, vault.TokenBMint)
+				assert.NoError(t, err)
+				assert.Len(t, mints, 2)
+
+				// by extension token pair should exist
+				tokenPair, err := repo.GetTokenPair(context.Background(), vault.TokenAMint, vault.TokenBMint)
+				assert.NoError(t, err)
+				assert.NotNil(t, tokenPair)
+				assert.Equal(t, "H9gBUJs5Kc5zyiKRTzZcYom4Hpj9VPHLy4VzExTVPgxa", tokenPair.TokenA)
+				assert.Equal(t, "7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M", tokenPair.TokenB)
+				// if the line below needs to be updated, add the field assertion above
+				assert.Equal(t, reflect.TypeOf(*tokenPair).NumField(), 3)
+
+				assert.Equal(t, "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8", vault.Pubkey)
+				assert.Equal(t, "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr", vault.ProtoConfig)
+				assert.Equal(t, "H9gBUJs5Kc5zyiKRTzZcYom4Hpj9VPHLy4VzExTVPgxa", vault.TokenAMint)
+				assert.Equal(t, "7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M", vault.TokenBMint)
+				assert.Equal(t, "HPTSZFzxKUsJKPrxSyYh6TuGQV7qfBqpW6c4A8DERxFr", vault.TokenAAccount)
+				assert.Equal(t, "9Swein4rvYYN1MJyFBjfTdvx8Lh3wzabwtWKddPWdhrP", vault.TokenBAccount)
+				assert.Equal(t, "6smBUZt2e7Dz9o6hWoXmY78n1rpXrgpNwNFtocZMU5QN", vault.TreasuryTokenBAccount)
+				assert.Equal(t, uint64(1847), vault.LastDcaPeriod)
+				assert.Equal(t, uint64(75250000), vault.DripAmount)
+				assert.Equal(t, int64(1664673300), vault.DcaActivationTimestamp.Unix())
+				assert.Equal(t, int32(1000), vault.MaxSlippageBps)
+				assert.Equal(t, false, vault.Enabled)
+				assert.Equal(t, tokenPair.ID, vault.TokenPairID)
+				// if the line below needs to be updated, add the field assertion above
+				assert.Equal(t, reflect.TypeOf(*vault).NumField(), 13)
+			})
+	})
+}
