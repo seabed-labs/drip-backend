@@ -460,10 +460,12 @@ func GetURLWithRateLimit(env config.Network) (string, int) {
 	switch env {
 	case config.MainnetNetwork:
 		return rpc.MainNetBeta_RPC, 3
-		//return "https://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d", 20
+		// mocha+1@dcaf.so
+		// return "https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388", 10
 	case config.DevnetNetwork:
 		return rpc.DevNet_RPC, 3
-		//return "https://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7", 15
+		// mocha+2@dcaf.so
+		// return "https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd", 10
 	case config.NilNetwork:
 		fallthrough
 	case config.LocalNetwork:
