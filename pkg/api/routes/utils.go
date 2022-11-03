@@ -82,10 +82,11 @@ func vaultPeriodModelsToAPI(vaultPeriodModels []*model.VaultPeriod) apispec.List
 
 func tokenModelToApi(tokenModel *model.Token) apispec.Token {
 	return apispec.Token{
-		Decimals: int(tokenModel.Decimals),
-		Pubkey:   tokenModel.Pubkey,
-		Symbol:   tokenModel.Symbol,
-		IconUrl:  tokenModel.IconURL,
+		Decimals:    int(tokenModel.Decimals),
+		Pubkey:      tokenModel.Pubkey,
+		Symbol:      tokenModel.Symbol,
+		IconUrl:     tokenModel.IconURL,
+		CoinGeckoId: tokenModel.CoinGeckoID,
 	}
 }
 

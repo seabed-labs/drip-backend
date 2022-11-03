@@ -119,8 +119,8 @@ func TestUtils(t *testing.T) {
 			Pubkey:      solana.NewWallet().PublicKey().String(),
 			Symbol:      utils.GetStringPtr("BTC"),
 			Decimals:    0,
-			IconURL:     nil,
-			CoinGeckoID: nil,
+			IconURL:     utils.GetStringPtr("url"),
+			CoinGeckoID: utils.GetStringPtr("wrapped-solana"),
 		}
 		apiModel := tokenModelToApi(&dbModel)
 		assert.Equal(t, dbModel.Pubkey, apiModel.Pubkey)
