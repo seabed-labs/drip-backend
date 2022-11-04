@@ -22,7 +22,7 @@ func IsStagingEnvironment(env Environment) bool {
 }
 
 func IsProductionEnvironment(env Environment) bool {
-	return env == ProdEnv
+	return env == ProdEnv || env == ProductionEnv
 }
 
 func IsLocalNetwork(network Network) bool {
