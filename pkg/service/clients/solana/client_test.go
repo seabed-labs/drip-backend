@@ -15,7 +15,6 @@ import (
 
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/test-go/testify/assert"
 )
 
@@ -32,10 +31,10 @@ func TestSolanaClient(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Genesys go devnet RPC doesn't support airdrops for some reason
-	rpcClient := rpc.New(rpc.DevNet_RPC)
-	_, err = rpcClient.RequestAirdrop(
-		context.Background(), client.GetWalletPubKey(), 100000000, "confirmed")
-	assert.NoError(t, err)
+	//rpcClient := rpc.New(rpc.DevNet_RPC)
+	//_, err = rpcClient.RequestAirdrop(
+	//	context.Background(), client.GetWalletPubKey(), 100000000, "confirmed")
+	//assert.NoError(t, err)
 
 	t.Run("GetWalletPubKey should return public key", func(t *testing.T) {
 		assert.Equal(t, client.GetWalletPubKey().String(), "J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")
