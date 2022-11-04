@@ -21,6 +21,7 @@ import (
 )
 
 func main() {
+	log.SetFormatter(&log.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
 		log.WithError(err).Fatalf("failed to start drip event processor")
@@ -36,23 +37,21 @@ func getDependencies() []fx.Option {
 		fx.Provide(
 			config.NewAppConfig,
 			config.NewPSQLConfig,
-
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
-
 			clients.DefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,
 			coingecko.NewCoinGeckoClient,
-
 			processor.NewProcessor,
 			alert.NewAlertService,
 		),
 		fx.Invoke(
+			database.RunMigrations,
 			event.Server,
 		),
 		fx.NopLogger,

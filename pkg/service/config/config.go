@@ -19,9 +19,10 @@ const (
 type Environment string
 
 const (
-	NilEnv     = Environment("")
-	StagingEnv = Environment("STAGING")
-	ProdEnv    = Environment("PROD")
+	NilEnv        = Environment("")
+	StagingEnv    = Environment("STAGING")
+	ProdEnv       = Environment("PROD")
+	ProductionEnv = Environment("PRODUCTION")
 )
 
 type EnvVar string
@@ -155,6 +156,9 @@ func NewAppConfig() (AppConfig, error) {
 	// Sane defaults
 	if config.Environment == NilEnv {
 		config.Environment = StagingEnv
+	} else if config.Environment == ProdEnv {
+		// ProdEnv is deprecated
+		config.Environment = ProductionEnv
 	}
 	if config.Network == NilNetwork {
 		config.Network = DevnetNetwork
