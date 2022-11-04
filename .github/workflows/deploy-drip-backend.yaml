@@ -49,7 +49,10 @@ on:
         required: true
         type: string
     secrets:
-      GA_TOKEN:
+      AWS_ACCESS_KEY_ID:
+        required: true
+        type: string
+      AWS_SECRET_ACCESS_KEY:
         required: true
         type: string
 
@@ -64,11 +67,10 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1 # More information on this action can be found below in the 'AWS Credentials' section
         with:
+          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+          aws-region: us-east-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -97,9 +99,9 @@ jobs:
           --build-arg GOOGLE_CLIENT_ID=${{ inputs.GOOGLE_CLIENT_ID }} \
           -t ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ inputs.$IMAGE_TAG }} . \
 
-      - name: Push to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: my-cr-repo
-          IMAGE_TAG: ${{ github.sha }}
-        run: docker push ${{ inputs.REGISTRY }}/${{ inputs.REGISTRY }}:${{ inputs.$IMAGE_TAG }}
+#      - name: Push to Amazon ECR
+#        env:
+#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          REPOSITORY: my-cr-repo
+#          IMAGE_TAG: ${{ github.sha }}
+#        run: docker push ${{ inputs.REGISTRY }}/${{ inputs.REGISTRY }}:${{ inputs.$IMAGE_TAG }}

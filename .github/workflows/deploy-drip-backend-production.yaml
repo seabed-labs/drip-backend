@@ -1,9 +1,9 @@
-name: Deploy Drip Backend Devent Staging
+name: Deploy Drip Backend Devent Production
 
 on:
   push:
     branches:
-      - "main"
+      - "devnet"
 
 permissions: write-all
 
@@ -12,19 +12,19 @@ jobs:
     name: deploy
     uses: dcaf-labs/drip-backend/.github/workflows/deploy-drip-backend.yaml@main
     with:
-      DISCORD_ACCESS_TOKEN: ${{ secrets.DEVNET_STAGING_DISCORD_ACCESS_TOKEN }}
-      DISCORD_WEBHOOK_ID: ${{ secrets.DEVNET_STAGING_DISCORD_WEBHOOK_ID }}
-      DRIP_BACKEND_WALLET: ${{ secrets.DEVNET_STAGING_DRIP_BACKEND_WALLET }}
-      DRIP_PROGRAM_ID: F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo
+      DISCORD_ACCESS_TOKEN: ${{ secrets.DEVNET_PRODUCTION_DISCORD_ACCESS_TOKEN }}
+      DISCORD_WEBHOOK_ID: ${{ secrets.DEVNET_PRODUCTION_DISCORD_WEBHOOK_ID }}
+      DRIP_BACKEND_WALLET: ${{ secrets.DEVNET_PRODUCTION_DRIP_BACKEND_WALLET }}
+      DRIP_PROGRAM_ID: dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk
       PORT: 8080
-      ENV: STAGING
+      ENV: PRODUCTION
       NETWORK: DEVNET
-      PSQL_USER: ${{ secrets.DEVNET_STAGING_PSQL_USER }}
-      PSQL_PASS:  ${{ secrets.DEVNET_STAGING_PSQL_PASS }}
-      PSQL_DBNAME: ${{ secrets.DEVNET_STAGING_PSQL_DBNAME }}
+      PSQL_USER: ${{ secrets.DEVNET_PRODUCTION_PSQL_USER }}
+      PSQL_PASS:  ${{ secrets.DEVNET_PRODUCTION_PSQL_PASS }}
+      PSQL_DBNAME: ${{ secrets.DEVNET_PRODUCTION_PSQL_DBNAME }}
       PSQL_PORT: 5432
-      PSQL_HOST: ${{ secrets.DEVNET_STAGING_PSQL_HOST }}
+      PSQL_HOST: ${{ secrets.DEVNET_PRODUCTION_PSQL_HOST }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      REGISTRY: 434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-staging
+      REGISTRY: 434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-production
       IMAGE_TAG: latest
     secrets: inherit
