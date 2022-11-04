@@ -2,6 +2,37 @@ name: Build and Deploy Drip Backend
 
 on:
   workflow_call:
+    inputs:
+      DRIP_PROGRAM_ID:
+        required: true
+        type: string
+      PORT:
+        required: true
+        type: string
+      ENV:
+        required: true
+        type: string
+      NETWORK:
+        required: true
+        type: string
+      PSQL_USER:
+        required: true
+        type: string
+      PSQL_PORT:
+        required: true
+        type: string
+      PSQL_DBNAME:
+        required: true
+        type: string
+      PSQL_HOST:
+        required: true
+        type: string
+      REGISTRY:
+        required: true
+        type: string
+      IMAGE_TAG:
+        required: true
+        type: string
     secrets:
       DISCORD_ACCESS_TOKEN:
         required: true
@@ -9,29 +40,9 @@ on:
         required: true
       DRIP_BACKEND_WALLET:
         required: true
-      DRIP_PROGRAM_ID:
-        required: true
-      PORT:
-        required: true
-      ENV:
-        required: true
-      NETWORK:
-        required: true
-      PSQL_USER:
-        required: true
       PSQL_PASS:
         required: true
-      PSQL_DBNAME:
-        required: true
-      PSQL_PORT:
-        required: true
-      PSQL_HOST:
-        required: true
       GOOGLE_CLIENT_ID:
-        required: true
-      REGISTRY:
-        required: true
-      IMAGE_TAG:
         required: true
       AWS_ACCESS_KEY_ID:
         required: true
@@ -49,7 +60,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1 # More information on this action can be found below in the 'AWS Credentials' section
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/my-github-actions-role
+#          role-to-assume: arn:aws:iam::123456789012:role/deploy-drip-backend
           aws-region: us-east-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -65,17 +76,17 @@ jobs:
           --build-arg DISCORD_ACCESS_TOKEN=${{ secrets.DISCORD_ACCESS_TOKEN }} \
           --build-arg DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} \
           --build-arg DRIP_BACKEND_WALLET=${{ secrets.DRIP_BACKEND_WALLET }} \
-          --build-arg DRIP_PROGRAM_ID=${{ secrets.DRIP_PROGRAM_ID }} \
-          --build-arg PORT=${{ secrets.PORT }} \
-          --build-arg ENV=${{ secrets.ENV }} \
-          --build-arg NETWORK=${{ secrets.NETWORK }} \
-          --build-arg PSQL_USER=${{ secrets.PSQL_USER }} \
+          --build-arg DRIP_PROGRAM_ID=${{ inputs.DRIP_PROGRAM_ID }} \
+          --build-arg PORT=${{ inputs.PORT }} \
+          --build-arg ENV=${{ inputs.ENV }} \
+          --build-arg NETWORK=${{ inputs.NETWORK }} \
+          --build-arg PSQL_USER=${{ inputs.PSQL_USER }} \
           --build-arg PSQL_PASS=${{ secrets.PSQL_PASS }} \
-          --build-arg PSQL_DBNAME=${{ secrets.PSQL_DBNAME }} \
-          --build-arg PSQL_PORT=${{ secrets.PSQL_PORT }} \
+          --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }} \
+          --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }} \
           --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }} \
           --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-          -t ${{ secrets.REGISTRY }}/${{ secrets.REPOSITORY }}:${{ secrets.IMAGE_TAG }} . \
+          -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }} . \
 
 #      - name: Push to Amazon ECR
 #        env:
