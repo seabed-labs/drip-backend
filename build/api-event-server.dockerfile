@@ -42,6 +42,8 @@ COPY cmd ./cmd
 COPY internal ./internal
 COPY pkg ./pkg
 
+# https://github.com/montanaflynn/golang-docker-cache
+RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
 RUN go build -o app ./main.go
 
 CMD ["./app"]
