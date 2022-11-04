@@ -70,23 +70,22 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Tag Image
-        run: | 
-          docker build \
-          --platform linux/amd64 \
-          --build-arg DISCORD_ACCESS_TOKEN=${{ secrets.DISCORD_ACCESS_TOKEN }} \
-          --build-arg DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} \
-          --build-arg DRIP_BACKEND_WALLET=${{ secrets.DRIP_BACKEND_WALLET }} \
-          --build-arg DRIP_PROGRAM_ID=${{ inputs.DRIP_PROGRAM_ID }} \
-          --build-arg PORT=${{ inputs.PORT }} \
-          --build-arg ENV=${{ inputs.ENV }} \
-          --build-arg NETWORK=${{ inputs.NETWORK }} \
-          --build-arg PSQL_USER=${{ inputs.PSQL_USER }} \
-          --build-arg PSQL_PASS=${{ secrets.PSQL_PASS }} \
-          --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }} \
-          --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }} \
-          --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }} \
-          --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-          -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }} . \
+        run: docker build 
+          --platform linux/amd64
+          --build-arg DISCORD_ACCESS_TOKEN=${{ secrets.DISCORD_ACCESS_TOKEN }}
+          --build-arg DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} 
+          --build-arg DRIP_BACKEND_WALLET=${{ secrets.DRIP_BACKEND_WALLET }}
+          --build-arg DRIP_PROGRAM_ID=${{ inputs.DRIP_PROGRAM_ID }}
+          --build-arg PORT=${{ inputs.PORT }}
+          --build-arg ENV=${{ inputs.ENV }}
+          --build-arg NETWORK=${{ inputs.NETWORK }}
+          --build-arg PSQL_USER=${{ inputs.PSQL_USER }}
+          --build-arg PSQL_PASS=${{ secrets.PSQL_PASS }}
+          --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }}
+          --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }}
+          --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }}
+          --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }}
           -f build/api-event-server.dockerfile .
 #      - name: Push to Amazon ECR
 #        env:
