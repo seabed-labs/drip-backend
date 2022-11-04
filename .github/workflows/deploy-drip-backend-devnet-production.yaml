@@ -12,19 +12,21 @@ jobs:
     name: deploy
     uses: dcaf-labs/drip-backend/.github/workflows/deploy-drip-backend.yaml@main
     with:
-      DISCORD_ACCESS_TOKEN: ${{ secrets.DEVNET_PRODUCTION_DISCORD_ACCESS_TOKEN }}
-      DISCORD_WEBHOOK_ID: ${{ secrets.DEVNET_PRODUCTION_DISCORD_WEBHOOK_ID }}
-      DRIP_BACKEND_WALLET: ${{ secrets.DEVNET_PRODUCTION_DRIP_BACKEND_WALLET }}
-      DRIP_PROGRAM_ID: dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk
-      PORT: 8080
-      ENV: PRODUCTION
-      NETWORK: DEVNET
-      PSQL_USER: ${{ secrets.DEVNET_PRODUCTION_PSQL_USER }}
-      PSQL_PASS:  ${{ secrets.DEVNET_PRODUCTION_PSQL_PASS }}
-      PSQL_DBNAME: ${{ secrets.DEVNET_PRODUCTION_PSQL_DBNAME }}
-      PSQL_PORT: 5432
-      PSQL_HOST: ${{ secrets.DEVNET_PRODUCTION_PSQL_HOST }}
-      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      REGISTRY: 434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-production
-      IMAGE_TAG: latest
-    secrets: inherit
+      DRIP_PROGRAM_ID: "dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"
+      ENV: "PRODUCTION"
+      NETWORK: "DEVNET"
+      port: "8080"
+      PSQL_USER: "postgres"
+      PSQL_PORT: "5432"
+      PSQL_DBNAME: "drip-devnet-production"
+      PSQL_HOST: "database-1.cluster-czi7cvr73oui.us-east-1.rds.amazonaws.com"
+      REGISTRY: "434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-production"
+      IMAGE_TAG: "latest"
+    secrets:
+      DISCORD_ACCESS_TOKEN: "${{ secrets.DEVNET_PRODUCTION_DISCORD_ACCESS_TOKEN }}"
+      DISCORD_WEBHOOK_ID: "${{ secrets.DEVNET_PRODUCTION_DISCORD_WEBHOOK_ID }}"
+      DRIP_BACKEND_WALLET: "${{ secrets.DEVNET_PRODUCTION_DRIP_BACKEND_WALLET }}"
+      PSQL_PASS: "${{ secrets.DEVNET_PRODUCTION_PSQL_PASS }}"
+      GOOGLE_CLIENT_ID: "${{ secrets.GOOGLE_CLIENT_ID }}"
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
