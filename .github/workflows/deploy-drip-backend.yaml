@@ -82,7 +82,7 @@ jobs:
           --build-arg PSQL_PASS=${{ secrets.PSQL_PASS }}
           --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }}
           --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }}
-          --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }}
+          --build-arg PSQL_HOST=${{ inputs.PSQL_HOST }}
           --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }}
           -f build/api-event-server.dockerfile .
