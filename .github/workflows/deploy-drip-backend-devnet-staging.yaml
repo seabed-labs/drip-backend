@@ -28,20 +28,20 @@ jobs:
 #      REGISTRY: 434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-staging
 #      IMAGE_TAG: latest
     secrets:
-      DISCORD_ACCESS_TOKEN: ${{ secrets.DEVNET_STAGING_DISCORD_ACCESS_TOKEN }}
-      DISCORD_WEBHOOK_ID: ${{ secrets.DEVNET_STAGING_DISCORD_WEBHOOK_ID }}
-      DRIP_BACKEND_WALLET: ${{ secrets.DEVNET_STAGING_DRIP_BACKEND_WALLET }}
-      DRIP_PROGRAM_ID: F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo
+      DISCORD_ACCESS_TOKEN: "${{ secrets.DEVNET_STAGING_DISCORD_ACCESS_TOKEN }}"
+      DISCORD_WEBHOOK_ID: "${{ secrets.DEVNET_STAGING_DISCORD_WEBHOOK_ID }}"
+      DRIP_BACKEND_WALLET: "${{ secrets.DEVNET_STAGING_DRIP_BACKEND_WALLET }}"
+      DRIP_PROGRAM_ID: "F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo"
       PORT: "8080"
-      ENV: STAGING
-      NETWORK: DEVNET
-      PSQL_USER: ${{ secrets.DEVNET_STAGING_PSQL_USER }}
-      PSQL_PASS: ${{ secrets.DEVNET_STAGING_PSQL_PASS }}
-      PSQL_DBNAME: ${{ secrets.DEVNET_STAGING_PSQL_DBNAME }}
-      PSQL_PORT: 5432
-      PSQL_HOST: ${{ secrets.DEVNET_STAGING_PSQL_HOST }}
-      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      REGISTRY: 434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-staging
-      IMAGE_TAG: latest
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      ENV: "STAGING"
+      NETWORK: "DEVNET"
+      PSQL_USER: "${{ secrets.DEVNET_STAGING_PSQL_USER }}"
+      PSQL_PASS: "${{ secrets.DEVNET_STAGING_PSQL_PASS }}"
+      PSQL_DBNAME: "${{ secrets.DEVNET_STAGING_PSQL_DBNAME }}"
+      PSQL_PORT: "5432"
+      PSQL_HOST: "${{ secrets.DEVNET_STAGING_PSQL_HOST }}"
+      GOOGLE_CLIENT_ID: "${{ secrets.GOOGLE_CLIENT_ID }}"
+      REGISTRY: "434618599721.dkr.ecr.us-east-1.amazonaws.com/drip-backend-devnet-staging"
+      IMAGE_TAG: "latest"
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
