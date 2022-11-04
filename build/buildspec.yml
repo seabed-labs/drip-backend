@@ -9,7 +9,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build --build-arg DISCORD_ACCESS_TOKEN=${DISCORD_ACCESS_TOKEN} --build-arg DISCORD_WEBHOOK_ID=${DISCORD_WEBHOOK_ID} --build-arg DRIP_BACKEND_WALLET=${DRIP_BACKEND_WALLET} --build-arg DRIP_PROGRAM_ID=${DRIP_PROGRAM_ID} --build-arg PORT=${PORT} --build-arg ENV=${ENV} --build-arg GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} --build-arg NETWORK=${NETWORK} --build-arg PSQL_USER=${PSQL_USER} --build-arg PSQL_PASS=${PSQL_PASS} --build-arg PSQL_DBNAME=${PSQL_DBNAME} --build-arg PSQL_PORT=${PSQL_PORT} --build-arg PSQL_HOST=${PSQL_HOST} -t $IMAGE_REPO_NAME:$IMAGE_TAG -f build/api-event-server.dockerfile .
+      - docker build --platform linux/amd64 --build-arg DISCORD_ACCESS_TOKEN=${DISCORD_ACCESS_TOKEN} --build-arg DISCORD_WEBHOOK_ID=${DISCORD_WEBHOOK_ID} --build-arg DRIP_BACKEND_WALLET=${DRIP_BACKEND_WALLET} --build-arg DRIP_PROGRAM_ID=${DRIP_PROGRAM_ID} --build-arg PORT=${PORT} --build-arg ENV=${ENV} --build-arg GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} --build-arg NETWORK=${NETWORK} --build-arg PSQL_USER=${PSQL_USER} --build-arg PSQL_PASS=${PSQL_PASS} --build-arg PSQL_DBNAME=${PSQL_DBNAME} --build-arg PSQL_PORT=${PSQL_PORT} --build-arg PSQL_HOST=${PSQL_HOST} -t $IMAGE_REPO_NAME:$IMAGE_TAG -f build/api-event-server.dockerfile .
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
   post_build:
     commands:
