@@ -36,14 +36,15 @@ WORKDIR /drip-backend
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
+# https://github.com/montanaflynn/golang-docker-cache
+RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
 
 COPY main.go main.go
 COPY cmd ./cmd
 COPY internal ./internal
 COPY pkg ./pkg
 
-# https://github.com/montanaflynn/golang-docker-cache
-RUN go mod graph | awk '{if ($1 !~ "@") print $2}' | xargs go get
+
 RUN go build -o app ./main.go
 
 CMD ["./app"]
