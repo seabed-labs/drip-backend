@@ -87,7 +87,7 @@ jobs:
           --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }} \
           --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
           -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }} . \
-          -f build/api-event-server.dockerfile . \
+          -f build/api-event-server.dockerfile .
 #      - name: Push to Amazon ECR
 #        env:
 #          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
