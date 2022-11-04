@@ -2,7 +2,7 @@ name: Build and Deploy Drip Backend
 
 on:
   workflow_call:
-    inputs:
+    secrets:
       DISCORD_ACCESS_TOKEN:
         required: true
         type: string
@@ -48,7 +48,6 @@ on:
       IMAGE_TAG:
         required: true
         type: string
-    secrets:
       AWS_ACCESS_KEY_ID:
         required: true
         type: string
