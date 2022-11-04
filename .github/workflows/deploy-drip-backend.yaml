@@ -87,9 +87,6 @@ jobs:
           --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           -t ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }}
           -f build/api-event-server.dockerfile .
-#      - name: Push to Amazon ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: my-cr-repo
-#          IMAGE_TAG: ${{ github.sha }}
-#        run: docker push ${{ inputs.REGISTRY }}/${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }}
+
+      - name: Push to Amazon ECR
+        run: docker push ${{ inputs.REGISTRY }}:${{ inputs.IMAGE_TAG }}
