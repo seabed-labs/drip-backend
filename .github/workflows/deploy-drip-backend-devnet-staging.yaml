@@ -1,4 +1,4 @@
-name: Deploy Drip Backend Devent Staging
+name: Deploy Drip Backend Devnet Staging
 
 on:
   push:
