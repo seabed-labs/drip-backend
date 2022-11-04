@@ -1,0 +1,14 @@
+name: Deploy Drip Backend Devent Staging
+
+on: workflow_dispatch
+
+permissions: write-all
+
+jobs:
+  rebase-all:
+    name: deploy
+    uses: dcaf-labs/drip-backend/.github/workflows/deploy-drip-backend.yaml@main
+    with:
+      target: devnet
+      source: main
+    secrets: inherit

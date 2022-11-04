@@ -1,0 +1,105 @@
+name: Build and Deploy Drip Backend
+
+on:
+  workflow_call:
+    inputs:
+      DISCORD_ACCESS_TOKEN:
+        required: true
+        type: string
+      DISCORD_WEBHOOK_ID:
+        required: true
+        type: string
+      DRIP_BACKEND_WALLET:
+        required: true
+        type: string
+      DRIP_PROGRAM_ID:
+        required: true
+        type: string
+      PORT:
+        required: true
+        type: string
+      ENV:
+        required: true
+        type: string
+      NETWORK:
+        required: true
+        type: string
+      PSQL_USER:
+        required: true
+        type: string
+      PSQL_PASS:
+        required: true
+        type: string
+      PSQL_DBNAME:
+        required: true
+        type: string
+      PSQL_PORT:
+        required: true
+        type: string
+      PSQL_HOST:
+        required: true
+        type: string
+      GOOGLE_CLIENT_ID:
+        required: true
+        type: string
+      REGISTRY:
+        required: true
+        type: string
+      IMAGE_TAG:
+        required: true
+        type: string
+    secrets:
+      GA_TOKEN:
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1 # More information on this action can be found below in the 'AWS Credentials' section
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-external-id: ${{ secrets.AWS_ROLE_EXTERNAL_ID }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Tag Image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: my-cr-repo
+          IMAGE_TAG: ${{ github.sha }}
+        run: | 
+          docker build \
+          --platform linux/amd64 \
+          --build-arg DISCORD_ACCESS_TOKEN=${{ inputs.DISCORD_ACCESS_TOKEN }} \
+          --build-arg DISCORD_WEBHOOK_ID=${{ inputs.DISCORD_WEBHOOK_ID }} \
+          --build-arg DRIP_BACKEND_WALLET=${{ inputs.DRIP_BACKEND_WALLET }} \
+          --build-arg DRIP_PROGRAM_ID=${{ inputs.DRIP_PROGRAM_ID }} \
+          --build-arg PORT=${{inputs.PORT }} \
+          --build-arg ENV=${{ inputs.ENV }} \
+          --build-arg NETWORK=${{ inputs.NETWORK }} \
+          --build-arg PSQL_USER=${{ inputs.PSQL_USER }} \
+          --build-arg PSQL_PASS=${{ inputs.PSQL_PASS }} \
+          --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }} \
+          --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }} \
+          --build-arg PSQL_HOST=${{ inputs.PSQL_HOST }} \
+          --build-arg GOOGLE_CLIENT_ID=${{ inputs.GOOGLE_CLIENT_ID }} \
+          -t ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ inputs.$IMAGE_TAG }} . \
+
+      - name: Push to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: my-cr-repo
+          IMAGE_TAG: ${{ github.sha }}
+        run: docker push ${{ inputs.REGISTRY }}/${{ inputs.REGISTRY }}:${{ inputs.$IMAGE_TAG }}
