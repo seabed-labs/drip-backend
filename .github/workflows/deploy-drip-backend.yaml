@@ -5,55 +5,38 @@ on:
     secrets:
       DISCORD_ACCESS_TOKEN:
         required: true
-        type: string
       DISCORD_WEBHOOK_ID:
         required: true
-        type: string
       DRIP_BACKEND_WALLET:
         required: true
-        type: string
       DRIP_PROGRAM_ID:
         required: true
-        type: string
       PORT:
         required: true
-        type: string
       ENV:
         required: true
-        type: string
       NETWORK:
         required: true
-        type: string
       PSQL_USER:
         required: true
-        type: string
       PSQL_PASS:
         required: true
-        type: string
       PSQL_DBNAME:
         required: true
-        type: string
       PSQL_PORT:
         required: true
-        type: string
       PSQL_HOST:
         required: true
-        type: string
       GOOGLE_CLIENT_ID:
         required: true
-        type: string
       REGISTRY:
         required: true
-        type: string
       IMAGE_TAG:
         required: true
-        type: string
       AWS_ACCESS_KEY_ID:
         required: true
-        type: string
       AWS_SECRET_ACCESS_KEY:
         required: true
-        type: string
 
 jobs:
   build:
