@@ -83,20 +83,20 @@ jobs:
         run: | 
           docker build \
           --platform linux/amd64 \
-          --build-arg DISCORD_ACCESS_TOKEN=${{ inputs.DISCORD_ACCESS_TOKEN }} \
-          --build-arg DISCORD_WEBHOOK_ID=${{ inputs.DISCORD_WEBHOOK_ID }} \
-          --build-arg DRIP_BACKEND_WALLET=${{ inputs.DRIP_BACKEND_WALLET }} \
-          --build-arg DRIP_PROGRAM_ID=${{ inputs.DRIP_PROGRAM_ID }} \
-          --build-arg PORT=${{inputs.PORT }} \
-          --build-arg ENV=${{ inputs.ENV }} \
-          --build-arg NETWORK=${{ inputs.NETWORK }} \
-          --build-arg PSQL_USER=${{ inputs.PSQL_USER }} \
-          --build-arg PSQL_PASS=${{ inputs.PSQL_PASS }} \
-          --build-arg PSQL_DBNAME=${{ inputs.PSQL_DBNAME }} \
-          --build-arg PSQL_PORT=${{ inputs.PSQL_PORT }} \
-          --build-arg PSQL_HOST=${{ inputs.PSQL_HOST }} \
-          --build-arg GOOGLE_CLIENT_ID=${{ inputs.GOOGLE_CLIENT_ID }} \
-          -t ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ inputs.$IMAGE_TAG }} . \
+          --build-arg DISCORD_ACCESS_TOKEN=${{ secrets.DISCORD_ACCESS_TOKEN }} \
+          --build-arg DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} \
+          --build-arg DRIP_BACKEND_WALLET=${{ secrets.DRIP_BACKEND_WALLET }} \
+          --build-arg DRIP_PROGRAM_ID=${{ secrets.DRIP_PROGRAM_ID }} \
+          --build-arg PORT=${{ secrets.PORT }} \
+          --build-arg ENV=${{ secrets.ENV }} \
+          --build-arg NETWORK=${{ secrets.NETWORK }} \
+          --build-arg PSQL_USER=${{ secrets.PSQL_USER }} \
+          --build-arg PSQL_PASS=${{ secrets.PSQL_PASS }} \
+          --build-arg PSQL_DBNAME=${{ secrets.PSQL_DBNAME }} \
+          --build-arg PSQL_PORT=${{ secrets.PSQL_PORT }} \
+          --build-arg PSQL_HOST=${{ secrets.PSQL_HOST }} \
+          --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+          -t ${{ secrets.REGISTRY }}/${{ secrets.REPOSITORY }}:${{ secrets.$IMAGE_TAG }} . \
 
 #      - name: Push to Amazon ECR
 #        env:
