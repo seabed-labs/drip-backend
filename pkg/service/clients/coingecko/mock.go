@@ -50,6 +50,26 @@ func (mr *MockCoinGeckoClientMockRecorder) GetCoinGeckoMetadata(ctx, contractAdd
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoinGeckoMetadata", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetCoinGeckoMetadata), ctx, contractAddress)
 }
 
+// GetMarketPriceForTokens mocks base method.
+func (m *MockCoinGeckoClient) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range coinGeckoIDs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetMarketPriceForTokens", varargs...)
+	ret0, _ := ret[0].(CoinGeckoTokensMarketPriceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMarketPriceForTokens indicates an expected call of GetMarketPriceForTokens.
+func (mr *MockCoinGeckoClientMockRecorder) GetMarketPriceForTokens(ctx interface{}, coinGeckoIDs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, coinGeckoIDs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMarketPriceForTokens", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetMarketPriceForTokens), varargs...)
+}
+
 // sendUnAuthenticatedGetRequest mocks base method.
 func (m *MockCoinGeckoClient) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {
 	m.ctrl.T.Helper()

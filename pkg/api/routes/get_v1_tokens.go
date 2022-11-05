@@ -10,7 +10,7 @@ import (
 )
 
 func (h Handler) GetV1Tokens(c echo.Context) error {
-	tokens, err := h.repo.GetAllSupportTokens(c.Request().Context())
+	tokens, err := h.repo.GetAllSupportedTokens(c.Request().Context())
 	if err != nil {
 		log.WithError(err).Errorf("failed to get tokens")
 		return c.JSON(http.StatusInternalServerError, apispec.ErrorResponse{Error: "internal api error"})

@@ -75,7 +75,7 @@ func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *stri
 	}
 	if coinGeckoID == nil {
 		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, mint); err == nil {
-			coinGeckoID = &coinGeckoMeta.Id
+			coinGeckoID = &coinGeckoMeta.ID
 		}
 	}
 	return symbol, iconURL, coinGeckoID

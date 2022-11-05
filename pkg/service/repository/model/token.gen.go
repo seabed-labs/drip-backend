@@ -4,18 +4,35 @@
 
 package model
 
+import "reflect"
+
 const TableNameToken = "token"
 
 // Token mapped from table <token>
 type Token struct {
-	Pubkey      string  `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
-	Symbol      *string `gorm:"column:symbol;type:varchar" json:"symbol" db:"symbol"`
-	Decimals    int16   `gorm:"column:decimals;type:int2;not null" json:"decimals" db:"decimals"`
-	IconURL     *string `gorm:"column:icon_url;type:varchar" json:"iconUrl" db:"icon_url"`
-	CoinGeckoID *string `gorm:"column:coin_gecko_id;type:varchar" json:"coinGeckoId" db:"coin_gecko_id"`
+	Pubkey        string   `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
+	Symbol        *string  `gorm:"column:symbol;type:varchar" json:"symbol" db:"symbol"`
+	Decimals      int16    `gorm:"column:decimals;type:int2;not null" json:"decimals" db:"decimals"`
+	IconURL       *string  `gorm:"column:icon_url;type:varchar" json:"iconUrl" db:"icon_url"`
+	CoinGeckoID   *string  `gorm:"column:coin_gecko_id;type:varchar" json:"coinGeckoId" db:"coin_gecko_id"`
+	UIMarketPrice *float64 `gorm:"column:ui_market_price;type:numeric" json:"uiMarketPrice" db:"ui_market_price"`
+	Name          *string  `gorm:"column:name;type:varchar" json:"name" db:"name"`
+	MarketCapRank *int32   `gorm:"column:market_cap_rank;type:int4" json:"marketCapRank" db:"market_cap_rank"`
 }
 
 // TableName Token's table name
 func (*Token) TableName() string {
 	return TableNameToken
+}
+
+func (t Token) GetAllColumns() []string {
+	var res []string
+	numFields := reflect.TypeOf(t).NumField()
+	i := 0
+	for i < numFields {
+		field := reflect.TypeOf(t).Field(i)
+		res = append(res, field.Tag.Get("db"))
+		i++
+	}
+	return res
 }

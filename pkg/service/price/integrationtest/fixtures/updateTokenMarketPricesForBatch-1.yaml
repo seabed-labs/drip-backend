@@ -1,0 +1,80 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: api.coingecko.com
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers: {}
+        url: https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=orca%2Cmsol&order=market_cap_desc&per_page=100&page=1&sparkline=false
+        method: GET
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '[{"id":"msol","symbol":"msol","name":"Marinade staked SOL","image":"https://assets.coingecko.com/coins/images/17752/large/mSOL.png?1644541955","current_price":39.49,"market_cap":274446197,"market_cap_rank":149,"fully_diluted_valuation":274446197,"total_volume":15892416,"high_24h":41.25,"low_24h":35.83,"price_change_24h":3.61,"price_change_percentage_24h":10.05553,"market_cap_change_24h":25351020,"market_cap_change_percentage_24h":10.17724,"circulating_supply":6956110.0,"total_supply":6956110.0,"max_supply":6956110.0,"ath":3541.84,"ath_change_percentage":-98.8848,"ath_date":"2021-08-23T22:16:35.076Z","atl":27.53,"atl_change_percentage":43.474,"atl_date":"2022-06-14T02:42:27.638Z","roi":null,"last_updated":"2022-11-05T20:21:48.754Z"},{"id":"orca","symbol":"orca","name":"Orca","image":"https://assets.coingecko.com/coins/images/17547/large/Orca_Logo.png?1628781615","current_price":0.920703,"market_cap":21746831,"market_cap_rank":670,"fully_diluted_valuation":91681204,"total_volume":593116,"high_24h":0.937357,"low_24h":0.878492,"price_change_24h":0.03984804,"price_change_percentage_24h":4.52379,"market_cap_change_24h":834113,"market_cap_change_percentage_24h":3.98855,"circulating_supply":23720054.462121,"total_supply":100000000.0,"max_supply":100000000.0,"ath":20.33,"ath_change_percentage":-95.46866,"ath_date":"2021-10-02T20:14:11.766Z","atl":0.351125,"atl_change_percentage":162.39122,"atl_date":"2022-06-19T19:34:08.830Z","roi":null,"last_updated":"2022-11-05T20:21:54.860Z"}]'
+        headers:
+            Access-Control-Allow-Headers:
+                - Origin, X-Requested-With, Content-Type, Accept, Authorization
+            Access-Control-Allow-Methods:
+                - POST, PUT, DELETE, GET, OPTIONS
+            Access-Control-Allow-Origin:
+                - '*'
+            Access-Control-Expose-Headers:
+                - link, per-page, total
+            Access-Control-Request-Method:
+                - '*'
+            Age:
+                - "43"
+            Alternate-Protocol:
+                - 443:npn-spdy/2
+            Cache-Control:
+                - public, max-age=120
+            Cf-Cache-Status:
+                - HIT
+            Cf-Ray:
+                - 76584d9a3cc64009-YYZ
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Sat, 05 Nov 2022 20:22:43 GMT
+            Etag:
+                - W/"092b75806eabd1cc64b2f33e2db0484c"
+            Expires:
+                - Sat, 05 Nov 2022 20:24:43 GMT
+            Referrer-Policy:
+                - strict-origin-when-cross-origin
+            Server:
+                - cloudflare
+            Vary:
+                - Accept-Encoding, Origin
+            X-Content-Type-Options:
+                - nosniff
+            X-Download-Options:
+                - noopen
+            X-Frame-Options:
+                - SAMEORIGIN
+            X-Permitted-Cross-Domain-Policies:
+                - none
+            X-Request-Id:
+                - 0a344641-a63f-4d24-96d6-89799f18009f
+            X-Runtime:
+                - "0.040661"
+            X-Xss-Protection:
+                - 1; mode=block
+        status: 200 OK
+        code: 200
+        duration: 75.243625ms

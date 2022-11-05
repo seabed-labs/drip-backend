@@ -53,7 +53,7 @@ func (d repositoryImpl) GetSPLTokenSwapsByTokenPairIDs(ctx context.Context, toke
 }
 
 // todo: dedupe with GetAllSupportedTokenAs
-func (d repositoryImpl) GetAllSupportTokens(ctx context.Context) ([]*model.Token, error) {
+func (d repositoryImpl) GetAllSupportedTokens(ctx context.Context) ([]*model.Token, error) {
 	tokenPairs, err := d.repo.TokenPair.WithContext(ctx).
 		Join(d.repo.Vault, d.repo.Vault.TokenPairID.EqCol(d.repo.TokenPair.ID)).
 		Where(d.repo.Vault.Enabled.Is(true)).

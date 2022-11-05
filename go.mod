@@ -40,6 +40,7 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
+	github.com/go-co-op/gocron v1.17.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
@@ -68,6 +69,7 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20210812194225-61421b77c44b // indirect
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -76,6 +78,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220930213112-107f3e3c3b0b // indirect
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.11 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

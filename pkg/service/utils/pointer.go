@@ -26,3 +26,8 @@ func GetInt32Ptr(val int32) *int32 {
 	temp := val
 	return &temp
 }
+
+func GetFloat64Ptr(val float64) *float64 {
+	temp := val
+	return &temp
+}
