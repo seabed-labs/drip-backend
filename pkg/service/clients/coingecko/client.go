@@ -50,7 +50,10 @@ func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs 
 	var res CoinGeckoTokensMarketPriceResponse
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	if err = json.Unmarshal(body, &res); err != nil {
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -64,7 +67,7 @@ func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress 
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	if err = json.Unmarshal(body, &cgMeta); err != nil {
+	if err := json.Unmarshal(body, &cgMeta); err != nil {
 		return nil, err
 	}
 	return cgMeta, nil

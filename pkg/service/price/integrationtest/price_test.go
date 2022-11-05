@@ -32,7 +32,7 @@ func TestPriceService(t *testing.T) {
 				coinGeckoClient coingecko.CoinGeckoClient,
 			) {
 				priceService, err := price.NewPriceService(dummyInterface{}, repo, coinGeckoClient)
-
+				assert.NoError(t, err)
 				assert.NoError(t, repo.UpsertTokens(context.Background(), &model.Token{
 					Pubkey:      "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
 					Symbol:      utils.GetStringPtr("ORCA"),

@@ -48,7 +48,7 @@ func TestHandler_GetTokens(t *testing.T) {
 		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
 		m.
 			EXPECT().
-			GetAllSupportTokens(gomock.Any()).
+			GetAllSupportedTokens(gomock.Any()).
 			Return(tokenModels, nil).
 			AnyTimes()
 
