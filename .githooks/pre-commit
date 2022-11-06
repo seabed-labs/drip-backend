@@ -4,6 +4,5 @@
 ./scripts/create-mocks.sh
 git add **mock.go
 git add **.gen.go
-git add **.generated.**
 # if this fails, check readme on how to install it
 golangci-lint run
