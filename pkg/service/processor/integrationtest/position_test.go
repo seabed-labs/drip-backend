@@ -19,7 +19,7 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 	t.Run("should upsert position and all related accounts", func(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
-				FixturePath: "./fixtures/upsert-position-by-address",
+				FixturePath: "./fixtures/test3",
 			},
 			func(
 				processor processor.Processor,
