@@ -2,9 +2,7 @@ package coingecko
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +15,7 @@ import (
 
 type CoinGeckoClient interface {
 	GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error)
-	GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error)
+	GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta CoinGeckoMetadataResponse, err error)
 	GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error)
 	sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error)
 }
@@ -44,13 +42,8 @@ func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse
 	if err != nil {
 		return nil, err
 	}
-	var res CoinsListResponse
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	res, err := clients.DecodeRequestBody(resp, CoinsListResponse{})
 	if err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, err
 	}
 	return lo2.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
@@ -69,31 +62,16 @@ func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs 
 	if err != nil {
 		return nil, err
 	}
-	var res CoinGeckoTokensMarketPriceResponse
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(body, &res); err != nil {
-		return nil, err
-	}
-	return res, nil
+	return clients.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
 }
 
-func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (*CoinGeckoMetadataResponse, error) {
+func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
 	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
-		return nil, err
+		return CoinGeckoMetadataResponse{}, err
 	}
-	var res *CoinGeckoMetadataResponse
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err := json.Unmarshal(body, &res); err != nil {
-		return nil, err
-	}
-	return res, nil
+	return clients.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
 }
 
 func (client *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {

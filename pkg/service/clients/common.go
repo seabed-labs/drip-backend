@@ -2,6 +2,8 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -89,4 +91,16 @@ func getRateLimitedHTTPClient(options RateLimitHTTPClientOptions) RetryableHTTPC
 		}
 	}
 	return RetryableHTTPClient{client}
+}
+
+func DecodeRequestBody[V any](resp *http.Response, res V) (V, error) {
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return res, err
+	}
+	if err := json.Unmarshal(body, &res); err != nil {
+		return res, err
+	}
+	return res, nil
 }
