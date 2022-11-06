@@ -1,7 +1,7 @@
 package coingecko
 
 const (
-	callsPerSecond        = 10
+	callsPerSecond        = 1
 	baseUrl               = "https://api.coingecko.com/api/v3"
 	coinsMarketsPath      = "/coins/markets"
 	coinsList             = "/coins/list"

@@ -10,6 +10,9 @@ import (
 )
 
 func TestTokenRegistry(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 
 	client := NewCoinGeckoClient(clients.DefaultClientProvider())
 

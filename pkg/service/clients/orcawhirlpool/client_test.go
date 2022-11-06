@@ -15,6 +15,9 @@ import (
 )
 
 func TestOrcaWhirlpoolClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	ctrl := gomock.NewController(t)
 	mockConfig := config.NewMockAppConfig(ctrl)
 	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()

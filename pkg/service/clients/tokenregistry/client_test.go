@@ -10,7 +10,9 @@ import (
 )
 
 func TestTokenRegistry(t *testing.T) {
-
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	client := NewTokenRegistry(clients.DefaultClientProvider())
 
 	t.Run("GetTokenRegistry should return all tokens", func(t *testing.T) {

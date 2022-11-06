@@ -19,6 +19,9 @@ import (
 )
 
 func TestSolanaClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
 	mockConfig := config.NewMockAppConfig(ctrl)
