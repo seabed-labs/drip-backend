@@ -26,6 +26,9 @@ func (d dummyInterface) Append(_ fx.Hook) {
 
 }
 func TestPriceService(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	ctrl := gomock.NewController(t)
 	t.Run("should update market tokenjob for 2 tokens", func(t *testing.T) {
 		mockConfig := config.NewMockAppConfig(ctrl)

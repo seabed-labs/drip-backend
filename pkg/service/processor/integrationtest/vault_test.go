@@ -12,6 +12,9 @@ import (
 )
 
 func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	t.Run("should upsert vault proto config", func(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
@@ -42,6 +45,9 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 }
 
 func TestHandler_UpsertVaultByAddress(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	t.Run("should upsert vault and all related accounts", func(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
