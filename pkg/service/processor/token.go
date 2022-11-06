@@ -3,17 +3,18 @@ package processor
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
-
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
-	"github.com/sirupsen/logrus"
-
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+	bin "github.com/gagliardetto/binary"
+	tokenmetadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/google/uuid"
+	"github.com/samber/lo"
+	"github.com/sirupsen/logrus"
 )
 
 func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMint string) error {
@@ -39,83 +40,150 @@ func (p impl) UpsertTokenPair(ctx context.Context, tokenAAMint string, tokenBMin
 }
 
 func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) error {
-	tokenMint, err := p.solanaClient.GetTokenMint(ctx, mintAddress)
-	if err != nil {
-		return fmt.Errorf("failed to GetTokenMint %s, err: %w", mintAddress, err)
-	}
-	existingToken, err := p.repo.GetTokenByAddress(ctx, mintAddress)
-	if err != nil && err.Error() != repository.ErrRecordNotFound {
+	return p.UpsertTokensByAddresses(ctx, mintAddress)
+}
+
+func (p impl) UpsertTokensByAddresses(ctx context.Context, addresses ...string) error {
+	return utils.DoForPaginatedBatch(coingecko.CoinsMarketsPathLimit, len(addresses),
+		func(start, end int) error { return p.upsertTokensByAddresses(ctx, addresses[start:end]...) },
+		func(err error) error { return err },
+	)
+}
+
+func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) error {
+	tokenMintsByAddress := make(map[string]token.Mint)
+	var tokenMints []token.Mint
+	if err := p.solanaClient.GetAccounts(ctx, addresses, func(address string, data []byte) {
+		var tokenMint token.Mint
+		if err := bin.NewBinDecoder(data).Decode(&tokenMint); err != nil {
+			logrus.
+				WithError(err).
+				WithField("address", address).
+				Errorf("failed to decode tokenMint")
+		} else {
+			tokenMints = append(tokenMints, tokenMint)
+			tokenMintsByAddress[address] = tokenMint
+		}
+	}); err != nil {
 		return err
 	}
-	symbol, name, iconURL, coinGeckoID, marketCapRank, marketPrice := p.getTokenMetadata(ctx, mintAddress, existingToken)
-	tokenModel := model.Token{
-		Pubkey:        mintAddress,
-		Symbol:        symbol,
-		Name:          name,
-		Decimals:      int16(tokenMint.Decimals),
-		IconURL:       iconURL,
-		CoinGeckoID:   coinGeckoID,
-		MarketCapRank: marketCapRank,
-		UIMarketPrice: marketPrice,
-	}
-	return p.repo.UpsertTokens(ctx, &tokenModel)
-}
 
-func (p impl) getTokenMetadata(
-	ctx context.Context, mint string, existingToken *model.Token,
-) (symbol *string, name *string, iconURL *string, coinGeckoID *string, marketCapRank *int32, marketPrice *float64) {
-	if existingToken != nil {
-		symbol = existingToken.Symbol
-		name = existingToken.Name
-		iconURL = existingToken.IconURL
-		coinGeckoID = existingToken.CoinGeckoID
-	}
-	// try and populate symbol with token metadata if it exists
-	if symbol == nil {
-		if tokenMetadataAccount, err := p.solanaClient.GetTokenMetadataAccount(ctx, mint); err != nil {
-			if err.Error() != solana.ErrNotFound {
-				logrus.WithError(err).Error("failed to GetTokenMetadataAccount")
-			}
+	metadataAddresses := lo.FilterMap[string, string](addresses, func(mintAddress string, _ int) (string, bool) {
+		tokenMetadataAddress, err := utils.GetTokenMetadataPDA(mintAddress)
+		if err != nil {
+			logrus.
+				WithError(err).
+				WithField("address", mintAddress).
+				Errorf("failed to GetTokenMetadataPDA")
+			return "", false
+		}
+		return tokenMetadataAddress, true
+	})
+
+	tokenMetadataByAddress := make(map[string]tokenmetadata.Metadata)
+	var tokenMetadatas []tokenmetadata.Metadata
+	if err := p.solanaClient.GetAccounts(ctx, metadataAddresses, func(address string, data []byte) {
+		var tokenMetadata tokenmetadata.Metadata
+		if err := bin.NewBorshDecoder(data).Decode(&tokenMetadata); err != nil {
+			logrus.
+				WithError(err).
+				WithField("address", address).
+				Errorf("failed to decode tokenMetadata")
 		} else {
-			symbol = &tokenMetadataAccount.Data.Symbol
+			tokenMetadatas = append(tokenMetadatas, tokenMetadata)
+			tokenMetadataByAddress[address] = tokenMetadata
 		}
+	}); err != nil {
+		return err
 	}
-	// try and backfill the rest of the data with coingecko if it doesn't exist
-	shouldFetchCoinGeckoMetadata := symbol == nil || name == nil || iconURL == nil || coinGeckoID == nil || marketPrice == nil
-	if !shouldFetchCoinGeckoMetadata {
-		return
-	}
-	// fill coingecko meta data
-	if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, mint); err != nil {
-		logrus.WithError(err).Error("failed to GetCoinGeckoMetadata")
-	} else {
-		coinGeckoID = utils.GetStringPtr(coinGeckoMeta.ID)
-		marketCapRank = coinGeckoMeta.MarketCapRank
-		if usdPrice, ok := coinGeckoMeta.MarketData.CurrentPrice["usd"]; ok {
-			marketPrice = utils.GetFloat64Ptr(usdPrice)
-		}
-		if symbol == nil {
-			symbol = utils.GetStringPtr(coinGeckoMeta.Symbol)
-		}
-		if name == nil {
-			name = utils.GetStringPtr(coinGeckoMeta.Name)
-		}
-		if iconURL == nil {
-			iconURL = coinGeckoMeta.Image.Small
-		}
-	}
-	return
-}
 
-func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {
-	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isVaultTreasuryAccount(ctx, tokenAccountAddress) ||
-		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
-		return true
+	// create base
+	tokensByAddress := make(map[string]*model.Token)
+	for address, tokenMint := range tokenMintsByAddress {
+		tokensByAddress[address] = &model.Token{
+			Pubkey:   address,
+			Decimals: int16(tokenMint.Decimals),
+		}
 	}
-	return false
+	// populate via token metadata
+	for address := range tokensByAddress {
+		token := tokensByAddress[address]
+		tokenMetadataAddress, _ := utils.GetTokenMetadataPDA(address)
+		if tokenMetadata, ok := tokenMetadataByAddress[tokenMetadataAddress]; ok {
+			token.Symbol = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Symbol, "\u0000"))
+			token.Name = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Name, "\u0000"))
+		}
+		tokensByAddress[address] = token
+	}
+	// populate via coin gecko metadata
+	cgCoinsByAddress := func() map[string]coingecko.CoinResponse {
+		cgCoinsList, err := p.coinGeckoClient.GetSolanaCoinsList(ctx)
+		if err != nil {
+			logrus.WithError(err).Error("failed to get GetSolanaCoinsList")
+			return nil
+		}
+		cgCoinsByAddress := lo.KeyBy[string, coingecko.CoinResponse](cgCoinsList, func(coin coingecko.CoinResponse) string {
+			return *coin.Platforms.Solana
+		})
+		return cgCoinsByAddress
+	}()
+	// cg 1: populate cg token ID
+	var coingeckoIDs []string
+	for address := range tokensByAddress {
+		token := tokensByAddress[address]
+		cgMetdata, ok := cgCoinsByAddress[address]
+		if !ok {
+			continue
+		}
+		token.CoinGeckoID = utils.GetStringPtr(cgMetdata.ID)
+		coingeckoIDs = append(coingeckoIDs, cgMetdata.ID)
+		if token.Symbol == nil || *token.Symbol == "" {
+			token.Symbol = utils.GetStringPtr(cgMetdata.Symbol)
+		}
+		if token.Name == nil || *token.Name == "" {
+			token.Name = utils.GetStringPtr(cgMetdata.Name)
+		}
+		tokensByAddress[address] = token
+	}
+	// cg 2: populate market metadata
+	cgTokenMarketDataByCGID := func() map[string]coingecko.CoinGeckoTokenMarketPriceResponse {
+		tokenPrices, err := p.coinGeckoClient.GetMarketPriceForTokens(ctx, coingeckoIDs...)
+		if err != nil {
+			logrus.WithError(err).Error("failed to get GetMarketPriceForTokens")
+			return nil
+		}
+		res := make(map[string]coingecko.CoinGeckoTokenMarketPriceResponse)
+		for _, tokenPrice := range tokenPrices {
+			res[tokenPrice.ID] = tokenPrice
+		}
+		return res
+	}()
+	for address := range tokensByAddress {
+		token := tokensByAddress[address]
+		if token.CoinGeckoID == nil || *token.CoinGeckoID == "" {
+			continue
+		}
+		if marketData, ok := cgTokenMarketDataByCGID[*token.CoinGeckoID]; ok {
+			token.MarketCapRank = marketData.MarketCapRank
+			token.UIMarketPrice = utils.GetFloat64Ptr(marketData.CurrentPrice)
+		}
+		tokensByAddress[address] = token
+	}
+	// note: this makes n network calls only if iconURL doesn't exist
+	// todo: maybe this should live in a separate 1-time back-fill script?
+	for address := range tokensByAddress {
+		token := tokensByAddress[address]
+		if token.IconURL != nil && *token.IconURL != "" {
+			continue
+		}
+		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, token.Pubkey); err != nil {
+			logrus.WithError(err).Error("failed to GetCoinGeckoMetadata")
+		} else {
+			token.IconURL = coinGeckoMeta.Image.Small
+		}
+		tokensByAddress[address] = token
+	}
+	return p.repo.UpsertTokens(ctx, lo.Values[string, *model.Token](tokensByAddress)...)
 }
 
 func (p impl) UpsertTokenAccountByAddress(ctx context.Context, address string) error {
@@ -127,7 +195,7 @@ func (p impl) UpsertTokenAccountByAddress(ctx context.Context, address string) e
 }
 
 func (p impl) UpsertTokenAccount(ctx context.Context, address string, tokenAccount token.Account) error {
-	if !p.shouldIngestTokenBalance(ctx, address, tokenAccount) {
+	if !p.shouldIngestTokenAccount(ctx, address, tokenAccount) {
 		return nil
 	}
 	state := "initialized"
@@ -151,6 +219,17 @@ func (p impl) UpsertTokenAccount(ctx context.Context, address string, tokenAccou
 		Amount: tokenAccount.Amount,
 		State:  state,
 	})
+}
+
+func (p impl) shouldIngestTokenAccount(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {
+	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
+		p.isVaultTreasuryAccount(ctx, tokenAccountAddress) ||
+		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
+		return true
+	}
+	return false
 }
 
 func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner string) bool {

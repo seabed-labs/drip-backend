@@ -34,4 +34,14 @@ func TestTokenRegistry(t *testing.T) {
 		assert.Nil(t, res)
 		assert.Equal(t, "missing coinGeckoIDs", err.Error())
 	})
+
+	t.Run("GetSolanaCoinsList should return list of all solana assets", func(t *testing.T) {
+		res, err := client.GetSolanaCoinsList(context.Background())
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+		for _, coin := range res {
+			assert.NotNil(t, coin.Platforms.Solana)
+			assert.NotEqual(t, "", coin.Platforms.Solana)
+		}
+	})
 }

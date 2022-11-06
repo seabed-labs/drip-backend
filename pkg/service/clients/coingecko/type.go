@@ -4,8 +4,20 @@ const (
 	callsPerSecond        = 10
 	baseUrl               = "https://api.coingecko.com/api/v3"
 	coinsMarketsPath      = "/coins/markets"
+	coinsList             = "/coins/list"
 	CoinsMarketsPathLimit = 100
 )
+
+type CoinsListResponse []CoinResponse
+
+type CoinResponse struct {
+	ID        string `json:"id"`
+	Symbol    string `json:"symbol"`
+	Name      string `json:"name"`
+	Platforms struct {
+		Solana *string `json:"solana,omitempty"`
+	} `json:"platforms"`
+}
 
 type CoinGeckoMetadataResponse struct {
 	ID     string `json:"id"`

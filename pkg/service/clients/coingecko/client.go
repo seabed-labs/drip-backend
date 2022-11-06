@@ -9,11 +9,14 @@ import (
 	"net/url"
 	"strings"
 
+	lo2 "github.com/samber/lo"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 )
 
 type CoinGeckoClient interface {
+	GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error)
 	GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error)
 	GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error)
 	sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error)
@@ -33,6 +36,26 @@ func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client 
 	})
 	apiClient := client{retryClient}
 	return &apiClient
+}
+
+func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error) {
+	urlString := fmt.Sprintf("%s%s?include_platform=true", baseUrl, coinsList)
+	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
+	if err != nil {
+		return nil, err
+	}
+	var res CoinsListResponse
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &res); err != nil {
+		return nil, err
+	}
+	return lo2.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
+		return coin.Platforms.Solana != nil && *coin.Platforms.Solana != ""
+	}), nil
 }
 
 func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
