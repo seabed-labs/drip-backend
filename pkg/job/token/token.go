@@ -1,12 +1,13 @@
-package price
+package token
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
+	"github.com/dcaf-labs/drip/pkg/service/processor"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -15,26 +16,29 @@ import (
 	"go.uber.org/fx"
 )
 
-type PriceService interface {
-	UpdateTokenMarketPrices()
+type TokenJob interface {
+	UpsertAllSupportedTokensWithMetadata()
 }
 
 type impl struct {
 	repo            repository.Repository
+	processor       processor.Processor
 	coinGeckoClient coingecko.CoinGeckoClient
 }
 
-func NewPriceService(
+func NewTokenJob(
 	lifecycle fx.Lifecycle,
 	repo repository.Repository,
+	processor processor.Processor,
 	coinGeckoClient coingecko.CoinGeckoClient,
-) (PriceService, error) {
+) (TokenJob, error) {
 	impl := impl{
 		repo:            repo,
+		processor:       processor,
 		coinGeckoClient: coinGeckoClient,
 	}
 	s := gocron.NewScheduler(time.UTC)
-	if _, err := s.Every(5).Minutes().Do(impl.UpdateTokenMarketPrices); err != nil {
+	if _, err := s.Every(5).Minutes().Do(impl.UpsertAllSupportedTokensWithMetadata); err != nil {
 		return nil, err
 	}
 	lifecycle.Append(fx.Hook{
@@ -50,7 +54,7 @@ func NewPriceService(
 	return impl, nil
 }
 
-func (i impl) UpdateTokenMarketPrices() {
+func (i impl) UpsertAllSupportedTokensWithMetadata() {
 	ctx := context.Background()
 	tokens, err := i.repo.GetAllSupportedTokens(ctx)
 	if err != nil {
@@ -58,8 +62,8 @@ func (i impl) UpdateTokenMarketPrices() {
 		return
 	}
 	if err := utils.DoForPaginatedBatch(coingecko.CoinsMarketsPathLimit, len(tokens), func(start, end int) {
-		if err := i.updateTokenMarketPricesForBatch(ctx, tokens[start:end]); err != nil {
-			logrus.WithError(err).Error("failed to updateTokenMarketPricesForBatch")
+		if err := i.updateTokenMetadataForBatch(ctx, tokens[start:end]); err != nil {
+			logrus.WithError(err).Error("failed to updateTokenMetadataForBatch")
 		}
 	}); err != nil {
 		logrus.WithError(err).Error("failed to DoForPaginatedBatch")
@@ -67,7 +71,21 @@ func (i impl) UpdateTokenMarketPrices() {
 	}
 }
 
-func (i impl) updateTokenMarketPricesForBatch(ctx context.Context, tokens []*model.Token) error {
+func (i impl) updateTokenMetadataForBatch(ctx context.Context, tokens []*model.Token) error {
+	// backfill token metadata
+	for _, token := range tokens {
+		// this is inefficient on a  fresh db as it will make n network calls
+		// subsequent runs should produce better results as data is backfilled
+		if err := i.processor.UpsertTokenByAddress(ctx, token.Pubkey); err != nil {
+			logrus.WithError(err).Error("failed to UpsertTokenByAddress, continuing...")
+		}
+	}
+	// re-fetch tokens to get tokens with populated coingecko id's
+	tokens, err := i.repo.GetTokensByAddresses(ctx, model.GetTokenPubkeys(tokens)...)
+	if err != nil {
+		return err
+	}
+	// backfill latest market price
 	tokensByCoinGeckoID := model.GetTokensByCoinGeckoID(tokens)
 	coinGeckoIDs := model.GetTokenCoinGeckoIDs(tokens)
 	marketPrices, err := i.coinGeckoClient.GetMarketPriceForTokens(ctx, coinGeckoIDs...)
@@ -79,8 +97,9 @@ func (i impl) updateTokenMarketPricesForBatch(ctx context.Context, tokens []*mod
 		token, ok := tokensByCoinGeckoID[marketPrice.ID]
 		if !ok {
 			logrus.
-				WithError(fmt.Errorf("unexted missing token")).
-				WithField("cgID", marketPrice.ID).Warning("missing token, continuing")
+				WithError(fmt.Errorf("unexpected missing token")).
+				WithField("cgID", marketPrice.ID).
+				Warning("missing token, continuing...")
 			continue
 		}
 		token.UIMarketPrice = utils.GetFloat64Ptr(marketPrice.CurrentPrice)

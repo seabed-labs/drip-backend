@@ -14,8 +14,8 @@ import (
 func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 	t.Run("should upsert vault proto config", func(t *testing.T) {
 		integrationtest.InjectDependencies(
-			&integrationtest.APIRecorderOptions{
-				Path: "./fixtures/upsert-protoconfig-by-address",
+			&integrationtest.TestOptions{
+				FixturePath: "./fixtures/upsert-protoconfig-by-address",
 			},
 			func(
 				processor processor.Processor,
@@ -44,8 +44,8 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 func TestHandler_UpsertVaultByAddress(t *testing.T) {
 	t.Run("should upsert vault and all related accounts", func(t *testing.T) {
 		integrationtest.InjectDependencies(
-			&integrationtest.APIRecorderOptions{
-				Path: "./fixtures/upsert-vault-by-address",
+			&integrationtest.TestOptions{
+				FixturePath: "./fixtures/upsert-vault-by-address",
 			},
 			func(
 				processor processor.Processor,

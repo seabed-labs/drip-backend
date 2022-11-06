@@ -36,6 +36,7 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
+	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
 	UpsertTokenAccountByAddress(context.Context, string) error
 	UpsertTokenAccount(context.Context, string, token.Account) error
 

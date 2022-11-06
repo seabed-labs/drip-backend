@@ -9,9 +9,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
 	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
 )
 
 type CoinGeckoClient interface {
@@ -59,18 +58,19 @@ func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs 
 	return res, nil
 }
 
-func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error) {
+func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (*CoinGeckoMetadataResponse, error) {
 	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
 		return nil, err
 	}
+	var res *CoinGeckoMetadataResponse
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	if err := json.Unmarshal(body, &cgMeta); err != nil {
+	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, err
 	}
-	return cgMeta, nil
+	return res, nil
 }
 
 func (client *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {

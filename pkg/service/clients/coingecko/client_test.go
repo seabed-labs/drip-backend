@@ -22,7 +22,7 @@ func TestTokenRegistry(t *testing.T) {
 		assert.Equal(t, "Wrapped Solana", cgMeta.Name)
 	})
 
-	t.Run("GetCoinGeckoMeta should return market price for 3 tokens", func(t *testing.T) {
+	t.Run("GetCoinGeckoMeta should return market tokenjob for 3 tokens", func(t *testing.T) {
 		res, err := client.GetMarketPriceForTokens(context.Background(), "bonfida", "honey-finance", "solend")
 		assert.NoError(t, err)
 		assert.Len(t, res, 3)

@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/sirupsen/logrus"
 
@@ -39,46 +43,68 @@ func (p impl) UpsertTokenByAddress(ctx context.Context, mintAddress string) erro
 	if err != nil {
 		return fmt.Errorf("failed to GetTokenMint %s, err: %w", mintAddress, err)
 	}
-	symbol, iconURL, coinGeckoID := p.getTokenMetadata(ctx, mintAddress)
+	existingToken, err := p.repo.GetTokenByAddress(ctx, mintAddress)
+	if err != nil && err.Error() != repository.ErrRecordNotFound {
+		return err
+	}
+	symbol, name, iconURL, coinGeckoID, marketCapRank, marketPrice := p.getTokenMetadata(ctx, mintAddress, existingToken)
 	tokenModel := model.Token{
-		Pubkey:      mintAddress,
-		Symbol:      symbol,
-		Decimals:    int16(tokenMint.Decimals),
-		IconURL:     iconURL,
-		CoinGeckoID: coinGeckoID,
+		Pubkey:        mintAddress,
+		Symbol:        symbol,
+		Name:          name,
+		Decimals:      int16(tokenMint.Decimals),
+		IconURL:       iconURL,
+		CoinGeckoID:   coinGeckoID,
+		MarketCapRank: marketCapRank,
+		UIMarketPrice: marketPrice,
 	}
 	return p.repo.UpsertTokens(ctx, &tokenModel)
 }
 
-func (p impl) getTokenMetadata(ctx context.Context, mint string) (*string, *string, *string) {
-	var (
-		symbol      *string
-		iconURL     *string
-		coinGeckoID *string
-	)
-	existingToken, err := p.repo.GetTokenByAddress(ctx, mint)
-	if err == nil {
+func (p impl) getTokenMetadata(
+	ctx context.Context, mint string, existingToken *model.Token,
+) (symbol *string, name *string, iconURL *string, coinGeckoID *string, marketCapRank *int32, marketPrice *float64) {
+	if existingToken != nil {
 		symbol = existingToken.Symbol
+		name = existingToken.Name
 		iconURL = existingToken.IconURL
 		coinGeckoID = existingToken.CoinGeckoID
 	}
-	tokenMetadataAccount, err := p.solanaClient.GetTokenMetadataAccount(ctx, mint)
-	if err == nil && symbol == nil {
-		symbol = &tokenMetadataAccount.Data.Symbol
-	}
-	tokenRegistryMetadata, err := p.tokenRegistryClient.GetTokenRegistryToken(ctx, mint)
-	if err == nil && symbol == nil {
-		symbol = &tokenRegistryMetadata.Symbol
-	}
-	if err == nil && iconURL == nil {
-		iconURL = &tokenRegistryMetadata.LogoURI
-	}
-	if coinGeckoID == nil {
-		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, mint); err == nil {
-			coinGeckoID = &coinGeckoMeta.ID
+	// try and populate symbol with token metadata if it exists
+	if symbol == nil {
+		if tokenMetadataAccount, err := p.solanaClient.GetTokenMetadataAccount(ctx, mint); err != nil {
+			if err.Error() != solana.ErrNotFound {
+				logrus.WithError(err).Error("failed to GetTokenMetadataAccount")
+			}
+		} else {
+			symbol = &tokenMetadataAccount.Data.Symbol
 		}
 	}
-	return symbol, iconURL, coinGeckoID
+	// try and backfill the rest of the data with coingecko if it doesn't exist
+	shouldFetchCoinGeckoMetadata := symbol == nil || name == nil || iconURL == nil || coinGeckoID == nil || marketPrice == nil
+	if !shouldFetchCoinGeckoMetadata {
+		return
+	}
+	// fill coingecko meta data
+	if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, mint); err != nil {
+		logrus.WithError(err).Error("failed to GetCoinGeckoMetadata")
+	} else {
+		coinGeckoID = utils.GetStringPtr(coinGeckoMeta.ID)
+		marketCapRank = coinGeckoMeta.MarketCapRank
+		if usdPrice, ok := coinGeckoMeta.MarketData.CurrentPrice["usd"]; ok {
+			marketPrice = utils.GetFloat64Ptr(usdPrice)
+		}
+		if symbol == nil {
+			symbol = utils.GetStringPtr(coinGeckoMeta.Symbol)
+		}
+		if name == nil {
+			name = utils.GetStringPtr(coinGeckoMeta.Name)
+		}
+		if iconURL == nil {
+			iconURL = coinGeckoMeta.Image.Small
+		}
+	}
+	return
 }
 
 func (p impl) shouldIngestTokenBalance(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {

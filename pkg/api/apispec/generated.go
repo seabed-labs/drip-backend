@@ -3453,7 +3453,7 @@ func (w *ServerInterfaceWrapper) GetV1AdminSummaryActivewallets(ctx echo.Context
 // PutV1AdminVaultPubkeyPathEnable converts echo context to params.
 func (w *ServerInterfaceWrapper) PutV1AdminVaultPubkeyPathEnable(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "pubkeyPath" -------------
+	// ------------- FixturePath parameter "pubkeyPath" -------------
 	var pubkeyPath PubkeyPathParam
 
 	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
@@ -3595,7 +3595,7 @@ func (w *ServerInterfaceWrapper) GetV1DripOrcawhirlpoolconfigs(ctx echo.Context)
 // GetV1DripPositionPubkeyPathMetadata converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1DripPositionPubkeyPathMetadata(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "pubkeyPath" -------------
+	// ------------- FixturePath parameter "pubkeyPath" -------------
 	var pubkeyPath PubkeyPathParam
 
 	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
@@ -3629,7 +3629,7 @@ func (w *ServerInterfaceWrapper) GetV1DripSpltokenswapconfigs(ctx echo.Context) 
 // GetV1DripPubkeyPathTokenmetadata converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1DripPubkeyPathTokenmetadata(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "pubkeyPath" -------------
+	// ------------- FixturePath parameter "pubkeyPath" -------------
 	var pubkeyPath PubkeyPathParam
 
 	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
@@ -3709,7 +3709,7 @@ func (w *ServerInterfaceWrapper) GetV1Protoconfigs(ctx echo.Context) error {
 // GetV1TokenPubkeyPath converts echo context to params.
 func (w *ServerInterfaceWrapper) GetV1TokenPubkeyPath(ctx echo.Context) error {
 	var err error
-	// ------------- Path parameter "pubkeyPath" -------------
+	// ------------- FixturePath parameter "pubkeyPath" -------------
 	var pubkeyPath PubkeyPathParam
 
 	err = runtime.BindStyledParameterWithLocation("simple", false, "pubkeyPath", runtime.ParamLocationPath, ctx.Param("pubkeyPath"), &pubkeyPath)
