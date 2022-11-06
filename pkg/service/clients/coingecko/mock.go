@@ -36,10 +36,10 @@ func (m *MockCoinGeckoClient) EXPECT() *MockCoinGeckoClientMockRecorder {
 }
 
 // GetCoinGeckoMetadata mocks base method.
-func (m *MockCoinGeckoClient) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (*CoinGeckoMetadataResponse, error) {
+func (m *MockCoinGeckoClient) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoinGeckoMetadata", ctx, contractAddress)
-	ret0, _ := ret[0].(*CoinGeckoMetadataResponse)
+	ret0, _ := ret[0].(CoinGeckoMetadataResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
