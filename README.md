@@ -19,11 +19,11 @@
 | Production 	 | Rebase `devnet` with `main` 	                                                                                                                 | Rebase `mainnet` with `main` 	                                                                                                            |
 
 ## Setup
-
+- [^15] setup git hooks
 - [^1] install go 1.18 
-- [^2] install all packages with
 - [^4] install `docker` and `docker-compose`
 - [^5] setup a `.env` file
+- [^16] install `golangci-lint` 
 
 ## Start the Server
 - [^6] start the database
@@ -144,25 +144,8 @@ go run cmd/codegen/main.go
 [^14]: Update mock files
     `./scripts/create-mocks.sh`
 
-[//]: # ()
-[//]: # (```bash)
+[^15]: Register git hooks
+    `git config --local core.hooksPath .githooks/`
 
-[//]: # (# Add to ZSHRC)
-
-[//]: # (export GOPRIVATE=github.com/dcaf-labs/solana-go-clients)
-
-[//]: # (go get -u ./...)
-
-[//]: # (```)
-
-[//]: # ()
-[//]: # (Add the following to ~/.gitconfig )
-
-[//]: # ()
-[//]: # (```txt)
-
-[//]: # ([url "ssh://git@github.com/"])
-
-[//]: # (insteadOf = https://github.com/)
-
-[//]: # (```)
+[^16]: Install golangci-lint for your operating system
+    `https://golangci-lint.run/usage/install`

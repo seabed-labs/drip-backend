@@ -70,6 +70,21 @@ func (mr *MockCoinGeckoClientMockRecorder) GetMarketPriceForTokens(ctx interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMarketPriceForTokens", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetMarketPriceForTokens), varargs...)
 }
 
+// GetSolanaCoinsList mocks base method.
+func (m *MockCoinGeckoClient) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSolanaCoinsList", ctx)
+	ret0, _ := ret[0].(CoinsListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSolanaCoinsList indicates an expected call of GetSolanaCoinsList.
+func (mr *MockCoinGeckoClientMockRecorder) GetSolanaCoinsList(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSolanaCoinsList", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetSolanaCoinsList), ctx)
+}
+
 // sendUnAuthenticatedGetRequest mocks base method.
 func (m *MockCoinGeckoClient) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {
 	m.ctrl.T.Helper()

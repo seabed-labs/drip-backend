@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# create mock files for test
+./scripts/create-mocks.sh
+# if this fails, check readme on how to install it
+golangci-lint run
