@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/dcaf-labs/drip/pkg/service/config"
+	"github.com/golang/mock/gomock"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,4 +21,39 @@ func GetTestRequestRecorder(e *echo.Echo, body io.Reader) (echo.Context, *httpte
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	return c, rec
+}
+
+func GetMockMainnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConfig {
+	mockConfig := config.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookID().Return("").AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookAccessToken().Return("").AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.MainnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
+	mockConfig.EXPECT().GetDripProgramID().Return("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk").AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	return mockConfig
+}
+func GetMockDevnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConfig {
+	mockConfig := config.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookID().Return("").AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookAccessToken().Return("").AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
+	mockConfig.EXPECT().GetDripProgramID().Return("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk").AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	return mockConfig
+}
+
+func GetMockDevnetStagingConfig(ctrl *gomock.Controller) *config.MockAppConfig {
+	mockConfig := config.NewMockAppConfig(ctrl)
+	mockConfig.EXPECT().GetWalletPrivateKey().Return(GetTestPrivateKey()).AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookID().Return("").AnyTimes()
+	mockConfig.EXPECT().GetDiscordWebhookAccessToken().Return("").AnyTimes()
+	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
+	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
+	mockConfig.EXPECT().GetDripProgramID().Return("F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo").AnyTimes()
+	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	return mockConfig
 }

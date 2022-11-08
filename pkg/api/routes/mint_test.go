@@ -12,7 +12,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
-	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	bin "github.com/gagliardetto/binary"
@@ -27,11 +26,7 @@ import (
 func TestHandler_PostMint(t *testing.T) {
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
-	mockConfig := config.NewMockAppConfig(ctrl)
-	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
-	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig := unittest.GetMockDevnetStagingConfig(ctrl)
 	e := echo.New()
 
 	t.Run("should return an error when providing invalid amount", func(t *testing.T) {

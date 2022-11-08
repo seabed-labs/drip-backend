@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/dcaf-labs/drip/pkg/unittest"
+
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
 	"github.com/dcaf-labs/drip/pkg/job/token"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
-	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/gagliardetto/solana-go"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -30,14 +30,8 @@ func TestPriceService(t *testing.T) {
 		t.Skip("skipping integration tests in short mode")
 	}
 	ctrl := gomock.NewController(t)
-	t.Run("should update market tokenjob for 2 tokens", func(t *testing.T) {
-		mockConfig := config.NewMockAppConfig(ctrl)
-		mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-		mockConfig.EXPECT().GetDiscordWebhookID().Return("").AnyTimes()
-		mockConfig.EXPECT().GetDiscordWebhookAccessToken().Return("").AnyTimes()
-		mockConfig.EXPECT().GetNetwork().Return(config.MainnetNetwork).AnyTimes()
-		mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
-		mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	t.Run("should update 2 tokens with metadata", func(t *testing.T) {
+		mockConfig := unittest.GetMockMainnetProductionConfig(ctrl)
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/updateTokenMarketPricesForBatch-1",
