@@ -7,10 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	lo2 "github.com/samber/lo"
-
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
+	"github.com/samber/lo"
 )
 
 type CoinGeckoClient interface {
@@ -46,7 +45,7 @@ func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse
 	if err != nil {
 		return nil, err
 	}
-	return lo2.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
+	return lo.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
 		return coin.Platforms.Solana != nil && *coin.Platforms.Solana != ""
 	}), nil
 }
