@@ -128,8 +128,8 @@ func (p impl) ensureVault(ctx context.Context, address string) (*model.Vault, er
 }
 
 // upsertVaultPeriodByAddress: this is potentially a recursive call
-// if shouldUpsertPrice is set to true, we will try and token period[i], which will try to ensure period[i-1]
-// if shouldUpsertPrice is set to false, we will not calculate a token and will upsert it to 0
+// if shouldUpsertPrice is set to true, we will try and price period[i], which will try to ensure period[i-1]
+// if shouldUpsertPrice is set to false, we will not calculate a price and will upsert it to 0
 func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, shouldUpsertPrice bool) error {
 	var vaultPeriodAccount drip.VaultPeriod
 	if err := p.solanaClient.GetAccount(ctx, address, &vaultPeriodAccount); err != nil {
@@ -163,7 +163,7 @@ func (p impl) upsertVaultPeriodByAddress(ctx context.Context, address string, sh
 	})
 }
 
-// getVaultPeriodPriceBOverA calculate and return normalized token of b over a
+// getVaultPeriodPriceBOverA calculate and return normalized price of b over a
 // in the following, twap[x] is the normalized twap value (not the x64 value stored on chain)
 //
 //	p[i] = twap[i]*i - twap[i-1]*(i-1) for i > 0
@@ -198,7 +198,7 @@ func (p impl) getVaultPeriodPriceBOverA(ctx context.Context, periodI drip.VaultP
 		return decimal.Decimal{}, fmt.Errorf("failed to periodIId decimal, err: %w", err)
 	}
 	periodIPrecedingID := periodIID.Sub(decimal.NewFromInt(1))
-	// average token from period I to period I-1
+	// average price from period I to period I-1
 	rawPrice := twapI.Mul(periodIID).Sub(twapIPreceding.Mul(periodIPrecedingID))
 	return normalizePrice(rawPrice, decimal.NewFromInt(int64(tokenA.Decimals)), decimal.NewFromInt(int64(tokenB.Decimals))), nil
 }
@@ -209,7 +209,7 @@ func normalizePrice(rawPrice, tokenADecimals, tokenBDecimals decimal.Decimal) de
 		DivRound(decimal.NewFromInt(10).Pow(tokenBDecimals), 64)
 }
 
-// ensureVaultPeriod - if vaultPeriod exists return it , else upsert vaultPeriods with a token of 0
+// ensureVaultPeriod - if vaultPeriod exists return it , else upsert vaultPeriods with a price of 0
 func (p impl) ensureVaultPeriod(ctx context.Context, address string) (*model.VaultPeriod, error) {
 	vaultPeriod, err := p.repo.GetVaultPeriodByAddress(ctx, address)
 	if err != nil && err.Error() == repository.ErrRecordNotFound {
