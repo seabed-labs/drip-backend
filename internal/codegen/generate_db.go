@@ -103,7 +103,7 @@ func GenerateModels(
 	).AddMethod(ModelUtil{})
 
 	g.GenerateModel("token",
-		gen.FieldType("ui_market_price", "*float64"),
+		gen.FieldType("ui_market_price_usd", "*float64"),
 	).AddMethod(ModelUtil{})
 
 	g.Execute()

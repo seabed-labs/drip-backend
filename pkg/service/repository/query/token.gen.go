@@ -32,7 +32,7 @@ func newToken(db *gorm.DB) token {
 	_token.Decimals = field.NewInt16(tableName, "decimals")
 	_token.IconURL = field.NewString(tableName, "icon_url")
 	_token.CoinGeckoID = field.NewString(tableName, "coin_gecko_id")
-	_token.UIMarketPrice = field.NewUint64(tableName, "ui_market_price")
+	_token.UIMarketPriceUsd = field.NewUint64(tableName, "ui_market_price_usd")
 	_token.Name = field.NewString(tableName, "name")
 	_token.MarketCapRank = field.NewInt32(tableName, "market_cap_rank")
 
@@ -44,15 +44,15 @@ func newToken(db *gorm.DB) token {
 type token struct {
 	tokenDo tokenDo
 
-	ALL           field.Field
-	Pubkey        field.String
-	Symbol        field.String
-	Decimals      field.Int16
-	IconURL       field.String
-	CoinGeckoID   field.String
-	UIMarketPrice field.Uint64
-	Name          field.String
-	MarketCapRank field.Int32
+	ALL              field.Field
+	Pubkey           field.String
+	Symbol           field.String
+	Decimals         field.Int16
+	IconURL          field.String
+	CoinGeckoID      field.String
+	UIMarketPriceUsd field.Uint64
+	Name             field.String
+	MarketCapRank    field.Int32
 
 	fieldMap map[string]field.Expr
 }
@@ -74,7 +74,7 @@ func (t *token) updateTableName(table string) *token {
 	t.Decimals = field.NewInt16(table, "decimals")
 	t.IconURL = field.NewString(table, "icon_url")
 	t.CoinGeckoID = field.NewString(table, "coin_gecko_id")
-	t.UIMarketPrice = field.NewUint64(table, "ui_market_price")
+	t.UIMarketPriceUsd = field.NewUint64(table, "ui_market_price_usd")
 	t.Name = field.NewString(table, "name")
 	t.MarketCapRank = field.NewInt32(table, "market_cap_rank")
 
@@ -105,7 +105,7 @@ func (t *token) fillFieldMap() {
 	t.fieldMap["decimals"] = t.Decimals
 	t.fieldMap["icon_url"] = t.IconURL
 	t.fieldMap["coin_gecko_id"] = t.CoinGeckoID
-	t.fieldMap["ui_market_price"] = t.UIMarketPrice
+	t.fieldMap["ui_market_price_usd"] = t.UIMarketPriceUsd
 	t.fieldMap["name"] = t.Name
 	t.fieldMap["market_cap_rank"] = t.MarketCapRank
 }

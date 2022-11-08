@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
@@ -94,7 +95,7 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 			tokenMetadataByAddress[address] = tokenMetadata
 		}
 	}); err != nil {
-		return err
+		logrus.WithError(err).Info("failed to GetAccounts for token metadata accounts, continuing...")
 	}
 
 	// create base
@@ -112,6 +113,8 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		if tokenMetadata, ok := tokenMetadataByAddress[tokenMetadataAddress]; ok {
 			token.Symbol = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Symbol, "\u0000"))
 			token.Name = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Name, "\u0000"))
+		} else {
+			logrus.Info("debug")
 		}
 		tokensByAddress[address] = token
 	}
@@ -145,6 +148,8 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		}
 		tokensByAddress[address] = token
 	}
+	// Sort to make the api-request deterministic, makes for less flaky tests via the api replay
+	sort.Strings(coingeckoIDs)
 	// cg 2: populate market metadata
 	cgTokenMarketDataByCGID := func() map[string]coingecko.CoinGeckoTokenMarketPriceResponse {
 		tokenPrices, err := p.coinGeckoClient.GetMarketPriceForTokens(ctx, coingeckoIDs...)
@@ -165,7 +170,7 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		}
 		if marketData, ok := cgTokenMarketDataByCGID[*token.CoinGeckoID]; ok {
 			token.MarketCapRank = marketData.MarketCapRank
-			token.UIMarketPrice = utils.GetFloat64Ptr(marketData.CurrentPrice)
+			token.UIMarketPriceUsd = utils.GetFloat64Ptr(marketData.CurrentPrice)
 		}
 		tokensByAddress[address] = token
 	}

@@ -34,7 +34,7 @@ func TestPriceService(t *testing.T) {
 		mockConfig := unittest.GetMockMainnetProductionConfig(ctrl)
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
-				FixturePath: "./fixtures/updateTokenMarketPricesForBatch-1",
+				FixturePath: "./fixtures/test1",
 				AppConfig:   mockConfig,
 			},
 			func(
@@ -64,8 +64,8 @@ func TestPriceService(t *testing.T) {
 				assert.Equal(t, "Orca", *orca.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17547/small/Orca_Logo.png?1628781615", *orca.IconURL)
 				assert.Equal(t, "orca", *orca.CoinGeckoID)
-				assert.Equal(t, 0.893816, *orca.UIMarketPrice)
-				assert.Equal(t, int32(683), *orca.MarketCapRank)
+				assert.Equal(t, 0.822179, *orca.UIMarketPriceUsd)
+				assert.Equal(t, int32(686), *orca.MarketCapRank)
 
 				assert.Equal(t, msolTokenAddress, msol.Pubkey)
 				assert.Equal(t, int16(9), msol.Decimals)
@@ -73,8 +73,8 @@ func TestPriceService(t *testing.T) {
 				assert.Equal(t, "Marinade staked SOL (mSOL)", *msol.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17752/small/mSOL.png?1644541955", *msol.IconURL)
 				assert.Equal(t, "msol", *msol.CoinGeckoID)
-				assert.Equal(t, 36.52, *msol.UIMarketPrice)
-				assert.Equal(t, int32(155), *msol.MarketCapRank)
+				assert.Equal(t, 30.24, *msol.UIMarketPriceUsd)
+				assert.Equal(t, int32(164), *msol.MarketCapRank)
 
 			})
 	})
