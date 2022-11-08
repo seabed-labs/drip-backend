@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# create mock files for test
+./scripts/create-mocks.sh
+git add **mock.go
+git add **.gen.go
+# if this fails, check readme on how to install it
+golangci-lint run
+
+go test ./... -short

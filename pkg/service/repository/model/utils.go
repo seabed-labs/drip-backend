@@ -84,6 +84,42 @@ func GetVaultsByPubkey(vaults []*Vault) map[string]*Vault {
 	return res
 }
 
+func GetTokenPubkeys(tokens []*Token) []string {
+	var tokenPubkeys []string
+	for i := range tokens {
+		tokenPubkeys = append(tokenPubkeys, tokens[i].Pubkey)
+	}
+	return tokenPubkeys
+}
+
+func GetTokenCoinGeckoIDs(tokens []*Token) []string {
+	var tokenPubkeys []string
+	for i := range tokens {
+		if tokens[i].CoinGeckoID != nil {
+			tokenPubkeys = append(tokenPubkeys, *tokens[i].CoinGeckoID)
+		}
+	}
+	return tokenPubkeys
+}
+
+func GetTokensByPubkey(tokens []*Token) map[string]*Token {
+	res := make(map[string]*Token)
+	for i := range tokens {
+		res[tokens[i].Pubkey] = tokens[i]
+	}
+	return res
+}
+
+func GetTokensByCoinGeckoID(tokens []*Token) map[string]*Token {
+	res := make(map[string]*Token)
+	for i := range tokens {
+		if tokens[i].CoinGeckoID != nil {
+			res[*tokens[i].CoinGeckoID] = tokens[i]
+		}
+	}
+	return res
+}
+
 func GetTokenPairIDsForVaults(vaults []*Vault) []string {
 	var tokenPairIDs []string
 	for i := range vaults {

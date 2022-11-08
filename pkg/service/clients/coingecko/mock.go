@@ -36,10 +36,10 @@ func (m *MockCoinGeckoClient) EXPECT() *MockCoinGeckoClientMockRecorder {
 }
 
 // GetCoinGeckoMetadata mocks base method.
-func (m *MockCoinGeckoClient) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (*CoinGeckoMetadataResponse, error) {
+func (m *MockCoinGeckoClient) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCoinGeckoMetadata", ctx, contractAddress)
-	ret0, _ := ret[0].(*CoinGeckoMetadataResponse)
+	ret0, _ := ret[0].(CoinGeckoMetadataResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -48,6 +48,41 @@ func (m *MockCoinGeckoClient) GetCoinGeckoMetadata(ctx context.Context, contract
 func (mr *MockCoinGeckoClientMockRecorder) GetCoinGeckoMetadata(ctx, contractAddress interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCoinGeckoMetadata", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetCoinGeckoMetadata), ctx, contractAddress)
+}
+
+// GetMarketPriceForTokens mocks base method.
+func (m *MockCoinGeckoClient) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range coinGeckoIDs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetMarketPriceForTokens", varargs...)
+	ret0, _ := ret[0].(CoinGeckoTokensMarketPriceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMarketPriceForTokens indicates an expected call of GetMarketPriceForTokens.
+func (mr *MockCoinGeckoClientMockRecorder) GetMarketPriceForTokens(ctx interface{}, coinGeckoIDs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, coinGeckoIDs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMarketPriceForTokens", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetMarketPriceForTokens), varargs...)
+}
+
+// GetSolanaCoinsList mocks base method.
+func (m *MockCoinGeckoClient) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSolanaCoinsList", ctx)
+	ret0, _ := ret[0].(CoinsListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSolanaCoinsList indicates an expected call of GetSolanaCoinsList.
+func (mr *MockCoinGeckoClientMockRecorder) GetSolanaCoinsList(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSolanaCoinsList", reflect.TypeOf((*MockCoinGeckoClient)(nil).GetSolanaCoinsList), ctx)
 }
 
 // sendUnAuthenticatedGetRequest mocks base method.

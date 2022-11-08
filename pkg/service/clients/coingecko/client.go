@@ -2,18 +2,20 @@ package coingecko
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-
-	"github.com/dcaf-labs/drip/pkg/service/utils"
+	"net/url"
+	"strings"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/dcaf-labs/drip/pkg/service/utils"
+	"github.com/samber/lo"
 )
 
 type CoinGeckoClient interface {
-	GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error)
+	GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error)
+	GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta CoinGeckoMetadataResponse, err error)
+	GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error)
 	sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error)
 }
 
@@ -33,19 +35,42 @@ func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client 
 	return &apiClient
 }
 
-func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (cgMeta *CoinGeckoMetadataResponse, err error) {
-
-	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
+func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error) {
+	urlString := fmt.Sprintf("%s%s?include_platform=true", baseUrl, coinsList)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err = json.Unmarshal(body, &cgMeta); err != nil {
+	res, err := clients.DecodeRequestBody(resp, CoinsListResponse{})
+	if err != nil {
 		return nil, err
 	}
-	return cgMeta, nil
+	return lo.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
+		return coin.Platforms.Solana != nil && *coin.Platforms.Solana != ""
+	}), nil
+}
+
+func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
+	if len(coinGeckoIDs) == 0 {
+		return nil, fmt.Errorf("missing coinGeckoIDs")
+	}
+	urlString := fmt.Sprintf("%s%s?vs_currency=usd&ids=%s&order=market_cap_desc&per_page=%d&page=1&sparkline=false",
+		baseUrl, coinsMarketsPath,
+		url.QueryEscape(strings.Join(coinGeckoIDs, ",")), CoinsMarketsPathLimit)
+	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
+	if err != nil {
+		return nil, err
+	}
+	return clients.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
+}
+
+func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
+	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
+	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
+	if err != nil {
+		return CoinGeckoMetadataResponse{}, err
+	}
+	return clients.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
 }
 
 func (client *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {

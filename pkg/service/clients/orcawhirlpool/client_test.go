@@ -10,17 +10,15 @@ import (
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
-	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/test-go/testify/assert"
 )
 
 func TestOrcaWhirlpoolClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	ctrl := gomock.NewController(t)
-	mockConfig := config.NewMockAppConfig(ctrl)
-	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
-	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig := unittest.GetMockDevnetStagingConfig(ctrl)
 
 	client := NewOrcaWhirlpoolClient(mockConfig, clients.DefaultClientProvider())
 

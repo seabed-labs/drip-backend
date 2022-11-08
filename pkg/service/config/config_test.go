@@ -10,7 +10,7 @@ func TestNewAppConfig(t *testing.T) {
 	config, err := NewAppConfig()
 	assert.NoError(t, err)
 	assert.NotNil(t, config)
-	assert.Contains(t, []Network{NilNetwork, LocalNetwork, DevnetNetwork}, config.GetNetwork())
+	assert.Contains(t, []Network{NilNetwork, LocalNetwork, DevnetNetwork, MainnetNetwork}, config.GetNetwork())
 }
 
 func TestNewPSQLConfig(t *testing.T) {

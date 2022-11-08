@@ -28,12 +28,14 @@ import (
 	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 )
 
-type APIRecorderOptions struct {
-	Path string
+type TestOptions struct {
+	FixturePath string
+	AppConfig   config.AppConfig
+	PSQLConfig  config.PSQLConfig
 }
 
 func InjectDependencies(
-	recordOptions *APIRecorderOptions,
+	testOptions *TestOptions,
 	testCase interface{},
 ) {
 	err := os.Setenv("IS_TEST_DB", "true")
@@ -45,8 +47,8 @@ func InjectDependencies(
 
 	// test http recorder
 	httpClientProvider := clients.DefaultClientProvider
-	if recordOptions != nil {
-		r, err := recorder.New(recordOptions.Path)
+	if testOptions != nil {
+		r, err := recorder.New(testOptions.FixturePath)
 		if err != nil {
 			logrus.WithError(err).Error("could not get recorder")
 			os.Exit(1)
@@ -72,34 +74,46 @@ func InjectDependencies(
 			}
 		}
 	}
+	providers := []interface{}{
+		// Data access
+		database.NewDatabase,
+		database.NewGORMDatabase,
+		query.Use,
+		repository.NewRepository,
+		repository.NewAccountUpdateQueue,
+		// API Clients
+		httpClientProvider,
+		solana.NewSolanaClient,
+		tokenregistry.NewTokenRegistry,
+		orcawhirlpool.NewOrcaWhirlpoolClient,
+		coingecko.NewCoinGeckoClient,
+		// services
+		base.NewBase,
+		processor.NewProcessor,
+		alert.NewAlertService,
+		// server
+		middleware.NewHandler,
+		controller.NewHandler,
+	}
 
+	if testOptions != nil && testOptions.AppConfig != nil {
+		providers = append(providers, func() config.AppConfig {
+			return testOptions.AppConfig
+		})
+	} else {
+		providers = append(providers, config.NewAppConfig)
+	}
+	if testOptions != nil && testOptions.PSQLConfig != nil {
+		providers = append(providers, func() config.PSQLConfig {
+			return testOptions.PSQLConfig
+		})
+	} else {
+		providers = append(providers, config.NewPSQLConfig)
+	}
 	// comment out below for logs
 	logrus.SetOutput(ioutil.Discard)
 	opts := []fx.Option{
-		fx.Provide(
-			// configs
-			config.NewAppConfig,
-			config.NewPSQLConfig,
-			// Data access
-			database.NewDatabase,
-			database.NewGORMDatabase,
-			query.Use,
-			repository.NewRepository,
-			repository.NewAccountUpdateQueue,
-			// API Clients
-			httpClientProvider,
-			solana.NewSolanaClient,
-			tokenregistry.NewTokenRegistry,
-			orcawhirlpool.NewOrcaWhirlpoolClient,
-			coingecko.NewCoinGeckoClient,
-			// services
-			base.NewBase,
-			processor.NewProcessor,
-			alert.NewAlertService,
-			// server
-			middleware.NewHandler,
-			controller.NewHandler,
-		),
+		fx.Provide(providers...),
 		fx.Invoke(
 			database.RunMigrations,
 			testCase,

@@ -13,10 +13,13 @@ import (
 )
 
 func TestHandler_UpsertPositionByAddress(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	t.Run("should upsert position and all related accounts", func(t *testing.T) {
 		integrationtest.InjectDependencies(
-			&integrationtest.APIRecorderOptions{
-				Path: "./fixtures/upsert-position-by-address",
+			&integrationtest.TestOptions{
+				FixturePath: "./fixtures/test3",
 			},
 			func(
 				processor processor.Processor,

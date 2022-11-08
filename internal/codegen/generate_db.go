@@ -102,5 +102,9 @@ func GenerateModels(
 		gen.FieldType("delta_b", "uint64"),
 	).AddMethod(ModelUtil{})
 
+	g.GenerateModel("token",
+		gen.FieldType("ui_market_price", "*float64"),
+	).AddMethod(ModelUtil{})
+
 	g.Execute()
 }

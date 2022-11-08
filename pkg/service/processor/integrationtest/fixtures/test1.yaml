@@ -1,0 +1,115 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 46
+        transfer_encoding: []
+        trailer: {}
+        host: api.devnet.solana.com
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://api.devnet.solana.com
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {"jsonrpc":"2.0","result":{"feature-set":4011803773,"solana-core":"1.13.3"},"id":0}
+        headers:
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Sun, 06 Nov 2022 22:21:21 GMT
+            Vary:
+                - Accept-Encoding
+            X-Ratelimit-Conn-Limit:
+                - "200"
+            X-Ratelimit-Conn-Remaining:
+                - "199"
+            X-Ratelimit-Connrate-Limit:
+                - "200"
+            X-Ratelimit-Connrate-Remaining:
+                - "199"
+            X-Ratelimit-Method-Limit:
+                - "200"
+            X-Ratelimit-Method-Remaining:
+                - "199"
+            X-Ratelimit-Rps-Limit:
+                - "300"
+            X-Ratelimit-Rps-Remaining:
+                - "299"
+        status: 200 OK
+        code: 200
+        duration: 25.426958ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 155
+        transfer_encoding: []
+        trailer: {}
+        host: api.devnet.solana.com
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getAccountInfo","params":["Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://api.devnet.solana.com
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.3","slot":173870975},"value":{"data":["rRYkpb4Djsc8AAAAAAAAADIAGQAZACCnBAMbax/ztrk82y/NlCaa2hUpLyv5fQdKOKcf/FYlAAA=","base64"],"executable":false,"lamports":1280640,"owner":"F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo","rentEpoch":0}},"id":0}
+        headers:
+            Content-Type:
+                - application/json; charset=utf-8
+            Date:
+                - Sun, 06 Nov 2022 22:21:21 GMT
+            Vary:
+                - Accept-Encoding
+            X-Ratelimit-Conn-Limit:
+                - "200"
+            X-Ratelimit-Conn-Remaining:
+                - "199"
+            X-Ratelimit-Connrate-Limit:
+                - "200"
+            X-Ratelimit-Connrate-Remaining:
+                - "199"
+            X-Ratelimit-Method-Limit:
+                - "200"
+            X-Ratelimit-Method-Remaining:
+                - "199"
+            X-Ratelimit-Rps-Limit:
+                - "300"
+            X-Ratelimit-Rps-Remaining:
+                - "298"
+        status: 200 OK
+        code: 200
+        duration: 25.405125ms

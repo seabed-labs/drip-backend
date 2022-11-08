@@ -20,3 +20,6 @@ mockgen -source=base.go -destination=mock.go -package=base
 
 cd ../config || exit
 mockgen -source=config.go -destination=mock.go -package=config
+
+cd ../../job/token || exit
+mockgen -source=token.go -destination=mock.go -package=token

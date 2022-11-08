@@ -11,30 +11,21 @@ import (
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
 
-	"github.com/dcaf-labs/drip/pkg/service/config"
-
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/gagliardetto/solana-go"
 	"github.com/test-go/testify/assert"
 )
 
 func TestSolanaClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration tests in short mode")
+	}
 	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
-	mockConfig := config.NewMockAppConfig(ctrl)
-	mockConfig.EXPECT().GetWalletPrivateKey().Return(unittest.GetTestPrivateKey()).AnyTimes()
-	mockConfig.EXPECT().GetNetwork().Return(config.DevnetNetwork).AnyTimes()
-	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
-	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig := unittest.GetMockDevnetStagingConfig(ctrl)
 
 	client, err := NewSolanaClient(mockConfig, clients.DefaultClientProvider())
 	assert.NoError(t, err)
-
-	// Genesys go devnet RPC doesn't support airdrops for some reason
-	//rpcClient := rpc.New(rpc.DevNet_RPC)
-	//_, err = rpcClient.RequestAirdrop(
-	//	context.Background(), client.GetWalletPubKey(), 100000000, "confirmed")
-	//assert.NoError(t, err)
 
 	t.Run("GetWalletPubKey should return public key", func(t *testing.T) {
 		assert.Equal(t, client.GetWalletPubKey().String(), "J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")

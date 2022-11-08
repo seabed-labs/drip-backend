@@ -30,7 +30,7 @@ type Solana interface {
 	signAndBroadcast(context.Context, rpc.CommitmentType, ...solana.Instruction) (string, error)
 	GetUserBalances(context.Context, string) (*rpc.GetTokenAccountsResult, error)
 	GetAccount(context.Context, string, interface{}) error
-	GetAccounts(context.Context, []string, func(string, []byte)) error
+	GetAccounts(context.Context, []string, func(address string, data []byte)) error
 	GetProgramAccounts(context.Context, string) ([]string, error)
 	GetAccountInfo(context.Context, string) (*rpc.GetAccountInfoResult, error)
 	ProgramSubscribe(context.Context, string, func(string, []byte) error) error
