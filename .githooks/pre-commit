@@ -1,10 +1,16 @@
 #!/bin/bash
+set -e
+
+# run migrations and codegen in embedded db
+SHOULD_USE_EMBEDDED_DB=true go run cmd/codegen/main.go
+git add **.gen.go
 
 # create mock files for test
 ./scripts/create-mocks.sh
 git add **mock.go
-git add **.gen.go
+
 # if this fails, check readme on how to install it
 golangci-lint run
 
+# run all unit tests (skips integration tests)
 go test ./... -short

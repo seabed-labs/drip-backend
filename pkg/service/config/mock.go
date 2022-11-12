@@ -210,20 +210,6 @@ func (mr *MockPSQLConfigMockRecorder) GetHost() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHost", reflect.TypeOf((*MockPSQLConfig)(nil).GetHost))
 }
 
-// GetIsTestDB mocks base method.
-func (m *MockPSQLConfig) GetIsTestDB() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetIsTestDB")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// GetIsTestDB indicates an expected call of GetIsTestDB.
-func (mr *MockPSQLConfigMockRecorder) GetIsTestDB() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIsTestDB", reflect.TypeOf((*MockPSQLConfig)(nil).GetIsTestDB))
-}
-
 // GetPassword mocks base method.
 func (m *MockPSQLConfig) GetPassword() string {
 	m.ctrl.T.Helper()
@@ -250,6 +236,20 @@ func (m *MockPSQLConfig) GetPort() int {
 func (mr *MockPSQLConfigMockRecorder) GetPort() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPort", reflect.TypeOf((*MockPSQLConfig)(nil).GetPort))
+}
+
+// GetShouldUseEmbeddedDB mocks base method.
+func (m *MockPSQLConfig) GetShouldUseEmbeddedDB() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetShouldUseEmbeddedDB")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// GetShouldUseEmbeddedDB indicates an expected call of GetShouldUseEmbeddedDB.
+func (mr *MockPSQLConfigMockRecorder) GetShouldUseEmbeddedDB() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShouldUseEmbeddedDB", reflect.TypeOf((*MockPSQLConfig)(nil).GetShouldUseEmbeddedDB))
 }
 
 // GetURL mocks base method.
@@ -280,16 +280,16 @@ func (mr *MockPSQLConfigMockRecorder) GetUser() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockPSQLConfig)(nil).GetUser))
 }
 
-// SetDBName mocks base method.
-func (m *MockPSQLConfig) SetDBName(newDBName string) string {
+// SetPort mocks base method.
+func (m *MockPSQLConfig) SetPort(arg0 int) int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDBName", newDBName)
-	ret0, _ := ret[0].(string)
+	ret := m.ctrl.Call(m, "SetPort", arg0)
+	ret0, _ := ret[0].(int)
 	return ret0
 }
 
-// SetDBName indicates an expected call of SetDBName.
-func (mr *MockPSQLConfigMockRecorder) SetDBName(newDBName interface{}) *gomock.Call {
+// SetPort indicates an expected call of SetPort.
+func (mr *MockPSQLConfigMockRecorder) SetPort(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDBName", reflect.TypeOf((*MockPSQLConfig)(nil).SetDBName), newDBName)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPort", reflect.TypeOf((*MockPSQLConfig)(nil).SetPort), arg0)
 }

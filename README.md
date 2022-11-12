@@ -140,6 +140,10 @@ go run cmd/codegen/main.go
 
 [^13]: Run unit and integration tests
     `go test ./...`
+    If you need to run just unit tests
+    `go test ./... -short` 
+    To force the unit test to not use the embedded DB, set the following in `.env`
+    `SHOULD_USE_EMBEDDED_DB=false`
 
 [^14]: Update mock files
     `./scripts/create-mocks.sh`

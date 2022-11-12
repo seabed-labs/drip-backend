@@ -4,20 +4,20 @@ import (
 	"context"
 
 	"github.com/dcaf-labs/drip/internal/codegen"
-
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
 
 func main() {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start codegen")
+		logrus.WithError(err).Fatalf("failed to start codegen")
 	}
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithField("err", err.Error()).Fatalf("starting fx app for codegen")
+		logrus.WithField("err", err.Error()).Fatalf("starting fx app for codegen")
 	}
 }
 

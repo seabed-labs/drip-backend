@@ -29,8 +29,8 @@ func newProtoConfig(db *gorm.DB) protoConfig {
 	_protoConfig.ALL = field.NewField(tableName, "*")
 	_protoConfig.Pubkey = field.NewString(tableName, "pubkey")
 	_protoConfig.Granularity = field.NewUint64(tableName, "granularity")
-	_protoConfig.TokenADripTriggerSpread = field.NewInt16(tableName, "token_a_drip_trigger_spread")
-	_protoConfig.TokenBWithdrawalSpread = field.NewInt16(tableName, "token_b_withdrawal_spread")
+	_protoConfig.TokenADripTriggerSpread = field.NewUint64(tableName, "token_a_drip_trigger_spread")
+	_protoConfig.TokenBWithdrawalSpread = field.NewUint64(tableName, "token_b_withdrawal_spread")
 	_protoConfig.Admin = field.NewString(tableName, "admin")
 	_protoConfig.TokenBReferralSpread = field.NewInt32(tableName, "token_b_referral_spread")
 
@@ -45,8 +45,8 @@ type protoConfig struct {
 	ALL                     field.Field
 	Pubkey                  field.String
 	Granularity             field.Uint64
-	TokenADripTriggerSpread field.Int16
-	TokenBWithdrawalSpread  field.Int16
+	TokenADripTriggerSpread field.Uint64
+	TokenBWithdrawalSpread  field.Uint64
 	Admin                   field.String
 	TokenBReferralSpread    field.Int32
 
@@ -67,8 +67,8 @@ func (p *protoConfig) updateTableName(table string) *protoConfig {
 	p.ALL = field.NewField(table, "*")
 	p.Pubkey = field.NewString(table, "pubkey")
 	p.Granularity = field.NewUint64(table, "granularity")
-	p.TokenADripTriggerSpread = field.NewInt16(table, "token_a_drip_trigger_spread")
-	p.TokenBWithdrawalSpread = field.NewInt16(table, "token_b_withdrawal_spread")
+	p.TokenADripTriggerSpread = field.NewUint64(table, "token_a_drip_trigger_spread")
+	p.TokenBWithdrawalSpread = field.NewUint64(table, "token_b_withdrawal_spread")
 	p.Admin = field.NewString(table, "admin")
 	p.TokenBReferralSpread = field.NewInt32(table, "token_b_referral_spread")
 

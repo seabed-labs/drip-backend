@@ -100,19 +100,24 @@ type PSQLConfig interface {
 	GetDBName() string
 	GetPort() int
 	GetHost() string
-	GetIsTestDB() bool
+	GetShouldUseEmbeddedDB() bool
 
-	SetDBName(newDBName string) string
+	SetPort(int) int
 }
 
 type psqlConfig struct {
-	URL      string `env:"DATABASE_URL"`
-	User     string `yaml:"psql_username" env:"PSQL_USER"`
-	Password string `yaml:"psql_password" env:"PSQL_PASS"`
-	DBName   string `yaml:"psql_database" env:"PSQL_DBNAME"`
-	Port     int    `yaml:"psql_port" env:"PSQL_PORT"`
-	Host     string `yaml:"psql_host" env:"PSQL_HOST"`
-	IsTestDB bool   `yaml:"is_test_db" env:"IS_TEST_DB"`
+	URL                 string `env:"DATABASE_URL"`
+	User                string `yaml:"psql_username" env:"PSQL_USER"`
+	Password            string `yaml:"psql_password" env:"PSQL_PASS"`
+	DBName              string `yaml:"psql_database" env:"PSQL_DBNAME"`
+	Port                int    `yaml:"psql_port" env:"PSQL_PORT"`
+	Host                string `yaml:"psql_host" env:"PSQL_HOST"`
+	ShouldUseEmbeddedDB bool   `yaml:"should_use_embedded_db" env:"SHOULD_USE_EMBEDDED_DB"`
+}
+
+func (p *psqlConfig) SetPort(newPort int) int {
+	p.Port = newPort
+	return p.Port
 }
 
 func (p *psqlConfig) GetURL() string {
@@ -131,11 +136,6 @@ func (p *psqlConfig) GetDBName() string {
 	return p.DBName
 }
 
-func (p *psqlConfig) SetDBName(newDBName string) string {
-	p.DBName = newDBName
-	return p.DBName
-}
-
 func (p *psqlConfig) GetPort() int {
 	return p.Port
 }
@@ -144,8 +144,8 @@ func (p *psqlConfig) GetHost() string {
 	return p.Host
 }
 
-func (p *psqlConfig) GetIsTestDB() bool {
-	return p.IsTestDB
+func (p *psqlConfig) GetShouldUseEmbeddedDB() bool {
+	return p.ShouldUseEmbeddedDB
 }
 
 func NewAppConfig() (AppConfig, error) {
@@ -178,11 +178,12 @@ func NewPSQLConfig() (PSQLConfig, error) {
 	if err := parseToConfig(&config, ""); err != nil {
 		return nil, err
 	}
-	if config.IsTestDB {
+	if config.ShouldUseEmbeddedDB {
 		config.DBName = "test_" + uuid.New().String()[0:4]
+		config.Host = "localhost"
 	}
 	log.
-		WithField("IsTestDB", config.IsTestDB).
+		WithField("ShouldUseEmbeddedDB", config.ShouldUseEmbeddedDB).
 		WithField("DBName", config.DBName).
 		Info("loaded drip-backend app config")
 	return &config, nil

@@ -3,17 +3,19 @@ module github.com/dcaf-labs/drip
 // +heroku goVersion go1.18
 go 1.18
 
-replace github.com/dfuse-io/logging => github.com/streamingfast/logging v0.0.0-20210109005628-b97a57253f70
+// Remove once https://github.com/fergusstrange/embedded-postgres/pull/90 is merged
+replace github.com/fergusstrange/embedded-postgres => github.com/tovala/embedded-postgres v0.0.0-20221103205757-5f8ea8a8920d
 
 require (
-	github.com/dave/jennifer v1.5.1
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
 	github.com/dcaf-labs/solana-go-clients v0.0.0-20220921001636-da320fd976a4
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/disgoorg/disgo v0.13.19
 	github.com/disgoorg/snowflake/v2 v2.0.0
+	github.com/fergusstrange/embedded-postgres v0.0.0-00010101000000-000000000000
 	github.com/gagliardetto/metaplex-go v0.2.1
 	github.com/getkin/kin-openapi v0.94.0
+	github.com/go-co-op/gocron v1.17.1
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
@@ -22,12 +24,13 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/labstack/echo/v4 v4.7.2
-	github.com/lib/pq v1.10.2
+	github.com/samber/lo v1.33.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/test-go/testify v1.1.4
 	github.com/ulule/limiter/v3 v3.10.0
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306
 	google.golang.org/api v0.86.0
+	gopkg.in/dnaeon/go-vcr.v3 v3.1.2
 	gorm.io/driver/postgres v1.3.8
 	gorm.io/gen v0.3.14
 	gorm.io/gorm v1.23.9-0.20220713102635-3262daf8d468
@@ -40,7 +43,6 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-co-op/gocron v1.17.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
@@ -65,16 +67,18 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/samber/lo v1.33.0 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20210812194225-61421b77c44b // indirect
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20220325121720-054d8573a5d8 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
@@ -87,7 +91,6 @@ require (
 	google.golang.org/genproto v0.0.0-20220624142145-8cd45d7dbd1f // indirect
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/dnaeon/go-vcr.v3 v3.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/datatypes v1.0.7 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
