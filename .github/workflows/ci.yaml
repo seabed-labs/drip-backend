@@ -96,8 +96,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: install OS dependencies
-        run: apt-get update && apt-get install build-essential -y
+#      - name: install OS dependencies
+#        run: apt-get update && apt-get install build-essential -y
 
       - name: Cache go packages
         uses: actions/cache@v2
