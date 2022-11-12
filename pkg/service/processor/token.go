@@ -119,12 +119,15 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		tokensByAddress[address] = token
 	}
 	// populate via coin gecko metadata
-	cgCoinsByAddress := func() map[string]coingecko.CoinResponse {
+	cgCoinsList := func() coingecko.CoinsListResponse {
 		cgCoinsList, err := p.coinGeckoClient.GetSolanaCoinsList(ctx)
 		if err != nil {
 			logrus.WithError(err).Error("failed to get GetSolanaCoinsList")
 			return nil
 		}
+		return cgCoinsList
+	}()
+	cgCoinsByAddress := func() map[string]coingecko.CoinResponse {
 		cgCoinsByAddress := lo.KeyBy[string, coingecko.CoinResponse](cgCoinsList, func(coin coingecko.CoinResponse) string {
 			return *coin.Platforms.Solana
 		})
