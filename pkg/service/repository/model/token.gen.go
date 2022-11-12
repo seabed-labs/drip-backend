@@ -10,14 +10,14 @@ const TableNameToken = "token"
 
 // Token mapped from table <token>
 type Token struct {
-	Pubkey           string   `gorm:"column:pubkey;type:varchar;primaryKey" json:"pubkey" db:"pubkey"`
-	Symbol           *string  `gorm:"column:symbol;type:varchar" json:"symbol" db:"symbol"`
-	Decimals         int16    `gorm:"column:decimals;type:int2;not null" json:"decimals" db:"decimals"`
-	IconURL          *string  `gorm:"column:icon_url;type:varchar" json:"iconUrl" db:"icon_url"`
-	CoinGeckoID      *string  `gorm:"column:coin_gecko_id;type:varchar" json:"coinGeckoId" db:"coin_gecko_id"`
-	UIMarketPriceUsd *float64 `gorm:"column:ui_market_price_usd;type:numeric" json:"uiMarketPriceUsd" db:"ui_market_price_usd"`
-	Name             *string  `gorm:"column:name;type:varchar" json:"name" db:"name"`
-	MarketCapRank    *int32   `gorm:"column:market_cap_rank;type:int4" json:"marketCapRank" db:"market_cap_rank"`
+	Pubkey           string   `gorm:"column:pubkey;primaryKey" json:"pubkey" db:"pubkey"`
+	Symbol           *string  `gorm:"column:symbol" json:"symbol" db:"symbol"`
+	Decimals         int16    `gorm:"column:decimals;not null" json:"decimals" db:"decimals"`
+	IconURL          *string  `gorm:"column:icon_url" json:"iconUrl" db:"icon_url"`
+	CoinGeckoID      *string  `gorm:"column:coin_gecko_id" json:"coinGeckoId" db:"coin_gecko_id"`
+	UIMarketPriceUsd *float64 `gorm:"column:ui_market_price_usd" json:"uiMarketPriceUsd" db:"ui_market_price_usd"`
+	Name             *string  `gorm:"column:name" json:"name" db:"name"`
+	MarketCapRank    *int32   `gorm:"column:market_cap_rank" json:"marketCapRank" db:"market_cap_rank"`
 }
 
 // TableName Token's table name
