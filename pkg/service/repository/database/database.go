@@ -49,9 +49,13 @@ func maybeSetupEmbeddedDBWithRetry(dbConfig config.PSQLConfig, try, maxTry int) 
 	}
 	if onStop, err := maybeSetupEmbeddedDB(dbConfig); err != nil {
 		logrus.WithError(err).Errorf("failed to get db conn, retrying...")
-		return maybeSetupEmbeddedDBWithRetry(dbConfig, try+1, maxTry)
+		if onStop, err2 := maybeSetupEmbeddedDBWithRetry(dbConfig, try+1, maxTry); err2 != nil {
+			return nil, multierror.Append(err, err2)
+		} else {
+			return onStop, nil
+		}
 	} else {
-		return onStop, err
+		return onStop, nil
 	}
 }
 
