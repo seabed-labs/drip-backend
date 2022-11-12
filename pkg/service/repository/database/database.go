@@ -1,23 +1,29 @@
 package database
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/dcaf-labs/drip/pkg/service/config"
+	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/jmoiron/sqlx"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/fx"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func NewDatabase(
+	lifecycle fx.Lifecycle,
 	dbConfig config.PSQLConfig,
 ) (*sqlx.DB, error) {
-	if dbConfig.GetIsTestDB() {
-		if err := setupTestDB(dbConfig); err != nil {
-			return nil, err
-		}
+	onStop, err := maybeSetupEmbeddedDB(dbConfig)
+	if err != nil {
+		return nil, err
 	}
+	lifecycle.Append(fx.Hook{
+		OnStop: func(_ context.Context) error {
+			return onStop()
+		},
+	})
 	return sqlx.Connect("postgres", getConnectionString(dbConfig))
 }
 
@@ -28,28 +34,18 @@ func NewGORMDatabase(
 	return gorm.Open(postgres.Open(getConnectionString(dbConfig)), &gorm.Config{Logger: gormLogger{}})
 }
 
-func setupTestDB(dbConfig config.PSQLConfig) error {
-	// the db in the config is not guaranteed to exist yet
-	// connect to "postgres" to setup the db defined in the config
-	dbName := dbConfig.GetDBName()
-	defer dbConfig.SetDBName(dbName)
-	dbConfig.SetDBName("postgres")
-
-	db, err := sqlx.Connect("postgres", getConnectionString(dbConfig))
-	if err != nil {
-		return err
+func maybeSetupEmbeddedDB(dbConfig config.PSQLConfig) (func() error, error) {
+	if !dbConfig.GetShouldUseEmbeddedDB() {
+		return nil, nil
 	}
-	var count int
-	if err := db.QueryRow("SELECT count(*) FROM pg_catalog.pg_database where datname=$1;", dbName).Scan(&count); err != nil {
-		return err
+	embeddedDB := embeddedpostgres.NewDatabase(embeddedpostgres.DefaultConfig().
+		Username(dbConfig.GetUser()).
+		Password(dbConfig.GetPassword()).
+		Database(dbConfig.GetDBName()).
+		Port(uint32(dbConfig.GetPort())),
+	)
+	if err := embeddedDB.Start(); err != nil {
+		return nil, err
 	}
-	if count == 0 {
-		if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName)); err != nil {
-			return err
-		}
-	}
-
-	dbConfig.SetDBName(dbName)
-	logrus.WithField("database", dbConfig.GetDBName()).Info("created new DB")
-	return nil
+	return embeddedDB.Stop, nil
 }

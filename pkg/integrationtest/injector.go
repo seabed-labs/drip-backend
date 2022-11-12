@@ -38,9 +38,8 @@ func InjectDependencies(
 	testOptions *TestOptions,
 	testCase interface{},
 ) {
-	err := os.Setenv("IS_TEST_DB", "true")
-	if err != nil {
-		logrus.WithError(err).Error("could not set IS_TEST_DB env var")
+	if err := os.Setenv("SHOULD_USE_EMBEDDED_DB", "true"); err != nil {
+		logrus.WithError(err).Error("could not set SHOULD_USE_EMBEDDED_DB env var")
 		os.Exit(1)
 	}
 	logrus.SetFormatter(&logrus.JSONFormatter{})

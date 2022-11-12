@@ -22,7 +22,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/labstack/echo/v4 v4.7.2
-	github.com/lib/pq v1.10.2
+	github.com/lib/pq v1.10.7
 	github.com/shopspring/decimal v1.3.1
 	github.com/test-go/testify v1.1.4
 	github.com/ulule/limiter/v3 v3.10.0
@@ -39,6 +39,7 @@ require (
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/disgoorg/log v1.2.0 // indirect
+	github.com/fergusstrange/embedded-postgres v1.19.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-co-op/gocron v1.17.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -75,6 +76,7 @@ require (
 	github.com/streamingfast/logging v0.0.0-20220405224725-2755dab2ce75 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
+	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.uber.org/ratelimit v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20220325121720-054d8573a5d8 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
