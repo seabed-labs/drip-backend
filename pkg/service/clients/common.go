@@ -8,9 +8,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -48,19 +47,18 @@ func (r RetryableHTTPClient) CloseIdleConnections() {
 }
 
 func defaultCheckRetry(_ context.Context, resp *http.Response, err error) (bool, error) {
+	log := logrus.NewEntry(logrus.New())
+	if err != nil {
+		log = log.WithError(err)
+	}
+	if resp != nil && resp.Request != nil && resp.Request.URL != nil {
+		log = log.WithField("url", resp.Request.URL.String())
+	}
+	if resp != nil {
+		log = log.WithField("statusCode", resp.StatusCode)
+	}
 	if resp != nil && resp.StatusCode >= http.StatusTooManyRequests {
-		if err != nil {
-			log.WithFields(
-				log.Fields{
-					"err":        err.Error(),
-					"statusCode": resp.StatusCode,
-				}).Errorf("waiting for rate limit")
-		} else {
-			log.WithFields(
-				log.Fields{
-					"statusCode": resp.StatusCode,
-				}).Errorf("waiting for rate limit")
-		}
+		log.Error("waiting for rate limit")
 		return true, err
 	}
 	return false, nil
@@ -86,7 +84,7 @@ func getRateLimitedHTTPClient(options RateLimitHTTPClientOptions) RetryableHTTPC
 	rateLimiter := rate.NewLimiter(rate.Every(time.Second/time.Duration(callsPerSecond)), 1)
 	client.RequestLogHook = func(logger retryablehttp.Logger, req *http.Request, retry int) {
 		if err := rateLimiter.Wait(context.Background()); err != nil {
-			log.WithError(err).Errorf("waiting for rate limit")
+			logrus.WithError(err).Errorf("failed to wait for rate limiter")
 			return
 		}
 	}
