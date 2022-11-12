@@ -1,8 +1,5 @@
 name: CI
 
-env:
-  GOPRIVATE: github.com/dcaf-labs/solana-go-clients
-
 on:
   pull_request:
   push:
@@ -30,11 +27,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-#      - name: Configure git for Private Modules
-#        env:
-#          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-#        run: git config --global url."https://dcaf-devtools:${TOKEN}@github.com".insteadOf "https://github.com"
-
       - name: Build API Server
         run: go build main.go
 
@@ -53,11 +45,6 @@ jobs:
         with:
           go-version: 1.18.1
 
-#      - name: Configure git for Private Modules
-#        env:
-#          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-#        run: git config --global url."https://dcaf-devtools:${TOKEN}@github.com".insteadOf "https://github.com"
-
       - name: Lint
         uses: golangci/golangci-lint-action@v2
         with:
@@ -67,30 +54,7 @@ jobs:
 
   test:
     name: Test
-    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
-    # Docker Hub image that `container-job` executes in
-#    container: golang:1.18
-
-    # Service containers to run with `container-job`
-#    services:
-#      # Label used to access the service container
-#      postgres:
-#        # Docker Hub image
-#        image: postgres
-#        # Provide the password for postgres
-#        env:
-#          POSTGRES_DB: drip
-#          POSTGRES_USER: drip
-#          POSTGRES_PASSWORD: drip
-#        ports:
-#          - 5432:5432
-#        # Set health checks to wait until postgres has started
-#        options: >-
-#          --health-cmd pg_isready
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -100,8 +64,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
-#      - name: install OS dependencies
-#        run: apt-get update && apt-get install build-essential -y
 
       - name: Cache go packages
         uses: actions/cache@v2
@@ -110,11 +72,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-
-#      - name: Configure git for Private Modules
-#        env:
-#          TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-#        run: git config --global url."https://dcaf-devtools:${TOKEN}@github.com".insteadOf "https://github.com"
 
       - name: Install Code Coverage
         if: ${{ github.event_name != 'pull_request' }}
