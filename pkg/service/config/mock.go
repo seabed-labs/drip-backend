@@ -279,3 +279,17 @@ func (mr *MockPSQLConfigMockRecorder) GetUser() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockPSQLConfig)(nil).GetUser))
 }
+
+// SetPort mocks base method.
+func (m *MockPSQLConfig) SetPort(arg0 int) int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetPort", arg0)
+	ret0, _ := ret[0].(int)
+	return ret0
+}
+
+// SetPort indicates an expected call of SetPort.
+func (mr *MockPSQLConfigMockRecorder) SetPort(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetPort", reflect.TypeOf((*MockPSQLConfig)(nil).SetPort), arg0)
+}

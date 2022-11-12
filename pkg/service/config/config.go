@@ -101,6 +101,8 @@ type PSQLConfig interface {
 	GetPort() int
 	GetHost() string
 	GetShouldUseEmbeddedDB() bool
+
+	SetPort(int) int
 }
 
 type psqlConfig struct {
@@ -111,6 +113,11 @@ type psqlConfig struct {
 	Port                int    `yaml:"psql_port" env:"PSQL_PORT"`
 	Host                string `yaml:"psql_host" env:"PSQL_HOST"`
 	ShouldUseEmbeddedDB bool   `yaml:"should_use_embedded_db" env:"SHOULD_USE_EMBEDDED_DB"`
+}
+
+func (p *psqlConfig) SetPort(newPort int) int {
+	p.Port = newPort
+	return p.Port
 }
 
 func (p *psqlConfig) GetURL() string {
