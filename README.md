@@ -11,12 +11,11 @@
 
 ## Deploy Process 
 
-> TODO: Update production env's via a github action 
 
 | 	            | Devnet                                                                                                                                      	 | Mainnet                                                                                                                                 	 |
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
 | Staging    	 | Merge to `main`    	                                                                                                                          | n/a                                                                                                                                     	 |
-| Production 	 | Rebase `devnet` with `main` 	                                                                                                                 | Rebase `mainnet` with `main` 	                                                                                                            |
+| Production 	 | Via Infra GH Action 	                                                                                                                         | Via Infra GH Action 	                                                                                                                     |
 
 ## Setup
 - [^15] setup git hooks
