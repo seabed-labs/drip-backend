@@ -65,6 +65,7 @@ func listenAndServe(
 			log.WithField("err", err.Error()).Fatalf("api listening")
 		}
 	}()
+
 	return srv, nil
 }
 
