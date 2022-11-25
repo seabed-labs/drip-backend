@@ -11,7 +11,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
-	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -64,25 +63,15 @@ func (d *DripProgramProcessor) start(ctx context.Context) error {
 	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
 	if config.IsProductionEnvironment(d.environment) {
 		// Track token_swap program accounts
-		if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
-			return err
-		}
-		// Don't need to constantly backfill these, just do it once
-		//go d.processor.BackfillProgramOwnedAccounts(context.Background(), tokenswap.ProgramID.String(), d.processor.ProcessTokenSwapEvent)
+		//if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
+		//	return err
+		//}
 
 		// Track orca_whirlpool program accounts
 		if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.processor.AddItemToUpdateQueueCallback(ctx, whirlpool.ProgramID.String())); err != nil {
 			return err
 		}
-		// Don't need to constantly backfill these, just do it once
-		//go d.processor.BackfillProgramOwnedAccounts(context.Background(), whirlpool.ProgramID.String(), d.processor.ProcessWhirlpoolEvent)
 	}
-
-	// Track Balance Updates Live
-	// Too many messages... need to implement an actual queue before we re-enable this
-	//if err := d.client.ProgramSubscribe(ctx, token.ProgramID.String(), d.processor.ProcessTokenEvent); err != nil {
-	//	return err
-	//}
 
 	go d.runBackfill(ctx)
 	go d.processor.ProcessAccountUpdateQueue(ctx)

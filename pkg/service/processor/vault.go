@@ -80,16 +80,11 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 			WithError(err).
 			Error("failed to insert vaultWhitelists")
 	}
-	if err := p.UpsertTokenAccountByAddress(ctx, vaultAccount.TokenAAccount.String()); err != nil {
-		return err
-	}
-	if err := p.UpsertTokenAccountByAddress(ctx, vaultAccount.TokenBAccount.String()); err != nil {
-		return err
-	}
-	if err := p.UpsertTokenAccountByAddress(ctx, vaultAccount.TreasuryTokenBAccount.String()); err != nil {
-		return err
-	}
-	return nil
+	return p.UpsertTokenAccountsByAddresses(
+		ctx,
+		vaultAccount.TokenAAccount.String(),
+		vaultAccount.TokenBAccount.String(),
+		vaultAccount.TreasuryTokenBAccount.String())
 }
 
 func (p impl) UpsertVaultPeriodByAddress(ctx context.Context, address string) error {

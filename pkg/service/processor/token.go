@@ -51,6 +51,7 @@ func (p impl) UpsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	)
 }
 
+// process batch
 func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) error {
 	tokenMintsByAddress := make(map[string]token.Mint)
 	var tokenMints []token.Mint
@@ -194,24 +195,47 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	return p.repo.UpsertTokens(ctx, lo.Values[string, *model.Token](tokensByAddress)...)
 }
 
-func (p impl) UpsertTokenAccountByAddress(ctx context.Context, address string) error {
-	var tokenAccount token.Account
-	if err := p.solanaClient.GetAccount(ctx, address, &tokenAccount); err != nil {
+func (p impl) UpsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error {
+	return utils.DoForPaginatedBatch(50, len(addresses),
+		func(start, end int) error { return p.upsertTokenAccountsByAddresses(ctx, addresses[start:end]...) },
+		func(err error) error { return err },
+	)
+}
+
+// process batch
+func (p impl) upsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error {
+	if len(addresses) == 0 {
+		return nil
+	}
+	//tokenAccounts := make(map[string]token.Mint)
+	var tokenAccountModels []*model.TokenAccount
+	if err := p.solanaClient.GetAccounts(ctx, addresses, func(address string, data []byte) {
+		var tokenAccount token.Account
+		if err := bin.NewBinDecoder(data).Decode(&tokenAccount); err != nil {
+			logrus.
+				WithError(err).
+				WithField("address", address).
+				Errorf("failed to decode tokenAccount")
+		} else {
+			tokenAccountModels = append(tokenAccountModels, &model.TokenAccount{
+				Pubkey: address,
+				Mint:   tokenAccount.Mint.String(),
+				Owner:  tokenAccount.Owner.String(),
+				Amount: tokenAccount.Amount,
+				State:  getTokenAccountState(tokenAccount.State),
+			})
+		}
+	}); err != nil {
 		return err
 	}
-	return p.UpsertTokenAccount(ctx, address, tokenAccount)
+	if len(tokenAccountModels) == 0 {
+		return nil
+	}
+	return p.repo.UpsertTokenAccounts(ctx, tokenAccountModels...)
 }
 
 func (p impl) UpsertTokenAccount(ctx context.Context, address string, tokenAccount token.Account) error {
-	if !p.shouldIngestTokenAccount(ctx, address, tokenAccount) {
-		return nil
-	}
-	state := "initialized"
-	if tokenAccount.State == token.Uninitialized {
-		state = "uninitialized"
-	} else if tokenAccount.State == token.Frozen {
-		state = "frozen"
-	}
+	state := getTokenAccountState(tokenAccount.State)
 
 	var tokenMint token.Mint
 	if err := p.solanaClient.GetAccount(ctx, tokenAccount.Mint.String(), &tokenMint); err != nil {
@@ -229,73 +253,13 @@ func (p impl) UpsertTokenAccount(ctx context.Context, address string, tokenAccou
 	})
 }
 
-func (p impl) shouldIngestTokenAccount(ctx context.Context, tokenAccountAddress string, tokenAccount token.Account) bool {
-	if p.IsTokenSwapTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isOrcaWhirlpoolTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isVaultTokenAccount(ctx, tokenAccount.Owner.String()) ||
-		p.isVaultTreasuryAccount(ctx, tokenAccountAddress) ||
-		p.isUserPositionTokenAccount(ctx, tokenAccount.Mint.String()) {
-		return true
+func getTokenAccountState(state token.AccountState) string {
+	if state == token.Uninitialized {
+		return "uninitialized"
+	} else if state == token.Frozen {
+		return "frozen"
 	}
-	return false
-}
-
-func (p impl) IsTokenSwapTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
-	_, err := p.repo.GetTokenSwapByAddress(ctx, tokenAccountOwner)
-	if err != nil {
-		return false
-	}
-	if err != nil {
-		if err.Error() != repository.ErrRecordNotFound {
-			logrus.WithError(err).Error("failed to query for token swap")
-		}
-		return false
-	}
-	return true
-}
-
-func (p impl) isOrcaWhirlpoolTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
-	_, err := p.repo.GetOrcaWhirlpoolByAddress(ctx, tokenAccountOwner)
-	if err != nil {
-		if err.Error() != repository.ErrRecordNotFound {
-			logrus.WithError(err).Error("failed to query for whirlpool")
-		}
-		return false
-	}
-	return true
-}
-
-func (p impl) isVaultTokenAccount(ctx context.Context, tokenAccountOwner string) bool {
-	_, err := p.repo.AdminGetVaultByAddress(ctx, tokenAccountOwner)
-	if err != nil {
-		if err.Error() != repository.ErrRecordNotFound {
-			logrus.WithError(err).Error("failed to query for vault")
-		}
-		return false
-	}
-	return true
-}
-
-func (p impl) isVaultTreasuryAccount(ctx context.Context, tokenAccount string) bool {
-	_, err := p.repo.AdminGetVaultByTreasuryTokenBAccount(ctx, tokenAccount)
-	if err != nil {
-		if err.Error() != repository.ErrRecordNotFound {
-			logrus.WithError(err).Error("failed to query for vault")
-		}
-		return false
-	}
-	return true
-}
-
-func (p impl) isUserPositionTokenAccount(ctx context.Context, mint string) bool {
-	_, err := p.repo.GetPositionByNFTMint(ctx, mint)
-	if err != nil {
-		if err.Error() != repository.ErrRecordNotFound {
-			logrus.WithError(err).Error("failed to query for position")
-		}
-		return false
-	}
-	return true
+	return "initialized"
 }
 
 // ensureTokenPair - if token pair exists return it, else upsert tokenPair and all needed tokenPair foreign keys

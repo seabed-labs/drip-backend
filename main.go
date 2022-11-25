@@ -4,9 +4,13 @@ import (
 	"context"
 
 	"github.com/dcaf-labs/drip/pkg/api"
+	"github.com/dcaf-labs/drip/pkg/event"
+
+	"github.com/dcaf-labs/drip/pkg/job/token"
+	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
+
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
-	"github.com/dcaf-labs/drip/pkg/event"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients"
@@ -58,6 +62,8 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
+			token.NewTokenJob,
+			tokenaccount.NewTokenAccountJob,
 			api.StartServer,
 			event.Server,
 		),

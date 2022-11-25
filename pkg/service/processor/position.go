@@ -6,6 +6,10 @@ import (
 	"math"
 	"time"
 
+	"github.com/gagliardetto/solana-go/rpc"
+
+	"github.com/samber/lo"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
@@ -58,28 +62,32 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 		log.WithError(err).Error("failed to UpsertPositions in UpsertPosition")
 		return err
 	}
-	// Update existing account balances for this position if any (relevant when backfilling)
-	if existingBalances, err := p.repo.GetActiveTokenAccountsByMint(ctx, position.PositionAuthority.String()); err != nil {
-		log.WithError(err).Warning("failed to GetActiveTokenAccountsByMint")
-	} else {
-		for i := range existingBalances {
-			if err := p.UpsertTokenAccountByAddress(ctx, existingBalances[i].Pubkey); err != nil {
-				log.WithError(err).Warning("failed to UpsertTokenAccountByAddress")
-			}
+	allTokenAccountPubkeys := func() (ret []string) {
+		// Update existing account balances for this position if any (relevant when backfilling)
+		if existingBalances, err := p.repo.GetActiveTokenAccountsByMint(ctx, position.PositionAuthority.String()); err != nil {
+			log.WithError(err).Warning("failed to GetActiveTokenAccountsByMint")
+		} else {
+			tokenAccountPubkeys := lo.Map[*model.TokenAccount, string](existingBalances, func(tokenAccount *model.TokenAccount, _ int) string {
+				return tokenAccount.Pubkey
+			})
+			ret = append(ret, tokenAccountPubkeys...)
 		}
-	}
-	// Add new token account balance if any
-	if largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String()); err != nil {
-		log.WithError(err).Error("failed to GetLargestTokenAccounts")
-	} else {
-		for _, account := range largestAccounts {
-			if account == nil {
-				continue
-			}
-			if err := p.UpsertTokenAccountByAddress(ctx, account.Address.String()); err != nil {
-				log.WithError(err).Error("failed to UpsertTokenAccountByAddress in UpsertPosition")
-			}
+		// Add new token account balance if any
+		if largestAccounts, err := p.solanaClient.GetLargestTokenAccounts(ctx, position.PositionAuthority.String()); err != nil {
+			log.WithError(err).Error("failed to GetLargestTokenAccounts")
+		} else {
+			tokenAccountPubkeys := lo.FilterMap[*rpc.TokenLargestAccountsResult, string](largestAccounts, func(account *rpc.TokenLargestAccountsResult, _ int) (string, bool) {
+				if account == nil {
+					return "", false
+				}
+				return account.Address.String(), true
+			})
+			ret = append(ret, tokenAccountPubkeys...)
 		}
+		return ret
+	}()
+	if err := p.UpsertTokenAccountsByAddresses(ctx, allTokenAccountPubkeys...); err != nil {
+		log.WithError(err).Warning("failed to UpsertTokenAccountsByAddresses")
 	}
 	if shouldAlert {
 		if err := p.sendNewPositionAlert(ctx, address); err != nil {

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/job/token"
+	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
@@ -52,6 +54,8 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
+			token.NewTokenJob,
+			tokenaccount.NewTokenAccountJob,
 			event.Server,
 		),
 		fx.NopLogger,
