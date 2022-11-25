@@ -38,11 +38,8 @@ func NewTokenJob(
 	if _, err := s.Every(30).Minutes().Do(impl.UpsertAllSupportedTokensWithMetadata); err != nil {
 		return nil, err
 	}
+	s.StartImmediately().StartAsync()
 	lifecycle.Append(fx.Hook{
-		OnStart: func(_ context.Context) error {
-			s.StartImmediately()
-			return nil
-		},
 		OnStop: func(_ context.Context) error {
 			s.Stop()
 			return nil
@@ -52,6 +49,7 @@ func NewTokenJob(
 }
 
 func (i impl) UpsertAllSupportedTokensWithMetadata() {
+	logrus.Info("starting UpsertAllSupportedTokensWithMetadata")
 	ctx := context.Background()
 	tokens, err := i.repo.GetAllSupportedTokens(ctx)
 	if err != nil {
@@ -61,4 +59,5 @@ func (i impl) UpsertAllSupportedTokensWithMetadata() {
 	if err := i.processor.UpsertTokensByAddresses(ctx, model.GetTokenPubkeys(tokens)...); err != nil {
 		logrus.WithError(err).WithField("len(tokens", len(tokens)).Error("failed to UpsertTokensByAddresses")
 	}
+	logrus.Info("done UpsertAllSupportedTokensWithMetadata")
 }

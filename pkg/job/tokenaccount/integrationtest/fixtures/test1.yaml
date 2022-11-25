@@ -9,7 +9,7 @@ interactions:
         content_length: 46
         transfer_encoding: []
         trailer: {}
-        host: api.devnet.solana.com
+        host: api.mainnet-beta.solana.com
         remote_addr: ""
         request_uri: ""
         body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
@@ -19,7 +19,7 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.devnet.solana.com
+        url: https://api.mainnet-beta.solana.com
         method: POST
       response:
         proto: HTTP/2.0
@@ -35,49 +35,49 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 25 Nov 2022 21:35:45 GMT
+                - Fri, 25 Nov 2022 17:55:09 GMT
             Vary:
                 - Accept-Encoding
             X-Ratelimit-Conn-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Conn-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Connrate-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Connrate-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Method-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Method-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Rps-Limit:
-                - "300"
+                - "100"
             X-Ratelimit-Rps-Remaining:
-                - "297"
+                - "99"
             X-Rpc-Node:
-                - sg69
+                - pit36
         status: 200 OK
         code: 200
-        duration: 805.268583ms
+        duration: 171.694791ms
     - id: 1
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 155
+        content_length: 256
         transfer_encoding: []
         trailer: {}
-        host: api.devnet.solana.com
+        host: api.mainnet-beta.solana.com
         remote_addr: ""
         request_uri: ""
-        body: '{"method":"getAccountInfo","params":["Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
+        body: '{"method":"getMultipleAccounts","params":[["9UFPCaLbsst45ytt4ksUoAnL66nic3AicpGN6yVKW9Az","3W8k2S2wUkZVBmeFFS19QfMLkbbxABzjiFsYHLfZtSC4","5bmpKycNDC5hkS3eGZDwYctJKJF6BtCF2ebYoVFjN3er"],{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
         form: {}
         headers:
             Accept:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.devnet.solana.com
+        url: https://api.mainnet-beta.solana.com
         method: POST
       response:
         proto: HTTP/2.0
@@ -88,32 +88,32 @@ interactions:
         content_length: -1
         uncompressed: true
         body: |
-            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.5","slot":178001613},"value":{"data":["rRYkpb4Djsc8AAAAAAAAADIAGQAZACCnBAMbax/ztrk82y/NlCaa2hUpLyv5fQdKOKcf/FYlAAA=","base64"],"executable":false,"lamports":1280640,"owner":"F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo","rentEpoch":0}},"id":0}
+            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.5","slot":163136340},"value":[{"data":["xvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWH9fJZsciU7nnEbJVL/jyGDi20aPjDPZItxHkhfL9+F9AYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","base64"],"executable":false,"lamports":2039280,"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","rentEpoch":361},{"data":["Z1IFXCCz6dh0Zlbd9zhVUH+Hq22HUj5Mdqf6Nglqmev9fJZsciU7nnEbJVL/jyGDi20aPjDPZItxHkhfL9+F9H+N1gUeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","base64"],"executable":false,"lamports":2039280,"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","rentEpoch":361},{"data":["Z1IFXCCz6dh0Zlbd9zhVUH+Hq22HUj5Mdqf6Nglqmev/bQQ6hiLfkpzjoWX3pKBxXkgbG5CMXvxOkU/LfO+znBWZYzoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","base64"],"executable":false,"lamports":2039280,"owner":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","rentEpoch":361}]},"id":0}
         headers:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 25 Nov 2022 21:35:45 GMT
+                - Fri, 25 Nov 2022 17:55:13 GMT
             Vary:
                 - Accept-Encoding
             X-Ratelimit-Conn-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Conn-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Connrate-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Connrate-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Method-Limit:
-                - "200"
+                - "25"
             X-Ratelimit-Method-Remaining:
-                - "198"
+                - "24"
             X-Ratelimit-Rps-Limit:
-                - "300"
+                - "100"
             X-Ratelimit-Rps-Remaining:
-                - "297"
+                - "98"
             X-Rpc-Node:
-                - sg69
+                - pit36
         status: 200 OK
         code: 200
-        duration: 254.301667ms
+        duration: 37.084167ms

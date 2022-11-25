@@ -6,6 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+
+	"github.com/dcaf-labs/drip/pkg/unittest"
+
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -16,10 +20,12 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}
+	ctrl := gomock.NewController(t)
 	t.Run("should upsert position and all related accounts", func(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test3",
+				AppConfig:   unittest.GetMockDevnetStagingConfig(ctrl),
 			},
 			func(
 				processor processor.Processor,

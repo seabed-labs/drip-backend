@@ -36,9 +36,11 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokensByAddresses(ctx context.Context, addresses ...string) error
+
 	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
-	UpsertTokenAccountByAddress(context.Context, string) error
+	UpsertTokensByAddresses(ctx context.Context, addresses ...string) error
+
+	UpsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error
 	UpsertTokenAccount(context.Context, string, token.Account) error
 
 	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
@@ -47,7 +49,6 @@ type Processor interface {
 	ProcessDripEvent(address string, data []byte) error
 	ProcessTokenSwapEvent(address string, data []byte) error
 	ProcessWhirlpoolEvent(address string, data []byte) error
-	ProcessTokenEvent(address string, data []byte) error
 }
 
 type impl struct {
@@ -205,8 +206,6 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queu
 		err = p.ProcessWhirlpoolEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	case tokenswap.ProgramID.String():
 		err = p.ProcessTokenSwapEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
-	case token.ProgramID.String():
-		err = p.ProcessTokenEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
 	default:
 		log.Error("invalid programID")
 	}
@@ -314,30 +313,6 @@ func (p impl) ProcessWhirlpoolEvent(address string, data []byte) error {
 	if err == nil {
 		if err := p.UpsertWhirlpoolByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert whirlpool")
-			return err
-		}
-		return nil
-	}
-	return nil
-}
-
-func (p impl) ProcessTokenEvent(address string, data []byte) error {
-	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
-		logrus.WithField("address", address).Info("skipping zero/invalid address")
-		return nil
-	}
-	ctx := context.Background()
-	log := logrus.WithField("address", address)
-	defer func() {
-		if r := recover(); r != nil {
-			log.WithField("stack", debug.Stack()).Errorf("panic in processTokenEvent")
-		}
-	}()
-	var tokenAccount token.Account
-	err := bin.NewBinDecoder(data).Decode(&tokenAccount)
-	if err == nil {
-		if err := p.UpsertTokenAccount(ctx, address, tokenAccount); err != nil {
-			log.WithError(err).Error("failed to upsert tokenAccount")
 			return err
 		}
 		return nil
