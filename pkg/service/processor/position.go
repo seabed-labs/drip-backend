@@ -84,6 +84,7 @@ func (p impl) UpsertPosition(ctx context.Context, address string, position drip.
 			})
 			ret = append(ret, tokenAccountPubkeys...)
 		}
+		ret = lo.FindUniquesBy[string, string](ret, func(pubkey string) string { return pubkey })
 		return ret
 	}()
 	if err := p.UpsertTokenAccountsByAddresses(ctx, allTokenAccountPubkeys...); err != nil {
