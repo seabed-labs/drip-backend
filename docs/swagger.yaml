@@ -501,6 +501,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
+  /v1/analytics/tvl:
+    get:
+      summary: Get current TVL across all vaults.
+      description: Get TVL across all Drip Vaults.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/currentTVLResponse"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+
 components:
   parameters:
     enabledQueryParam:
@@ -728,6 +752,14 @@ components:
       properties:
         message:
           type: string
+
+    currentTVLResponse:
+      required:
+        - totalUsdValue
+      properties:
+        totalUsdValue:
+          type: string
+          description: A float 64 string for the current tvl in USD.
 
     #    DATA MODELS
 

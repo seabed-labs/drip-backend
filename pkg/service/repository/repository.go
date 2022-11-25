@@ -68,6 +68,8 @@ type Repository interface {
 	AdminGetVaultsByAddresses(ctx context.Context, addresses ...string) ([]*model.Vault, error)
 	AdminGetVaultsByTokenPairID(ctx context.Context, tokenPairID string) ([]*model.Vault, error)
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
+
+	GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error)
 }
 
 type AccountUpdateQueue interface {

@@ -205,6 +205,21 @@ func (mr *MockRepositoryMockRecorder) GetAllSupportedTokens(ctx interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSupportedTokens", reflect.TypeOf((*MockRepository)(nil).GetAllSupportedTokens), ctx)
 }
 
+// GetCurrentTVL mocks base method.
+func (m *MockRepository) GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentTVL", ctx)
+	ret0, _ := ret[0].(*model.CurrentTVL)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentTVL indicates an expected call of GetCurrentTVL.
+func (mr *MockRepositoryMockRecorder) GetCurrentTVL(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentTVL", reflect.TypeOf((*MockRepository)(nil).GetCurrentTVL), ctx)
+}
+
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
