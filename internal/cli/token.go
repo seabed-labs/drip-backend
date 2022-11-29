@@ -23,7 +23,7 @@ func getBackfillTokenCommand(i impl) *cli.Command {
 			return err
 		},
 		Flags: []cli.Flag{
-			&cli.StringSliceFlag{Name: "tokenMints", Aliases: []string{"N"}, Required: true, Destination: &tokenMints},
+			&cli.StringSliceFlag{Name: "tokenMints", Required: true, Destination: &tokenMints},
 		},
 	}
 }

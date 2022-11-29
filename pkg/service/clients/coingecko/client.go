@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -25,18 +28,22 @@ func NewCoinGeckoClient(retryClientProvider clients.RetryableHTTPClientProvider)
 
 type client struct {
 	clients.RetryableHTTPClient
+	cache *cache.Cache
 }
 
 func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
 	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
 		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
 	})
-	apiClient := client{retryClient}
+	apiClient := client{retryClient, cache.New(60*time.Minute, 60*time.Minute)}
 	return &apiClient
 }
 
 func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse, error) {
-	urlString := fmt.Sprintf("%s%s?include_platform=true", baseUrl, coinsList)
+	if res, found := client.cache.Get(cacheCoinsListPath); found {
+		return res.([]CoinResponse), nil
+	}
+	urlString := fmt.Sprintf("%s%s?include_platform=true", baseUrl, coinsListPath)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
 		return nil, err
@@ -45,9 +52,11 @@ func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse
 	if err != nil {
 		return nil, err
 	}
-	return lo.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
+	filteredRes := lo.Filter[CoinResponse](res, func(coin CoinResponse, _ int) bool {
 		return coin.Platforms.Solana != nil && *coin.Platforms.Solana != ""
-	}), nil
+	})
+	client.cache.Set(cacheCoinsListPath, filteredRes, cache.DefaultExpiration)
+	return filteredRes, nil
 }
 
 func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
@@ -65,12 +74,21 @@ func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs 
 }
 
 func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
-	urlString := fmt.Sprintf("%s/coins/solana/contract/%s", baseUrl, contractAddress)
+	cacheKey := cacheSolanaContractPath + contractAddress
+	if res, found := client.cache.Get(cacheKey); found {
+		return res.(CoinGeckoMetadataResponse), nil
+	}
+	urlString := fmt.Sprintf("%s%s/%s", baseUrl, solanaContractPath, contractAddress)
 	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
 	if err != nil {
 		return CoinGeckoMetadataResponse{}, err
 	}
-	return clients.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
+	res, err := clients.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
+	if err != nil {
+		return CoinGeckoMetadataResponse{}, err
+	}
+	client.cache.Set(cacheKey, res, cache.DefaultExpiration)
+	return res, nil
 }
 
 func (client *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {

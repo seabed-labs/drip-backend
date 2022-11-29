@@ -4,8 +4,13 @@ const (
 	callsPerSecond        = 1
 	baseUrl               = "https://api.coingecko.com/api/v3"
 	coinsMarketsPath      = "/coins/markets"
-	coinsList             = "/coins/list"
+	coinsListPath         = "/coins/list"
+	solanaContractPath    = "/coins/solana/contract"
 	CoinsMarketsPathLimit = 100
+
+	//CacheCoinsMarketsPath = coinsMarketsPath
+	cacheSolanaContractPath = solanaContractPath
+	cacheCoinsListPath      = coinsListPath
 )
 
 type CoinsListResponse []CoinResponse
