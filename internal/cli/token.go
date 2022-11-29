@@ -8,14 +8,16 @@ import (
 
 func getBackfillTokenCommand(i impl) *cli.Command {
 	var tokenMints cli.StringSlice
-	tokenMints.Value()
 	return &cli.Command{
 		Name: "token",
 		Action: func(cCtx *cli.Context) (err error) {
-			for _, mintAddress := range tokenMints.Value() {
+			tokenMintAddresses := tokenMints.Value()
+			logrus.WithField("len(tokenMintAddresses", len(tokenMintAddresses)).Info("starting token backfill")
+			for _, mintAddress := range tokenMintAddresses {
 				if upsertErr := i.processor.UpsertTokenByAddress(cCtx.Context, mintAddress); upsertErr != nil {
 					err = multierror.Append(err, upsertErr)
 				}
+				logrus.WithField("mint", mintAddress).Info("backfilled token")
 			}
 			logrus.Info("done")
 			return err
