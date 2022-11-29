@@ -12,7 +12,7 @@ func getBackfillTokenCommand(i impl) *cli.Command {
 		Name: "token",
 		Action: func(cCtx *cli.Context) (err error) {
 			tokenMintAddresses := tokenMints.Value()
-			logrus.WithField("len(tokenMintAddresses", len(tokenMintAddresses)).Info("starting token backfill")
+			logrus.WithField("len(tokenMintAddresses)", len(tokenMintAddresses)).Info("starting token backfill")
 			for _, mintAddress := range tokenMintAddresses {
 				if upsertErr := i.processor.UpsertTokenByAddress(cCtx.Context, mintAddress); upsertErr != nil {
 					err = multierror.Append(err, upsertErr)
