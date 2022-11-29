@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/internal/scripts"
+	"github.com/dcaf-labs/drip/internal/cli"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
@@ -22,10 +22,7 @@ import (
 func main() {
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start codegen")
-	}
-	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithField("err", err.Error()).Fatalf("starting fx app for codegen")
+		log.WithField("err", err.Error()).Fatalf("cli error")
 	}
 }
 
@@ -52,7 +49,7 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
-			scripts.Backfill,
+			cli.RunCLI,
 		),
 		fx.NopLogger,
 	}

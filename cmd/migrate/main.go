@@ -13,10 +13,7 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		logrus.WithError(err).Fatalf("failed to start migrations")
-	}
-	if err := fxApp.Start(context.Background()); err != nil {
-		logrus.WithField("err", err.Error()).Fatalf("starting fx app for migrations")
+		logrus.WithField("err", err.Error()).Fatalf("failed to migrate db")
 	}
 }
 
