@@ -4,15 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
-
-	"github.com/dcaf-labs/drip/pkg/unittest"
-
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
+	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/gagliardetto/solana-go"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -26,7 +24,7 @@ type dummyInterface struct {
 func (d dummyInterface) Append(_ fx.Hook) {
 
 }
-func TestPriceService(t *testing.T) {
+func TestTokenAccountJob(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}

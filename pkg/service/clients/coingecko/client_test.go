@@ -9,7 +9,7 @@ import (
 	"github.com/test-go/testify/assert"
 )
 
-func TestTokenRegistry(t *testing.T) {
+func TestCoinGeckoClient(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}
@@ -31,11 +31,10 @@ func TestTokenRegistry(t *testing.T) {
 		assert.Len(t, res, 3)
 	})
 
-	t.Run("GetCoinGeckoMeta should return error if coinGeckoIDS are empty", func(t *testing.T) {
+	t.Run("GetCoinGeckoMeta should not return error if coinGeckoIDS are empty", func(t *testing.T) {
 		res, err := client.GetMarketPriceForTokens(context.Background())
-		assert.Error(t, err)
-		assert.Nil(t, res)
-		assert.Equal(t, "missing coinGeckoIDs", err.Error())
+		assert.NoError(t, err)
+		assert.Len(t, res, 0)
 	})
 
 	t.Run("GetSolanaCoinsList should return list of all solana assets", func(t *testing.T) {

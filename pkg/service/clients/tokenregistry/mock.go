@@ -63,3 +63,23 @@ func (mr *MockTokenRegistryMockRecorder) GetTokenRegistryToken(ctx, mint interfa
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenRegistryToken", reflect.TypeOf((*MockTokenRegistry)(nil).GetTokenRegistryToken), ctx, mint)
 }
+
+// GetTokenRegistryTokens mocks base method.
+func (m *MockTokenRegistry) GetTokenRegistryTokens(ctx context.Context, mints ...string) ([]*Token, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range mints {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTokenRegistryTokens", varargs...)
+	ret0, _ := ret[0].([]*Token)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTokenRegistryTokens indicates an expected call of GetTokenRegistryTokens.
+func (mr *MockTokenRegistryMockRecorder) GetTokenRegistryTokens(ctx interface{}, mints ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, mints...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenRegistryTokens", reflect.TypeOf((*MockTokenRegistry)(nil).GetTokenRegistryTokens), varargs...)
+}

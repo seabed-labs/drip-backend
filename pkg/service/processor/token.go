@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
@@ -54,22 +56,51 @@ func (p impl) UpsertTokensByAddresses(ctx context.Context, addresses ...string) 
 // process batch
 func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) error {
 	tokenMintsByAddress := make(map[string]token.Mint)
-	var tokenMints []token.Mint
 	if err := p.solanaClient.GetAccounts(ctx, addresses, func(address string, data []byte) {
 		var tokenMint token.Mint
 		if err := bin.NewBinDecoder(data).Decode(&tokenMint); err != nil {
-			logrus.
-				WithError(err).
-				WithField("address", address).
-				Errorf("failed to decode tokenMint")
+			logrus.WithError(err).WithField("address", address).Errorf("failed to decode tokenMint")
 		} else {
-			tokenMints = append(tokenMints, tokenMint)
 			tokenMintsByAddress[address] = tokenMint
 		}
 	}); err != nil {
 		return err
 	}
+	// create base
+	tokensByAddress, err := func() (map[string]*model.Token, error) {
+		tokens, err := p.repo.GetTokensByAddresses(ctx, addresses...)
+		if err != nil {
+			return nil, err
+		}
+		return lo.KeyBy[string, *model.Token](tokens, func(tokenModel *model.Token) string {
+			return tokenModel.Pubkey
+		}), nil
+	}() //nolint:errcheck
+	if err != nil {
+		return err
+	}
+	// add new tokens
+	for address, tokenMint := range tokenMintsByAddress {
+		if _, ok := tokensByAddress[address]; ok {
+			continue
+		}
+		tokensByAddress[address] = &model.Token{
+			Pubkey:   address,
+			Decimals: int16(tokenMint.Decimals),
+		}
+	}
 
+	tokensByAddress = p.populateTokensWithMetaplexMetadata(ctx, addresses, tokensByAddress)
+	tokensByAddress = p.populateTokensWithCGMetadata(ctx, tokensByAddress)
+	tokensByAddress = p.populateTokensWithTokenRegistryMetadata(ctx, addresses, tokensByAddress)
+	return p.repo.UpsertTokens(ctx, lo.Values[string, *model.Token](tokensByAddress)...)
+}
+
+func (p impl) populateTokensWithMetaplexMetadata(
+	ctx context.Context,
+	addresses []string,
+	tokensByAddress map[string]*model.Token,
+) map[string]*model.Token {
 	metadataAddresses := lo.FilterMap[string, string](addresses, func(mintAddress string, _ int) (string, bool) {
 		tokenMetadataAddress, err := utils.GetTokenMetadataPDA(mintAddress)
 		if err != nil {
@@ -98,31 +129,6 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	}); err != nil {
 		logrus.WithError(err).Info("failed to GetAccounts for token metadata accounts, continuing...")
 	}
-
-	// create base
-	tokensByAddress, err := func() (map[string]*model.Token, error) {
-		tokens, err := p.repo.GetTokensByAddresses(ctx, addresses...)
-		if err != nil {
-			return nil, err
-		}
-		return lo.KeyBy[string, *model.Token](tokens, func(tokenModel *model.Token) string {
-			return tokenModel.Pubkey
-		}), nil
-	}() //nolint:errcheck
-	if err != nil {
-		return err
-	}
-	// add new tokens
-	for address, tokenMint := range tokenMintsByAddress {
-		if _, ok := tokensByAddress[address]; ok {
-			continue
-		}
-		tokensByAddress[address] = &model.Token{
-			Pubkey:   address,
-			Decimals: int16(tokenMint.Decimals),
-		}
-	}
-	// populate via token metadata
 	for address := range tokensByAddress {
 		tokenModel := tokensByAddress[address]
 		tokenMetadataAddress, _ := utils.GetTokenMetadataPDA(address)
@@ -132,7 +138,13 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		}
 		tokensByAddress[address] = tokenModel
 	}
-	// populate via coin gecko metadata
+	return tokensByAddress
+}
+
+func (p impl) populateTokensWithCGMetadata(
+	ctx context.Context,
+	tokensByAddress map[string]*model.Token,
+) map[string]*model.Token {
 	cgCoinsList := func() coingecko.CoinsListResponse {
 		cgCoinsList, err := p.coinGeckoClient.GetSolanaCoinsList(ctx)
 		if err != nil {
@@ -147,27 +159,11 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		})
 		return cgCoinsByAddress
 	}()
-	// cg 1: populate cg token ID
-	var coingeckoIDs []string
-	for address := range tokensByAddress {
-		token := tokensByAddress[address]
-		cgMetdata, ok := cgCoinsByAddress[address]
-		if !ok {
-			continue
-		}
-		token.CoinGeckoID = utils.GetStringPtr(cgMetdata.ID)
-		coingeckoIDs = append(coingeckoIDs, cgMetdata.ID)
-		if token.Symbol == nil || *token.Symbol == "" {
-			token.Symbol = utils.GetStringPtr(cgMetdata.Symbol)
-		}
-		if token.Name == nil || *token.Name == "" {
-			token.Name = utils.GetStringPtr(cgMetdata.Name)
-		}
-		tokensByAddress[address] = token
-	}
+	coingeckoIDs := lo.Map[coingecko.CoinResponse, string](cgCoinsList, func(cgMetadata coingecko.CoinResponse, _ int) string {
+		return cgMetadata.ID
+	})
 	// Sort to make the api-request deterministic, makes for less flaky tests via the api replay
 	sort.Strings(coingeckoIDs)
-	// cg 2: populate market metadata
 	cgTokenMarketDataByCGID := func() map[string]coingecko.CoinGeckoTokenMarketPriceResponse {
 		tokenPrices, err := p.coinGeckoClient.GetMarketPriceForTokens(ctx, coingeckoIDs...)
 		if err != nil {
@@ -180,32 +176,70 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 		}
 		return res
 	}()
+
 	for address := range tokensByAddress {
-		token := tokensByAddress[address]
-		if token.CoinGeckoID == nil || *token.CoinGeckoID == "" {
+		tokenModel := tokensByAddress[address]
+		cgMetdata, ok := cgCoinsByAddress[address]
+		if !ok {
 			continue
 		}
-		if marketData, ok := cgTokenMarketDataByCGID[*token.CoinGeckoID]; ok {
-			token.MarketCapRank = marketData.MarketCapRank
-			token.UIMarketPriceUsd = utils.GetFloat64Ptr(marketData.CurrentPrice)
+		tokenModel.CoinGeckoID = utils.GetStringPtr(cgMetdata.ID)
+		if tokenModel.Symbol == nil || *tokenModel.Symbol == "" {
+			tokenModel.Symbol = utils.GetStringPtr(cgMetdata.Symbol)
 		}
-		tokensByAddress[address] = token
-	}
-	// note: this makes n network calls only if iconURL doesn't exist
-	// todo: maybe this should live in a separate 1-time back-fill script?
-	for address := range tokensByAddress {
-		token := tokensByAddress[address]
-		if token.IconURL != nil && *token.IconURL != "" {
+		if tokenModel.Name == nil || *tokenModel.Name == "" {
+			tokenModel.Name = utils.GetStringPtr(cgMetdata.Name)
+		}
+		if marketData, ok := cgTokenMarketDataByCGID[cgMetdata.ID]; ok {
+			tokenModel.MarketCapRank = marketData.MarketCapRank
+			tokenModel.UIMarketPriceUsd = utils.GetFloat64Ptr(marketData.CurrentPrice)
+		}
+		if tokenModel.IconURL != nil && *tokenModel.IconURL != "" {
 			continue
 		}
-		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, token.Pubkey); err != nil {
+		// note: this makes n network calls only if iconURL doesn't exist
+		// todo: maybe this should live in a separate 1-time back-fill script?
+		if coinGeckoMeta, err := p.coinGeckoClient.GetCoinGeckoMetadata(ctx, tokenModel.Pubkey); err != nil {
 			logrus.WithError(err).Error("failed to GetCoinGeckoMetadata")
 		} else {
-			token.IconURL = coinGeckoMeta.Image.Small
+			tokenModel.IconURL = coinGeckoMeta.Image.Small
 		}
-		tokensByAddress[address] = token
+		tokensByAddress[address] = tokenModel
 	}
-	return p.repo.UpsertTokens(ctx, lo.Values[string, *model.Token](tokensByAddress)...)
+	return tokensByAddress
+}
+
+func (p impl) populateTokensWithTokenRegistryMetadata(
+	ctx context.Context,
+	addresses []string,
+	tokensByAddress map[string]*model.Token,
+) map[string]*model.Token {
+	tokenRegistryMetadataByAddress := func() map[string]*tokenregistry.Token {
+		tokenRegistryTokens, err := p.tokenRegistryClient.GetTokenRegistryTokens(ctx, addresses...)
+		if err != nil {
+			logrus.WithError(err).Info("failed to GetTokenRegistryTokens for token mints, continuing...")
+			return make(map[string]*tokenregistry.Token)
+		}
+		return lo.KeyBy[string, *tokenregistry.Token](tokenRegistryTokens, func(token *tokenregistry.Token) string {
+			return token.Address
+		})
+	}()
+	for address := range tokensByAddress {
+		tokenModel := tokensByAddress[address]
+		if tokenMetadata, ok := tokenRegistryMetadataByAddress[address]; ok {
+			if tokenModel.Symbol == nil || *tokenModel.Symbol == "" {
+				tokenModel.Symbol = utils.GetStringPtr(tokenMetadata.Symbol)
+			}
+			if tokenModel.Name == nil || *tokenModel.Name == "" {
+				tokenModel.Name = utils.GetStringPtr(tokenMetadata.Name)
+			}
+			if tokenModel.IconURL == nil || *tokenModel.IconURL == "" {
+				tokenModel.IconURL = utils.GetStringPtr(tokenMetadata.LogoURI)
+			}
+		}
+		tokensByAddress[address] = tokenModel
+	}
+	return tokensByAddress
 }
 
 func (p impl) UpsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error {

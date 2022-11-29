@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
+
+	"github.com/samber/lo"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/dcaf-labs/drip/pkg/service/utils"
-
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 
 	"github.com/dcaf-labs/drip/pkg/service/clients"
 )
@@ -17,6 +20,7 @@ import (
 type TokenRegistry interface {
 	GetTokenRegistry(ctx context.Context) (*TokenRegistryResponse, error)
 	GetTokenRegistryToken(ctx context.Context, mint string) (*Token, error)
+	GetTokenRegistryTokens(ctx context.Context, mints ...string) ([]*Token, error)
 }
 
 func NewTokenRegistry(retryClientProvider clients.RetryableHTTPClientProvider) TokenRegistry {
@@ -24,18 +28,22 @@ func NewTokenRegistry(retryClientProvider clients.RetryableHTTPClientProvider) T
 }
 
 type client struct {
-	jsonrpc.HTTPClient
+	clients.RetryableHTTPClient
+	cache *cache.Cache
 }
 
 func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
 	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
 		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
 	})
-	apiClient := client{retryClient}
+	apiClient := client{retryClient, cache.New(60*time.Minute, 60*time.Minute)}
 	return &apiClient
 }
 
 func (apiClient *client) GetTokenRegistry(ctx context.Context) (tokenRegistry *TokenRegistryResponse, err error) {
+	if res, found := apiClient.cache.Get(url); found {
+		return res.(*TokenRegistryResponse), nil
+	}
 	resp, err := apiClient.sendUnAuthenticatedGetRequest(ctx, url)
 	if err != nil {
 		return nil, err
@@ -45,6 +53,7 @@ func (apiClient *client) GetTokenRegistry(ctx context.Context) (tokenRegistry *T
 	if err = json.Unmarshal(body, &tokenRegistry); err != nil {
 		return nil, err
 	}
+	apiClient.cache.Set(url, tokenRegistry, cache.DefaultExpiration)
 	return tokenRegistry, nil
 }
 
@@ -59,6 +68,19 @@ func (apiClient *client) GetTokenRegistryToken(ctx context.Context, mint string)
 		}
 	}
 	return nil, fmt.Errorf("mint not found in token registry")
+}
+func (apiClient *client) GetTokenRegistryTokens(ctx context.Context, mints ...string) ([]*Token, error) {
+	tokenRegistry, err := apiClient.GetTokenRegistry(ctx)
+	if err != nil {
+		return nil, err
+	}
+	mintSet := lo.KeyBy[string, string](mints, func(mint string) string { return mint })
+	return lo.FilterMap[Token, *Token](tokenRegistry.Tokens, func(token Token, _ int) (*Token, bool) {
+		if _, ok := mintSet[token.Address]; ok {
+			return &token, true
+		}
+		return nil, false
+	}), nil
 }
 
 func (apiClient *client) sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error) {

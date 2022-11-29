@@ -15,7 +15,8 @@ func TestTokenRegistry(t *testing.T) {
 	}
 	client := NewTokenRegistry(clients.DefaultClientProvider())
 
-	t.Run("GetTokenRegistry should return all tokens", func(t *testing.T) {
+	t.Run("GetTokenRegistry should return all tokens with cache", func(t *testing.T) {
+		_, _ = client.GetTokenRegistry(context.Background())
 		tokenRegistry, err := client.GetTokenRegistry(context.Background())
 		assert.NoError(t, err)
 		assert.True(t, len(tokenRegistry.Tokens) >= 13644)

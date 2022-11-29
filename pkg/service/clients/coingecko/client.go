@@ -60,17 +60,34 @@ func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse
 }
 
 func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs ...string) (CoinGeckoTokensMarketPriceResponse, error) {
+	cacheKey := fmt.Sprintf("%s%v", cacheCoinsMarketsPath, coinGeckoIDs)
+	if res, found := client.cache.Get(cacheKey); found {
+		return res.(CoinGeckoTokensMarketPriceResponse), nil
+	}
 	if len(coinGeckoIDs) == 0 {
-		return nil, fmt.Errorf("missing coinGeckoIDs")
+		return CoinGeckoTokensMarketPriceResponse{}, nil
 	}
-	urlString := fmt.Sprintf("%s%s?vs_currency=usd&ids=%s&order=market_cap_desc&per_page=%d&page=1&sparkline=false",
-		baseUrl, coinsMarketsPath,
-		url.QueryEscape(strings.Join(coinGeckoIDs, ",")), CoinsMarketsPathLimit)
-	resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
-	if err != nil {
-		return nil, err
+	var paginatedRes CoinGeckoTokensMarketPriceResponse
+	page := 1
+	for {
+		urlString := fmt.Sprintf("%s%s?vs_currency=usd&ids=%s&order=market_cap_desc&per_page=%d&page=%d&sparkline=false",
+			baseUrl, coinsMarketsPath, url.QueryEscape(strings.Join(coinGeckoIDs, ",")), CoinsMarketsPathLimit, page)
+		resp, err := client.sendUnAuthenticatedGetRequest(ctx, urlString)
+		if err != nil {
+			return nil, err
+		}
+		res, err := clients.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
+		if err != nil {
+			return nil, err
+		}
+		paginatedRes = append(paginatedRes, res...)
+		if len(res) < CoinsMarketsPathLimit {
+			break
+		}
+		page = page + 1
 	}
-	return clients.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
+	client.cache.Set(cacheKey, paginatedRes, cache.DefaultExpiration)
+	return paginatedRes, nil
 }
 
 func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress string) (CoinGeckoMetadataResponse, error) {
