@@ -6,9 +6,9 @@ const (
 	coinsMarketsPath      = "/coins/markets"
 	coinsListPath         = "/coins/list"
 	solanaContractPath    = "/coins/solana/contract"
-	CoinsMarketsPathLimit = 100
+	CoinsMarketsPathLimit = 250
 
-	//CacheCoinsMarketsPath = coinsMarketsPath
+	cacheCoinsMarketsPath   = coinsMarketsPath
 	cacheSolanaContractPath = solanaContractPath
 	cacheCoinsListPath      = coinsListPath
 )

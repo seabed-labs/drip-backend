@@ -25,7 +25,7 @@ type dummyInterface struct {
 func (d dummyInterface) Append(_ fx.Hook) {
 
 }
-func TestPriceService(t *testing.T) {
+func TestTokenJob(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}
@@ -64,8 +64,8 @@ func TestPriceService(t *testing.T) {
 				assert.Equal(t, "Orca", *orca.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17547/small/Orca_Logo.png?1628781615", *orca.IconURL)
 				assert.Equal(t, "orca", *orca.CoinGeckoID)
-				assert.Equal(t, 0.822179, *orca.UIMarketPriceUsd)
-				assert.Equal(t, int32(686), *orca.MarketCapRank)
+				assert.Equal(t, 0.403697, *orca.UIMarketPriceUsd)
+				assert.Equal(t, int32(858), *orca.MarketCapRank)
 
 				assert.Equal(t, msolTokenAddress, msol.Pubkey)
 				assert.Equal(t, int16(9), msol.Decimals)
@@ -73,8 +73,8 @@ func TestPriceService(t *testing.T) {
 				assert.Equal(t, "Marinade staked SOL (mSOL)", *msol.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17752/small/mSOL.png?1644541955", *msol.IconURL)
 				assert.Equal(t, "msol", *msol.CoinGeckoID)
-				assert.Equal(t, 30.24, *msol.UIMarketPriceUsd)
-				assert.Equal(t, int32(164), *msol.MarketCapRank)
+				assert.Equal(t, 14.44, *msol.UIMarketPriceUsd)
+				assert.Equal(t, int32(220), *msol.MarketCapRank)
 
 			})
 	})
