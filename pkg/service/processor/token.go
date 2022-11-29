@@ -100,8 +100,23 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	}
 
 	// create base
-	tokensByAddress := make(map[string]*model.Token)
+	tokensByAddress, err := func() (map[string]*model.Token, error) {
+		tokens, err := p.repo.GetTokensByAddresses(ctx, addresses...)
+		if err != nil {
+			return nil, err
+		}
+		return lo.KeyBy[string, *model.Token](tokens, func(tokenModel *model.Token) string {
+			return tokenModel.Pubkey
+		}), nil
+	}() //nolint:errcheck
+	if err != nil {
+		return err
+	}
+	// add new tokens
 	for address, tokenMint := range tokenMintsByAddress {
+		if _, ok := tokensByAddress[address]; ok {
+			continue
+		}
 		tokensByAddress[address] = &model.Token{
 			Pubkey:   address,
 			Decimals: int16(tokenMint.Decimals),
@@ -109,15 +124,13 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	}
 	// populate via token metadata
 	for address := range tokensByAddress {
-		token := tokensByAddress[address]
+		tokenModel := tokensByAddress[address]
 		tokenMetadataAddress, _ := utils.GetTokenMetadataPDA(address)
 		if tokenMetadata, ok := tokenMetadataByAddress[tokenMetadataAddress]; ok {
-			token.Symbol = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Symbol, "\u0000"))
-			token.Name = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Name, "\u0000"))
-		} else {
-			logrus.Info("debug")
+			tokenModel.Symbol = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Symbol, "\u0000"))
+			tokenModel.Name = utils.GetStringPtr(strings.Trim(tokenMetadata.Data.Name, "\u0000"))
 		}
-		tokensByAddress[address] = token
+		tokensByAddress[address] = tokenModel
 	}
 	// populate via coin gecko metadata
 	cgCoinsList := func() coingecko.CoinsListResponse {
