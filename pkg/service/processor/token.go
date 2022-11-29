@@ -171,7 +171,7 @@ func (p impl) upsertTokensByAddresses(ctx context.Context, addresses ...string) 
 	cgTokenMarketDataByCGID := func() map[string]coingecko.CoinGeckoTokenMarketPriceResponse {
 		tokenPrices, err := p.coinGeckoClient.GetMarketPriceForTokens(ctx, coingeckoIDs...)
 		if err != nil {
-			logrus.WithError(err).Error("failed to get GetMarketPriceForTokens")
+			logrus.WithError(err).Warning("failed to get GetMarketPriceForTokens, continuing...")
 			return nil
 		}
 		res := make(map[string]coingecko.CoinGeckoTokenMarketPriceResponse)

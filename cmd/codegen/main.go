@@ -14,10 +14,7 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		logrus.WithError(err).Fatalf("failed to start codegen")
-	}
-	if err := fxApp.Start(context.Background()); err != nil {
-		logrus.WithField("err", err.Error()).Fatalf("starting fx app for codegen")
+		logrus.WithField("err", err.Error()).Fatalf("codegen failed")
 	}
 }
 
