@@ -181,7 +181,6 @@ func (s impl) GetAccount(ctx context.Context, address string, v interface{}) err
 		&rpc.GetAccountInfoOpts{
 			Encoding:   solana.EncodingBase64,
 			Commitment: "confirmed",
-			DataSlice:  nil,
 		})
 	if err != nil {
 		logrus.

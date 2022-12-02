@@ -6,13 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
-	"github.com/dcaf-labs/drip/pkg/unittest"
-
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
+	"github.com/dcaf-labs/drip/pkg/unittest"
+	"github.com/golang/mock/gomock"
 	"github.com/test-go/testify/assert"
 )
 
@@ -25,17 +23,17 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test3",
-				AppConfig:   unittest.GetMockDevnetStagingConfig(ctrl),
+				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
 			},
 			func(
 				processor processor.Processor,
 				repo repository.Repository,
 			) {
-				positionAddress := "46kbd7mjJhtxWW19wyh1uUgbFx8PktRBDgsY2BM9doRA"
-				// position: https://explorer.solana.com/address/46kbd7mjJhtxWW19wyh1uUgbFx8PktRBDgsY2BM9doRA/anchor-account?cluster=devnet
+				positionAddress := "3ob8nYeffN5TUBDLJsjsVLMmf8GhkPkpUdAcJctEWCEZ"
+				// position: https://explorer.solana.com/address/3ob8nYeffN5TUBDLJsjsVLMmf8GhkPkpUdAcJctEWCEZ
 				assert.NoError(t, processor.UpsertPositionByAddress(context.Background(), positionAddress))
 				// vault should exist
-				vault, err := repo.AdminGetVaultByAddress(context.Background(), "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8")
+				vault, err := repo.AdminGetVaultByAddress(context.Background(), "HJcGW3iQGvLpnaJ7LATnrBdw66MTC1hzmmQMKN8pgVhH")
 				assert.NoError(t, err)
 				assert.NotNil(t, vault)
 				// by extension proto config should exist
@@ -55,15 +53,15 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, position)
 
-				assert.Equal(t, "46kbd7mjJhtxWW19wyh1uUgbFx8PktRBDgsY2BM9doRA", position.Pubkey)
-				assert.Equal(t, "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8", position.Vault)
-				assert.Equal(t, "JB4DSzoQ5SyxLETtGUrC5s1MvS6Y78PTmzczszZ7ZPtB", position.Authority)
-				assert.Equal(t, uint64(101000000), position.DepositedTokenAAmount)
+				assert.Equal(t, "3ob8nYeffN5TUBDLJsjsVLMmf8GhkPkpUdAcJctEWCEZ", position.Pubkey)
+				assert.Equal(t, "HJcGW3iQGvLpnaJ7LATnrBdw66MTC1hzmmQMKN8pgVhH", position.Vault)
+				assert.Equal(t, "7vRcWTNo7Fz6LhhGTqaeKv3m63uE3hzDPMVdDhNccA9C", position.Authority)
+				assert.Equal(t, uint64(0x23c34600), position.DepositedTokenAAmount)
 				assert.Equal(t, uint64(0), position.WithdrawnTokenBAmount)
-				assert.Equal(t, time.Unix(1667152101, 0).Unix(), position.DepositTimestamp.Unix())
-				assert.Equal(t, uint64(1847), position.DcaPeriodIDBeforeDeposit)
-				assert.Equal(t, uint64(4), position.NumberOfSwaps)
-				assert.Equal(t, uint64(25250000), position.PeriodicDripAmount)
+				assert.Equal(t, time.Unix(1669882164, 0).Unix(), position.DepositTimestamp.Unix())
+				assert.Equal(t, uint64(0x21), position.DcaPeriodIDBeforeDeposit)
+				assert.Equal(t, uint64(0x3f), position.NumberOfSwaps)
+				assert.Equal(t, uint64(0x915261), position.PeriodicDripAmount)
 				assert.Equal(t, false, position.IsClosed)
 				// if the line below needs to be updated, add the field assertion above
 				assert.Equal(t, reflect.TypeOf(*position).NumField(), 10)
@@ -73,9 +71,9 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Len(t, positionNFTTokenAccounts, 1)
 
-				assert.Equal(t, "6tZikLFcRCvbpQca8bg9XrCNcnzwhfepBKWHcj8sLfjc", positionNFTTokenAccounts[0].Pubkey)
-				assert.Equal(t, "JB4DSzoQ5SyxLETtGUrC5s1MvS6Y78PTmzczszZ7ZPtB", positionNFTTokenAccounts[0].Mint)
-				assert.Equal(t, "3CTkqdcjzn1ptnNYUcFq4Sk1Smy91kz5p9JhgJBHGe3e", positionNFTTokenAccounts[0].Owner)
+				assert.Equal(t, "9dAqHvbRPK7WXCxSQf6e79fCAQJseS9WdE4D3U2LhBGB", positionNFTTokenAccounts[0].Pubkey)
+				assert.Equal(t, "7vRcWTNo7Fz6LhhGTqaeKv3m63uE3hzDPMVdDhNccA9C", positionNFTTokenAccounts[0].Mint)
+				assert.Equal(t, "GYvcAPtJKo9ierGgWhryrhrEKCrmZuPmYf1obMLq2uBK", positionNFTTokenAccounts[0].Owner)
 				assert.Equal(t, uint64(1), positionNFTTokenAccounts[0].Amount)
 				assert.Equal(t, "initialized", positionNFTTokenAccounts[0].State)
 				// if the line below needs to be updated, add the field assertion above

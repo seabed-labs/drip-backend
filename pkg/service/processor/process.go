@@ -29,18 +29,19 @@ const processConcurrency = 10
 
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error
+	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
 	UpsertPositionByAddress(context.Context, string) error
-	UpsertPosition(context.Context, string, drip.Position) error
-	UpsertVaultPeriodByAddress(context.Context, string) error
+	UpsertOracleConfigByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
-	UpsertTokenPair(context.Context, string, string) error
-
 	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
-	UpsertTokensByAddresses(ctx context.Context, addresses ...string) error
 
+	UpsertTokensByAddresses(ctx context.Context, addresses ...string) error
 	UpsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error
+
+	UpsertPosition(context.Context, string, drip.Position) error
+	UpsertTokenPair(context.Context, string, string) error
 	UpsertTokenAccount(context.Context, string, token.Account) error
 
 	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
@@ -263,6 +264,15 @@ func (p impl) ProcessDripEvent(address string, data []byte) error {
 		// log.Infof("decoded as protoConfig")
 		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert protoConfig")
+			return err
+		}
+		return nil
+	}
+	var oracleConfig drip.OracleConfig
+	if err := bin.NewBinDecoder(data).Decode(&oracleConfig); err == nil {
+		// log.Infof("decoded as oracleConfig")
+		if err := p.UpsertOracleConfigByAddress(ctx, address); err != nil {
+			log.WithError(err).Error("failed to upsert oracleConfig")
 			return err
 		}
 		return nil
