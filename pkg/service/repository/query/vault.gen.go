@@ -40,6 +40,8 @@ func newVault(db *gorm.DB) vault {
 	_vault.MaxSlippageBps = field.NewInt32(tableName, "max_slippage_bps")
 	_vault.TokenAMint = field.NewString(tableName, "token_a_mint")
 	_vault.TokenBMint = field.NewString(tableName, "token_b_mint")
+	_vault.OracleConfig = field.NewString(tableName, "oracle_config")
+	_vault.MaxPriceDeviationBps = field.NewInt32(tableName, "max_price_deviation_bps")
 
 	_vault.fillFieldMap()
 
@@ -63,6 +65,8 @@ type vault struct {
 	MaxSlippageBps         field.Int32
 	TokenAMint             field.String
 	TokenBMint             field.String
+	OracleConfig           field.String
+	MaxPriceDeviationBps   field.Int32
 
 	fieldMap map[string]field.Expr
 }
@@ -92,6 +96,8 @@ func (v *vault) updateTableName(table string) *vault {
 	v.MaxSlippageBps = field.NewInt32(table, "max_slippage_bps")
 	v.TokenAMint = field.NewString(table, "token_a_mint")
 	v.TokenBMint = field.NewString(table, "token_b_mint")
+	v.OracleConfig = field.NewString(table, "oracle_config")
+	v.MaxPriceDeviationBps = field.NewInt32(table, "max_price_deviation_bps")
 
 	v.fillFieldMap()
 
@@ -114,7 +120,7 @@ func (v *vault) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (v *vault) fillFieldMap() {
-	v.fieldMap = make(map[string]field.Expr, 13)
+	v.fieldMap = make(map[string]field.Expr, 15)
 	v.fieldMap["pubkey"] = v.Pubkey
 	v.fieldMap["proto_config"] = v.ProtoConfig
 	v.fieldMap["token_a_account"] = v.TokenAAccount
@@ -128,6 +134,8 @@ func (v *vault) fillFieldMap() {
 	v.fieldMap["max_slippage_bps"] = v.MaxSlippageBps
 	v.fieldMap["token_a_mint"] = v.TokenAMint
 	v.fieldMap["token_b_mint"] = v.TokenBMint
+	v.fieldMap["oracle_config"] = v.OracleConfig
+	v.fieldMap["max_price_deviation_bps"] = v.MaxPriceDeviationBps
 }
 
 func (v vault) clone(db *gorm.DB) vault {
