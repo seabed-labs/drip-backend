@@ -1117,6 +1117,8 @@ components:
         - dripAmount
         - dcaActivationTimestamp
         - enabled
+        - maxPriceDeviationBps
+        - maxSlippageBps
       properties:
         pubkey:
           type: string
@@ -1151,6 +1153,12 @@ components:
           description: unix timestamp
         enabled:
           type: boolean
+        maxSlippageBps:
+            type: integer
+        maxPriceDeviationBps:
+            type: integer
+        oracleConfig:
+            type: string
 
     vaultPeriod:
       type: object

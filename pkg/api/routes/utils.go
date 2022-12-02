@@ -48,6 +48,9 @@ func vaultModelToAPI(vaultModel *model.Vault) apispec.Vault {
 		TokenBAccount:          vaultModel.TokenBAccount,
 		TokenBMint:             vaultModel.TokenBMint,
 		TreasuryTokenBAccount:  vaultModel.TreasuryTokenBAccount,
+		MaxSlippageBps:         int(vaultModel.MaxSlippageBps),
+		OracleConfig:           vaultModel.OracleConfig,
+		MaxPriceDeviationBps:   int(vaultModel.MaxPriceDeviationBps),
 		Enabled:                vaultModel.Enabled,
 	}
 }

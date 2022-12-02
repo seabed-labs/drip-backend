@@ -66,9 +66,12 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, strconv.FormatUint(dbModel.LastDcaPeriod, 10), apiModel.LastDcaPeriod)
 		assert.Equal(t, strconv.FormatUint(dbModel.DripAmount, 10), apiModel.DripAmount)
 		assert.Equal(t, dbModel.Enabled, apiModel.Enabled)
+		assert.Equal(t, int(dbModel.MaxSlippageBps), apiModel.MaxSlippageBps)
+		assert.Equal(t, int(dbModel.MaxPriceDeviationBps), apiModel.MaxPriceDeviationBps)
+		assert.Nil(t, apiModel.OracleConfig)
 
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 11)
+		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 14)
 	})
 
 	t.Run("vaultModelsToAPI should return correct apiSpec model", func(t *testing.T) {
@@ -78,7 +81,7 @@ func TestUtils(t *testing.T) {
 		}
 		apiModel := vaultModelsToAPI(dbModels)
 		for i := range apiModel {
-			assert.Equal(t, reflect.TypeOf(apiModel[i]).NumField(), 11)
+			assert.Equal(t, reflect.TypeOf(apiModel[i]).NumField(), 14)
 		}
 	})
 
