@@ -111,8 +111,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/gagliardetto/binary v0.7.1
-	github.com/gagliardetto/solana-go v1.6.0
+	github.com/gagliardetto/binary v0.7.7
+	github.com/gagliardetto/solana-go v1.8.1
 	github.com/gagliardetto/treeout v0.1.4 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/gorilla/schema v1.2.0

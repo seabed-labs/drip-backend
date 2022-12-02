@@ -9,7 +9,7 @@ interactions:
         content_length: 46
         transfer_encoding: []
         trailer: {}
-        host: api.devnet.solana.com
+        host: api.mainnet-beta.solana.com
         remote_addr: ""
         request_uri: ""
         body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
@@ -19,7 +19,7 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.devnet.solana.com
+        url: https://api.mainnet-beta.solana.com
         method: POST
       response:
         proto: HTTP/2.0
@@ -35,30 +35,30 @@ interactions:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 25 Nov 2022 21:35:45 GMT
+                - Fri, 02 Dec 2022 20:23:32 GMT
             Vary:
                 - Accept-Encoding
             X-Ratelimit-Conn-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Conn-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Connrate-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Connrate-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Method-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Method-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Rps-Limit:
-                - "300"
+                - "100"
             X-Ratelimit-Rps-Remaining:
-                - "297"
+                - "99"
             X-Rpc-Node:
-                - sg69
+                - nyc61
         status: 200 OK
         code: 200
-        duration: 805.268583ms
+        duration: 230.651125ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -67,17 +67,17 @@ interactions:
         content_length: 155
         transfer_encoding: []
         trailer: {}
-        host: api.devnet.solana.com
+        host: api.mainnet-beta.solana.com
         remote_addr: ""
         request_uri: ""
-        body: '{"method":"getAccountInfo","params":["Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
+        body: '{"method":"getAccountInfo","params":["BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
         form: {}
         headers:
             Accept:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.devnet.solana.com
+        url: https://api.mainnet-beta.solana.com
         method: POST
       response:
         proto: HTTP/2.0
@@ -88,32 +88,32 @@ interactions:
         content_length: -1
         uncompressed: true
         body: |
-            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.5","slot":178001613},"value":{"data":["rRYkpb4Djsc8AAAAAAAAADIAGQAZACCnBAMbax/ztrk82y/NlCaa2hUpLyv5fQdKOKcf/FYlAAA=","base64"],"executable":false,"lamports":1280640,"owner":"F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo","rentEpoch":0}},"id":0}
+            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.5","slot":164531768},"value":{"data":["rRYkpb4DjscQDgAAAAAAACMABQAFAP9tBDqGIt+SnOOhZfekoHFeSBsbkIxe/E6RT8t877OcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","base64"],"executable":false,"lamports":2171520,"owner":"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk","rentEpoch":0}},"id":0}
         headers:
             Content-Type:
                 - application/json; charset=utf-8
             Date:
-                - Fri, 25 Nov 2022 21:35:45 GMT
+                - Fri, 02 Dec 2022 20:23:32 GMT
             Vary:
                 - Accept-Encoding
             X-Ratelimit-Conn-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Conn-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Connrate-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Connrate-Remaining:
-                - "199"
+                - "39"
             X-Ratelimit-Method-Limit:
-                - "200"
+                - "40"
             X-Ratelimit-Method-Remaining:
-                - "198"
+                - "39"
             X-Ratelimit-Rps-Limit:
-                - "300"
+                - "100"
             X-Ratelimit-Rps-Remaining:
-                - "297"
+                - "98"
             X-Rpc-Node:
-                - sg69
+                - nyc61
         status: 200 OK
         code: 200
-        duration: 254.301667ms
+        duration: 32.155334ms

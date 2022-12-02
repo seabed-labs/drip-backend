@@ -23,26 +23,26 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test1",
-				AppConfig:   unittest.GetMockDevnetStagingConfig(ctrl),
+				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
 			},
 			func(
 				processor processor.Processor,
 				repo repository.Repository,
 			) {
-				protoConfigAddress := "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr"
-				// protoConfig: https://explorer.solana.com/address/Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr?cluster=devnet
+				protoConfigAddress := "BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK"
+				// protoConfig: https://explorer.solana.com/address/BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK
 				assert.NoError(t, processor.UpsertProtoConfigByAddress(context.Background(), protoConfigAddress))
 
 				protoConfig, err := repo.GetProtoConfigByAddress(context.Background(), protoConfigAddress)
 				assert.NoError(t, err)
 				assert.NotNil(t, protoConfig)
 
-				assert.Equal(t, "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr", protoConfig.Pubkey)
-				assert.Equal(t, "3CTkqdcjzn1ptnNYUcFq4Sk1Smy91kz5p9JhgJBHGe3e", protoConfig.Admin)
-				assert.Equal(t, uint64(60), protoConfig.Granularity)
-				assert.Equal(t, uint16(50), protoConfig.TokenADripTriggerSpread)
-				assert.Equal(t, uint16(25), protoConfig.TokenBWithdrawalSpread)
-				assert.Equal(t, uint16(25), protoConfig.TokenBReferralSpread)
+				assert.Equal(t, "BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK", protoConfig.Pubkey)
+				assert.Equal(t, "JC5NuYudj4Dd8vFDS8re1spg3PZEZ3PZyBRef852vz5R", protoConfig.Admin)
+				assert.Equal(t, uint64(3600), protoConfig.Granularity)
+				assert.Equal(t, uint16(35), protoConfig.TokenADripTriggerSpread)
+				assert.Equal(t, uint16(5), protoConfig.TokenBWithdrawalSpread)
+				assert.Equal(t, uint16(5), protoConfig.TokenBReferralSpread)
 				// if the line below needs to be updated, add the field assertion above
 				assert.Equal(t, reflect.TypeOf(*protoConfig).NumField(), 6)
 			})
@@ -58,23 +58,23 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 		integrationtest.InjectDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test2",
-				AppConfig:   unittest.GetMockDevnetStagingConfig(ctrl),
+				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
 			},
 			func(
 				processor processor.Processor,
 				repo repository.Repository,
 			) {
-				vaultAddress := "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8"
-				// protoConfig: https://explorer.solana.com/address/BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8?cluster=devnet
+				vaultAddress := "HJcGW3iQGvLpnaJ7LATnrBdw66MTC1hzmmQMKN8pgVhH"
+				// vault:https://explorer.solana.com/address/HJcGW3iQGvLpnaJ7LATnrBdw66MTC1hzmmQMKN8pgVhH/anchor-account
 				assert.NoError(t, processor.UpsertVaultByAddress(context.Background(), vaultAddress))
 
 				// vault should exist
-				vault, err := repo.AdminGetVaultByAddress(context.Background(), "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8")
+				vault, err := repo.AdminGetVaultByAddress(context.Background(), vaultAddress)
 				assert.NoError(t, err)
 				assert.NotNil(t, vault)
 
 				// by extension proto config should exist
-				protoConfig, err := repo.GetProtoConfigByAddress(context.Background(), "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr")
+				protoConfig, err := repo.GetProtoConfigByAddress(context.Background(), "BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK")
 				assert.NoError(t, err)
 				assert.NotNil(t, protoConfig)
 
@@ -92,26 +92,28 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 				tokenPair, err := repo.GetTokenPair(context.Background(), vault.TokenAMint, vault.TokenBMint)
 				assert.NoError(t, err)
 				assert.NotNil(t, tokenPair)
-				assert.Equal(t, "H9gBUJs5Kc5zyiKRTzZcYom4Hpj9VPHLy4VzExTVPgxa", tokenPair.TokenA)
-				assert.Equal(t, "7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M", tokenPair.TokenB)
+				assert.Equal(t, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", tokenPair.TokenA)
+				assert.Equal(t, "So11111111111111111111111111111111111111112", tokenPair.TokenB)
 				// if the line below needs to be updated, add the field assertion above
 				assert.Equal(t, reflect.TypeOf(*tokenPair).NumField(), 3)
 
-				assert.Equal(t, "BwJj7DYyMR1xMnWK1PGKPLi5u2ZP5EDBFBkPAAv4UDP8", vault.Pubkey)
-				assert.Equal(t, "Et3bqQq32LPkrndf8gU9gRqfL4S13ubdUuiqBE1jjrgr", vault.ProtoConfig)
-				assert.Equal(t, "H9gBUJs5Kc5zyiKRTzZcYom4Hpj9VPHLy4VzExTVPgxa", vault.TokenAMint)
-				assert.Equal(t, "7ihthG4cFydyDnuA3zmJrX13ePGpLcANf3tHLmKLPN7M", vault.TokenBMint)
-				assert.Equal(t, "HPTSZFzxKUsJKPrxSyYh6TuGQV7qfBqpW6c4A8DERxFr", vault.TokenAAccount)
-				assert.Equal(t, "9Swein4rvYYN1MJyFBjfTdvx8Lh3wzabwtWKddPWdhrP", vault.TokenBAccount)
-				assert.Equal(t, "6smBUZt2e7Dz9o6hWoXmY78n1rpXrgpNwNFtocZMU5QN", vault.TreasuryTokenBAccount)
-				assert.Equal(t, uint64(1847), vault.LastDcaPeriod)
-				assert.Equal(t, uint64(75250000), vault.DripAmount)
-				assert.Equal(t, int64(1664673300), vault.DcaActivationTimestamp.Unix())
-				assert.Equal(t, int32(1000), vault.MaxSlippageBps)
+				assert.Equal(t, vaultAddress, vault.Pubkey)
+				assert.Equal(t, "BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK", vault.ProtoConfig)
+				assert.Equal(t, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", vault.TokenAMint)
+				assert.Equal(t, "So11111111111111111111111111111111111111112", vault.TokenBMint)
+				assert.Equal(t, "2JxQvnZcXNLugZTdLxCohWvRa24juDyfPY75w3HxMxUv", vault.TokenAAccount)
+				assert.Equal(t, "2AvGt9sXPxdVfJWq9mYn2umjnKLfKTUHEfchPmwADEn2", vault.TokenBAccount)
+				assert.Equal(t, "6i5YrPuJWReB9XCxaoB4ghga2PShFFWRCYYXPXhu4j1W", vault.TreasuryTokenBAccount)
+				assert.Equal(t, uint64(69), vault.LastDcaPeriod)
+				assert.Equal(t, uint64(11469628), vault.DripAmount)
+				assert.Equal(t, int64(1670014800), vault.DcaActivationTimestamp.Unix())
+				assert.Equal(t, int32(500), vault.MaxSlippageBps)
 				assert.Equal(t, false, vault.Enabled)
 				assert.Equal(t, tokenPair.ID, vault.TokenPairID)
+				assert.Nil(t, vault.OracleConfig)
+				assert.Equal(t, int32(0), vault.MaxPriceDeviationBps)
 				// if the line below needs to be updated, add the field assertion above
-				assert.Equal(t, reflect.TypeOf(*vault).NumField(), 13)
+				assert.Equal(t, 15, reflect.TypeOf(*vault).NumField())
 			})
 	})
 }
