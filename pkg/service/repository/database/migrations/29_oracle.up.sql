@@ -10,5 +10,5 @@ CREATE TABLE "oracle_config" (
 );
 
 ALTER TABLE vault ADD COLUMN oracle_config varchar(255);
-ALTER TABLE vault ADD COLUMN max_price_deviation_bps integer NOT NULL;
+ALTER TABLE vault ADD COLUMN max_price_deviation_bps integer NOT NULL DEFAULT 0;
 ALTER TABLE vault ADD FOREIGN KEY ("oracle_config") REFERENCES "oracle_config" ("pubkey");
