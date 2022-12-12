@@ -263,6 +263,7 @@ func TestUtils(t *testing.T) {
 			MaxSlippageBps:         50,
 			TokenAMint:             solana.NewWallet().PublicKey().String(),
 			TokenBMint:             solana.NewWallet().PublicKey().String(),
+			OracleConfig:           utils.GetStringPtr(solana.NewWallet().PublicKey().String()),
 		}
 		tokenSwap := model.TokenSwap{
 			Pubkey:        solana.NewWallet().PublicKey().String(),
@@ -293,8 +294,9 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, vault.ProtoConfig, apiModel.VaultProtoConfig)
 		assert.Equal(t, vault.TokenAAccount, apiModel.DripCommon.VaultTokenAAccount)
 		assert.Equal(t, vault.TokenBAccount, apiModel.DripCommon.VaultTokenBAccount)
+		assert.Equal(t, *vault.OracleConfig, *apiModel.OracleConfig)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 6)
+		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 7)
 	})
 
 	t.Run("vaultWhirlpoolToAPI should return correct apiSpec model", func(t *testing.T) {
@@ -312,6 +314,7 @@ func TestUtils(t *testing.T) {
 			MaxSlippageBps:         50,
 			TokenAMint:             solana.NewWallet().PublicKey().String(),
 			TokenBMint:             solana.NewWallet().PublicKey().String(),
+			OracleConfig:           utils.GetStringPtr(solana.NewWallet().PublicKey().String()),
 		}
 		orcaWhirlpool := model.OrcaWhirlpool{
 			Pubkey:                     solana.NewWallet().PublicKey().String(),
@@ -350,8 +353,9 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, vault.ProtoConfig, apiModel.VaultProtoConfig)
 		assert.Equal(t, vault.TokenAAccount, apiModel.DripCommon.VaultTokenAAccount)
 		assert.Equal(t, vault.TokenBAccount, apiModel.DripCommon.VaultTokenBAccount)
+		assert.Equal(t, *vault.OracleConfig, *apiModel.OracleConfig)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 6)
+		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 7)
 	})
 
 }

@@ -179,6 +179,7 @@ func vaultTokenSwapToAPI(vault *model.Vault, tokenSwap *model.TokenSwap) apispec
 			VaultProtoConfig:   vault.ProtoConfig,
 			VaultTokenAAccount: vault.TokenAAccount,
 			VaultTokenBAccount: vault.TokenBAccount,
+			OracleConfig:       vault.OracleConfig,
 		},
 	}
 }
@@ -196,6 +197,7 @@ func vaultWhirlpoolToAPI(vault *model.Vault, orcaWhirlpool *model.OrcaWhirlpool)
 			VaultProtoConfig:   vault.ProtoConfig,
 			VaultTokenAAccount: vault.TokenAAccount,
 			VaultTokenBAccount: vault.TokenBAccount,
+			OracleConfig:       vault.OracleConfig,
 		},
 	}
 }

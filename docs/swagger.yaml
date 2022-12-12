@@ -947,6 +947,9 @@ components:
         tokenBMint:
           type: string
           example: "5r23oKMycxnnjAJ4cEEkh1bbCowcZwzL6HYmhLqRazQa"
+        oracleConfig:
+          type: string
+          example: "5r23oKMycxnnjAJ4cEEkh1bbCowcZwzL6HYmhLqRazQa"
 
     splTokenSwapConfig:
       type: object
