@@ -51,17 +51,38 @@ func backfillDevnetAccounts(
 		} {
 			log := logrus.WithField("address", address)
 			if err := i.processor.UpsertWhirlpoolByAddress(ctx, address); err != nil {
-				log.WithError(err).Error("failed to cli whirlpool")
+				log.WithError(err).Error("failed to backfill whirlpool")
 			}
 		}
 	}
 	if config.IsDevnetNetwork(i.network) && config.IsStagingEnvironment(i.env) {
 		for _, address := range []string{
-			"HhKqRDp2ooZPj8554rHtJLGiMsDrHy1zkZqidDM1h9kQ",
+			"Aojvs2iH6sQkVKiyASHNLSrgdtfoG6NJ9piVMyQ2pyod",
 		} {
 			log := logrus.WithField("address", address)
-			if err := i.processor.UpsertPositionByAddress(ctx, address); err != nil {
-				log.WithError(err).Error("failed to cli position")
+			if err := i.processor.UpsertProtoConfigByAddress(ctx, address); err != nil {
+				log.WithError(err).Error("failed to backfill protoconfig")
+			}
+		}
+	}
+	if config.IsDevnetNetwork(i.network) && config.IsStagingEnvironment(i.env) {
+		for _, address := range []string{
+			"EQje3kVqMqKJ92pBHUqxeKvgxuSX2o7KKDf64imTcTcR",
+			"bBaGKPJBUstDBwuLo9yyAtTiFjRrgkvDLkZq7B7VXvF",
+		} {
+			log := logrus.WithField("address", address)
+			if err := i.processor.UpsertVaultByAddress(ctx, address); err != nil {
+				log.WithError(err).Error("failed to backfill vault")
+			}
+		}
+	}
+	if config.IsDevnetNetwork(i.network) && config.IsStagingEnvironment(i.env) {
+		for _, address := range []string{
+			"2nSfqMNV9CyjWA8zSA5jGPKGgEA4CtskHZsQf7H4fCaT",
+		} {
+			log := logrus.WithField("address", address)
+			if err := i.processor.UpsertOracleConfigByAddress(ctx, address); err != nil {
+				log.WithError(err).Error("failed to backfill oracle config")
 			}
 		}
 	}

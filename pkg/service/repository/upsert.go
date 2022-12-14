@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/samber/lo"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"gorm.io/gorm/clause"
 )
@@ -90,11 +92,14 @@ func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model.Token
 
 func (d repositoryImpl) UpsertVaults(ctx context.Context, vaults ...*model.Vault) error {
 	// Insert new vaults or update select fields on updates
+	updateColumns := lo.Filter[string](model.Vault{}.GetAllColumns(), func(item string, _ int) bool {
+		return item != "enabled"
+	})
 	return d.repo.Vault.
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "pubkey"}},
-			DoUpdates: clause.AssignmentColumns([]string{"last_dca_period", "drip_amount", "dca_activation_timestamp"}),
+			DoUpdates: clause.AssignmentColumns(updateColumns),
 		}).
 		Create(vaults...)
 }
