@@ -458,9 +458,9 @@ func (s impl) signAndBroadcast(
 func GetURLWithRateLimit(env config.Network) (string, int) {
 	switch env {
 	case config.MainnetNetwork:
-		return rpc.MainNetBeta_RPC, 3
+		//return rpc.MainNetBeta_RPC, 3
 		// mocha+1@dcaf.so
-		// return "https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388", 10
+		return "https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388", 10
 	case config.DevnetNetwork:
 		//return rpc.DevNet_RPC, 3
 		// mocha+2@dcaf.so

@@ -5,7 +5,6 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/event"
-
 	"github.com/dcaf-labs/drip/pkg/job/token"
 	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
 
@@ -62,10 +61,10 @@ func getDependencies() []fx.Option {
 		),
 		fx.Invoke(
 			database.RunMigrations,
+			event.Server,
+			api.StartServer,
 			token.NewTokenJob,
 			tokenaccount.NewTokenAccountJob,
-			api.StartServer,
-			event.Server,
 		),
 		fx.NopLogger,
 	}

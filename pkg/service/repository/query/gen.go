@@ -15,6 +15,8 @@ func Use(db *gorm.DB) *Query {
 	return &Query{
 		db:                       db,
 		AccountUpdateQueueItem:   newAccountUpdateQueueItem(db),
+		DepositMetric:            newDepositMetric(db),
+		DripMetric:               newDripMetric(db),
 		OracleConfig:             newOracleConfig(db),
 		OrcaWhirlpool:            newOrcaWhirlpool(db),
 		OrcaWhirlpoolDeltaBQuote: newOrcaWhirlpoolDeltaBQuote(db),
@@ -29,6 +31,7 @@ func Use(db *gorm.DB) *Query {
 		Vault:                    newVault(db),
 		VaultPeriod:              newVaultPeriod(db),
 		VaultWhitelist:           newVaultWhitelist(db),
+		WithdrawalMetric:         newWithdrawalMetric(db),
 	}
 }
 
@@ -36,6 +39,8 @@ type Query struct {
 	db *gorm.DB
 
 	AccountUpdateQueueItem   accountUpdateQueueItem
+	DepositMetric            depositMetric
+	DripMetric               dripMetric
 	OracleConfig             oracleConfig
 	OrcaWhirlpool            orcaWhirlpool
 	OrcaWhirlpoolDeltaBQuote orcaWhirlpoolDeltaBQuote
@@ -50,6 +55,7 @@ type Query struct {
 	Vault                    vault
 	VaultPeriod              vaultPeriod
 	VaultWhitelist           vaultWhitelist
+	WithdrawalMetric         withdrawalMetric
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -58,6 +64,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:                       db,
 		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.clone(db),
+		DepositMetric:            q.DepositMetric.clone(db),
+		DripMetric:               q.DripMetric.clone(db),
 		OracleConfig:             q.OracleConfig.clone(db),
 		OrcaWhirlpool:            q.OrcaWhirlpool.clone(db),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.clone(db),
@@ -72,11 +80,14 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Vault:                    q.Vault.clone(db),
 		VaultPeriod:              q.VaultPeriod.clone(db),
 		VaultWhitelist:           q.VaultWhitelist.clone(db),
+		WithdrawalMetric:         q.WithdrawalMetric.clone(db),
 	}
 }
 
 type queryCtx struct {
 	AccountUpdateQueueItem   *accountUpdateQueueItemDo
+	DepositMetric            *depositMetricDo
+	DripMetric               *dripMetricDo
 	OracleConfig             *oracleConfigDo
 	OrcaWhirlpool            *orcaWhirlpoolDo
 	OrcaWhirlpoolDeltaBQuote *orcaWhirlpoolDeltaBQuoteDo
@@ -91,11 +102,14 @@ type queryCtx struct {
 	Vault                    *vaultDo
 	VaultPeriod              *vaultPeriodDo
 	VaultWhitelist           *vaultWhitelistDo
+	WithdrawalMetric         *withdrawalMetricDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.WithContext(ctx),
+		DepositMetric:            q.DepositMetric.WithContext(ctx),
+		DripMetric:               q.DripMetric.WithContext(ctx),
 		OracleConfig:             q.OracleConfig.WithContext(ctx),
 		OrcaWhirlpool:            q.OrcaWhirlpool.WithContext(ctx),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
@@ -110,6 +124,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Vault:                    q.Vault.WithContext(ctx),
 		VaultPeriod:              q.VaultPeriod.WithContext(ctx),
 		VaultWhitelist:           q.VaultWhitelist.WithContext(ctx),
+		WithdrawalMetric:         q.WithdrawalMetric.WithContext(ctx),
 	}
 }
 

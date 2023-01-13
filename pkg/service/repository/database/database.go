@@ -27,7 +27,10 @@ func NewDatabase(
 	}
 	lifecycle.Append(fx.Hook{
 		OnStop: func(_ context.Context) error {
-			return onStop()
+			if onStop != nil {
+				return onStop()
+			}
+			return nil
 		},
 	})
 	return sqlx.Connect("postgres", getConnectionString(dbConfig))
