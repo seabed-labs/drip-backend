@@ -113,7 +113,7 @@ func TestWithInjectedDependencies(
 		providers = append(providers, config.NewPSQLConfig)
 	}
 	// comment out below for logs
-	logrus.SetOutput(ioutil.Discard)
+	//logrus.SetOutput(ioutil.Discard)
 	opts := []fx.Option{
 		fx.Provide(providers...),
 		fx.Invoke(
@@ -129,6 +129,7 @@ func TestWithInjectedDependencies(
 		}
 	}()
 	if err := app.Start(context.Background()); err != nil {
+		logrus.WithError(err).Error("failed to run integration test")
 		panic(err)
 	}
 }
