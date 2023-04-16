@@ -807,60 +807,192 @@ func (m *MockAccountUpdateQueue) EXPECT() *MockAccountUpdateQueueMockRecorder {
 	return m.recorder
 }
 
-// AddItem mocks base method.
-func (m *MockAccountUpdateQueue) AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+// AccountUpdateQueueItemDepth mocks base method.
+func (m *MockAccountUpdateQueue) AccountUpdateQueueItemDepth(ctx context.Context) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddItem", ctx, item)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// AddItem indicates an expected call of AddItem.
-func (mr *MockAccountUpdateQueueMockRecorder) AddItem(ctx, item interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AddItem), ctx, item)
-}
-
-// Depth mocks base method.
-func (m *MockAccountUpdateQueue) Depth(ctx context.Context) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Depth", ctx)
+	ret := m.ctrl.Call(m, "AccountUpdateQueueItemDepth", ctx)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Depth indicates an expected call of Depth.
-func (mr *MockAccountUpdateQueueMockRecorder) Depth(ctx interface{}) *gomock.Call {
+// AccountUpdateQueueItemDepth indicates an expected call of AccountUpdateQueueItemDepth.
+func (mr *MockAccountUpdateQueueMockRecorder) AccountUpdateQueueItemDepth(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Depth", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Depth), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccountUpdateQueueItemDepth", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AccountUpdateQueueItemDepth), ctx)
 }
 
-// Pop mocks base method.
-func (m *MockAccountUpdateQueue) Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
+// AddAccountUpdateQueueItem mocks base method.
+func (m *MockAccountUpdateQueue) AddAccountUpdateQueueItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Pop", ctx)
+	ret := m.ctrl.Call(m, "AddAccountUpdateQueueItem", ctx, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddAccountUpdateQueueItem indicates an expected call of AddAccountUpdateQueueItem.
+func (mr *MockAccountUpdateQueueMockRecorder) AddAccountUpdateQueueItem(ctx, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAccountUpdateQueueItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AddAccountUpdateQueueItem), ctx, item)
+}
+
+// PopAccountUpdateQueueItem mocks base method.
+func (m *MockAccountUpdateQueue) PopAccountUpdateQueueItem(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PopAccountUpdateQueueItem", ctx)
 	ret0, _ := ret[0].(*model.AccountUpdateQueueItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Pop indicates an expected call of Pop.
-func (mr *MockAccountUpdateQueueMockRecorder) Pop(ctx interface{}) *gomock.Call {
+// PopAccountUpdateQueueItem indicates an expected call of PopAccountUpdateQueueItem.
+func (mr *MockAccountUpdateQueueMockRecorder) PopAccountUpdateQueueItem(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pop", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Pop), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopAccountUpdateQueueItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).PopAccountUpdateQueueItem), ctx)
 }
 
-// ReQueue mocks base method.
-func (m *MockAccountUpdateQueue) ReQueue(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+// ReQueueAccountUpdateQueueItem mocks base method.
+func (m *MockAccountUpdateQueue) ReQueueAccountUpdateQueueItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReQueue", ctx, item)
+	ret := m.ctrl.Call(m, "ReQueueAccountUpdateQueueItem", ctx, item)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ReQueue indicates an expected call of ReQueue.
-func (mr *MockAccountUpdateQueueMockRecorder) ReQueue(ctx, item interface{}) *gomock.Call {
+// ReQueueAccountUpdateQueueItem indicates an expected call of ReQueueAccountUpdateQueueItem.
+func (mr *MockAccountUpdateQueueMockRecorder) ReQueueAccountUpdateQueueItem(ctx, item interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReQueue", reflect.TypeOf((*MockAccountUpdateQueue)(nil).ReQueue), ctx, item)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReQueueAccountUpdateQueueItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).ReQueueAccountUpdateQueueItem), ctx, item)
+}
+
+// MockTransactionUpdateQueue is a mock of TransactionUpdateQueue interface.
+type MockTransactionUpdateQueue struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionUpdateQueueMockRecorder
+}
+
+// MockTransactionUpdateQueueMockRecorder is the mock recorder for MockTransactionUpdateQueue.
+type MockTransactionUpdateQueueMockRecorder struct {
+	mock *MockTransactionUpdateQueue
+}
+
+// NewMockTransactionUpdateQueue creates a new mock instance.
+func NewMockTransactionUpdateQueue(ctrl *gomock.Controller) *MockTransactionUpdateQueue {
+	mock := &MockTransactionUpdateQueue{ctrl: ctrl}
+	mock.recorder = &MockTransactionUpdateQueueMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactionUpdateQueue) EXPECT() *MockTransactionUpdateQueueMockRecorder {
+	return m.recorder
+}
+
+// AddTransactionUpdateQueueItem mocks base method.
+func (m *MockTransactionUpdateQueue) AddTransactionUpdateQueueItem(ctx context.Context, item *model.TransactionUpdateQueueItem) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddTransactionUpdateQueueItem", ctx, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddTransactionUpdateQueueItem indicates an expected call of AddTransactionUpdateQueueItem.
+func (mr *MockTransactionUpdateQueueMockRecorder) AddTransactionUpdateQueueItem(ctx, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTransactionUpdateQueueItem", reflect.TypeOf((*MockTransactionUpdateQueue)(nil).AddTransactionUpdateQueueItem), ctx, item)
+}
+
+// PopTransactionUpdateQueueItem mocks base method.
+func (m *MockTransactionUpdateQueue) PopTransactionUpdateQueueItem(ctx context.Context) (*model.TransactionUpdateQueueItem, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PopTransactionUpdateQueueItem", ctx)
+	ret0, _ := ret[0].(*model.TransactionUpdateQueueItem)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PopTransactionUpdateQueueItem indicates an expected call of PopTransactionUpdateQueueItem.
+func (mr *MockTransactionUpdateQueueMockRecorder) PopTransactionUpdateQueueItem(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PopTransactionUpdateQueueItem", reflect.TypeOf((*MockTransactionUpdateQueue)(nil).PopTransactionUpdateQueueItem), ctx)
+}
+
+// ReQueueTransactionUpdateItem mocks base method.
+func (m *MockTransactionUpdateQueue) ReQueueTransactionUpdateItem(ctx context.Context, item *model.TransactionUpdateQueueItem) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReQueueTransactionUpdateItem", ctx, item)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ReQueueTransactionUpdateItem indicates an expected call of ReQueueTransactionUpdateItem.
+func (mr *MockTransactionUpdateQueueMockRecorder) ReQueueTransactionUpdateItem(ctx, item interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReQueueTransactionUpdateItem", reflect.TypeOf((*MockTransactionUpdateQueue)(nil).ReQueueTransactionUpdateItem), ctx, item)
+}
+
+// TransactionUpdateQueueItemDepth mocks base method.
+func (m *MockTransactionUpdateQueue) TransactionUpdateQueueItemDepth(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TransactionUpdateQueueItemDepth", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// TransactionUpdateQueueItemDepth indicates an expected call of TransactionUpdateQueueItemDepth.
+func (mr *MockTransactionUpdateQueueMockRecorder) TransactionUpdateQueueItemDepth(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TransactionUpdateQueueItemDepth", reflect.TypeOf((*MockTransactionUpdateQueue)(nil).TransactionUpdateQueueItemDepth), ctx)
+}
+
+// MockTransactionProcessingCheckpointRepository is a mock of TransactionProcessingCheckpointRepository interface.
+type MockTransactionProcessingCheckpointRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionProcessingCheckpointRepositoryMockRecorder
+}
+
+// MockTransactionProcessingCheckpointRepositoryMockRecorder is the mock recorder for MockTransactionProcessingCheckpointRepository.
+type MockTransactionProcessingCheckpointRepositoryMockRecorder struct {
+	mock *MockTransactionProcessingCheckpointRepository
+}
+
+// NewMockTransactionProcessingCheckpointRepository creates a new mock instance.
+func NewMockTransactionProcessingCheckpointRepository(ctrl *gomock.Controller) *MockTransactionProcessingCheckpointRepository {
+	mock := &MockTransactionProcessingCheckpointRepository{ctrl: ctrl}
+	mock.recorder = &MockTransactionProcessingCheckpointRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransactionProcessingCheckpointRepository) EXPECT() *MockTransactionProcessingCheckpointRepositoryMockRecorder {
+	return m.recorder
+}
+
+// GetLatestTransactionCheckpoint mocks base method.
+func (m *MockTransactionProcessingCheckpointRepository) GetLatestTransactionCheckpoint(ctx context.Context) *model.TransactionProcessingCheckpoint {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLatestTransactionCheckpoint", ctx)
+	ret0, _ := ret[0].(*model.TransactionProcessingCheckpoint)
+	return ret0
+}
+
+// GetLatestTransactionCheckpoint indicates an expected call of GetLatestTransactionCheckpoint.
+func (mr *MockTransactionProcessingCheckpointRepositoryMockRecorder) GetLatestTransactionCheckpoint(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatestTransactionCheckpoint", reflect.TypeOf((*MockTransactionProcessingCheckpointRepository)(nil).GetLatestTransactionCheckpoint), ctx)
+}
+
+// UpsertTransactionProcessingCheckpoint mocks base method.
+func (m *MockTransactionProcessingCheckpointRepository) UpsertTransactionProcessingCheckpoint(ctx context.Context, slot uint64, signature string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpsertTransactionProcessingCheckpoint", ctx, slot, signature)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertTransactionProcessingCheckpoint indicates an expected call of UpsertTransactionProcessingCheckpoint.
+func (mr *MockTransactionProcessingCheckpointRepositoryMockRecorder) UpsertTransactionProcessingCheckpoint(ctx, slot, signature interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertTransactionProcessingCheckpoint", reflect.TypeOf((*MockTransactionProcessingCheckpointRepository)(nil).UpsertTransactionProcessingCheckpoint), ctx, slot, signature)
 }

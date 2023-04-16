@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/AlekSi/pointer"
+
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
@@ -43,6 +45,8 @@ type Solana interface {
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
 	GetNetwork() config.Network
+
+	GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error)
 }
 
 func NewSolanaClient(
@@ -56,6 +60,14 @@ type impl struct {
 	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
+}
+
+func (s impl) GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error) {
+	return s.client.GetBlockWithOpts(ctx, slot, &rpc.GetBlockOpts{
+		TransactionDetails:             rpc.TransactionDetailsFull,
+		Commitment:                     rpc.CommitmentFinalized,
+		MaxSupportedTransactionVersion: pointer.ToUint64(0),
+	})
 }
 
 func (s impl) GetNetwork() config.Network {
@@ -155,7 +167,7 @@ func (s impl) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (
 		solana.MustPublicKeyFromBase58(tokenMetadataAddress),
 		&rpc.GetAccountInfoOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 			DataSlice:  nil,
 		})
 	if err != nil {
@@ -180,7 +192,7 @@ func (s impl) GetAccount(ctx context.Context, address string, v interface{}) err
 		solana.MustPublicKeyFromBase58(address),
 		&rpc.GetAccountInfoOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 		})
 	if err != nil {
 		logrus.
@@ -221,7 +233,7 @@ func (s impl) GetProgramAccounts(ctx context.Context, address string) ([]string,
 		solana.MustPublicKeyFromBase58(address),
 		&rpc.GetProgramAccountsOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 			DataSlice: &rpc.DataSlice{
 				Offset: &offset,
 				Length: &length,
@@ -255,7 +267,7 @@ func (s impl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetToken
 			ProgramId: &solana.TokenProgramID,
 		},
 		&rpc.GetTokenAccountsOpts{
-			Commitment: rpc.CommitmentMax,
+			Commitment: rpc.CommitmentFinalized,
 			Encoding:   solana.EncodingJSONParsed,
 		})
 }
@@ -304,7 +316,7 @@ func (s impl) ProgramSubscribe(
 	}
 	sub, err := client.ProgramSubscribeWithOpts(
 		solana.MustPublicKeyFromBase58(program),
-		rpc.CommitmentRecent,
+		rpc.CommitmentFinalized,
 		solana.EncodingBase64Zstd,
 		nil,
 	)
@@ -320,22 +332,22 @@ func (s impl) ProgramSubscribe(
 				logrus.
 					WithError(err).
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Error("failed to get next msg from event ws")
+					Error("failed to get next msg from consumer ws")
 				// TODO(Mocha): need to handle the case where this fails
 				client, err = ws.Connect(ctx, url)
 				if err != nil {
 					logrus.
 						WithError(err).
 						WithFields(logrus.Fields{
-							"event": program,
+							"consumer": program,
 						}).
 						Error("failed to get new ws client")
 				}
 				sub, err = client.ProgramSubscribeWithOpts(
 					solana.MustPublicKeyFromBase58(program),
-					rpc.CommitmentRecent,
+					rpc.CommitmentFinalized,
 					solana.EncodingBase64Zstd,
 					nil,
 				)
@@ -343,7 +355,7 @@ func (s impl) ProgramSubscribe(
 					logrus.
 						WithError(err).
 						WithFields(logrus.Fields{
-							"event": program,
+							"consumer": program,
 						}).
 						Error("failed to get new program websocket subscription")
 				}
@@ -352,18 +364,18 @@ func (s impl) ProgramSubscribe(
 			if msg == nil || msg.Value.Account == nil || msg.Value.Account.Data == nil {
 				logrus.
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Warning("event ws msg account or account data is nil")
+					Warning("consumer ws msg account or account data is nil")
 				continue
 			}
 			decodedBinary := msg.Value.Account.Data.GetBinary()
 			if decodedBinary == nil {
 				logrus.
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Warning("event ws msg decoded binary is nil")
+					Warning("consumer ws msg decoded binary is nil")
 				continue
 			}
 			_ = onReceive(msg.Value.Pubkey.String(), decodedBinary)

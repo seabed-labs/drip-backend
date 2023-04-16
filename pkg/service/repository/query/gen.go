@@ -13,113 +13,123 @@ import (
 
 func Use(db *gorm.DB) *Query {
 	return &Query{
-		db:                       db,
-		AccountUpdateQueueItem:   newAccountUpdateQueueItem(db),
-		DepositMetric:            newDepositMetric(db),
-		DripMetric:               newDripMetric(db),
-		OrcaWhirlpool:            newOrcaWhirlpool(db),
-		OrcaWhirlpoolDeltaBQuote: newOrcaWhirlpoolDeltaBQuote(db),
-		Position:                 newPosition(db),
-		ProtoConfig:              newProtoConfig(db),
-		SchemaMigration:          newSchemaMigration(db),
-		SourceReference:          newSourceReference(db),
-		Token:                    newToken(db),
-		TokenAccount:             newTokenAccount(db),
-		TokenPair:                newTokenPair(db),
-		TokenSwap:                newTokenSwap(db),
-		Vault:                    newVault(db),
-		VaultPeriod:              newVaultPeriod(db),
-		VaultWhitelist:           newVaultWhitelist(db),
-		WithdrawalMetric:         newWithdrawalMetric(db),
+		db:                              db,
+		AccountUpdateQueueItem:          newAccountUpdateQueueItem(db),
+		DepositMetric:                   newDepositMetric(db),
+		DripMetric:                      newDripMetric(db),
+		OrcaWhirlpool:                   newOrcaWhirlpool(db),
+		OrcaWhirlpoolDeltaBQuote:        newOrcaWhirlpoolDeltaBQuote(db),
+		Position:                        newPosition(db),
+		ProtoConfig:                     newProtoConfig(db),
+		SchemaMigration:                 newSchemaMigration(db),
+		SourceReference:                 newSourceReference(db),
+		Token:                           newToken(db),
+		TokenAccount:                    newTokenAccount(db),
+		TokenPair:                       newTokenPair(db),
+		TokenSwap:                       newTokenSwap(db),
+		TransactionProcessingCheckpoint: newTransactionProcessingCheckpoint(db),
+		TransactionUpdateQueueItem:      newTransactionUpdateQueueItem(db),
+		Vault:                           newVault(db),
+		VaultPeriod:                     newVaultPeriod(db),
+		VaultWhitelist:                  newVaultWhitelist(db),
+		WithdrawalMetric:                newWithdrawalMetric(db),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	AccountUpdateQueueItem   accountUpdateQueueItem
-	DepositMetric            depositMetric
-	DripMetric               dripMetric
-	OrcaWhirlpool            orcaWhirlpool
-	OrcaWhirlpoolDeltaBQuote orcaWhirlpoolDeltaBQuote
-	Position                 position
-	ProtoConfig              protoConfig
-	SchemaMigration          schemaMigration
-	SourceReference          sourceReference
-	Token                    token
-	TokenAccount             tokenAccount
-	TokenPair                tokenPair
-	TokenSwap                tokenSwap
-	Vault                    vault
-	VaultPeriod              vaultPeriod
-	VaultWhitelist           vaultWhitelist
-	WithdrawalMetric         withdrawalMetric
+	AccountUpdateQueueItem          accountUpdateQueueItem
+	DepositMetric                   depositMetric
+	DripMetric                      dripMetric
+	OrcaWhirlpool                   orcaWhirlpool
+	OrcaWhirlpoolDeltaBQuote        orcaWhirlpoolDeltaBQuote
+	Position                        position
+	ProtoConfig                     protoConfig
+	SchemaMigration                 schemaMigration
+	SourceReference                 sourceReference
+	Token                           token
+	TokenAccount                    tokenAccount
+	TokenPair                       tokenPair
+	TokenSwap                       tokenSwap
+	TransactionProcessingCheckpoint transactionProcessingCheckpoint
+	TransactionUpdateQueueItem      transactionUpdateQueueItem
+	Vault                           vault
+	VaultPeriod                     vaultPeriod
+	VaultWhitelist                  vaultWhitelist
+	WithdrawalMetric                withdrawalMetric
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                       db,
-		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.clone(db),
-		DepositMetric:            q.DepositMetric.clone(db),
-		DripMetric:               q.DripMetric.clone(db),
-		OrcaWhirlpool:            q.OrcaWhirlpool.clone(db),
-		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.clone(db),
-		Position:                 q.Position.clone(db),
-		ProtoConfig:              q.ProtoConfig.clone(db),
-		SchemaMigration:          q.SchemaMigration.clone(db),
-		SourceReference:          q.SourceReference.clone(db),
-		Token:                    q.Token.clone(db),
-		TokenAccount:             q.TokenAccount.clone(db),
-		TokenPair:                q.TokenPair.clone(db),
-		TokenSwap:                q.TokenSwap.clone(db),
-		Vault:                    q.Vault.clone(db),
-		VaultPeriod:              q.VaultPeriod.clone(db),
-		VaultWhitelist:           q.VaultWhitelist.clone(db),
-		WithdrawalMetric:         q.WithdrawalMetric.clone(db),
+		db:                              db,
+		AccountUpdateQueueItem:          q.AccountUpdateQueueItem.clone(db),
+		DepositMetric:                   q.DepositMetric.clone(db),
+		DripMetric:                      q.DripMetric.clone(db),
+		OrcaWhirlpool:                   q.OrcaWhirlpool.clone(db),
+		OrcaWhirlpoolDeltaBQuote:        q.OrcaWhirlpoolDeltaBQuote.clone(db),
+		Position:                        q.Position.clone(db),
+		ProtoConfig:                     q.ProtoConfig.clone(db),
+		SchemaMigration:                 q.SchemaMigration.clone(db),
+		SourceReference:                 q.SourceReference.clone(db),
+		Token:                           q.Token.clone(db),
+		TokenAccount:                    q.TokenAccount.clone(db),
+		TokenPair:                       q.TokenPair.clone(db),
+		TokenSwap:                       q.TokenSwap.clone(db),
+		TransactionProcessingCheckpoint: q.TransactionProcessingCheckpoint.clone(db),
+		TransactionUpdateQueueItem:      q.TransactionUpdateQueueItem.clone(db),
+		Vault:                           q.Vault.clone(db),
+		VaultPeriod:                     q.VaultPeriod.clone(db),
+		VaultWhitelist:                  q.VaultWhitelist.clone(db),
+		WithdrawalMetric:                q.WithdrawalMetric.clone(db),
 	}
 }
 
 type queryCtx struct {
-	AccountUpdateQueueItem   *accountUpdateQueueItemDo
-	DepositMetric            *depositMetricDo
-	DripMetric               *dripMetricDo
-	OrcaWhirlpool            *orcaWhirlpoolDo
-	OrcaWhirlpoolDeltaBQuote *orcaWhirlpoolDeltaBQuoteDo
-	Position                 *positionDo
-	ProtoConfig              *protoConfigDo
-	SchemaMigration          *schemaMigrationDo
-	SourceReference          *sourceReferenceDo
-	Token                    *tokenDo
-	TokenAccount             *tokenAccountDo
-	TokenPair                *tokenPairDo
-	TokenSwap                *tokenSwapDo
-	Vault                    *vaultDo
-	VaultPeriod              *vaultPeriodDo
-	VaultWhitelist           *vaultWhitelistDo
-	WithdrawalMetric         *withdrawalMetricDo
+	AccountUpdateQueueItem          *accountUpdateQueueItemDo
+	DepositMetric                   *depositMetricDo
+	DripMetric                      *dripMetricDo
+	OrcaWhirlpool                   *orcaWhirlpoolDo
+	OrcaWhirlpoolDeltaBQuote        *orcaWhirlpoolDeltaBQuoteDo
+	Position                        *positionDo
+	ProtoConfig                     *protoConfigDo
+	SchemaMigration                 *schemaMigrationDo
+	SourceReference                 *sourceReferenceDo
+	Token                           *tokenDo
+	TokenAccount                    *tokenAccountDo
+	TokenPair                       *tokenPairDo
+	TokenSwap                       *tokenSwapDo
+	TransactionProcessingCheckpoint *transactionProcessingCheckpointDo
+	TransactionUpdateQueueItem      *transactionUpdateQueueItemDo
+	Vault                           *vaultDo
+	VaultPeriod                     *vaultPeriodDo
+	VaultWhitelist                  *vaultWhitelistDo
+	WithdrawalMetric                *withdrawalMetricDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.WithContext(ctx),
-		DepositMetric:            q.DepositMetric.WithContext(ctx),
-		DripMetric:               q.DripMetric.WithContext(ctx),
-		OrcaWhirlpool:            q.OrcaWhirlpool.WithContext(ctx),
-		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
-		Position:                 q.Position.WithContext(ctx),
-		ProtoConfig:              q.ProtoConfig.WithContext(ctx),
-		SchemaMigration:          q.SchemaMigration.WithContext(ctx),
-		SourceReference:          q.SourceReference.WithContext(ctx),
-		Token:                    q.Token.WithContext(ctx),
-		TokenAccount:             q.TokenAccount.WithContext(ctx),
-		TokenPair:                q.TokenPair.WithContext(ctx),
-		TokenSwap:                q.TokenSwap.WithContext(ctx),
-		Vault:                    q.Vault.WithContext(ctx),
-		VaultPeriod:              q.VaultPeriod.WithContext(ctx),
-		VaultWhitelist:           q.VaultWhitelist.WithContext(ctx),
-		WithdrawalMetric:         q.WithdrawalMetric.WithContext(ctx),
+		AccountUpdateQueueItem:          q.AccountUpdateQueueItem.WithContext(ctx),
+		DepositMetric:                   q.DepositMetric.WithContext(ctx),
+		DripMetric:                      q.DripMetric.WithContext(ctx),
+		OrcaWhirlpool:                   q.OrcaWhirlpool.WithContext(ctx),
+		OrcaWhirlpoolDeltaBQuote:        q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
+		Position:                        q.Position.WithContext(ctx),
+		ProtoConfig:                     q.ProtoConfig.WithContext(ctx),
+		SchemaMigration:                 q.SchemaMigration.WithContext(ctx),
+		SourceReference:                 q.SourceReference.WithContext(ctx),
+		Token:                           q.Token.WithContext(ctx),
+		TokenAccount:                    q.TokenAccount.WithContext(ctx),
+		TokenPair:                       q.TokenPair.WithContext(ctx),
+		TokenSwap:                       q.TokenSwap.WithContext(ctx),
+		TransactionProcessingCheckpoint: q.TransactionProcessingCheckpoint.WithContext(ctx),
+		TransactionUpdateQueueItem:      q.TransactionUpdateQueueItem.WithContext(ctx),
+		Vault:                           q.Vault.WithContext(ctx),
+		VaultPeriod:                     q.VaultPeriod.WithContext(ctx),
+		VaultWhitelist:                  q.VaultWhitelist.WithContext(ctx),
+		WithdrawalMetric:                q.WithdrawalMetric.WithContext(ctx),
 	}
 }
 

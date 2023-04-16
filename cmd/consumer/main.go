@@ -9,7 +9,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 
-	"github.com/dcaf-labs/drip/pkg/event"
+	"github.com/dcaf-labs/drip/pkg/consumer"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -27,12 +27,12 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start drip event processor")
+		log.WithError(err).Fatalf("failed to start drip consumer processor")
 	}
-	log.Info("starting drip event processor")
+	log.Info("starting drip consumer processor")
 	sig := <-fxApp.Done()
 	log.WithFields(log.Fields{"signal": sig}).
-		Infof("received exit signal, stoping event processor")
+		Infof("received exit signal, stoping consumer processor")
 }
 
 func getDependencies() []fx.Option {
@@ -45,6 +45,7 @@ func getDependencies() []fx.Option {
 			query.Use,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
+			repository.NewTransactionUpdateQueue,
 			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
@@ -57,7 +58,7 @@ func getDependencies() []fx.Option {
 			database.RunMigrations,
 			token.NewTokenJob,
 			tokenaccount.NewTokenAccountJob,
-			event.Server,
+			consumer.Server,
 		),
 		fx.NopLogger,
 	}

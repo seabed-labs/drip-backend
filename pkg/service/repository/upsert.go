@@ -104,3 +104,13 @@ func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...
 func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model.Position) error {
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
 }
+
+func (d repositoryImpl) UpsertTransactionProcessingCheckpoint(ctx context.Context, slot uint64, signature string) error {
+	return d.repo.TransactionProcessingCheckpoint.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{UpdateAll: true}).
+		Create(&model.TransactionProcessingCheckpoint{
+			Signature: signature,
+			Slot:      slot,
+		})
+}

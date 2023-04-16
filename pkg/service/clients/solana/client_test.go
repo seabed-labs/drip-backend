@@ -65,7 +65,7 @@ func TestSolanaClient(t *testing.T) {
 	//assert.Equal(t, GetURL(config.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
 	//})
 
-	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {
+	t.Run("ProgramSubscribe should subscribe to consumer", func(t *testing.T) {
 		timeout := time.Second * 5
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()

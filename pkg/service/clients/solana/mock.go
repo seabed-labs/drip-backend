@@ -82,6 +82,21 @@ func (mr *MockSolanaMockRecorder) GetAccounts(arg0, arg1, arg2 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccounts", reflect.TypeOf((*MockSolana)(nil).GetAccounts), arg0, arg1, arg2)
 }
 
+// GetBlock mocks base method.
+func (m *MockSolana) GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBlock", ctx, slot)
+	ret0, _ := ret[0].(*rpc.GetBlockResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBlock indicates an expected call of GetBlock.
+func (mr *MockSolanaMockRecorder) GetBlock(ctx, slot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBlock", reflect.TypeOf((*MockSolana)(nil).GetBlock), ctx, slot)
+}
+
 // GetLargestTokenAccounts mocks base method.
 func (m *MockSolana) GetLargestTokenAccounts(ctx context.Context, mint string) ([]*rpc.TokenLargestAccountsResult, error) {
 	m.ctrl.T.Helper()

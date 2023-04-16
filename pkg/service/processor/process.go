@@ -5,7 +5,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
@@ -14,7 +13,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
 	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
@@ -43,12 +41,12 @@ type Processor interface {
 	UpsertTokenPair(context.Context, string, string) error
 	UpsertTokenAccount(context.Context, string, token.Account) error
 
-	BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string)
-	AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error
 	ProcessAccountUpdateQueue(ctx context.Context)
 	ProcessDripEvent(address string, data []byte) error
 	ProcessTokenSwapEvent(address string, data []byte) error
 	ProcessWhirlpoolEvent(address string, data []byte) error
+
+	ProcessTransactionUpateQueue(ctx context.Context)
 }
 
 type impl struct {
@@ -81,64 +79,6 @@ func NewProcessor(
 	}
 }
 
-func (p impl) BackfillProgramOwnedAccounts(ctx context.Context, logId string, programID string) {
-	log := logrus.WithField("id", logId).WithField("program", programID).WithField("func", "BackfillProgramOwnedAccounts")
-	accounts, err := p.solanaClient.GetProgramAccounts(ctx, programID)
-	if err != nil {
-		log.WithError(err).Error("failed to get accounts")
-	}
-	page, pageSize, total := 0, 50, len(accounts)
-	start, end := paginate(page, pageSize, total)
-	for start < end {
-		log = log.
-			WithField("page", page).
-			WithField("pageSize", pageSize).
-			WithField("total", total)
-		log.Infof("backfilling program accounts")
-		for i := start; i < end; i++ {
-			if err := p.accountUpdateQueue.AddItem(ctx, &model.AccountUpdateQueueItem{
-				Pubkey:    accounts[i],
-				ProgramID: programID,
-				Time:      utils.GetTimePtr(time.Now()),
-				// Hardcode priority to 2 so that we don't block live drip updates (priority 1)
-				Priority: utils.GetInt32Ptr(2),
-				Try:      0,
-				MaxTry:   utils.GetInt32Ptr(10),
-			}); err != nil {
-				log.WithError(err).Error("failed to add backfill account to queue")
-			}
-		}
-		page++
-		start, end = paginate(page, pageSize, total)
-	}
-}
-
-func (p impl) AddItemToUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error {
-	return func(account string, data []byte) error {
-		priority := int32(3)
-		if programId == drip.ProgramID.String() {
-			priority = 1
-		} else if programId == whirlpool.ProgramID.String() || programId == token.ProgramID.String() {
-			priority = 2
-		}
-		if err := p.accountUpdateQueue.AddItem(ctx, &model.AccountUpdateQueueItem{
-			Pubkey:    account,
-			ProgramID: programId,
-			Time:      utils.GetTimePtr(time.Now()),
-			Priority:  &priority,
-			MaxTry:    utils.GetInt32Ptr(10),
-		}); err != nil {
-			logrus.
-				WithError(err).
-				WithField("programId", programId).
-				WithField("account", account).
-				Error("failed to add queue item")
-			return err
-		}
-		return nil
-	}
-}
-
 func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 	var wg sync.WaitGroup
 	ch := make(chan *model.AccountUpdateQueueItem)
@@ -158,14 +98,14 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			queueItem, err := p.accountUpdateQueue.Pop(ctx)
+			queueItem, err := p.accountUpdateQueue.PopAccountUpdateQueueItem(ctx)
 			if err != nil && err == gorm.ErrRecordNotFound {
 				continue
 			} else if queueItem == nil {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
 			}
-			//if depth, err := p.accountUpdateQueue.Depth(ctx); err != nil {
+			//if depth, err := p.accountUpdateQueue.AccountUpdateQueueItemDepth(ctx); err != nil {
 			//	logrus.WithError(err).Error("failed to get queue depth")
 			//} else {
 			//	logrus.WithField("depth", depth).Infof("queue depth")
@@ -173,6 +113,11 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 			ch <- queueItem
 		}
 	}
+}
+
+func (p impl) ProcessTransactionUpateQueue(ctx context.Context) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string, wg *sync.WaitGroup, queueCh chan *model.AccountUpdateQueueItem) {
@@ -194,7 +139,7 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queu
 	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
 	if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
 		log.WithError(err).Error("error or invalid account")
-		if requeueErr := p.accountUpdateQueue.ReQueue(ctx, queueItem); requeueErr != nil {
+		if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
 			log.WithError(requeueErr).Error("failed to add item to queue")
 		}
 		return
@@ -211,7 +156,7 @@ func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queu
 	}
 	if err != nil {
 		log.WithError(err).Error("failed to process update")
-		if requeueErr := p.accountUpdateQueue.ReQueue(ctx, queueItem); requeueErr != nil {
+		if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
 			log.WithError(requeueErr).Error("failed to add item to queue")
 		}
 	}
@@ -318,19 +263,4 @@ func (p impl) ProcessWhirlpoolEvent(address string, data []byte) error {
 		return nil
 	}
 	return nil
-}
-
-func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
-	start := pageNum * pageSize
-
-	if start > sliceLength {
-		start = sliceLength
-	}
-
-	end := start + pageSize
-	if end > sliceLength {
-		end = sliceLength
-	}
-
-	return start, end
 }

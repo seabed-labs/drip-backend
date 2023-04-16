@@ -31,7 +31,7 @@ jobs:
         run: go build main.go
 
       - name: Build Event Server
-        run: go build cmd/event/main.go
+        run: go build cmd/consumer/main.go
 
   lint:
     name: Lint
