@@ -1,8 +1,9 @@
 
 CREATE TABLE "transaction_processing_checkpoint" (
+    "id" int,
     "signature" VARCHAR(255) NOT NULL,
     "slot" NUMERIC NOT NULL,
-    PRIMARY KEY("signature")
+    PRIMARY KEY("id")
 );
 
 

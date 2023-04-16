@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
 	"github.com/dcaf-labs/drip/pkg/unittest"
 
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
@@ -70,6 +72,7 @@ func TestWithInjectedDependencies(
 		tokenregistry.NewTokenRegistry,
 		orcawhirlpool.NewOrcaWhirlpoolClient,
 		coingecko.NewCoinGeckoClient,
+		ixparser.NewIxParser,
 		// services
 		base.NewBase,
 		processor.NewProcessor,

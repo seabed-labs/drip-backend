@@ -23,6 +23,9 @@ type Repository interface {
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error
+	UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error
+	UpsertDripMetric(ctx context.Context, metrics ...*model.DripMetric) error
+	UpsertWithdrawMetric(ctx context.Context, metrics ...*model.WithdrawalMetric) error
 
 	// These will only returned "enabled=true" vaults
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)

@@ -77,6 +77,7 @@ func Server(
 }
 
 func (d *DripProgramProducer) start(ctx context.Context) error {
+	logrus.Info("starting producer")
 	// Track Drip accounts
 	// We track drip accounts live
 	if err := d.client.ProgramSubscribe(ctx, drip.ProgramID.String(), d.AddItemToAccountUpdateQueueCallback(ctx, drip.ProgramID.String())); err != nil {

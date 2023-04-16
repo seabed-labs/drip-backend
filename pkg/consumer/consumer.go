@@ -3,6 +3,8 @@ package consumer
 import (
 	"context"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
@@ -45,6 +47,7 @@ func Server(
 }
 
 func (d *DripProgramConsumer) start(ctx context.Context) error {
+	logrus.Info("starting producer")
 	go d.processor.ProcessAccountUpdateQueue(ctx)
 	go d.processor.ProcessTransactionUpateQueue(ctx)
 	return nil

@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/pkg/job/token"
@@ -53,6 +55,7 @@ func getDependencies() []fx.Option {
 			coingecko.NewCoinGeckoClient,
 			processor.NewProcessor,
 			alert.NewAlertService,
+			ixparser.NewIxParser,
 		),
 		fx.Invoke(
 			database.RunMigrations,

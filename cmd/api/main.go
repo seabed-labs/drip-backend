@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/pkg/api"
@@ -45,6 +47,7 @@ func getDependencies() []fx.Option {
 			base.NewBase,
 			middleware.NewHandler,
 			controller.NewHandler,
+			ixparser.NewIxParser,
 		),
 		fx.Invoke(
 			api.StartServer,

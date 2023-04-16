@@ -110,7 +110,35 @@ func (d repositoryImpl) UpsertTransactionProcessingCheckpoint(ctx context.Contex
 		WithContext(ctx).
 		Clauses(clause.OnConflict{UpdateAll: true}).
 		Create(&model.TransactionProcessingCheckpoint{
+			ID:        1,
 			Signature: signature,
 			Slot:      slot,
 		})
+}
+
+func (d repositoryImpl) UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error {
+	return d.repo.DepositMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
+}
+
+func (d repositoryImpl) UpsertDripMetric(ctx context.Context, metrics ...*model.DripMetric) error {
+	return d.repo.DripMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
+}
+
+func (d repositoryImpl) UpsertWithdrawMetric(ctx context.Context, metrics ...*model.WithdrawalMetric) error {
+	return d.repo.WithdrawalMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
 }

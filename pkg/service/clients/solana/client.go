@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/AlekSi/pointer"
 
@@ -335,15 +336,18 @@ func (s impl) ProgramSubscribe(
 						"consumer": program,
 					}).
 					Error("failed to get next msg from consumer ws")
-				// TODO(Mocha): need to handle the case where this fails
-				client, err = ws.Connect(ctx, url)
-				if err != nil {
-					logrus.
-						WithError(err).
-						WithFields(logrus.Fields{
-							"consumer": program,
-						}).
-						Error("failed to get new ws client")
+				client = nil
+				for client == nil {
+					client, err = ws.Connect(ctx, url)
+					if err != nil {
+						logrus.
+							WithError(err).
+							WithFields(logrus.Fields{
+								"consumer": program,
+							}).
+							Error("failed to get new ws client")
+						time.Sleep(1000)
+					}
 				}
 				sub, err = client.ProgramSubscribeWithOpts(
 					solana.MustPublicKeyFromBase58(program),
