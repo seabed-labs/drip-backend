@@ -45,7 +45,7 @@ func TestWithInjectedDependencies(
 	// test http recorder
 	httpClientProvider := api2.GetDefaultClientProvider
 	if testOptions != nil {
-		recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider("./fixtures/drip_1")
+		recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider(testOptions.FixturePath)
 		defer recorderTeardown()
 		httpClientProvider = func() api2.RetryableHTTPClientProvider {
 			return func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {

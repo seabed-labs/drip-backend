@@ -3,9 +3,6 @@ module github.com/dcaf-labs/drip
 // +heroku goVersion go1.18
 go 1.18
 
-// Remove once https://github.com/fergusstrange/embedded-postgres/pull/90 is merged
-//replace github.com/fergusstrange/embedded-postgres => github.com/tovala/embedded-postgres v0.0.0-20221103205757-5f8ea8a8920d
-
 require (
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
 	github.com/dcaf-labs/solana-drip-go v0.0.0-20230416112801-7d7e880135eb

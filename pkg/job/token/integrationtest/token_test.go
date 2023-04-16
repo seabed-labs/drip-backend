@@ -64,8 +64,8 @@ func TestTokenJob(t *testing.T) {
 				assert.Equal(t, "Orca", *orca.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17547/small/Orca_Logo.png?1628781615", *orca.IconURL)
 				assert.Equal(t, "orca", *orca.CoinGeckoID)
-				assert.Equal(t, 0.835, *orca.UIMarketPriceUsd)
-				assert.Equal(t, int32(790), *orca.MarketCapRank)
+				assert.Equal(t, 0.835341, *orca.UIMarketPriceUsd)
+				assert.Equal(t, int32(796), *orca.MarketCapRank)
 
 				assert.Equal(t, msolTokenAddress, msol.Pubkey)
 				assert.Equal(t, int16(9), msol.Decimals)
@@ -73,7 +73,7 @@ func TestTokenJob(t *testing.T) {
 				assert.Equal(t, "Marinade staked SOL (mSOL)", *msol.Name)
 				assert.Equal(t, "https://assets.coingecko.com/coins/images/17752/small/mSOL.png?1644541955", *msol.IconURL)
 				assert.Equal(t, "msol", *msol.CoinGeckoID)
-				assert.Equal(t, 26.63, *msol.UIMarketPriceUsd)
+				assert.Equal(t, 26.8, *msol.UIMarketPriceUsd)
 				assert.Equal(t, int32(285), *msol.MarketCapRank)
 
 			})
