@@ -8,10 +8,8 @@ import (
 	"strings"
 	"time"
 
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/patrickmn/go-cache"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/samber/lo"
 )
 
@@ -22,19 +20,19 @@ type CoinGeckoClient interface {
 	sendUnAuthenticatedGetRequest(ctx context.Context, urlString string) (*http.Response, error)
 }
 
-func NewCoinGeckoClient(retryClientProvider clients.RetryableHTTPClientProvider) CoinGeckoClient {
+func NewCoinGeckoClient(retryClientProvider api.RetryableHTTPClientProvider) CoinGeckoClient {
 	return newClient(retryClientProvider)
 }
 
 type client struct {
-	clients.RetryableHTTPClient
+	api.RetryableHTTPClient
 	cache *cache.Cache
 }
 
-func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
-	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
-		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
-	})
+func newClient(retryClientProvider api.RetryableHTTPClientProvider) *client {
+	options := api.GetDefaultRateLimitHTTPClientOptions()
+	options.CallsPerSecond = callsPerSecond
+	retryClient := retryClientProvider(options)
 	apiClient := client{retryClient, cache.New(60*time.Minute, 60*time.Minute)}
 	return &apiClient
 }
@@ -48,7 +46,7 @@ func (client *client) GetSolanaCoinsList(ctx context.Context) (CoinsListResponse
 	if err != nil {
 		return nil, err
 	}
-	res, err := clients.DecodeRequestBody(resp, CoinsListResponse{})
+	res, err := api.DecodeRequestBody(resp, CoinsListResponse{})
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +74,7 @@ func (client *client) GetMarketPriceForTokens(ctx context.Context, coinGeckoIDs 
 		if err != nil {
 			return nil, err
 		}
-		res, err := clients.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
+		res, err := api.DecodeRequestBody(resp, CoinGeckoTokensMarketPriceResponse{})
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +98,7 @@ func (client *client) GetCoinGeckoMetadata(ctx context.Context, contractAddress 
 	if err != nil {
 		return CoinGeckoMetadataResponse{}, err
 	}
-	res, err := clients.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
+	res, err := api.DecodeRequestBody(resp, CoinGeckoMetadataResponse{})
 	if err != nil {
 		return CoinGeckoMetadataResponse{}, err
 	}

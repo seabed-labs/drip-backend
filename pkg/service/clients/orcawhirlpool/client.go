@@ -6,10 +6,9 @@ import (
 	"net/http"
 
 	dripextension "github.com/dcaf-labs/drip-client/drip-extension-go"
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 )
 
 type OrcaWhirlpoolClient interface {
@@ -18,7 +17,7 @@ type OrcaWhirlpoolClient interface {
 
 func NewOrcaWhirlpoolClient(
 	appConfig config.AppConfig,
-	retryClientProvider clients.RetryableHTTPClientProvider,
+	retryClientProvider api.RetryableHTTPClientProvider,
 ) OrcaWhirlpoolClient {
 	return newClient(appConfig.GetNetwork(), retryClientProvider)
 }
@@ -28,10 +27,10 @@ type client struct {
 	connectionUrl string
 }
 
-func newClient(network config.Network, retryClientProvider clients.RetryableHTTPClientProvider) *client {
-	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
-		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
-	})
+func newClient(network config.Network, retryClientProvider api.RetryableHTTPClientProvider) *client {
+	options := api.GetDefaultRateLimitHTTPClientOptions()
+	options.CallsPerSecond = callsPerSecond
+	retryClient := retryClientProvider(options)
 	config := dripextension.NewConfiguration()
 	config.HTTPClient = retryClient.StandardClient()
 	config.Host = host

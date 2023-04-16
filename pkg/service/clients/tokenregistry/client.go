@@ -8,13 +8,11 @@ import (
 	"net/http"
 	"time"
 
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
+
 	"github.com/samber/lo"
 
 	"github.com/patrickmn/go-cache"
-
-	"github.com/dcaf-labs/drip/pkg/service/utils"
-
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 )
 
 type TokenRegistry interface {
@@ -23,19 +21,19 @@ type TokenRegistry interface {
 	GetTokenRegistryTokens(ctx context.Context, mints ...string) ([]*Token, error)
 }
 
-func NewTokenRegistry(retryClientProvider clients.RetryableHTTPClientProvider) TokenRegistry {
+func NewTokenRegistry(retryClientProvider api.RetryableHTTPClientProvider) TokenRegistry {
 	return newClient(retryClientProvider)
 }
 
 type client struct {
-	clients.RetryableHTTPClient
+	api.RetryableHTTPClient
 	cache *cache.Cache
 }
 
-func newClient(retryClientProvider clients.RetryableHTTPClientProvider) *client {
-	retryClient := retryClientProvider(clients.RateLimitHTTPClientOptions{
-		CallsPerSecond: utils.GetIntPtr(callsPerSecond),
-	})
+func newClient(retryClientProvider api.RetryableHTTPClientProvider) *client {
+	options := api.GetDefaultRateLimitHTTPClientOptions()
+	options.CallsPerSecond = callsPerSecond
+	retryClient := retryClientProvider(options)
 	apiClient := client{retryClient, cache.New(60*time.Minute, 60*time.Minute)}
 	return &apiClient
 }

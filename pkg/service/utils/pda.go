@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
-	"github.com/gagliardetto/solana-go"
+	solana "github.com/gagliardetto/solana-go"
 )
 
 func GetVaultPeriodPDA(vaultAddress string, vaultPeriodID int64) (string, error) {

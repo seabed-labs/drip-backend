@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
+
 	"github.com/dcaf-labs/drip/internal/cli"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -38,7 +39,7 @@ func getDependencies() []fx.Option {
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
 
-			clients.DefaultClientProvider,
+			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,

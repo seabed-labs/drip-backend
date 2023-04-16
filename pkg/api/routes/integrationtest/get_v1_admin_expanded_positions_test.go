@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
@@ -16,6 +14,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/gagliardetto/solana-go"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/test-go/testify/assert"

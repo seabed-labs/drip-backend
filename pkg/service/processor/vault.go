@@ -9,7 +9,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
-	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
@@ -42,17 +42,18 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 	if err != nil {
 		return err
 	}
-	oracleConfig := func() *string {
-		if vaultAccount.OracleConfig.IsZero() {
-			return nil
-		}
-		oracleConfig, err := p.ensureOracleConfig(ctx, vaultAccount.OracleConfig.String())
-		if err != nil {
-			logrus.WithError(err).Error("failed to ensureOracleConfig, continuing...")
-			return nil
-		}
-		return utils.GetStringPtr(oracleConfig.Pubkey)
-	}()
+
+	//oracleConfig := func() *string {
+	//	if vaultAccount.OracleConfig.IsZero() {
+	//		return nil
+	//	}
+	//	oracleConfig, err := p.ensureOracleConfig(ctx, vaultAccount.OracleConfig.String())
+	//	if err != nil {
+	//		logrus.WithError(err).Error("failed to ensureOracleConfig, continuing...")
+	//		return nil
+	//	}
+	//	return utils.GetStringPtr(oracleConfig.Pubkey)
+	//}()
 	if err := p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
@@ -67,8 +68,9 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		Enabled:                false,
 		TokenPairID:            tokenPair.ID,
 		MaxSlippageBps:         int32(vaultAccount.MaxSlippageBps),
-		OracleConfig:           oracleConfig,
-		MaxPriceDeviationBps:   int32(vaultAccount.MaxPriceDeviationBps),
+		OracleConfig:           nil,
+		//MaxPriceDeviationBps:   int32(vaultAccount.MaxPriceDeviationBps),
+		MaxPriceDeviationBps: int32(0),
 	}); err != nil {
 		return err
 	}

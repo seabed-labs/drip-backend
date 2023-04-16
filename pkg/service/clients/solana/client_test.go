@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
@@ -24,7 +24,7 @@ func TestSolanaClient(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	mockConfig := unittest.GetMockDevnetStagingConfig(ctrl)
 
-	client, err := NewSolanaClient(mockConfig, clients.DefaultClientProvider())
+	client, err := NewSolanaClient(mockConfig, api.GetDefaultClientProvider())
 	assert.NoError(t, err)
 
 	t.Run("GetWalletPubKey should return public key", func(t *testing.T) {

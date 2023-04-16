@@ -11,7 +11,6 @@ import (
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/base"
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -21,11 +20,11 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
+	"github.com/dcaf-labs/drip/pkg/unittest"
+	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 	"gopkg.in/dnaeon/go-vcr.v3/cassette"
-	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 )
 
 type TestOptions struct {
@@ -48,32 +47,33 @@ func TestWithInjectedDependencies(
 	}
 
 	// test http recorder
-	httpClientProvider := clients.DefaultClientProvider
+	httpClientProvider := api2.GetDefaultClientProvider()
 	if testOptions != nil {
-		r, err := recorder.New(testOptions.FixturePath)
-		if err != nil {
-			logrus.WithError(err).Error("could not get recorder")
-			os.Exit(1)
-		}
-		defer func(r *recorder.Recorder) {
-			if err := r.Stop(); err != nil {
-				logrus.WithError(err).Error("could stop recorder")
-				os.Exit(1)
-			}
-		}(r)
-		if r.Mode() != recorder.ModeRecordOnce {
-			logrus.Error("recorder should be in ModeRecordOnce")
-			os.Exit(1)
-		}
-		r.SetReplayableInteractions(true)
-		r.SetMatcher(requestMatcher)
-		recorderHTTPClient := r.GetDefaultClient()
-		httpClientProvider = func() clients.RetryableHTTPClientProvider {
-			return func(options clients.RateLimitHTTPClientOptions) clients.RetryableHTTPClient {
-				options.HttpClient = recorderHTTPClient
-				options.CallsPerSecond = utils.GetIntPtr(100)
-				return clients.DefaultClientProvider()(options)
-			}
+		//var (
+		//	recorderTeardown func()
+		//)
+		recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider("./fixtures/drip_1")
+		defer recorderTeardown()
+		//r, err := recorder.New(testOptions.FixturePath)
+		//if err != nil {
+		//	logrus.WithError(err).Error("could not get recorder")
+		//	os.Exit(1)
+		//}
+		//defer func(r *recorder.Recorder) {
+		//	if err := r.Stop(); err != nil {
+		//		logrus.WithError(err).Error("could stop recorder")
+		//		os.Exit(1)
+		//	}
+		//}(r)
+		//if r.Mode() != recorder.ModeRecordOnce {
+		//	logrus.Error("recorder should be in ModeRecordOnce")
+		//	os.Exit(1)
+		//}
+		//r.SetReplayableInteractions(true)
+		//r.SetMatcher(requestMatcher)
+		//recorderHTTPClient := r.GetDefaultClient()
+		httpClientProvider = func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {
+			return recorderProvider()(options)
 		}
 	}
 	providers := []interface{}{
