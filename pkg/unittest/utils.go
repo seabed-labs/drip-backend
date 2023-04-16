@@ -85,7 +85,7 @@ func GetHTTPRecorderClientProvider(fixturePath string) (recorderProvider func() 
 	recorderHTTPClient := r.GetDefaultClient()
 	return func() api.RetryableHTTPClientProvider {
 		return func(options api.RateLimitHTTPClientOptions) api.RetryableHTTPClient {
-			options.HttpClient = *recorderHTTPClient
+			options.HttpClient = recorderHTTPClient
 			options.CallsPerSecond = 10.0
 			return api.GetDefaultClientProvider()(options)
 		}

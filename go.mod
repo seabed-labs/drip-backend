@@ -7,7 +7,7 @@ require (
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
 	github.com/dcaf-labs/solana-drip-go v0.0.0-20230416112801-7d7e880135eb
 	github.com/dcaf-labs/solana-go-clients v0.0.0-20221202190210-4fa06790e51a
-	github.com/dcaf-labs/solana-go-retryable-http-client v0.0.0-20230416170336-6240e29f9aad
+	github.com/dcaf-labs/solana-go-retryable-http-client v0.0.0-20230416171858-6dc5d47dddc8
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/disgoorg/disgo v0.13.19
 	github.com/disgoorg/snowflake/v2 v2.0.0
