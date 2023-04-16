@@ -20,7 +20,7 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	t.Run("should upsert vault proto config", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test1",
 				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
@@ -55,7 +55,7 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	t.Run("should upsert vault and all related accounts", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test2",
 				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),

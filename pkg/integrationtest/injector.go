@@ -34,7 +34,7 @@ type TestOptions struct {
 	PSQLConfig  config.PSQLConfig
 }
 
-func InjectDependencies(
+func TestWithInjectedDependencies(
 	testOptions *TestOptions,
 	testCase interface{},
 ) {

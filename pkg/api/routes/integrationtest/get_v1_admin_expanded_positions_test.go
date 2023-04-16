@@ -30,7 +30,7 @@ func TestHandler_GetV1AdminPositions(t *testing.T) {
 	e := echo.New()
 
 	t.Run("should return one expanded position", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/get_v1_admin_expanded_positions_test_test1",
 				AppConfig:   mockConfig,

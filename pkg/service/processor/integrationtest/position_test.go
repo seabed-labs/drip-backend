@@ -20,7 +20,7 @@ func TestHandler_UpsertPositionByAddress(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	t.Run("should upsert position and all related accounts", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test3",
 				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),

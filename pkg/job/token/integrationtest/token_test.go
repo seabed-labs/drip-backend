@@ -32,7 +32,7 @@ func TestTokenJob(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	t.Run("should update 2 tokens with metadata", func(t *testing.T) {
 		mockConfig := unittest.GetMockMainnetProductionConfig(ctrl)
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test1",
 				AppConfig:   mockConfig,
