@@ -4,7 +4,7 @@ module github.com/dcaf-labs/drip
 go 1.18
 
 // Remove once https://github.com/fergusstrange/embedded-postgres/pull/90 is merged
-replace github.com/fergusstrange/embedded-postgres => github.com/tovala/embedded-postgres v0.0.0-20221103205757-5f8ea8a8920d
+//replace github.com/fergusstrange/embedded-postgres => github.com/tovala/embedded-postgres v0.0.0-20221103205757-5f8ea8a8920d
 
 require (
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
@@ -12,7 +12,7 @@ require (
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/disgoorg/disgo v0.13.19
 	github.com/disgoorg/snowflake/v2 v2.0.0
-	github.com/fergusstrange/embedded-postgres v0.0.0-00010101000000-000000000000
+	github.com/fergusstrange/embedded-postgres v1.21.0
 	github.com/gagliardetto/metaplex-go v0.2.1
 	github.com/getkin/kin-openapi v0.94.0
 	github.com/go-co-op/gocron v1.17.1
@@ -71,8 +71,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
-	github.com/lib/pq v1.10.7 // indirect
-	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/lib/pq v1.10.8 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
