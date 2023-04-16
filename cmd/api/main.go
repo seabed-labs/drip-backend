@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 
+	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
+
 	"github.com/dcaf-labs/drip/pkg/api"
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -39,7 +40,7 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
-			clients.DefaultClientProvider,
+			api2.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			base.NewBase,
 			middleware.NewHandler,

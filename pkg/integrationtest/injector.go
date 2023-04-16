@@ -1,17 +1,15 @@
 package integrationtest
 
 import (
-	"bytes"
 	"context"
-	"io/ioutil"
-	"net/http"
 	"os"
+
+	"github.com/dcaf-labs/drip/pkg/unittest"
 
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/base"
-	"github.com/dcaf-labs/drip/pkg/service/clients"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -21,11 +19,9 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-	"github.com/dcaf-labs/drip/pkg/service/utils"
+	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
-	"gopkg.in/dnaeon/go-vcr.v3/cassette"
-	"gopkg.in/dnaeon/go-vcr.v3/recorder"
 )
 
 type TestOptions struct {
@@ -34,7 +30,7 @@ type TestOptions struct {
 	PSQLConfig  config.PSQLConfig
 }
 
-func InjectDependencies(
+func TestWithInjectedDependencies(
 	testOptions *TestOptions,
 	testCase interface{},
 ) {
@@ -48,34 +44,19 @@ func InjectDependencies(
 	}
 
 	// test http recorder
-	httpClientProvider := clients.DefaultClientProvider
+	httpClientProvider := api2.GetDefaultClientProvider
 	if testOptions != nil {
-		r, err := recorder.New(testOptions.FixturePath)
-		if err != nil {
-			logrus.WithError(err).Error("could not get recorder")
-			os.Exit(1)
-		}
-		defer func(r *recorder.Recorder) {
-			if err := r.Stop(); err != nil {
-				logrus.WithError(err).Error("could stop recorder")
-				os.Exit(1)
-			}
-		}(r)
-		if r.Mode() != recorder.ModeRecordOnce {
-			logrus.Error("recorder should be in ModeRecordOnce")
-			os.Exit(1)
-		}
-		r.SetReplayableInteractions(true)
-		r.SetMatcher(requestMatcher)
-		recorderHTTPClient := r.GetDefaultClient()
-		httpClientProvider = func() clients.RetryableHTTPClientProvider {
-			return func(options clients.RateLimitHTTPClientOptions) clients.RetryableHTTPClient {
-				options.HttpClient = recorderHTTPClient
-				options.CallsPerSecond = utils.GetIntPtr(100)
-				return clients.DefaultClientProvider()(options)
+		if testOptions.FixturePath != "" {
+			recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider(testOptions.FixturePath)
+			defer recorderTeardown()
+			httpClientProvider = func() api2.RetryableHTTPClientProvider {
+				return func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {
+					return recorderProvider()(options)
+				}
 			}
 		}
 	}
+
 	providers := []interface{}{
 		// Data access
 		database.NewDatabase,
@@ -113,7 +94,7 @@ func InjectDependencies(
 		providers = append(providers, config.NewPSQLConfig)
 	}
 	// comment out below for logs
-	logrus.SetOutput(ioutil.Discard)
+	//logrus.SetOutput(ioutil.Discard)
 	opts := []fx.Option{
 		fx.Provide(providers...),
 		fx.Invoke(
@@ -129,24 +110,7 @@ func InjectDependencies(
 		}
 	}()
 	if err := app.Start(context.Background()); err != nil {
+		logrus.WithError(err).Error("failed to run integration test")
 		panic(err)
 	}
-}
-
-func requestMatcher(r *http.Request, i cassette.Request) bool {
-	if r.Body == nil || r.Body == http.NoBody {
-		return cassette.DefaultMatcher(r, i)
-	}
-
-	var reqBody []byte
-	var err error
-	reqBody, err = ioutil.ReadAll(r.Body)
-	if err != nil {
-		logrus.WithError(err).Errorf("failed to read request body")
-		os.Exit(1)
-	}
-	r.Body.Close()
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
-
-	return r.Method == i.Method && r.URL.String() == i.URL && string(reqBody) == i.Body
 }

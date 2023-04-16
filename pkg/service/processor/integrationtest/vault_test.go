@@ -20,7 +20,7 @@ func TestHandler_UpsertProtoConfigByAddress(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	t.Run("should upsert vault proto config", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test1",
 				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
@@ -55,7 +55,7 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 	}
 	ctrl := gomock.NewController(t)
 	t.Run("should upsert vault and all related accounts", func(t *testing.T) {
-		integrationtest.InjectDependencies(
+		integrationtest.TestWithInjectedDependencies(
 			&integrationtest.TestOptions{
 				FixturePath: "./fixtures/test2",
 				AppConfig:   unittest.GetMockMainnetProductionConfig(ctrl),
@@ -104,16 +104,14 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 				assert.Equal(t, "2JxQvnZcXNLugZTdLxCohWvRa24juDyfPY75w3HxMxUv", vault.TokenAAccount)
 				assert.Equal(t, "2AvGt9sXPxdVfJWq9mYn2umjnKLfKTUHEfchPmwADEn2", vault.TokenBAccount)
 				assert.Equal(t, "6i5YrPuJWReB9XCxaoB4ghga2PShFFWRCYYXPXhu4j1W", vault.TreasuryTokenBAccount)
-				assert.Equal(t, uint64(69), vault.LastDcaPeriod)
-				assert.Equal(t, uint64(11469628), vault.DripAmount)
-				assert.Equal(t, int64(1670014800), vault.DcaActivationTimestamp.Unix())
+				assert.Equal(t, uint64(0xb51), vault.LastDcaPeriod)
+				assert.Equal(t, uint64(0x1bebc), vault.DripAmount)
+				assert.Equal(t, int64(1681650000), vault.DcaActivationTimestamp.Unix())
 				assert.Equal(t, int32(500), vault.MaxSlippageBps)
 				assert.Equal(t, false, vault.Enabled)
 				assert.Equal(t, tokenPair.ID, vault.TokenPairID)
-				assert.Nil(t, vault.OracleConfig)
-				assert.Equal(t, int32(0), vault.MaxPriceDeviationBps)
 				// if the line below needs to be updated, add the field assertion above
-				assert.Equal(t, 15, reflect.TypeOf(*vault).NumField())
+				assert.Equal(t, 13, reflect.TypeOf(*vault).NumField())
 			})
 	})
 }

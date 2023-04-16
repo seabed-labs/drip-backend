@@ -947,9 +947,6 @@ components:
         tokenBMint:
           type: string
           example: "5r23oKMycxnnjAJ4cEEkh1bbCowcZwzL6HYmhLqRazQa"
-        oracleConfig:
-          type: string
-          example: "5r23oKMycxnnjAJ4cEEkh1bbCowcZwzL6HYmhLqRazQa"
 
     splTokenSwapConfig:
       type: object
@@ -992,7 +989,6 @@ components:
             - whirlpool
             - tokenVaultA
             - tokenVaultB
-            - oracle
 
           properties:
             whirlpool:
@@ -1004,9 +1000,6 @@ components:
             tokenVaultB:
               type: string
               example: "2wMQTELEgEcK7V3gwZBH58WvGcRZsyaWNpebqyFugGKe"
-            oracle:
-              type: string
-              example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"
 
     tokenAccount:
       type: object
@@ -1120,7 +1113,6 @@ components:
         - dripAmount
         - dcaActivationTimestamp
         - enabled
-        - maxPriceDeviationBps
         - maxSlippageBps
       properties:
         pubkey:
@@ -1158,10 +1150,6 @@ components:
           type: boolean
         maxSlippageBps:
             type: integer
-        maxPriceDeviationBps:
-            type: integer
-        oracleConfig:
-            type: string
 
     vaultPeriod:
       type: object

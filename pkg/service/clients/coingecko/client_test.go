@@ -4,8 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients"
-
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/test-go/testify/assert"
 )
 
@@ -14,7 +13,7 @@ func TestCoinGeckoClient(t *testing.T) {
 		t.Skip("skipping integration tests in short mode")
 	}
 
-	client := NewCoinGeckoClient(clients.DefaultClientProvider())
+	client := NewCoinGeckoClient(api.GetDefaultClientProvider())
 
 	t.Run("GetCoinGeckoMeta should return the required meta data", func(t *testing.T) {
 		tokenAddress := "So11111111111111111111111111111111111111112"

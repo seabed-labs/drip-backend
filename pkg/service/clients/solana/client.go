@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients"
+	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
@@ -47,7 +47,7 @@ type Solana interface {
 
 func NewSolanaClient(
 	appConfig config.AppConfig,
-	retryClientProvider clients.RetryableHTTPClientProvider,
+	retryClientProvider api.RetryableHTTPClientProvider,
 ) (Solana, error) {
 	return createClient(appConfig, retryClientProvider)
 }
@@ -62,12 +62,12 @@ func (s impl) GetNetwork() config.Network {
 	return s.network
 }
 
-func createClient(appConfig config.AppConfig, retryClientProvider clients.RetryableHTTPClientProvider) (impl, error) {
+func createClient(appConfig config.AppConfig, retryClientProvider api.RetryableHTTPClientProvider) (impl, error) {
 	url, callsPerSecond := GetURLWithRateLimit(appConfig.GetNetwork())
+	options := api.GetDefaultRateLimitHTTPClientOptions()
+	options.CallsPerSecond = callsPerSecond
 	opts := &jsonrpc.RPCClientOpts{
-		HTTPClient: retryClientProvider(clients.RateLimitHTTPClientOptions{
-			CallsPerSecond: utils.GetIntPtr(callsPerSecond),
-		}),
+		HTTPClient: retryClientProvider(options),
 	}
 	rpcClient := rpc.NewWithCustomRPCClient(jsonrpc.NewClientWithOpts(url, opts))
 	solanaClient := impl{
@@ -455,7 +455,7 @@ func (s impl) signAndBroadcast(
 	return txHash.String(), nil
 }
 
-func GetURLWithRateLimit(env config.Network) (string, int) {
+func GetURLWithRateLimit(env config.Network) (string, float64) {
 	switch env {
 	case config.MainnetNetwork:
 		//return rpc.MainNetBeta_RPC, 3

@@ -15,7 +15,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
-	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	bin "github.com/gagliardetto/binary"
@@ -32,7 +32,6 @@ type Processor interface {
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
 	UpsertPositionByAddress(context.Context, string) error
-	UpsertOracleConfigByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
@@ -264,15 +263,6 @@ func (p impl) ProcessDripEvent(address string, data []byte) error {
 		// log.Infof("decoded as protoConfig")
 		if err := p.UpsertProtoConfigByAddress(ctx, address); err != nil {
 			log.WithError(err).Error("failed to upsert protoConfig")
-			return err
-		}
-		return nil
-	}
-	var oracleConfig drip.OracleConfig
-	if err := bin.NewBinDecoder(data).Decode(&oracleConfig); err == nil {
-		// log.Infof("decoded as oracleConfig")
-		if err := p.UpsertOracleConfigByAddress(ctx, address); err != nil {
-			log.WithError(err).Error("failed to upsert oracleConfig")
 			return err
 		}
 		return nil

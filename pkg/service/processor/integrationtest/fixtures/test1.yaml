@@ -9,7 +9,7 @@ interactions:
         content_length: 46
         transfer_encoding: []
         trailer: {}
-        host: api.mainnet-beta.solana.com
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
         remote_addr: ""
         request_uri: ""
         body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
@@ -19,7 +19,7 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.mainnet-beta.solana.com
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
         method: POST
       response:
         proto: HTTP/2.0
@@ -27,38 +27,42 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: -1
-        uncompressed: true
+        content_length: 84
+        uncompressed: false
         body: |
-            {"jsonrpc":"2.0","result":{"feature-set":1365939126,"solana-core":"1.13.5"},"id":0}
+            {"jsonrpc":"2.0","result":{"feature-set":1775889670,"solana-core":"1.13.6"},"id":0}
         headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Length:
+                - "84"
             Content-Type:
-                - application/json; charset=utf-8
+                - application/json
             Date:
-                - Fri, 02 Dec 2022 20:23:32 GMT
+                - Sun, 16 Apr 2023 12:38:28 GMT
             Vary:
                 - Accept-Encoding
-            X-Ratelimit-Conn-Limit:
-                - "40"
-            X-Ratelimit-Conn-Remaining:
-                - "39"
-            X-Ratelimit-Connrate-Limit:
-                - "40"
-            X-Ratelimit-Connrate-Remaining:
-                - "39"
-            X-Ratelimit-Method-Limit:
-                - "40"
-            X-Ratelimit-Method-Remaining:
-                - "39"
-            X-Ratelimit-Rps-Limit:
-                - "100"
-            X-Ratelimit-Rps-Remaining:
-                - "99"
-            X-Rpc-Node:
-                - nyc61
+            X-Host-Id:
+                - 98a37769
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "892072"
+            X-Ratelimit-Reset:
+                - "1681675555"
+            X-Request-Id:
+                - b0b92ef5-b0f7-4d4b-951c-bfb125d9ff94
         status: 200 OK
         code: 200
-        duration: 230.651125ms
+        duration: 141.422292ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -67,7 +71,7 @@ interactions:
         content_length: 155
         transfer_encoding: []
         trailer: {}
-        host: api.mainnet-beta.solana.com
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
         remote_addr: ""
         request_uri: ""
         body: '{"method":"getAccountInfo","params":["BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
@@ -77,7 +81,7 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.mainnet-beta.solana.com
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
         method: POST
       response:
         proto: HTTP/2.0
@@ -85,35 +89,39 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: -1
-        uncompressed: true
+        content_length: 472
+        uncompressed: false
         body: |
-            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.5","slot":164531768},"value":{"data":["rRYkpb4DjscQDgAAAAAAACMABQAFAP9tBDqGIt+SnOOhZfekoHFeSBsbkIxe/E6RT8t877OcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","base64"],"executable":false,"lamports":2171520,"owner":"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk","rentEpoch":0}},"id":0}
+            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.6","slot":188750781},"value":{"data":["rRYkpb4DjscQDgAAAAAAACMABQAFAP9tBDqGIt+SnOOhZfekoHFeSBsbkIxe/E6RT8t877OcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","base64"],"executable":false,"lamports":2171520,"owner":"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk","rentEpoch":0}},"id":0}
         headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Length:
+                - "472"
             Content-Type:
-                - application/json; charset=utf-8
+                - application/json
             Date:
-                - Fri, 02 Dec 2022 20:23:32 GMT
+                - Sun, 16 Apr 2023 12:38:28 GMT
             Vary:
                 - Accept-Encoding
-            X-Ratelimit-Conn-Limit:
-                - "40"
-            X-Ratelimit-Conn-Remaining:
-                - "39"
-            X-Ratelimit-Connrate-Limit:
-                - "40"
-            X-Ratelimit-Connrate-Remaining:
-                - "39"
-            X-Ratelimit-Method-Limit:
-                - "40"
-            X-Ratelimit-Method-Remaining:
-                - "39"
-            X-Ratelimit-Rps-Limit:
-                - "100"
-            X-Ratelimit-Rps-Remaining:
-                - "98"
-            X-Rpc-Node:
-                - nyc61
+            X-Host-Id:
+                - 7e7a0d52
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "892071"
+            X-Ratelimit-Reset:
+                - "1681675555"
+            X-Request-Id:
+                - 110b0b28-4163-4c5c-9691-7ca58f3fd9a9
         status: 200 OK
         code: 200
-        duration: 32.155334ms
+        duration: 25.553041ms

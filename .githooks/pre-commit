@@ -2,8 +2,9 @@
 set -e
 
 # run migrations and codegen in embedded db
-SHOULD_USE_EMBEDDED_DB=true go run cmd/codegen/main.go
-git add **.gen.go
+# TODO: Embedded postgres is flaky on macos
+#SHOULD_USE_EMBEDDED_DB=true go run cmd/codegen/main.go
+#git add **.gen.go
 
 # create mock files for test
 ./scripts/create-mocks.sh

@@ -10,7 +10,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
-	"github.com/dcaf-labs/solana-go-clients/pkg/drip"
+	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"

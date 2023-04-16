@@ -9,7 +9,7 @@ interactions:
         content_length: 46
         transfer_encoding: []
         trailer: {}
-        host: api.mainnet-beta.solana.com
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
         remote_addr: ""
         request_uri: ""
         body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
@@ -19,7 +19,7 @@ interactions:
                 - application/json
             Content-Type:
                 - application/json
-        url: https://api.mainnet-beta.solana.com
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
         method: POST
       response:
         proto: HTTP/2.0
@@ -27,33 +27,39 @@ interactions:
         proto_minor: 0
         transfer_encoding: []
         trailer: {}
-        content_length: -1
-        uncompressed: true
+        content_length: 84
+        uncompressed: false
         body: |
-            {"jsonrpc":"2.0","result":{"feature-set":4011803773,"solana-core":"1.13.3"},"id":0}
+            {"jsonrpc":"2.0","result":{"feature-set":1775889670,"solana-core":"1.13.6"},"id":0}
         headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Length:
+                - "84"
             Content-Type:
-                - application/json; charset=utf-8
+                - application/json
             Date:
-                - Sat, 12 Nov 2022 23:58:24 GMT
+                - Sun, 16 Apr 2023 12:34:00 GMT
             Vary:
                 - Accept-Encoding
-            X-Ratelimit-Conn-Limit:
-                - "40"
-            X-Ratelimit-Conn-Remaining:
-                - "39"
-            X-Ratelimit-Connrate-Limit:
-                - "40"
-            X-Ratelimit-Connrate-Remaining:
-                - "39"
-            X-Ratelimit-Method-Limit:
-                - "40"
-            X-Ratelimit-Method-Remaining:
-                - "39"
-            X-Ratelimit-Rps-Limit:
-                - "100"
-            X-Ratelimit-Rps-Remaining:
-                - "99"
+            X-Host-Id:
+                - 2fdee4d8
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "892374"
+            X-Ratelimit-Reset:
+                - "1681675555"
+            X-Request-Id:
+                - 2fafb4ba-1f3e-40e7-9394-340f3a1fd3ec
         status: 200 OK
         code: 200
-        duration: 334.711792ms
+        duration: 147.264042ms

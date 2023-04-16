@@ -67,11 +67,9 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, strconv.FormatUint(dbModel.DripAmount, 10), apiModel.DripAmount)
 		assert.Equal(t, dbModel.Enabled, apiModel.Enabled)
 		assert.Equal(t, int(dbModel.MaxSlippageBps), apiModel.MaxSlippageBps)
-		assert.Equal(t, int(dbModel.MaxPriceDeviationBps), apiModel.MaxPriceDeviationBps)
-		assert.Nil(t, apiModel.OracleConfig)
 
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 14)
+		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 12)
 	})
 
 	t.Run("vaultModelsToAPI should return correct apiSpec model", func(t *testing.T) {
@@ -81,7 +79,7 @@ func TestUtils(t *testing.T) {
 		}
 		apiModel := vaultModelsToAPI(dbModels)
 		for i := range apiModel {
-			assert.Equal(t, reflect.TypeOf(apiModel[i]).NumField(), 14)
+			assert.Equal(t, reflect.TypeOf(apiModel[i]).NumField(), 12)
 		}
 	})
 
@@ -263,7 +261,6 @@ func TestUtils(t *testing.T) {
 			MaxSlippageBps:         50,
 			TokenAMint:             solana.NewWallet().PublicKey().String(),
 			TokenBMint:             solana.NewWallet().PublicKey().String(),
-			OracleConfig:           utils.GetStringPtr(solana.NewWallet().PublicKey().String()),
 		}
 		tokenSwap := model.TokenSwap{
 			Pubkey:        solana.NewWallet().PublicKey().String(),
@@ -294,9 +291,8 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, vault.ProtoConfig, apiModel.VaultProtoConfig)
 		assert.Equal(t, vault.TokenAAccount, apiModel.DripCommon.VaultTokenAAccount)
 		assert.Equal(t, vault.TokenBAccount, apiModel.DripCommon.VaultTokenBAccount)
-		assert.Equal(t, *vault.OracleConfig, *apiModel.OracleConfig)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 7)
+		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 6)
 	})
 
 	t.Run("vaultWhirlpoolToAPI should return correct apiSpec model", func(t *testing.T) {
@@ -314,7 +310,6 @@ func TestUtils(t *testing.T) {
 			MaxSlippageBps:         50,
 			TokenAMint:             solana.NewWallet().PublicKey().String(),
 			TokenBMint:             solana.NewWallet().PublicKey().String(),
-			OracleConfig:           utils.GetStringPtr(solana.NewWallet().PublicKey().String()),
 		}
 		orcaWhirlpool := model.OrcaWhirlpool{
 			Pubkey:                     solana.NewWallet().PublicKey().String(),
@@ -323,7 +318,6 @@ func TestUtils(t *testing.T) {
 			TokenVaultA:                solana.NewWallet().PublicKey().String(),
 			TokenMintB:                 solana.NewWallet().PublicKey().String(),
 			TokenVaultB:                solana.NewWallet().PublicKey().String(),
-			Oracle:                     solana.NewWallet().PublicKey().String(),
 			TickSpacing:                0,
 			FeeRate:                    0,
 			ProtocolFeeRate:            0,
@@ -341,11 +335,10 @@ func TestUtils(t *testing.T) {
 
 		apiModel := vaultWhirlpoolToAPI(&vault, &orcaWhirlpool)
 		assert.Equal(t, orcaWhirlpool.Pubkey, apiModel.Whirlpool)
-		assert.Equal(t, orcaWhirlpool.Oracle, apiModel.Oracle)
 		assert.Equal(t, orcaWhirlpool.TokenVaultA, apiModel.TokenVaultA)
 		assert.Equal(t, orcaWhirlpool.TokenVaultB, apiModel.TokenVaultB)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 5)
+		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 4)
 
 		assert.Equal(t, vault.TokenAMint, apiModel.TokenAMint)
 		assert.Equal(t, vault.TokenBMint, apiModel.TokenBMint)
@@ -353,9 +346,8 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, vault.ProtoConfig, apiModel.VaultProtoConfig)
 		assert.Equal(t, vault.TokenAAccount, apiModel.DripCommon.VaultTokenAAccount)
 		assert.Equal(t, vault.TokenBAccount, apiModel.DripCommon.VaultTokenBAccount)
-		assert.Equal(t, *vault.OracleConfig, *apiModel.OracleConfig)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 7)
+		assert.Equal(t, reflect.TypeOf(apiModel.DripCommon).NumField(), 6)
 	})
 
 }

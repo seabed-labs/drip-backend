@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/test-go/testify/assert"
 )
@@ -13,7 +13,7 @@ func TestTokenRegistry(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}
-	client := NewTokenRegistry(clients.DefaultClientProvider())
+	client := NewTokenRegistry(api.GetDefaultClientProvider())
 
 	t.Run("GetTokenRegistry should return all tokens with cache", func(t *testing.T) {
 		_, _ = client.GetTokenRegistry(context.Background())

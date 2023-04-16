@@ -332,10 +332,3 @@ func (d repositoryImpl) GetAdminPositions(
 	}
 	return stmt.Find()
 }
-
-func (d repositoryImpl) GetOracleConfigByAddress(ctx context.Context, address string) (*model.OracleConfig, error) {
-	return d.repo.
-		OracleConfig.WithContext(ctx).
-		Where(d.repo.OracleConfig.Pubkey.Eq(address)).
-		First()
-}

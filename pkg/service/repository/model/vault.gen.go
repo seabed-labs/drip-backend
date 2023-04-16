@@ -26,8 +26,6 @@ type Vault struct {
 	MaxSlippageBps         int32     `gorm:"column:max_slippage_bps;type:int4;not null" json:"maxSlippageBps" db:"max_slippage_bps"`
 	TokenAMint             string    `gorm:"column:token_a_mint;type:varchar;not null" json:"tokenAMint" db:"token_a_mint"`
 	TokenBMint             string    `gorm:"column:token_b_mint;type:varchar;not null" json:"tokenBMint" db:"token_b_mint"`
-	OracleConfig           *string   `gorm:"column:oracle_config;type:varchar" json:"oracleConfig" db:"oracle_config"`
-	MaxPriceDeviationBps   int32     `gorm:"column:max_price_deviation_bps;type:int4;not null" json:"maxPriceDeviationBps" db:"max_price_deviation_bps"`
 }
 
 // TableName Vault's table name

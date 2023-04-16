@@ -220,21 +220,6 @@ func (mr *MockRepositoryMockRecorder) GetCurrentTVL(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentTVL", reflect.TypeOf((*MockRepository)(nil).GetCurrentTVL), ctx)
 }
 
-// GetOracleConfigByAddress mocks base method.
-func (m *MockRepository) GetOracleConfigByAddress(ctx context.Context, address string) (*model.OracleConfig, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOracleConfigByAddress", ctx, address)
-	ret0, _ := ret[0].(*model.OracleConfig)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOracleConfigByAddress indicates an expected call of GetOracleConfigByAddress.
-func (mr *MockRepositoryMockRecorder) GetOracleConfigByAddress(ctx, address interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOracleConfigByAddress", reflect.TypeOf((*MockRepository)(nil).GetOracleConfigByAddress), ctx, address)
-}
-
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
@@ -607,25 +592,6 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
-}
-
-// UpsertOracleConfigs mocks base method.
-func (m *MockRepository) UpsertOracleConfigs(arg0 context.Context, arg1 ...*model.OracleConfig) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpsertOracleConfigs", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpsertOracleConfigs indicates an expected call of UpsertOracleConfigs.
-func (mr *MockRepositoryMockRecorder) UpsertOracleConfigs(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertOracleConfigs", reflect.TypeOf((*MockRepository)(nil).UpsertOracleConfigs), varargs...)
 }
 
 // UpsertOrcaWhirlpoolDeltaBQuotes mocks base method.
