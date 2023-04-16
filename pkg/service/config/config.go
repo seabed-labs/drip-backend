@@ -1,6 +1,8 @@
 package config
 
 import (
+	dripV1 "github.com/dcaf-labs/solana-drip-go/pkg/v1"
+	"github.com/gagliardetto/solana-go"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
@@ -163,8 +165,8 @@ func NewAppConfig() (AppConfig, error) {
 	}
 
 	log.Info("loaded drip-backend app config")
-	//dripV0.SetProgramID(ag_solanago.MustPublicKeyFromBase58(config.DripProgramID))
-	//dripV1.SetProgramID(ag_solanago.MustPublicKeyFromBase58(config.DripProgramID))
+	// always register latest decoder just in case
+	dripV1.SetProgramID(solana.MustPublicKeyFromBase58(config.DripProgramID))
 	log.
 		WithField("programID", config.DripProgramID).
 		WithField("ShouldByPassAdminAuth", config.ShouldByPassAdminAuth).
