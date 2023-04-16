@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/dcaf-labs/drip/pkg/unittest"
+
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
 	controller "github.com/dcaf-labs/drip/pkg/api/routes"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
@@ -17,7 +19,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
-	"github.com/dcaf-labs/drip/pkg/unittest"
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -45,11 +46,13 @@ func TestWithInjectedDependencies(
 	// test http recorder
 	httpClientProvider := api2.GetDefaultClientProvider
 	if testOptions != nil {
-		recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider(testOptions.FixturePath)
-		defer recorderTeardown()
-		httpClientProvider = func() api2.RetryableHTTPClientProvider {
-			return func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {
-				return recorderProvider()(options)
+		if testOptions.FixturePath != "" {
+			recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider(testOptions.FixturePath)
+			defer recorderTeardown()
+			httpClientProvider = func() api2.RetryableHTTPClientProvider {
+				return func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {
+					return recorderProvider()(options)
+				}
 			}
 		}
 	}

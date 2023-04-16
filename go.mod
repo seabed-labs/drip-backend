@@ -7,7 +7,7 @@ require (
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
 	github.com/dcaf-labs/solana-drip-go v0.0.0-20230416112801-7d7e880135eb
 	github.com/dcaf-labs/solana-go-clients v0.0.0-20221202190210-4fa06790e51a
-	github.com/dcaf-labs/solana-go-retryable-http-client v0.0.0-20230212221440-015980319e0c
+	github.com/dcaf-labs/solana-go-retryable-http-client v0.0.0-20230416170336-6240e29f9aad
 	github.com/deepmap/oapi-codegen v1.10.1
 	github.com/disgoorg/disgo v0.13.19
 	github.com/disgoorg/snowflake/v2 v2.0.0
@@ -140,7 +140,7 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
-	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/term v0.0.0-20220919170432-7a66f970e087 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect

@@ -72,7 +72,7 @@ func GetHTTPRecorderClientProvider(fixturePath string) (recorderProvider func() 
 	}
 	teardown := func() {
 		if err := r.Stop(); err != nil {
-			logrus.WithError(err).Error("could stop recorder")
+			logrus.WithError(err).Error("could not stop recorder")
 			os.Exit(1)
 		}
 	}
