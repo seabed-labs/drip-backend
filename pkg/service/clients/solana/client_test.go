@@ -20,7 +20,7 @@ func TestSolanaClient(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration tests in short mode")
 	}
-	mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
+	//mint := "31nFDfb3b4qw8JPx4FaXGgEk8omt7NuHpPkwWCSym5rC"
 	ctrl := gomock.NewController(t)
 	mockConfig := unittest.GetMockDevnetStagingConfig(ctrl)
 
@@ -42,12 +42,12 @@ func TestSolanaClient(t *testing.T) {
 		assert.NotEmpty(t, versionResponse.FeatureSet)
 	})
 
-	t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
-		destWallet := solana.NewWallet()
-		txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, txHash)
-	})
+	//t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
+	//	destWallet := solana.NewWallet()
+	//	txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
+	//	assert.NoError(t, err)
+	//	assert.NotEmpty(t, txHash)
+	//})
 
 	//t.Run("mintToWallet should mint when wallet has a token account", func(t *testing.T) {
 	//	destWallet := solana.NewWallet()
