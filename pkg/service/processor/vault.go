@@ -43,17 +43,6 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		return err
 	}
 
-	//oracleConfig := func() *string {
-	//	if vaultAccount.OracleConfig.IsZero() {
-	//		return nil
-	//	}
-	//	oracleConfig, err := p.ensureOracleConfig(ctx, vaultAccount.OracleConfig.String())
-	//	if err != nil {
-	//		logrus.WithError(err).Error("failed to ensureOracleConfig, continuing...")
-	//		return nil
-	//	}
-	//	return utils.GetStringPtr(oracleConfig.Pubkey)
-	//}()
 	if err := p.repo.UpsertVaults(ctx, &model.Vault{
 		Pubkey:                 address,
 		ProtoConfig:            vaultAccount.ProtoConfig.String(),
@@ -68,9 +57,6 @@ func (p impl) UpsertVaultByAddress(ctx context.Context, address string) error {
 		Enabled:                false,
 		TokenPairID:            tokenPair.ID,
 		MaxSlippageBps:         int32(vaultAccount.MaxSlippageBps),
-		OracleConfig:           nil,
-		//MaxPriceDeviationBps:   int32(vaultAccount.MaxPriceDeviationBps),
-		MaxPriceDeviationBps: int32(0),
 	}); err != nil {
 		return err
 	}

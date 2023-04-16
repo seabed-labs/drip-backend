@@ -1,10 +1,7 @@
 package integrationtest
 
 import (
-	"bytes"
 	"context"
-	"io/ioutil"
-	"net/http"
 	"os"
 
 	"github.com/dcaf-labs/drip/pkg/api/middleware"
@@ -24,7 +21,6 @@ import (
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
-	"gopkg.in/dnaeon/go-vcr.v3/cassette"
 )
 
 type TestOptions struct {
@@ -49,29 +45,8 @@ func TestWithInjectedDependencies(
 	// test http recorder
 	httpClientProvider := api2.GetDefaultClientProvider()
 	if testOptions != nil {
-		//var (
-		//	recorderTeardown func()
-		//)
 		recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider("./fixtures/drip_1")
 		defer recorderTeardown()
-		//r, err := recorder.New(testOptions.FixturePath)
-		//if err != nil {
-		//	logrus.WithError(err).Error("could not get recorder")
-		//	os.Exit(1)
-		//}
-		//defer func(r *recorder.Recorder) {
-		//	if err := r.Stop(); err != nil {
-		//		logrus.WithError(err).Error("could stop recorder")
-		//		os.Exit(1)
-		//	}
-		//}(r)
-		//if r.Mode() != recorder.ModeRecordOnce {
-		//	logrus.Error("recorder should be in ModeRecordOnce")
-		//	os.Exit(1)
-		//}
-		//r.SetReplayableInteractions(true)
-		//r.SetMatcher(requestMatcher)
-		//recorderHTTPClient := r.GetDefaultClient()
 		httpClientProvider = func(options api2.RateLimitHTTPClientOptions) api2.RetryableHTTPClient {
 			return recorderProvider()(options)
 		}
@@ -132,22 +107,4 @@ func TestWithInjectedDependencies(
 		logrus.WithError(err).Error("failed to run integration test")
 		panic(err)
 	}
-}
-
-func requestMatcher(r *http.Request, i cassette.Request) bool {
-	if r.Body == nil || r.Body == http.NoBody {
-		return cassette.DefaultMatcher(r, i)
-	}
-
-	var reqBody []byte
-	var err error
-	reqBody, err = ioutil.ReadAll(r.Body)
-	if err != nil {
-		logrus.WithError(err).Errorf("failed to read request body")
-		os.Exit(1)
-	}
-	r.Body.Close()
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
-
-	return r.Method == i.Method && r.URL.String() == i.URL && string(reqBody) == i.Body
 }

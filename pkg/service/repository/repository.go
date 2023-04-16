@@ -14,7 +14,6 @@ const ErrRecordNotFound = "record not found"
 type Repository interface {
 	InsertTokenPairs(context.Context, ...*model.TokenPair) error
 	UpsertProtoConfigs(context.Context, ...*model.ProtoConfig) error
-	UpsertOracleConfigs(context.Context, ...*model.OracleConfig) error
 	UpsertTokens(context.Context, ...*model.Token) error
 	UpsertVaults(context.Context, ...*model.Vault) error
 	UpsertVaultWhitelists(context.Context, ...*model.VaultWhitelist) error
@@ -28,8 +27,6 @@ type Repository interface {
 	// These will only returned "enabled=true" vaults
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
 	GetVaultsWithFilter(context.Context, *string, *string, *string) ([]*model.Vault, error)
-
-	GetOracleConfigByAddress(ctx context.Context, address string) (*model.OracleConfig, error)
 
 	GetVaultWhitelistsByVaultAddress(context.Context, []string) ([]*model.VaultWhitelist, error)
 

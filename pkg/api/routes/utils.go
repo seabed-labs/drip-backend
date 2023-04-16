@@ -49,8 +49,6 @@ func vaultModelToAPI(vaultModel *model.Vault) apispec.Vault {
 		TokenBMint:             vaultModel.TokenBMint,
 		TreasuryTokenBAccount:  vaultModel.TreasuryTokenBAccount,
 		MaxSlippageBps:         int(vaultModel.MaxSlippageBps),
-		OracleConfig:           vaultModel.OracleConfig,
-		MaxPriceDeviationBps:   int(vaultModel.MaxPriceDeviationBps),
 		Enabled:                vaultModel.Enabled,
 	}
 }
@@ -179,14 +177,12 @@ func vaultTokenSwapToAPI(vault *model.Vault, tokenSwap *model.TokenSwap) apispec
 			VaultProtoConfig:   vault.ProtoConfig,
 			VaultTokenAAccount: vault.TokenAAccount,
 			VaultTokenBAccount: vault.TokenBAccount,
-			OracleConfig:       vault.OracleConfig,
 		},
 	}
 }
 
 func vaultWhirlpoolToAPI(vault *model.Vault, orcaWhirlpool *model.OrcaWhirlpool) apispec.OrcaWhirlpoolConfig {
 	return apispec.OrcaWhirlpoolConfig{
-		Oracle:      orcaWhirlpool.Oracle,
 		TokenVaultA: orcaWhirlpool.TokenVaultA,
 		TokenVaultB: orcaWhirlpool.TokenVaultB,
 		Whirlpool:   orcaWhirlpool.Pubkey,
@@ -197,7 +193,6 @@ func vaultWhirlpoolToAPI(vault *model.Vault, orcaWhirlpool *model.OrcaWhirlpool)
 			VaultProtoConfig:   vault.ProtoConfig,
 			VaultTokenAAccount: vault.TokenAAccount,
 			VaultTokenBAccount: vault.TokenBAccount,
-			OracleConfig:       vault.OracleConfig,
 		},
 	}
 }

@@ -110,10 +110,8 @@ func TestHandler_UpsertVaultByAddress(t *testing.T) {
 				assert.Equal(t, int32(500), vault.MaxSlippageBps)
 				assert.Equal(t, false, vault.Enabled)
 				assert.Equal(t, tokenPair.ID, vault.TokenPairID)
-				assert.Nil(t, vault.OracleConfig)
-				assert.Equal(t, int32(0), vault.MaxPriceDeviationBps)
 				// if the line below needs to be updated, add the field assertion above
-				assert.Equal(t, 15, reflect.TypeOf(*vault).NumField())
+				assert.Equal(t, 13, reflect.TypeOf(*vault).NumField())
 			})
 	})
 }

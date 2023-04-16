@@ -76,13 +76,6 @@ func (d repositoryImpl) UpsertProtoConfigs(ctx context.Context, protoConfigs ...
 		Create(protoConfigs...)
 }
 
-func (d repositoryImpl) UpsertOracleConfigs(ctx context.Context, oracleConfigs ...*model.OracleConfig) error {
-	return d.repo.OracleConfig.
-		WithContext(ctx).
-		Clauses(clause.OnConflict{UpdateAll: true}).
-		Create(oracleConfigs...)
-}
-
 func (d repositoryImpl) UpsertTokens(ctx context.Context, tokens ...*model.Token) error {
 	return d.repo.Token.
 		WithContext(ctx).

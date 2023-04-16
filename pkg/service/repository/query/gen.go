@@ -17,7 +17,6 @@ func Use(db *gorm.DB) *Query {
 		AccountUpdateQueueItem:   newAccountUpdateQueueItem(db),
 		DepositMetric:            newDepositMetric(db),
 		DripMetric:               newDripMetric(db),
-		OracleConfig:             newOracleConfig(db),
 		OrcaWhirlpool:            newOrcaWhirlpool(db),
 		OrcaWhirlpoolDeltaBQuote: newOrcaWhirlpoolDeltaBQuote(db),
 		Position:                 newPosition(db),
@@ -41,7 +40,6 @@ type Query struct {
 	AccountUpdateQueueItem   accountUpdateQueueItem
 	DepositMetric            depositMetric
 	DripMetric               dripMetric
-	OracleConfig             oracleConfig
 	OrcaWhirlpool            orcaWhirlpool
 	OrcaWhirlpoolDeltaBQuote orcaWhirlpoolDeltaBQuote
 	Position                 position
@@ -66,7 +64,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.clone(db),
 		DepositMetric:            q.DepositMetric.clone(db),
 		DripMetric:               q.DripMetric.clone(db),
-		OracleConfig:             q.OracleConfig.clone(db),
 		OrcaWhirlpool:            q.OrcaWhirlpool.clone(db),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.clone(db),
 		Position:                 q.Position.clone(db),
@@ -88,7 +85,6 @@ type queryCtx struct {
 	AccountUpdateQueueItem   *accountUpdateQueueItemDo
 	DepositMetric            *depositMetricDo
 	DripMetric               *dripMetricDo
-	OracleConfig             *oracleConfigDo
 	OrcaWhirlpool            *orcaWhirlpoolDo
 	OrcaWhirlpoolDeltaBQuote *orcaWhirlpoolDeltaBQuoteDo
 	Position                 *positionDo
@@ -110,7 +106,6 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AccountUpdateQueueItem:   q.AccountUpdateQueueItem.WithContext(ctx),
 		DepositMetric:            q.DepositMetric.WithContext(ctx),
 		DripMetric:               q.DripMetric.WithContext(ctx),
-		OracleConfig:             q.OracleConfig.WithContext(ctx),
 		OrcaWhirlpool:            q.OrcaWhirlpool.WithContext(ctx),
 		OrcaWhirlpoolDeltaBQuote: q.OrcaWhirlpoolDeltaBQuote.WithContext(ctx),
 		Position:                 q.Position.WithContext(ctx),

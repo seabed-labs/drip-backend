@@ -32,7 +32,6 @@ type Processor interface {
 	UpsertVaultPeriodByAddress(context.Context, string) error
 	UpsertVaultByAddress(context.Context, string) error
 	UpsertPositionByAddress(context.Context, string) error
-	//UpsertOracleConfigByAddress(context.Context, string) error
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
@@ -268,15 +267,6 @@ func (p impl) ProcessDripEvent(address string, data []byte) error {
 		}
 		return nil
 	}
-	//var oracleConfig drip.OracleConfig
-	//if err := bin.NewBinDecoder(data).Decode(&oracleConfig); err == nil {
-	//	// log.Infof("decoded as oracleConfig")
-	//	if err := p.UpsertOracleConfigByAddress(ctx, address); err != nil {
-	//		log.WithError(err).Error("failed to upsert oracleConfig")
-	//		return err
-	//	}
-	//	return nil
-	//}
 	log.Errorf("failed to decode drip account to known types")
 	return nil
 }

@@ -76,16 +76,6 @@ func backfillDevnetAccounts(
 			}
 		}
 	}
-	//if config.IsDevnetNetwork(i.network) && config.IsStagingEnvironment(i.env) {
-	//	for _, address := range []string{
-	//		"2nSfqMNV9CyjWA8zSA5jGPKGgEA4CtskHZsQf7H4fCaT",
-	//	} {
-	//		log := logrus.WithField("address", address)
-	//		if err := i.processor.UpsertOracleConfigByAddress(ctx, address); err != nil {
-	//			log.WithError(err).Error("failed to backfill oracle config")
-	//		}
-	//	}
-	//}
 	if config.IsDevnetNetwork(i.network) && config.IsProductionEnvironment(i.env) {
 		for _, address := range []string{
 			"5VfSyiFenN99Nk3KTsuB93E6783cpB1rdJkjFdg9qSLK",
