@@ -34,8 +34,6 @@ func newWithdrawalMetric(db *gorm.DB) withdrawalMetric {
 	_withdrawalMetric.Slot = field.NewInt32(tableName, "slot")
 	_withdrawalMetric.Time = field.NewTime(tableName, "time")
 	_withdrawalMetric.Vault = field.NewString(tableName, "vault")
-	_withdrawalMetric.TokenAMint = field.NewString(tableName, "token_a_mint")
-	_withdrawalMetric.TokenBMint = field.NewString(tableName, "token_b_mint")
 	_withdrawalMetric.UserTokenAWithdrawAmount = field.NewUint64(tableName, "user_token_a_withdraw_amount")
 	_withdrawalMetric.UserTokenBWithdrawAmount = field.NewUint64(tableName, "user_token_b_withdraw_amount")
 	_withdrawalMetric.TreasuryTokenBReceivedAmount = field.NewUint64(tableName, "treasury_token_b_received_amount")
@@ -59,8 +57,6 @@ type withdrawalMetric struct {
 	Slot                         field.Int32
 	Time                         field.Time
 	Vault                        field.String
-	TokenAMint                   field.String
-	TokenBMint                   field.String
 	UserTokenAWithdrawAmount     field.Uint64
 	UserTokenBWithdrawAmount     field.Uint64
 	TreasuryTokenBReceivedAmount field.Uint64
@@ -90,8 +86,6 @@ func (w *withdrawalMetric) updateTableName(table string) *withdrawalMetric {
 	w.Slot = field.NewInt32(table, "slot")
 	w.Time = field.NewTime(table, "time")
 	w.Vault = field.NewString(table, "vault")
-	w.TokenAMint = field.NewString(table, "token_a_mint")
-	w.TokenBMint = field.NewString(table, "token_b_mint")
 	w.UserTokenAWithdrawAmount = field.NewUint64(table, "user_token_a_withdraw_amount")
 	w.UserTokenBWithdrawAmount = field.NewUint64(table, "user_token_b_withdraw_amount")
 	w.TreasuryTokenBReceivedAmount = field.NewUint64(table, "treasury_token_b_received_amount")
@@ -122,7 +116,7 @@ func (w *withdrawalMetric) GetFieldByName(fieldName string) (field.OrderExpr, bo
 }
 
 func (w *withdrawalMetric) fillFieldMap() {
-	w.fieldMap = make(map[string]field.Expr, 15)
+	w.fieldMap = make(map[string]field.Expr, 13)
 	w.fieldMap["signature"] = w.Signature
 	w.fieldMap["ix_index"] = w.IxIndex
 	w.fieldMap["ix_name"] = w.IxName
@@ -130,8 +124,6 @@ func (w *withdrawalMetric) fillFieldMap() {
 	w.fieldMap["slot"] = w.Slot
 	w.fieldMap["time"] = w.Time
 	w.fieldMap["vault"] = w.Vault
-	w.fieldMap["token_a_mint"] = w.TokenAMint
-	w.fieldMap["token_b_mint"] = w.TokenBMint
 	w.fieldMap["user_token_a_withdraw_amount"] = w.UserTokenAWithdrawAmount
 	w.fieldMap["user_token_b_withdraw_amount"] = w.UserTokenBWithdrawAmount
 	w.fieldMap["treasury_token_b_received_amount"] = w.TreasuryTokenBReceivedAmount

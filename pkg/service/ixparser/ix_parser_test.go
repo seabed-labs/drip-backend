@@ -68,7 +68,7 @@ func TestIxParser(t *testing.T) {
 		innerIx := innerInstructions[0].Instructions[0]
 		accounts, err := innerIx.ResolveInstructionAccounts(&tx.Message)
 		assert.NoError(t, err)
-		parsedIx, ixName, err := parser.MaybeParseTokenTransfer(accounts, innerIx.Data)
+		parsedIx, ixName, err := parser.ParseTokenTransfer(accounts, innerIx.Data)
 		assert.NoError(t, err)
 		assert.NotNil(t, parsedIx)
 		assert.Equal(t, ixName, "Transfer")

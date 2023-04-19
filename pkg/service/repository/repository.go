@@ -73,6 +73,9 @@ type Repository interface {
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 
 	GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error)
+	GetDepositMetricBySignature(ctx context.Context, signature string) (*model.DepositMetric, error)
+	GetDripMetricBySignature(ctx context.Context, signature string) (*model.DripMetric, error)
+	GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error)
 }
 
 type AccountUpdateQueue interface {

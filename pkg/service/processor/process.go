@@ -3,6 +3,8 @@ package processor
 import (
 	"context"
 
+	"github.com/gagliardetto/solana-go/rpc"
+
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
@@ -37,7 +39,8 @@ type Processor interface {
 	ProcessTokenSwapEvent(address string, data []byte) error
 	ProcessWhirlpoolEvent(address string, data []byte) error
 
-	ProcessTransactionUpateQueue(ctx context.Context)
+	ProcessTransactionUpdateQueue(ctx context.Context)
+	ProcessTransaction(ctx context.Context, txRaw rpc.GetTransactionResult) error
 }
 
 type impl struct {

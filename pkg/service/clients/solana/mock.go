@@ -171,6 +171,21 @@ func (mr *MockSolanaMockRecorder) GetTokenMint(ctx, mintAddress interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenMint", reflect.TypeOf((*MockSolana)(nil).GetTokenMint), ctx, mintAddress)
 }
 
+// GetTransaction mocks base method.
+func (m *MockSolana) GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransaction", ctx, signature)
+	ret0, _ := ret[0].(*rpc.GetTransactionResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransaction indicates an expected call of GetTransaction.
+func (mr *MockSolanaMockRecorder) GetTransaction(ctx, signature interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransaction", reflect.TypeOf((*MockSolana)(nil).GetTransaction), ctx, signature)
+}
+
 // GetUserBalances mocks base method.
 func (m *MockSolana) GetUserBalances(arg0 context.Context, arg1 string) (*rpc.GetTokenAccountsResult, error) {
 	m.ctrl.T.Helper()

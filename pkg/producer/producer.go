@@ -298,12 +298,12 @@ func (d DripProgramProducer) pushTransactionsToQueue(
 		txSignature := parsedTx.Signatures[0].String()
 		if shouldPushTx {
 			log.WithField("transactionSignature", txSignature).Info("pushing tx to queue...")
-			bytes, err := json.Marshal(tx)
+			rpcTx, err := d.client.GetTransaction(ctx, txSignature)
 			if err != nil {
-				log.WithError(err).Error("failed to marshal tx")
+				log.WithError(err).Error("failed to get tx by signature")
 				return err
 			}
-			if err := d.AddItemToTransactionUpdate(ctx, txSignature, string(bytes)); err != nil {
+			if err := d.AddItemToTransactionUpdate(ctx, txSignature, *rpcTx); err != nil {
 				log.WithError(err).Error("failed to insert data into queue...")
 				return err
 			} else {
@@ -346,11 +346,16 @@ func (d DripProgramProducer) AddItemToAccountUpdateQueueCallback(ctx context.Con
 	}
 }
 
-func (d DripProgramProducer) AddItemToTransactionUpdate(ctx context.Context, signature string, txJSON string) error {
+func (d DripProgramProducer) AddItemToTransactionUpdate(ctx context.Context, signature string, tx rpc.GetTransactionResult) error {
+	bytes, err := json.Marshal(tx)
+	if err != nil {
+		logrus.WithError(err).Error("failed to marshal tx")
+		return err
+	}
 	priority := int32(1)
 	if err := d.transactionUpdateQueue.AddTransactionUpdateQueueItem(ctx, &model.TransactionUpdateQueueItem{
 		Signature: signature,
-		TxJSON:    txJSON,
+		TxJSON:    string(bytes),
 		Time:      utils.GetTimePtr(time.Now()),
 		Priority:  &priority,
 		MaxTry:    utils.GetInt32Ptr(10),

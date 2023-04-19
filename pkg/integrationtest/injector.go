@@ -66,6 +66,7 @@ func TestWithInjectedDependencies(
 		query.Use,
 		repository.NewRepository,
 		repository.NewAccountUpdateQueue,
+		repository.NewTransactionUpdateQueue,
 		// API Clients
 		httpClientProvider,
 		solana.NewSolanaClient,

@@ -34,7 +34,6 @@ func newDepositMetric(db *gorm.DB) depositMetric {
 	_depositMetric.Slot = field.NewInt32(tableName, "slot")
 	_depositMetric.Time = field.NewTime(tableName, "time")
 	_depositMetric.Vault = field.NewString(tableName, "vault")
-	_depositMetric.TokenAMint = field.NewString(tableName, "token_a_mint")
 	_depositMetric.Referrer = field.NewString(tableName, "referrer")
 	_depositMetric.TokenADepositAmount = field.NewUint64(tableName, "token_a_deposit_amount")
 	_depositMetric.TokenAUsdPriceDay = field.NewUint64(tableName, "token_a_usd_price_day")
@@ -55,7 +54,6 @@ type depositMetric struct {
 	Slot                field.Int32
 	Time                field.Time
 	Vault               field.String
-	TokenAMint          field.String
 	Referrer            field.String
 	TokenADepositAmount field.Uint64
 	TokenAUsdPriceDay   field.Uint64
@@ -82,7 +80,6 @@ func (d *depositMetric) updateTableName(table string) *depositMetric {
 	d.Slot = field.NewInt32(table, "slot")
 	d.Time = field.NewTime(table, "time")
 	d.Vault = field.NewString(table, "vault")
-	d.TokenAMint = field.NewString(table, "token_a_mint")
 	d.Referrer = field.NewString(table, "referrer")
 	d.TokenADepositAmount = field.NewUint64(table, "token_a_deposit_amount")
 	d.TokenAUsdPriceDay = field.NewUint64(table, "token_a_usd_price_day")
@@ -110,7 +107,7 @@ func (d *depositMetric) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (d *depositMetric) fillFieldMap() {
-	d.fieldMap = make(map[string]field.Expr, 11)
+	d.fieldMap = make(map[string]field.Expr, 10)
 	d.fieldMap["signature"] = d.Signature
 	d.fieldMap["ix_index"] = d.IxIndex
 	d.fieldMap["ix_name"] = d.IxName
@@ -118,7 +115,6 @@ func (d *depositMetric) fillFieldMap() {
 	d.fieldMap["slot"] = d.Slot
 	d.fieldMap["time"] = d.Time
 	d.fieldMap["vault"] = d.Vault
-	d.fieldMap["token_a_mint"] = d.TokenAMint
 	d.fieldMap["referrer"] = d.Referrer
 	d.fieldMap["token_a_deposit_amount"] = d.TokenADepositAmount
 	d.fieldMap["token_a_usd_price_day"] = d.TokenAUsdPriceDay

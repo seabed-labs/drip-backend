@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/internal/cli"
@@ -38,12 +40,14 @@ func getDependencies() []fx.Option {
 			query.Use,
 			repository.NewRepository,
 			repository.NewAccountUpdateQueue,
+			repository.NewTransactionUpdateQueue,
 
 			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,
 			orcawhirlpool.NewOrcaWhirlpoolClient,
 			coingecko.NewCoinGeckoClient,
+			ixparser.NewIxParser,
 
 			processor.NewProcessor,
 			alert.NewAlertService,

@@ -34,8 +34,6 @@ func newDripMetric(db *gorm.DB) dripMetric {
 	_dripMetric.Slot = field.NewInt32(tableName, "slot")
 	_dripMetric.Time = field.NewTime(tableName, "time")
 	_dripMetric.Vault = field.NewString(tableName, "vault")
-	_dripMetric.TokenAMint = field.NewString(tableName, "token_a_mint")
-	_dripMetric.TokenBMint = field.NewString(tableName, "token_b_mint")
 	_dripMetric.VaultTokenASwappedAmount = field.NewUint64(tableName, "vault_token_a_swapped_amount")
 	_dripMetric.VaultTokenBReceivedAmount = field.NewUint64(tableName, "vault_token_b_received_amount")
 	_dripMetric.KeeperTokenAReceivedAmount = field.NewUint64(tableName, "keeper_token_a_received_amount")
@@ -58,8 +56,6 @@ type dripMetric struct {
 	Slot                       field.Int32
 	Time                       field.Time
 	Vault                      field.String
-	TokenAMint                 field.String
-	TokenBMint                 field.String
 	VaultTokenASwappedAmount   field.Uint64
 	VaultTokenBReceivedAmount  field.Uint64
 	KeeperTokenAReceivedAmount field.Uint64
@@ -88,8 +84,6 @@ func (d *dripMetric) updateTableName(table string) *dripMetric {
 	d.Slot = field.NewInt32(table, "slot")
 	d.Time = field.NewTime(table, "time")
 	d.Vault = field.NewString(table, "vault")
-	d.TokenAMint = field.NewString(table, "token_a_mint")
-	d.TokenBMint = field.NewString(table, "token_b_mint")
 	d.VaultTokenASwappedAmount = field.NewUint64(table, "vault_token_a_swapped_amount")
 	d.VaultTokenBReceivedAmount = field.NewUint64(table, "vault_token_b_received_amount")
 	d.KeeperTokenAReceivedAmount = field.NewUint64(table, "keeper_token_a_received_amount")
@@ -119,7 +113,7 @@ func (d *dripMetric) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (d *dripMetric) fillFieldMap() {
-	d.fieldMap = make(map[string]field.Expr, 14)
+	d.fieldMap = make(map[string]field.Expr, 12)
 	d.fieldMap["signature"] = d.Signature
 	d.fieldMap["ix_index"] = d.IxIndex
 	d.fieldMap["ix_name"] = d.IxName
@@ -127,8 +121,6 @@ func (d *dripMetric) fillFieldMap() {
 	d.fieldMap["slot"] = d.Slot
 	d.fieldMap["time"] = d.Time
 	d.fieldMap["vault"] = d.Vault
-	d.fieldMap["token_a_mint"] = d.TokenAMint
-	d.fieldMap["token_b_mint"] = d.TokenBMint
 	d.fieldMap["vault_token_a_swapped_amount"] = d.VaultTokenASwappedAmount
 	d.fieldMap["vault_token_b_received_amount"] = d.VaultTokenBReceivedAmount
 	d.fieldMap["keeper_token_a_received_amount"] = d.KeeperTokenAReceivedAmount

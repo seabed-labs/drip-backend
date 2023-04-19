@@ -19,8 +19,6 @@ type DripMetric struct {
 	Slot                       int32     `gorm:"column:slot;not null" json:"slot" db:"slot"`
 	Time                       time.Time `gorm:"column:time;not null" json:"time" db:"time"`
 	Vault                      string    `gorm:"column:vault;not null" json:"vault" db:"vault"`
-	TokenAMint                 string    `gorm:"column:token_a_mint;not null" json:"tokenAMint" db:"token_a_mint"`
-	TokenBMint                 string    `gorm:"column:token_b_mint;not null" json:"tokenBMint" db:"token_b_mint"`
 	VaultTokenASwappedAmount   uint64    `gorm:"column:vault_token_a_swapped_amount;not null" json:"vaultTokenASwappedAmount" db:"vault_token_a_swapped_amount"`
 	VaultTokenBReceivedAmount  uint64    `gorm:"column:vault_token_b_received_amount;not null" json:"vaultTokenBReceivedAmount" db:"vault_token_b_received_amount"`
 	KeeperTokenAReceivedAmount uint64    `gorm:"column:keeper_token_a_received_amount;not null" json:"keeperTokenAReceivedAmount" db:"keeper_token_a_received_amount"`

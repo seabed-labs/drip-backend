@@ -48,6 +48,7 @@ type Solana interface {
 	GetNetwork() config.Network
 
 	GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error)
+	GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error)
 }
 
 func NewSolanaClient(
@@ -61,6 +62,15 @@ type impl struct {
 	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
+}
+
+func (s impl) GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error) {
+	return s.client.GetTransaction(ctx,
+		solana.MustSignatureFromBase58(signature), &rpc.GetTransactionOpts{
+			Encoding:                       solana.EncodingBase58,
+			Commitment:                     rpc.CommitmentFinalized,
+			MaxSupportedTransactionVersion: pointer.ToUint64(0),
+		})
 }
 
 func (s impl) GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error) {

@@ -49,7 +49,7 @@ func Server(
 func (d *DripProgramConsumer) start(ctx context.Context) error {
 	logrus.Info("starting producer")
 	go d.processor.ProcessAccountUpdateQueue(ctx)
-	go d.processor.ProcessTransactionUpateQueue(ctx)
+	go d.processor.ProcessTransactionUpdateQueue(ctx)
 	return nil
 }
 

@@ -18,12 +18,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func (p impl) ProcessTransactionUpateQueue(ctx context.Context) {
+func (p impl) ProcessTransactionUpdateQueue(ctx context.Context) {
 	var wg sync.WaitGroup
 	ch := make(chan *model.TransactionUpdateQueueItem)
 	defer func() {
 		close(ch)
-		logrus.Info("exiting ProcessTransactionUpateQueue...")
+		logrus.Info("exiting ProcessTransactionUpdateQueue...")
 		wg.Wait()
 	}()
 
@@ -40,16 +40,20 @@ func (p impl) ProcessTransactionUpateQueue(ctx context.Context) {
 			queueItem, err := p.transactionUpdateQueue.PopTransactionUpdateQueueItem(ctx)
 			if err != nil && err == gorm.ErrRecordNotFound {
 				continue
+			} else if err != nil {
+				logrus.WithError(err).Error("failed to fetch transaction from queue")
+				continue
 			} else if queueItem == nil {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
+			} else {
+				ch <- queueItem
 			}
 			//if depth, err := p.accountUpdateQueue.AccountUpdateQueueItemDepth(ctx); err != nil {
 			//	logrus.WithError(err).Error("failed to get queue depth")
 			//} else {
 			//	logrus.WithField("depth", depth).Infof("queue depth")
 			//}
-			ch <- queueItem
 		}
 	}
 }
@@ -62,26 +66,35 @@ func (p impl) processTransactionUpdateQueueItemWorker(ctx context.Context, id st
 			logrus.Info("exiting processTransactionUpdateQueueItemWorker")
 			return
 		case queueItem := <-queueCh:
-			if err := p.processTransactionUpdateQueueItem(ctx, id, queueItem); err != nil {
-				p.handleTransactionUpdateErr(ctx, queueItem, err)
+			if queueItem != nil {
+				var txRaw rpc.GetTransactionResult
+				if err := json.Unmarshal([]byte(queueItem.TxJSON), &txRaw); err != nil {
+					logrus.WithError(err).Error("failed to unmarshall tx...")
+					p.handleTransactionUpdateErr(ctx, queueItem, err)
+				}
+				if err := p.ProcessTransaction(ctx, txRaw); err != nil {
+					p.handleTransactionUpdateErr(ctx, queueItem, err)
+				}
 			}
 		}
 	}
 }
 
-func (p impl) processTransactionUpdateQueueItem(ctx context.Context, id string, queueItem *model.TransactionUpdateQueueItem) error {
-	log := logrus.WithField("id", id).WithField("signature", queueItem.Signature)
-	var txRaw rpc.TransactionWithMeta
-	if err := json.Unmarshal([]byte(queueItem.TxJSON), &txRaw); err != nil {
-		log.WithError(err).Error("failed to unmarshall tx...")
-		return err
-	}
-	tx, err := txRaw.GetTransaction()
+func (p impl) ProcessTransaction(ctx context.Context, txRaw rpc.GetTransactionResult) error {
+
+	tx, err := txRaw.Transaction.GetTransaction()
 	if err != nil {
-		log.WithError(err).Error("failed to get transaction from unmarshalled tx")
+		logrus.WithError(err).Error("failed to get transaction from unmarshalled tx")
 		return err
 	}
 	version := drip.GetIdlVersion(txRaw.Slot)
+	blockTime := time.Unix(0, 0)
+	if txRaw.BlockTime != nil {
+		blockTime = time.Unix(int64(*txRaw.BlockTime), 0)
+	}
+	signature := tx.Signatures[0].String()
+	log := logrus.WithField("signature", signature).WithField("version", version)
+
 	for i := range tx.Message.Instructions {
 		ix := tx.Message.Instructions[i]
 		accounts, err := ix.ResolveInstructionAccounts(&tx.Message)
@@ -89,325 +102,341 @@ func (p impl) processTransactionUpdateQueueItem(ctx context.Context, id string, 
 			logrus.WithError(err).Error("failed ResolveInstructionAccounts")
 			return err
 		}
-		blockTime := time.Unix(0, 0)
-		if txRaw.BlockTime != nil {
-			blockTime = time.Unix(int64(*txRaw.BlockTime), 0)
+		ixName := p.dripIxParser.GetIxName(version, accounts, ix.Data)
+		if ixName == nil {
+			continue
 		}
-		signature := tx.Signatures[0].String()
-		switch version {
-		case 1:
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV1DepositIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetDepositAccounts()
-				return p.repo.UpsertDepositMetric(ctx, &model.DepositMetric{
-					Signature:           signature,
-					IxIndex:             int32(i),
-					IxName:              ixName,
-					IxVersion:           0,
-					Slot:                int32(txRaw.Slot),
-					Time:                blockTime,
-					Vault:               parsedAccounts.Common.Vault.String(),
-					Referrer:            pointer.ToString(parsedAccounts.Common.Referrer.String()),
-					TokenADepositAmount: parsedIx.Params.TokenADepositAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV1DepositIx")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV1DepositWithMetadataIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetDepositWithMetadataAccounts()
-				return p.repo.UpsertDepositMetric(ctx, &model.DepositMetric{
-					Signature:           signature,
-					IxIndex:             int32(i),
-					IxName:              ixName,
-					IxVersion:           0,
-					Slot:                int32(txRaw.Slot),
-					Time:                blockTime,
-					Vault:               parsedAccounts.Common.Vault.String(),
-					Referrer:            pointer.ToString(parsedAccounts.Common.Referrer.String()),
-					TokenADepositAmount: parsedIx.Params.TokenADepositAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV1DepositWithMetadataIx")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV1DripOrcaWhirlpool(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetDripOrcaWhirlpoolAccounts()
-				tokenASwapped := uint64(0)
-				tokenBReceived := uint64(0)
-				keeperTokenAReceived := uint64(0)
-				if vaultTokenAToWhirlpool := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[0].PublicKey.String() == parsedAccounts.Common.VaultTokenAAccount.String()
-				}); vaultTokenAToWhirlpool != nil {
-					tokenASwapped = *vaultTokenAToWhirlpool.Amount
-				}
-				if vaultTokenAToKeeper := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.DripFeeTokenAAccount.String()
-				}); vaultTokenAToKeeper != nil {
-					keeperTokenAReceived = *vaultTokenAToKeeper.Amount
-				}
-				if whirlpoolToVaultTokenB := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.VaultTokenBAccount.String()
-				}); whirlpoolToVaultTokenB != nil {
-					tokenBReceived = *whirlpoolToVaultTokenB.Amount
-				}
+		log = log.WithField("ixName", *ixName)
+		log.Info("starting to parse ix")
 
-				return p.repo.UpsertDripMetric(ctx, &model.DripMetric{
-					Signature:                  signature,
-					IxIndex:                    int32(i),
-					IxName:                     ixName,
-					IxVersion:                  1,
-					Slot:                       int32(txRaw.Slot),
-					Time:                       blockTime,
-					Vault:                      parsedAccounts.Common.Vault.String(),
-					VaultTokenASwappedAmount:   tokenASwapped,
-					VaultTokenBReceivedAmount:  tokenBReceived,
-					KeeperTokenAReceivedAmount: keeperTokenAReceived,
-				})
+		switch *ixName {
+		case "Deposit":
+			metric, err := p.getDepositMetric(txRaw, ix, accounts, version, i, signature, *ixName, blockTime)
+			if err != nil {
+				return err
+			}
+			return p.repo.UpsertDepositMetric(ctx, metric)
+		case "DepositWithMetadata":
+			metric, err2 := p.getDepositWithMetadataMetric(txRaw, ix, accounts, version, i, signature, *ixName, blockTime)
+			if err2 != nil {
+				return err2
+			}
+			return p.repo.UpsertDepositMetric(ctx, metric)
 
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV1DripOrcaWhirlpool")
-				return err
+		case "DripOrcaWhirlpool":
+			metric, err2 := p.getDripMetric(txRaw, tx.Message, ix, accounts, version, i, signature, *ixName, blockTime)
+			if err2 != nil {
+				return err2
 			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV1WithdrawIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetWithdrawBAccounts()
-				userTokenBWithdrawAmount := uint64(0)
-				treasuryTokenBReceivedAmount := uint64(0)
-				referralTokenBReceivedAmount := uint64(0)
-				if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.UserTokenBAccount.String()
-				}); vaultTokenBToUser != nil {
-					userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
-				}
-				if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.VaultTreasuryTokenBAccount.String()
-				}); vaultTokenBToTreasury != nil {
-					treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
-				}
-				if vaultTokenBToReferral := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.Referrer.String()
-				}); vaultTokenBToReferral != nil {
-					referralTokenBReceivedAmount = *vaultTokenBToReferral.Amount
-				}
-				return p.repo.UpsertWithdrawMetric(ctx, &model.WithdrawalMetric{
-					Signature:                    signature,
-					IxIndex:                      int32(i),
-					IxName:                       ixName,
-					IxVersion:                    0,
-					Slot:                         int32(txRaw.Slot),
-					Time:                         blockTime,
-					Vault:                        parsedAccounts.Common.Vault.String(),
-					UserTokenAWithdrawAmount:     0,
-					UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
-					TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
-					ReferralTokenBReceivedAmount: referralTokenBReceivedAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV1WithdrawIx")
-				return err
+			return p.repo.UpsertDripMetric(ctx, metric)
+		case "ClosePosition":
+			metric, err2 := p.getClosePositionMetric(txRaw, tx.Message, ix, accounts, version, i, signature, *ixName, blockTime)
+			if err2 != nil {
+				return err2
 			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV1ClosePositionIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetClosePositionAccounts()
-				userTokenAWithdrawAmount := uint64(0)
-				userTokenBWithdrawAmount := uint64(0)
-				treasuryTokenBReceivedAmount := uint64(0)
-				referralTokenBReceivedAmount := uint64(0)
-				if vaultTokenAToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.UserTokenAAccount.String()
-				}); vaultTokenAToUser != nil {
-					userTokenAWithdrawAmount = *vaultTokenAToUser.Amount
-				}
-				if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.UserTokenBAccount.String()
-				}); vaultTokenBToUser != nil {
-					userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
-				}
-				if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.VaultTreasuryTokenBAccount.String()
-				}); vaultTokenBToTreasury != nil {
-					treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
-				}
-				if vaultTokenBToReferral := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.Referrer.String()
-				}); vaultTokenBToReferral != nil {
-					referralTokenBReceivedAmount = *vaultTokenBToReferral.Amount
-				}
-				return p.repo.UpsertWithdrawMetric(ctx, &model.WithdrawalMetric{
-					Signature:                    signature,
-					IxIndex:                      int32(i),
-					IxName:                       ixName,
-					IxVersion:                    0,
-					Slot:                         int32(txRaw.Slot),
-					Time:                         blockTime,
-					Vault:                        parsedAccounts.Common.Vault.String(),
-					UserTokenAWithdrawAmount:     userTokenAWithdrawAmount,
-					UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
-					TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
-					ReferralTokenBReceivedAmount: referralTokenBReceivedAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV1ClosePositionIx")
-				return err
+			return p.repo.UpsertWithdrawMetric(ctx, metric)
+		case "WithdrawB":
+			metric, err2 := p.getWithdrawBMetric(txRaw, tx.Message, ix, accounts, version, i, signature, *ixName, blockTime)
+			if err2 != nil {
+				return err2
 			}
-		case 0:
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV0DepositIx(accounts, ix.Data); parsedIx != nil {
-				return p.repo.UpsertDepositMetric(ctx, &model.DepositMetric{
-					Signature: signature,
-					IxIndex:   int32(i),
-					IxName:    ixName,
-					IxVersion: 0,
-					Slot:      int32(txRaw.Slot),
-					Time:      blockTime,
-					Vault:     parsedIx.GetVaultAccount().PublicKey.String(),
-					// todo: remove
-					//TokenAMint:          parsedIx.,
-					//Referrer:            nil,
-					TokenADepositAmount: parsedIx.Params.TokenADepositAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV0DepositIx")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV0DepositWithMetadataIx(accounts, ix.Data); parsedIx != nil {
-				return p.repo.UpsertDepositMetric(ctx, &model.DepositMetric{
-					Signature: signature,
-					IxIndex:   int32(i),
-					IxName:    ixName,
-					IxVersion: 0,
-					Slot:      int32(txRaw.Slot),
-					Time:      blockTime,
-					Vault:     parsedIx.GetVaultAccount().PublicKey.String(),
-					// todo: remove
-					//TokenAMint:          parsedIx.,
-					//Referrer:            nil,
-					TokenADepositAmount: parsedIx.Params.TokenADepositAmount,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV0DepositWithMetadataIx")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV0DripOrcaWhirlpool(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetDripOrcaWhirlpoolAccounts()
-				tokenASwapped := uint64(0)
-				tokenBReceived := uint64(0)
-				keeperTokenAReceived := uint64(0)
-				if vaultTokenAToWhirlpool := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[0].PublicKey.String() == parsedAccounts.VaultTokenAAccount.String()
-				}); vaultTokenAToWhirlpool != nil {
-					tokenASwapped = *vaultTokenAToWhirlpool.Amount
-				}
-				if vaultTokenAToKeeper := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.DripFeeTokenAAccount.String()
-				}); vaultTokenAToKeeper != nil {
-					keeperTokenAReceived = *vaultTokenAToKeeper.Amount
-				}
-				if whirlpoolToVaultTokenB := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.VaultTokenBAccount.String()
-				}); whirlpoolToVaultTokenB != nil {
-					tokenBReceived = *whirlpoolToVaultTokenB.Amount
-				}
-
-				return p.repo.UpsertDripMetric(ctx, &model.DripMetric{
-					Signature: signature,
-					IxIndex:   int32(i),
-					IxName:    ixName,
-					IxVersion: 1,
-					Slot:      int32(txRaw.Slot),
-					Time:      blockTime,
-					Vault:     parsedAccounts.Vault.String(),
-					// TODO: Remove
-					//TokenAMint:                 "",
-					//TokenBMint:                 "",
-					VaultTokenASwappedAmount:   tokenASwapped,
-					VaultTokenBReceivedAmount:  tokenBReceived,
-					KeeperTokenAReceivedAmount: keeperTokenAReceived,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV0DripOrcaWhirlpool")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV0WithdrawIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetWithdrawBAccounts()
-				userTokenBWithdrawAmount := uint64(0)
-				treasuryTokenBReceivedAmount := uint64(0)
-				if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.UserTokenBAccount.String()
-				}); vaultTokenBToUser != nil {
-					userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
-				}
-				if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.VaultTreasuryTokenBAccount.String()
-				}); vaultTokenBToTreasury != nil {
-					treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
-				}
-				return p.repo.UpsertWithdrawMetric(ctx, &model.WithdrawalMetric{
-					Signature: signature,
-					IxIndex:   int32(i),
-					IxName:    ixName,
-					IxVersion: 0,
-					Slot:      int32(txRaw.Slot),
-					Time:      blockTime,
-					Vault:     parsedAccounts.Vault.String(),
-					// TODO: Remove
-					//TokenAMint:                   nil,
-					//TokenBMint:                   "",
-					UserTokenAWithdrawAmount:     0,
-					UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
-					TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
-					ReferralTokenBReceivedAmount: 0,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV0WithdrawIx")
-				return err
-			}
-			if parsedIx, ixName, err := p.dripIxParser.MaybeParseV0ClosePositionIx(accounts, ix.Data); parsedIx != nil {
-				parsedAccounts := parsedIx.GetClosePositionAccounts()
-				userTokenAWithdrawAmount := uint64(0)
-				userTokenBWithdrawAmount := uint64(0)
-				treasuryTokenBReceivedAmount := uint64(0)
-				if vaultTokenAToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.UserTokenAAccount.String()
-				}); vaultTokenAToUser != nil {
-					userTokenAWithdrawAmount = *vaultTokenAToUser.Amount
-				}
-				if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.UserTokenBAccount.String()
-				}); vaultTokenBToUser != nil {
-					userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
-				}
-				if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, tx.Message, i, log, func(transfer token.Transfer) bool {
-					return transfer.Accounts[1].PublicKey.String() == parsedAccounts.VaultTreasuryTokenBAccount.String()
-				}); vaultTokenBToTreasury != nil {
-					treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
-				}
-				return p.repo.UpsertWithdrawMetric(ctx, &model.WithdrawalMetric{
-					Signature: signature,
-					IxIndex:   int32(i),
-					IxName:    ixName,
-					IxVersion: 0,
-					Slot:      int32(txRaw.Slot),
-					Time:      blockTime,
-					Vault:     parsedAccounts.Vault.String(),
-					// TODO: Remove
-					//TokenAMint:                   nil,
-					//TokenBMint:                   "",
-					UserTokenAWithdrawAmount:     userTokenAWithdrawAmount,
-					UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
-					TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
-					ReferralTokenBReceivedAmount: 0,
-				})
-			} else if err != nil {
-				log.WithError(err).Error("failed MaybeParseV0ClosePositionIx")
-				return err
-			}
-		default:
-			log.WithField("version", version).Warn("unknown drip program version")
+			return p.repo.UpsertWithdrawMetric(ctx, metric)
 		}
-
 	}
 	return nil
 }
 
-func (p impl) findInnerIxTokenTransfer(txRaw rpc.TransactionWithMeta, msg solana.Message, ixIndex int, log *logrus.Entry, condition func(transfer token.Transfer) bool) *token.Transfer {
+func (p impl) getWithdrawBMetric(
+	txRaw rpc.GetTransactionResult, txMsg solana.Message, ix solana.CompiledInstruction, accounts []*solana.AccountMeta,
+	version int, ixIndex int, signature string, ixName string, blockTime time.Time,
+) (*model.WithdrawalMetric, error) {
+	var (
+		vault                      string
+		vaultTreasuryTokenBAccount string
+		userTokenBAccount          string
+
+		userTokenAWithdrawAmount     uint64
+		userTokenBWithdrawAmount     uint64
+		treasuryTokenBReceivedAmount uint64
+		referralTokenBReceivedAmount uint64
+	)
+	if version == 1 {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV1WithdrawIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetWithdrawBAccounts()
+			vault = parsedAccounts.Common.Vault.String()
+			vaultTreasuryTokenBAccount = parsedAccounts.Common.VaultTreasuryTokenBAccount.String()
+			userTokenBAccount = parsedAccounts.Common.UserTokenBAccount.String()
+			if vaultTokenBToReferral := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+				return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.Referrer.String()
+			}); vaultTokenBToReferral != nil {
+				referralTokenBReceivedAmount = *vaultTokenBToReferral.Amount
+			}
+		} else if err != nil {
+			return nil, err
+		}
+	} else {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV0WithdrawIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetWithdrawBAccounts()
+			vault = parsedAccounts.Vault.String()
+			vaultTreasuryTokenBAccount = parsedAccounts.VaultTreasuryTokenBAccount.String()
+			userTokenBAccount = parsedAccounts.UserTokenBAccount.String()
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == userTokenBAccount
+	}); vaultTokenBToUser != nil {
+		userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
+	}
+	if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == vaultTreasuryTokenBAccount
+	}); vaultTokenBToTreasury != nil {
+		treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
+	}
+	metric := &model.WithdrawalMetric{
+		Signature:                    signature,
+		IxIndex:                      int32(ixIndex),
+		IxName:                       ixName,
+		IxVersion:                    int32(version),
+		Slot:                         int32(txRaw.Slot),
+		Time:                         blockTime,
+		Vault:                        vault,
+		UserTokenAWithdrawAmount:     userTokenAWithdrawAmount,
+		UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
+		TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
+		ReferralTokenBReceivedAmount: referralTokenBReceivedAmount,
+	}
+	return metric, nil
+}
+
+func (p impl) getClosePositionMetric(
+	txRaw rpc.GetTransactionResult, txMsg solana.Message, ix solana.CompiledInstruction, accounts []*solana.AccountMeta,
+	version int, ixIndex int, signature string, ixName string, blockTime time.Time,
+) (*model.WithdrawalMetric, error) {
+	var (
+		vault                      string
+		userTokenAAcount           string
+		userTokenBAccount          string
+		vaultTreasuryTokenBAccount string
+
+		userTokenAWithdrawAmount     uint64
+		userTokenBWithdrawAmount     uint64
+		treasuryTokenBReceivedAmount uint64
+		referralTokenBReceivedAmount uint64
+	)
+	if version == 1 {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV1ClosePositionIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetClosePositionAccounts()
+			vault = parsedAccounts.Common.Vault.String()
+			userTokenAAcount = parsedAccounts.UserTokenAAccount.String()
+			userTokenBAccount = parsedAccounts.Common.UserTokenBAccount.String()
+			vaultTreasuryTokenBAccount = parsedAccounts.Common.VaultTreasuryTokenBAccount.String()
+			if vaultTokenBToReferral := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+				return transfer.Accounts[1].PublicKey.String() == parsedAccounts.Common.Referrer.String()
+			}); vaultTokenBToReferral != nil {
+				referralTokenBReceivedAmount = *vaultTokenBToReferral.Amount
+			}
+		} else if err != nil {
+			return nil, err
+		}
+	} else {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV0ClosePositionIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetClosePositionAccounts()
+			vault = parsedAccounts.Vault.String()
+			userTokenAAcount = parsedAccounts.UserTokenAAccount.String()
+			userTokenBAccount = parsedAccounts.UserTokenBAccount.String()
+			vaultTreasuryTokenBAccount = parsedAccounts.VaultTreasuryTokenBAccount.String()
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	if vaultTokenAToUser := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == userTokenAAcount
+	}); vaultTokenAToUser != nil {
+		userTokenAWithdrawAmount = *vaultTokenAToUser.Amount
+	}
+	if vaultTokenBToUser := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == userTokenBAccount
+	}); vaultTokenBToUser != nil {
+		userTokenBWithdrawAmount = *vaultTokenBToUser.Amount
+	}
+	if vaultTokenBToTreasury := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == vaultTreasuryTokenBAccount
+	}); vaultTokenBToTreasury != nil {
+		treasuryTokenBReceivedAmount = *vaultTokenBToTreasury.Amount
+	}
+	metric := &model.WithdrawalMetric{
+		Signature:                    signature,
+		IxIndex:                      int32(ixIndex),
+		IxName:                       ixName,
+		IxVersion:                    int32(version),
+		Slot:                         int32(txRaw.Slot),
+		Time:                         blockTime,
+		Vault:                        vault,
+		UserTokenAWithdrawAmount:     userTokenAWithdrawAmount,
+		UserTokenBWithdrawAmount:     userTokenBWithdrawAmount,
+		TreasuryTokenBReceivedAmount: treasuryTokenBReceivedAmount,
+		ReferralTokenBReceivedAmount: referralTokenBReceivedAmount,
+	}
+	return metric, nil
+}
+
+func (p impl) getDripMetric(
+	txRaw rpc.GetTransactionResult, txMsg solana.Message, ix solana.CompiledInstruction, accounts []*solana.AccountMeta,
+	version int, ixIndex int, signature string, ixName string, blockTime time.Time,
+) (*model.DripMetric, error) {
+	var (
+		vault                string
+		vaultTokenAAccount   string
+		vaultTokenBAccount   string
+		dripFeeTokenAAccount string
+	)
+	if version == 1 {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV1DripOrcaWhirlpool(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDripOrcaWhirlpoolAccounts()
+			vault = parsedAccounts.Common.Vault.String()
+			vaultTokenAAccount = parsedAccounts.Common.VaultTokenAAccount.String()
+			vaultTokenBAccount = parsedAccounts.Common.VaultTokenBAccount.String()
+			dripFeeTokenAAccount = parsedAccounts.Common.DripFeeTokenAAccount.String()
+		} else if err != nil {
+			return nil, err
+		}
+	} else {
+		if parsedIx, _, err := p.dripIxParser.MaybeParseV0DripOrcaWhirlpool(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDripOrcaWhirlpoolAccounts()
+			vault = parsedAccounts.Vault.String()
+			vaultTokenAAccount = parsedAccounts.VaultTokenAAccount.String()
+			vaultTokenBAccount = parsedAccounts.VaultTokenBAccount.String()
+			dripFeeTokenAAccount = parsedAccounts.DripFeeTokenAAccount.String()
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	tokenASwapped := uint64(0)
+	tokenBReceived := uint64(0)
+	keeperTokenAReceived := uint64(0)
+	if vaultTokenAToWhirlpool := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[0].PublicKey.String() == vaultTokenAAccount &&
+			transfer.Accounts[1].PublicKey.String() != dripFeeTokenAAccount
+	}); vaultTokenAToWhirlpool != nil {
+		tokenASwapped = *vaultTokenAToWhirlpool.Amount
+	}
+	if vaultTokenAToKeeper := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == dripFeeTokenAAccount
+	}); vaultTokenAToKeeper != nil {
+		keeperTokenAReceived = *vaultTokenAToKeeper.Amount
+	}
+	if whirlpoolToVaultTokenB := p.findInnerIxTokenTransfer(txRaw, txMsg, ixIndex, func(transfer token.Transfer) bool {
+		return transfer.Accounts[1].PublicKey.String() == vaultTokenBAccount
+	}); whirlpoolToVaultTokenB != nil {
+		tokenBReceived = *whirlpoolToVaultTokenB.Amount
+	}
+	metric := &model.DripMetric{
+		Signature:                  signature,
+		IxIndex:                    int32(ixIndex),
+		IxName:                     ixName,
+		IxVersion:                  int32(version),
+		Slot:                       int32(txRaw.Slot),
+		Time:                       blockTime,
+		Vault:                      vault,
+		VaultTokenASwappedAmount:   tokenASwapped,
+		VaultTokenBReceivedAmount:  tokenBReceived,
+		KeeperTokenAReceivedAmount: keeperTokenAReceived,
+		TokenAUsdPriceDay:          nil,
+		TokenBUsdPriceDay:          nil,
+	}
+	return metric, nil
+}
+
+func (p impl) getDepositWithMetadataMetric(
+	txRaw rpc.GetTransactionResult, ix solana.CompiledInstruction, accounts []*solana.AccountMeta,
+	version int, ixIndex int, signature string, ixName string, blockTime time.Time,
+) (*model.DepositMetric, error) {
+	var (
+		vault               string
+		referrer            *string
+		tokenADepositAmount uint64
+	)
+	if version == 1 {
+		if parsedIx, _, err := p.dripIxParser.ParseV1DepositWithMetadataIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDepositWithMetadataAccounts()
+			vault = parsedAccounts.Common.Vault.String()
+			referrer = pointer.ToString(parsedAccounts.Common.Referrer.String())
+			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+		} else if err != nil {
+			return nil, err
+		}
+	} else {
+		if parsedIx, _, err := p.dripIxParser.ParseV0DepositWithMetadataIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDepositWithMetadataAccounts()
+			vault = parsedAccounts.Vault.String()
+			referrer = nil
+			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	metric := &model.DepositMetric{
+		Signature:           signature,
+		IxIndex:             int32(ixIndex),
+		IxName:              ixName,
+		IxVersion:           int32(version),
+		Slot:                int32(txRaw.Slot),
+		Time:                blockTime,
+		Vault:               vault,
+		Referrer:            referrer,
+		TokenADepositAmount: tokenADepositAmount,
+		TokenAUsdPriceDay:   nil,
+	}
+	return metric, nil
+}
+
+func (p impl) getDepositMetric(
+	txRaw rpc.GetTransactionResult, ix solana.CompiledInstruction, accounts []*solana.AccountMeta,
+	version int, ixIndex int, signature string, ixName string, blockTime time.Time,
+) (*model.DepositMetric, error) {
+	var (
+		vault               string
+		referrer            *string
+		tokenADepositAmount uint64
+	)
+
+	if version == 1 {
+		if parsedIx, _, err := p.dripIxParser.ParseV1DepositIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDepositAccounts()
+			vault = parsedAccounts.Common.Vault.String()
+			referrer = pointer.ToString(parsedAccounts.Common.Referrer.String())
+			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+		} else if err != nil {
+			return nil, err
+		}
+	} else {
+		if parsedIx, _, err := p.dripIxParser.ParseV0DepositIx(accounts, ix.Data); parsedIx != nil {
+			parsedAccounts := parsedIx.GetDepositAccounts()
+			vault = parsedAccounts.Vault.String()
+			referrer = nil
+			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	metric := &model.DepositMetric{
+		Signature:           signature,
+		IxIndex:             int32(ixIndex),
+		IxName:              ixName,
+		IxVersion:           int32(version),
+		Slot:                int32(txRaw.Slot),
+		Time:                blockTime,
+		Vault:               vault,
+		Referrer:            referrer,
+		TokenADepositAmount: tokenADepositAmount,
+		TokenAUsdPriceDay:   nil,
+	}
+	return metric, nil
+}
+
+func (p impl) findInnerIxTokenTransfer(txRaw rpc.GetTransactionResult, msg solana.Message, ixIndex int, condition func(transfer token.Transfer) bool) *token.Transfer {
 	innerIXS := lo.Filter(txRaw.Meta.InnerInstructions, func(innerIx rpc.InnerInstruction, idx int) bool {
 		return innerIx.Index == uint16(ixIndex)
 	})
@@ -418,11 +447,10 @@ func (p impl) findInnerIxTokenTransfer(txRaw rpc.TransactionWithMeta, msg solana
 	tokenTransfers := lo.FilterMap(instructions, func(ix solana.CompiledInstruction, idx int) (token.Transfer, bool) {
 		accounts, err := ix.ResolveInstructionAccounts(&msg)
 		if err != nil {
-			log.WithError(err).Error("failed to  innerInnerIx.ResolveInstructionAccounts(&tx.Message)")
+			logrus.WithError(err).Error("failed to ix.ResolveInstructionAccounts(&msg)")
 			return token.Transfer{}, false
 		}
-		if transfer, _, err := p.dripIxParser.MaybeParseTokenTransfer(accounts, ix.Data); err != nil {
-			log.WithError(err).Error("failed to p.dripIxParser.MaybeParseTokenTransfer(accounts, innerInnerIx.Data);")
+		if transfer, _, err := p.dripIxParser.ParseTokenTransfer(accounts, ix.Data); err != nil {
 			return token.Transfer{}, false
 		} else {
 			return *transfer, condition(*transfer)
@@ -431,7 +459,7 @@ func (p impl) findInnerIxTokenTransfer(txRaw rpc.TransactionWithMeta, msg solana
 	if len(tokenTransfers) == 1 {
 		return &tokenTransfers[0]
 	}
-	log.WithField("len(tokenTransfers)", len(tokenTransfers)).Warn("expected 1 token transfer, but got 0 or more then 1")
+	logrus.WithField("len(tokenTransfers)", len(tokenTransfers)).Warn("expected 1 token transfer, but got 0 or more then 1")
 	return nil
 }
 

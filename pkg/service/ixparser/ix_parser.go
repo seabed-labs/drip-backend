@@ -1,6 +1,9 @@
 package ixparser
 
 import (
+	"fmt"
+
+	"github.com/AlekSi/pointer"
 	dripV0 "github.com/dcaf-labs/solana-drip-go/pkg/v0"
 	dripV1 "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/gagliardetto/solana-go"
@@ -8,57 +11,76 @@ import (
 )
 
 type IxParser interface {
-	MaybeParseV0DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.Deposit, string, error)
-	MaybeParseV0DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.DepositWithMetadata, string, error)
+	GetIxName(version int, accounts []*solana.AccountMeta, data []byte) *string
+
+	ParseV0DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.Deposit, string, error)
+	ParseV0DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.DepositWithMetadata, string, error)
 	MaybeParseV0DripOrcaWhirlpool(accounts []*solana.AccountMeta, data []byte) (*dripV0.DripOrcaWhirlpool, string, error)
 	MaybeParseV0ClosePositionIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.ClosePosition, string, error)
 	MaybeParseV0WithdrawIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.WithdrawB, string, error)
-	MaybeParseV1DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.Deposit, string, error)
-	MaybeParseV1DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.DepositWithMetadata, string, error)
+
+	ParseV1DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.Deposit, string, error)
+	ParseV1DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.DepositWithMetadata, string, error)
 	MaybeParseV1DripOrcaWhirlpool(accounts []*solana.AccountMeta, data []byte) (*dripV1.DripOrcaWhirlpool, string, error)
 	MaybeParseV1ClosePositionIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.ClosePosition, string, error)
 	MaybeParseV1WithdrawIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.WithdrawB, string, error)
-	MaybeParseTokenTransfer(accounts []*solana.AccountMeta, data []byte) (*token.Transfer, string, error)
+	ParseTokenTransfer(accounts []*solana.AccountMeta, data []byte) (*token.Transfer, string, error)
 }
 
 type ixParser struct {
+}
+
+func (p ixParser) GetIxName(version int, accounts []*solana.AccountMeta, data []byte) *string {
+	if version == 1 {
+		decodedIx, err := dripV1.DecodeInstruction(accounts, data)
+		if err != nil {
+			return nil
+		}
+		return pointer.ToString(dripV0.InstructionIDToName(decodedIx.TypeID))
+	} else {
+		decodedIx, err := dripV0.DecodeInstruction(accounts, data)
+		if err != nil {
+			return nil
+		}
+		return pointer.ToString(dripV0.InstructionIDToName(decodedIx.TypeID))
+	}
 }
 
 func NewIxParser() IxParser {
 	return ixParser{}
 }
 
-func (p ixParser) MaybeParseTokenTransfer(accounts []*solana.AccountMeta, data []byte) (*token.Transfer, string, error) {
+func (p ixParser) ParseTokenTransfer(accounts []*solana.AccountMeta, data []byte) (*token.Transfer, string, error) {
 	decodedIx, err := token.DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, "", err
 	}
 	if ixName := token.InstructionIDToName(decodedIx.TypeID.Uint8()); ixName != "Transfer" {
-		return nil, "", nil
+		return nil, "", fmt.Errorf("not token transfer ix")
 	} else {
 		return decodedIx.Impl.(*token.Transfer), ixName, nil
 	}
 }
 
-func (p ixParser) MaybeParseV0DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.Deposit, string, error) {
+func (p ixParser) ParseV0DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.Deposit, string, error) {
 	decodedIx, err := dripV0.DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, "", err
 	}
 	if ixName := dripV0.InstructionIDToName(decodedIx.TypeID); ixName != "Deposit" {
-		return nil, "", nil
+		return nil, "", fmt.Errorf("not a deposit ix")
 	} else {
 		return decodedIx.Impl.(*dripV0.Deposit), ixName, nil
 	}
 }
 
-func (p ixParser) MaybeParseV0DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.DepositWithMetadata, string, error) {
+func (p ixParser) ParseV0DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV0.DepositWithMetadata, string, error) {
 	decodedIx, err := dripV0.DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, "", err
 	}
 	if ixName := dripV0.InstructionIDToName(decodedIx.TypeID); ixName != "DepositWithMetadata" {
-		return nil, "", nil
+		return nil, "", fmt.Errorf("not depositWithMetadata ix")
 	} else {
 		return decodedIx.Impl.(*dripV0.DepositWithMetadata), ixName, nil
 
@@ -102,25 +124,25 @@ func (p ixParser) MaybeParseV0WithdrawIx(accounts []*solana.AccountMeta, data []
 	}
 }
 
-func (p ixParser) MaybeParseV1DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.Deposit, string, error) {
+func (p ixParser) ParseV1DepositIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.Deposit, string, error) {
 	decodedIx, err := dripV1.DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, "", err
 	}
 	if ixName := dripV1.InstructionIDToName(decodedIx.TypeID); ixName != "Deposit" {
-		return nil, "", nil
+		return nil, "", fmt.Errorf("not a deposit ix")
 	} else {
 		return decodedIx.Impl.(*dripV1.Deposit), ixName, nil
 	}
 }
 
-func (p ixParser) MaybeParseV1DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.DepositWithMetadata, string, error) {
+func (p ixParser) ParseV1DepositWithMetadataIx(accounts []*solana.AccountMeta, data []byte) (*dripV1.DepositWithMetadata, string, error) {
 	decodedIx, err := dripV1.DecodeInstruction(accounts, data)
 	if err != nil {
 		return nil, "", err
 	}
 	if ixName := dripV1.InstructionIDToName(decodedIx.TypeID); ixName != "DepositWithMetadata" {
-		return nil, "", nil
+		return nil, "", fmt.Errorf("not depositWithMetadata ix")
 	} else {
 		return decodedIx.Impl.(*dripV1.DepositWithMetadata), ixName, nil
 
