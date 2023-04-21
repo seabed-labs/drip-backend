@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+	transactioncheckpointrepository "github.com/dcaf-labs/drip/pkg/service/repository/transactioncheckpoint"
+
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 
 	"github.com/dcaf-labs/drip/pkg/producer"
@@ -52,9 +56,10 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
-			repository.NewTransactionProcessingCheckpointRepository,
-			repository.NewTransactionUpdateQueue,
-			repository.NewAccountUpdateQueue,
+			transactioncheckpointrepository.NewTransactionProcessingCheckpointRepository,
+			analyticsrepository.NewAnalyticsRepository,
+			queuerepository.NewTransactionUpdateQueue,
+			queuerepository.NewAccountUpdateQueue,
 			api2.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,

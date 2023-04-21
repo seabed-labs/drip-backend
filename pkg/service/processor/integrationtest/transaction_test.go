@@ -5,11 +5,13 @@ import (
 	"testing"
 	"time"
 
+	repository2 "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+	repository3 "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+
 	"github.com/AlekSi/pointer"
 	"github.com/dcaf-labs/drip/pkg/integrationtest"
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
-	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/unittest"
 	"github.com/golang/mock/gomock"
@@ -30,9 +32,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "5otEnwWY8z5MJhrxaXRgGeN9jyM3nAcC8gGJQY1asE3wfGB3QbjPQ1DUFXzEtPuLcdWpdBuw3XZuL177jRiwMBiv"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -66,9 +68,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "5uECxzjML1a5sXuMPqwcpP8BMAKCXCpUVwFydPHWBnaW9V72ockWQKevfSQBaqiSxtGKtmstkVaxmo5Jcfnp9Lcb"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -104,9 +106,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "3QCyiPWTdbeEi9VKMzRrYL2Rw8vdAHXcqFjKcbYx11yv55mttRmLwPFNepZEZ9Qd1UHjfnUCSmffnsdSTL3axXmh"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -143,9 +145,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "shVfUMeDU38tQxdWvrYwFrBCjDve5889JdEAhgmJB3bXejhgx8VpRwtXaYhG4FhZXKHrT7pz2SZk3UvpkaHmfE6"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -182,9 +184,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "2tf1Mmg2bir7BHd3zbxt1R3C44xWezxqmho9XHVQxPPPvt62WMksFpm4b6WjzNYJLaSwjLs7vcPNFMwE71z2TQ1B"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -218,9 +220,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "3ySFiaC3VPnPUL8ywCFgMKGG7XMWCLJaz3WFdKGukkBEMcouAv9jw3Xi7eNssLYsYxg4rW3indsVyjupjUWSKYQr"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -256,9 +258,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "4TjArAvd9ESBubQV3Z1bDXahX2uu1J8a4wYTFhomB1i8Xxskzer8KpsXaJJ238edDTyKp1z8LabtxTfHeiWE2vyH"
 				ctx, cancel := context.WithCancel(context.Background())
@@ -295,9 +297,9 @@ func Test_ProcessTransaction(t *testing.T) {
 			},
 			func(
 				processor processor.Processor,
-				repo repository.Repository,
 				client solanaClient.Solana,
-				txQueue repository.TransactionUpdateQueue,
+				repo repository2.AnalyticsRepository,
+				txQueue repository3.TransactionUpdateQueue,
 			) {
 				sig := "5AA9RecspxtdsXVPPcj43ZnkuGQCwFBF3iDz76hKPfNvFXy5sJPGtFrFhco5f2oo4bb5WAVnutuk8JcnNB3hdNHG"
 				ctx, cancel := context.WithCancel(context.Background())

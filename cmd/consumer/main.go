@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
@@ -46,8 +48,8 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
-			repository.NewAccountUpdateQueue,
-			repository.NewTransactionUpdateQueue,
+			queuerepository.NewAccountUpdateQueue,
+			queuerepository.NewTransactionUpdateQueue,
 			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,

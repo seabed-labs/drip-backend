@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -39,7 +41,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		assert.NoError(t, h.PostMint(c))
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
@@ -59,7 +62,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		m.
 			EXPECT().
@@ -85,7 +89,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		mintDataBytes, err := rpc.DataBytesOrJSONFromBase64(base64.StdEncoding.EncodeToString([]byte{1, 0, 0, 0, 5, 234, 156}))
 		assert.NoError(t, err)
@@ -121,7 +126,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		mintAuth := solana.NewWallet().PublicKey()
 		mintData, err := encodeMintToBase64(token.Mint{
@@ -172,7 +178,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		mintAuth := solana.MustPublicKeyFromBase58("J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")
 		mintData, err := encodeMintToBase64(token.Mint{
@@ -229,7 +236,8 @@ func TestHandler_PostMint(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, strings.NewReader(string(reqBody)))
 
 		m := solanaClient.NewMockSolana(ctrl)
-		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl))
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, m, base.NewMockBase(ctrl), repository.NewMockRepository(ctrl), m2)
 
 		mintAuth := solana.MustPublicKeyFromBase58("J15X2DWTRPVTJsofDrf5se4zkNv1sD1eJPgEHwvuNJer")
 		mintData, err := encodeMintToBase64(token.Mint{

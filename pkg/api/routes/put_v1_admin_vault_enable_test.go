@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+
 	"gorm.io/gorm"
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
@@ -30,7 +32,8 @@ func TestHandler_PutV1AdminVaultPubkeyPathEnable(t *testing.T) {
 		vaultPubkey := solana2.NewWallet().PublicKey().String()
 
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		m.
 			EXPECT().
@@ -69,7 +72,8 @@ func TestHandler_PutV1AdminVaultPubkeyPathEnable(t *testing.T) {
 		}
 
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		m.
 			EXPECT().

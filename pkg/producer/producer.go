@@ -8,11 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+	transactioncheckpointrepository "github.com/dcaf-labs/drip/pkg/service/repository/transactioncheckpoint"
+
 	"github.com/samber/lo"
 
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
-	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
@@ -30,9 +32,9 @@ const backfillEvery = time.Hour * 12
 
 type DripProgramProducer struct {
 	client                     solanaClient.Solana
-	txProcessingCheckpointRepo repository.TransactionProcessingCheckpointRepository
-	accountUpdateQueue         repository.AccountUpdateQueue
-	transactionUpdateQueue     repository.TransactionUpdateQueue
+	txProcessingCheckpointRepo transactioncheckpointrepository.TransactionProcessingCheckpointRepository
+	accountUpdateQueue         queuerepository.AccountUpdateQueue
+	transactionUpdateQueue     queuerepository.TransactionUpdateQueue
 	cancel                     context.CancelFunc
 	environment                config.Environment
 	txBackfillStartSlot        uint64
@@ -41,9 +43,9 @@ type DripProgramProducer struct {
 func Server(
 	lifecycle fx.Lifecycle,
 	client solanaClient.Solana,
-	txProcessingCheckpointRepo repository.TransactionProcessingCheckpointRepository,
-	accountUpdateQueue repository.AccountUpdateQueue,
-	transactionUpdateQueue repository.TransactionUpdateQueue,
+	txProcessingCheckpointRepo transactioncheckpointrepository.TransactionProcessingCheckpointRepository,
+	accountUpdateQueue queuerepository.AccountUpdateQueue,
+	transactionUpdateQueue queuerepository.TransactionUpdateQueue,
 	appConfig config.AppConfig,
 ) error {
 	ctx, cancel := context.WithCancel(context.Background())

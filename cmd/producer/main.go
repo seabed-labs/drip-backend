@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+	transactioncheckpointrepository "github.com/dcaf-labs/drip/pkg/service/repository/transactioncheckpoint"
+
 	"github.com/dcaf-labs/drip/pkg/producer"
 
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
@@ -14,7 +17,6 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/config"
-	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
 	log "github.com/sirupsen/logrus"
@@ -41,9 +43,9 @@ func getDependencies() []fx.Option {
 			database.NewDatabase,
 			database.NewGORMDatabase,
 			query.Use,
-			repository.NewTransactionProcessingCheckpointRepository,
-			repository.NewAccountUpdateQueue,
-			repository.NewTransactionUpdateQueue,
+			transactioncheckpointrepository.NewTransactionProcessingCheckpointRepository,
+			queuerepository.NewAccountUpdateQueue,
+			queuerepository.NewTransactionUpdateQueue,
 			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			tokenregistry.NewTokenRegistry,

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/repository"
+
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
 	"github.com/jmoiron/sqlx"
@@ -36,7 +38,7 @@ func (d transactionProcessingCheckpointImpl) GetLatestTransactionCheckpoint(ctx 
 		WithContext(ctx).
 		Order(d.repo.TransactionProcessingCheckpoint.Slot.Desc()).
 		First()
-	if err != nil && err.Error() == ErrRecordNotFound {
+	if err != nil && err.Error() == repository.ErrRecordNotFound {
 		return nil
 	} else if err != nil {
 		logrus.WithError(err).Error("failed to get checkpoint")
