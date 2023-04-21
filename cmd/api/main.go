@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	repository2 "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
@@ -42,6 +44,7 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
+			repository2.NewAnalyticsRepository,
 			api2.GetDefaultClientProvider,
 			solana.NewSolanaClient,
 			base.NewBase,

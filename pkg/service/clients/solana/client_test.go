@@ -6,12 +6,10 @@ import (
 	"testing"
 	"time"
 
-	api "github.com/dcaf-labs/solana-go-retryable-http-client"
-
 	"github.com/dcaf-labs/drip/pkg/unittest"
-	"github.com/golang/mock/gomock"
-
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
+	"github.com/golang/mock/gomock"
 	"github.com/test-go/testify/assert"
 )
 

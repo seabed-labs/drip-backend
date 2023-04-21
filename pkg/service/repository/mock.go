@@ -205,51 +205,6 @@ func (mr *MockRepositoryMockRecorder) GetAllSupportedTokens(ctx interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSupportedTokens", reflect.TypeOf((*MockRepository)(nil).GetAllSupportedTokens), ctx)
 }
 
-// GetCurrentTVL mocks base method.
-func (m *MockRepository) GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentTVL", ctx)
-	ret0, _ := ret[0].(*model.CurrentTVL)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCurrentTVL indicates an expected call of GetCurrentTVL.
-func (mr *MockRepositoryMockRecorder) GetCurrentTVL(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentTVL", reflect.TypeOf((*MockRepository)(nil).GetCurrentTVL), ctx)
-}
-
-// GetDepositMetricBySignature mocks base method.
-func (m *MockRepository) GetDepositMetricBySignature(ctx context.Context, signature string) (*model.DepositMetric, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDepositMetricBySignature", ctx, signature)
-	ret0, _ := ret[0].(*model.DepositMetric)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDepositMetricBySignature indicates an expected call of GetDepositMetricBySignature.
-func (mr *MockRepositoryMockRecorder) GetDepositMetricBySignature(ctx, signature interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDepositMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetDepositMetricBySignature), ctx, signature)
-}
-
-// GetDripMetricBySignature mocks base method.
-func (m *MockRepository) GetDripMetricBySignature(ctx context.Context, signature string) (*model.DripMetric, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDripMetricBySignature", ctx, signature)
-	ret0, _ := ret[0].(*model.DripMetric)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDripMetricBySignature indicates an expected call of GetDripMetricBySignature.
-func (mr *MockRepositoryMockRecorder) GetDripMetricBySignature(ctx, signature interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDripMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetDripMetricBySignature), ctx, signature)
-}
-
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
@@ -603,21 +558,6 @@ func (m *MockRepository) GetVaultsWithFilter(arg0 context.Context, arg1, arg2, a
 func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1, arg2, arg3)
-}
-
-// GetWithdrawalMetricBySignature mocks base method.
-func (m *MockRepository) GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWithdrawalMetricBySignature", ctx, signature)
-	ret0, _ := ret[0].(*model.WithdrawalMetric)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetWithdrawalMetricBySignature indicates an expected call of GetWithdrawalMetricBySignature.
-func (mr *MockRepositoryMockRecorder) GetWithdrawalMetricBySignature(ctx, signature interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithdrawalMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetWithdrawalMetricBySignature), ctx, signature)
 }
 
 // InsertTokenPairs mocks base method.

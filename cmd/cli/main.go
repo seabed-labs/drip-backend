@@ -3,10 +3,6 @@ package main
 import (
 	"context"
 
-	"github.com/dcaf-labs/drip/pkg/service/ixparser"
-
-	api "github.com/dcaf-labs/solana-go-retryable-http-client"
-
 	"github.com/dcaf-labs/drip/internal/cli"
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
@@ -14,10 +10,13 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/config"
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 	"github.com/dcaf-labs/drip/pkg/service/processor"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/database"
 	"github.com/dcaf-labs/drip/pkg/service/repository/query"
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -39,8 +38,8 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
-			repository.NewAccountUpdateQueue,
-			repository.NewTransactionUpdateQueue,
+			queuerepository.NewAccountUpdateQueue,
+			queuerepository.NewTransactionUpdateQueue,
 
 			api.GetDefaultClientProvider,
 			solana.NewSolanaClient,

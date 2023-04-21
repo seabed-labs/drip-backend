@@ -10,6 +10,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
@@ -35,8 +36,8 @@ type Processor interface {
 
 type impl struct {
 	repo                   repository.Repository
-	accountUpdateQueue     repository.AccountUpdateQueue
-	transactionUpdateQueue repository.TransactionUpdateQueue
+	accountUpdateQueue     queuerepository.AccountUpdateQueue
+	transactionUpdateQueue queuerepository.TransactionUpdateQueue
 	tokenRegistryClient    tokenregistry.TokenRegistry
 	orcaWhirlpoolClient    orcawhirlpool.OrcaWhirlpoolClient
 	solanaClient           solana.Solana
@@ -47,8 +48,8 @@ type impl struct {
 
 func NewProcessor(
 	repo repository.Repository,
-	accountUpdateQueue repository.AccountUpdateQueue,
-	transactionUpdateQueue repository.TransactionUpdateQueue,
+	accountUpdateQueue queuerepository.AccountUpdateQueue,
+	transactionUpdateQueue queuerepository.TransactionUpdateQueue,
 	client solana.Solana,
 	tokenRegistryClient tokenregistry.TokenRegistry,
 	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient,

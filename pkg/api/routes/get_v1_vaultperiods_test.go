@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -46,7 +48,8 @@ func TestHandler_GetV1Vaultperiods(t *testing.T) {
 	t.Run("should return internal server error if `GetVaultPeriods` returns an error", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		params := apispec.GetV1VaultperiodsParams{}
 
@@ -67,7 +70,8 @@ func TestHandler_GetV1Vaultperiods(t *testing.T) {
 	t.Run("should call GetV1Vaultperiods with the correct parameters", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		limit := apispec.LimitQueryParam(5)
 		offset := apispec.OffsetQueryParam(10)
@@ -98,7 +102,8 @@ func TestHandler_GetV1Vaultperiods(t *testing.T) {
 	t.Run("should return 2 vaultPeriods", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		params := apispec.GetV1VaultperiodsParams{}
 

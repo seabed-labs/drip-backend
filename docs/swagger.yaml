@@ -501,7 +501,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/errorResponse"
 
-  /v1/analytics/tvl:
+  /v1/analytics/overview:
     get:
       summary: Get current TVL across all vaults.
       description: Get TVL across all Drip Vaults.
@@ -511,7 +511,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/currentTVLResponse"
+                $ref: "#/components/schemas/analyticsOverviewResponse"
         "400":
           description: Bad Request
           content:
@@ -753,13 +753,26 @@ components:
         message:
           type: string
 
-    currentTVLResponse:
+    analyticsOverviewResponse:
       required:
-        - totalUsdValue
+        - usdTvl
+        - lifeTimeUsdDeposit
+        - lifeTimeUsdWithdrawal
+        - lifeTimeUsdVolume
       properties:
-        totalUsdValue:
+        usdTvl:
           type: string
           description: A float 64 string for the current tvl in USD.
+        lifeTimeUsdDeposit:
+          type: string
+          description: A float 64 string for life time deposits (normalized to the current usd price of assets).
+        lifeTimeUsdWithdrawal:
+          type: string
+          description: A float 64 string for life time withdrawals (normalized to the current usd price of assets).
+        lifeTimeUsdVolume:
+          type: string
+          description: A float 64 string for life time volume (normalized to the current usd price of assets).
+
 
     #    DATA MODELS
 

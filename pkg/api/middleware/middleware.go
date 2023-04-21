@@ -10,8 +10,6 @@ import (
 
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 
-	"github.com/dcaf-labs/drip/pkg/service/repository"
-
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"
@@ -21,14 +19,12 @@ import (
 
 type Handler struct {
 	googleClientID        string
-	repo                  repository.Repository
 	rateLimiter           *limiter.Limiter
 	shouldByPassAdminAuth bool
 }
 
 func NewHandler(
 	appConfig config.AppConfig,
-	repo repository.Repository,
 ) *Handler {
 	// 20 requests / second
 	rate, err := limiter.NewRateFromFormatted("20-S")
@@ -40,7 +36,6 @@ func NewHandler(
 
 	return &Handler{
 		googleClientID:        appConfig.GetGoogleClientID(),
-		repo:                  repo,
 		rateLimiter:           rateLimiter,
 		shouldByPassAdminAuth: appConfig.GetShouldByPassAdminAuth(),
 	}

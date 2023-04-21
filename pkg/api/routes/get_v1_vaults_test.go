@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+
 	"github.com/dcaf-labs/drip/pkg/api/apispec"
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
@@ -49,7 +51,8 @@ func TestHandler_GetVaults(t *testing.T) {
 	t.Run("should return internal server error if `GetVaultsWithFilter` returns an error", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		params := apispec.GetV1VaultsParams{
 			TokenA:      nil,
@@ -72,7 +75,8 @@ func TestHandler_GetVaults(t *testing.T) {
 	t.Run("should return vaults without filter", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 
 		m.
 			EXPECT().

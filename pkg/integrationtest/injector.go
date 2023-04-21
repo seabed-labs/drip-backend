@@ -4,6 +4,9 @@ import (
 	"context"
 	"os"
 
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 
 	"github.com/dcaf-labs/drip/pkg/unittest"
@@ -65,8 +68,9 @@ func TestWithInjectedDependencies(
 		database.NewGORMDatabase,
 		query.Use,
 		repository.NewRepository,
-		repository.NewAccountUpdateQueue,
-		repository.NewTransactionUpdateQueue,
+		analyticsrepository.NewAnalyticsRepository,
+		queuerepository.NewAccountUpdateQueue,
+		queuerepository.NewTransactionUpdateQueue,
 		// API Clients
 		httpClientProvider,
 		solana.NewSolanaClient,

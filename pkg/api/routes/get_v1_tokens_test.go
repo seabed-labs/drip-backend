@@ -8,6 +8,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/base"
 	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
+	analyticsrepository "github.com/dcaf-labs/drip/pkg/service/repository/analytics"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/dcaf-labs/drip/pkg/unittest"
@@ -40,7 +41,8 @@ func TestHandler_GetTokens(t *testing.T) {
 	t.Run("should return tokens with expected fields", func(t *testing.T) {
 		c, rec := unittest.GetTestRequestRecorder(e, nil)
 		m := repository.NewMockRepository(ctrl)
-		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m)
+		m2 := analyticsrepository.NewMockAnalyticsRepository(ctrl)
+		h := NewHandler(mockConfig, solana.NewMockSolana(ctrl), base.NewMockBase(ctrl), m, m2)
 		m.
 			EXPECT().
 			GetAllSupportedTokens(gomock.Any()).
