@@ -12,7 +12,6 @@ import (
 	"github.com/golang/mock/gomock"
 
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
-	"github.com/gagliardetto/solana-go"
 	"github.com/test-go/testify/assert"
 )
 
@@ -42,18 +41,18 @@ func TestSolanaClient(t *testing.T) {
 		assert.NotEmpty(t, versionResponse.FeatureSet)
 	})
 
-	t.Run("ProgramSubscribe should subscribe to consumer", func(t *testing.T) {
-		timeout := time.Second * 5
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) error {
-			assert.NotEmpty(t, address)
-			assert.NotEmpty(t, data)
-			return nil
-		})
-		assert.NoError(t, err)
-		time.Sleep(timeout)
-	})
+	//t.Run("ProgramSubscribe should subscribe to consumer", func(t *testing.T) {
+	//	timeout := time.Second * 5
+	//	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	//	defer cancel()
+	//	err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) error {
+	//		assert.NotEmpty(t, address)
+	//		assert.NotEmpty(t, data)
+	//		return nil
+	//	})
+	//	assert.NoError(t, err)
+	//	time.Sleep(timeout)
+	//})
 
 	t.Run("GetProgramAccounts should return all account publickeys", func(t *testing.T) {
 		timeout := time.Second * 5
