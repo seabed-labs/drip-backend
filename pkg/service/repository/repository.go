@@ -23,6 +23,9 @@ type Repository interface {
 	UpsertTokenSwaps(context.Context, ...*model.TokenSwap) error
 	UpsertOrcaWhirlpools(context.Context, ...*model.OrcaWhirlpool) error
 	UpsertOrcaWhirlpoolDeltaBQuotes(ctx context.Context, quotes ...*model.OrcaWhirlpoolDeltaBQuote) error
+	UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error
+	UpsertDripMetric(ctx context.Context, metrics ...*model.DripMetric) error
+	UpsertWithdrawMetric(ctx context.Context, metrics ...*model.WithdrawalMetric) error
 
 	// These will only returned "enabled=true" vaults
 	GetVaultByAddress(context.Context, string) (*model.Vault, error)
@@ -70,28 +73,14 @@ type Repository interface {
 	GetActiveWallets(ctx context.Context, params GetActiveWalletParams) ([]ActiveWallet, error)
 
 	GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error)
-}
-
-type AccountUpdateQueue interface {
-	AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	ReQueue(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	Depth(ctx context.Context) (int64, error)
-	Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error)
+	GetDepositMetricBySignature(ctx context.Context, signature string) (*model.DepositMetric, error)
+	GetDripMetricBySignature(ctx context.Context, signature string) (*model.DripMetric, error)
+	GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error)
 }
 
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
-}
-
-func NewAccountUpdateQueue(
-	repo *query.Query,
-	db *sqlx.DB,
-) AccountUpdateQueue {
-	return repositoryImpl{
-		repo: repo,
-		db:   db,
-	}
 }
 
 func NewRepository(

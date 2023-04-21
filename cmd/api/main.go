@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/pkg/api"
@@ -23,12 +25,12 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	fxApp := fx.New(getDependencies()...)
 	if err := fxApp.Start(context.Background()); err != nil {
-		log.WithError(err).Fatalf("failed to start drip event processor")
+		log.WithError(err).Fatalf("failed to start drip consumer processor")
 	}
-	log.Info("starting drip event processor")
+	log.Info("starting drip consumer processor")
 	sig := <-fxApp.Done()
 	log.WithFields(log.Fields{"signal": sig}).
-		Infof("received exit signal, stoping event processor")
+		Infof("received exit signal, stoping consumer processor")
 }
 
 func getDependencies() []fx.Option {
@@ -45,6 +47,7 @@ func getDependencies() []fx.Option {
 			base.NewBase,
 			middleware.NewHandler,
 			controller.NewHandler,
+			ixparser.NewIxParser,
 		),
 		fx.Invoke(
 			api.StartServer,

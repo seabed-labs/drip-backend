@@ -104,3 +104,30 @@ func (d repositoryImpl) UpsertVaultPeriods(ctx context.Context, vaultPeriods ...
 func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model.Position) error {
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
 }
+
+func (d repositoryImpl) UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error {
+	return d.repo.DepositMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
+}
+
+func (d repositoryImpl) UpsertDripMetric(ctx context.Context, metrics ...*model.DripMetric) error {
+	return d.repo.DripMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
+}
+
+func (d repositoryImpl) UpsertWithdrawMetric(ctx context.Context, metrics ...*model.WithdrawalMetric) error {
+	return d.repo.WithdrawalMetric.
+		WithContext(ctx).
+		Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).
+		Create(metrics...)
+}

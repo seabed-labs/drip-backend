@@ -12,7 +12,6 @@ import (
 	"github.com/golang/mock/gomock"
 
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
-	"github.com/gagliardetto/solana-go"
 	"github.com/test-go/testify/assert"
 )
 
@@ -42,41 +41,18 @@ func TestSolanaClient(t *testing.T) {
 		assert.NotEmpty(t, versionResponse.FeatureSet)
 	})
 
-	//t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
-	//	destWallet := solana.NewWallet()
-	//	txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
+	//t.Run("ProgramSubscribe should subscribe to consumer", func(t *testing.T) {
+	//	timeout := time.Second * 5
+	//	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	//	defer cancel()
+	//	err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) error {
+	//		assert.NotEmpty(t, address)
+	//		assert.NotEmpty(t, data)
+	//		return nil
+	//	})
 	//	assert.NoError(t, err)
-	//	assert.NotEmpty(t, txHash)
+	//	time.Sleep(timeout)
 	//})
-
-	//t.Run("mintToWallet should mint when wallet has a token account", func(t *testing.T) {
-	//	destWallet := solana.NewWallet()
-	//	_, err = client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-	//	assert.NoError(t, err)
-	//	txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-	//	assert.NoError(t, err)
-	//	assert.NotEmpty(t, txHash)
-	//})
-
-	//t.Run("getURL should return correct RPC url", func(t *testing.T) {
-	//assert.Equal(t, Get(config.NilNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(config.LocalNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(config.DevnetNetwork, true), rpc.DevNet_RPC)
-	//assert.Equal(t, GetURL(config.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
-	//})
-
-	t.Run("ProgramSubscribe should subscribe to event", func(t *testing.T) {
-		timeout := time.Second * 5
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		err := client.ProgramSubscribe(ctx, solana.TokenProgramID.String(), func(address string, data []byte) error {
-			assert.NotEmpty(t, address)
-			assert.NotEmpty(t, data)
-			return nil
-		})
-		assert.NoError(t, err)
-		time.Sleep(timeout)
-	})
 
 	t.Run("GetProgramAccounts should return all account publickeys", func(t *testing.T) {
 		timeout := time.Second * 5

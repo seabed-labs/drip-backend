@@ -19,8 +19,6 @@ type WithdrawalMetric struct {
 	Slot                         int32     `gorm:"column:slot;not null" json:"slot" db:"slot"`
 	Time                         time.Time `gorm:"column:time;not null" json:"time" db:"time"`
 	Vault                        string    `gorm:"column:vault;not null" json:"vault" db:"vault"`
-	TokenAMint                   *string   `gorm:"column:token_a_mint" json:"tokenAMint" db:"token_a_mint"`
-	TokenBMint                   string    `gorm:"column:token_b_mint;not null" json:"tokenBMint" db:"token_b_mint"`
 	UserTokenAWithdrawAmount     uint64    `gorm:"column:user_token_a_withdraw_amount;not null" json:"userTokenAWithdrawAmount" db:"user_token_a_withdraw_amount"`
 	UserTokenBWithdrawAmount     uint64    `gorm:"column:user_token_b_withdraw_amount;not null" json:"userTokenBWithdrawAmount" db:"user_token_b_withdraw_amount"`
 	TreasuryTokenBReceivedAmount uint64    `gorm:"column:treasury_token_b_received_amount;not null" json:"treasuryTokenBReceivedAmount" db:"treasury_token_b_received_amount"`

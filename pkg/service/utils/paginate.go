@@ -7,7 +7,7 @@ func DoForPaginatedBatch(pageSize, total int, processBatch func(start, end int) 
 		return fmt.Errorf("pageSize must be non-zero when total is non-zero")
 	}
 	page := 0
-	start, end := paginate(page, pageSize, total)
+	start, end := Paginate(page, pageSize, total)
 	for start < end {
 		if err := processBatch(start, end); err != nil {
 			if err := handleError(err); err != nil {
@@ -15,12 +15,12 @@ func DoForPaginatedBatch(pageSize, total int, processBatch func(start, end int) 
 			}
 		}
 		page++
-		start, end = paginate(page, pageSize, total)
+		start, end = Paginate(page, pageSize, total)
 	}
 	return nil
 }
 
-func paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
+func Paginate(pageNum int, pageSize int, sliceLength int) (int, int) {
 	start := pageNum * pageSize
 
 	if start > sliceLength {

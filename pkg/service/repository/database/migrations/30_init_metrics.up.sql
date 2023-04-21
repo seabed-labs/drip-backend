@@ -1,6 +1,6 @@
 -- No foreign keys are used intentionally
 -- the data in these tables is pushed to primarily from the metrics server
--- the event server/primary backend populates price
+-- the consumer server/primary backend populates price
 
 CREATE TABLE "deposit_metric" (
     "signature" VARCHAR(255) NOT NULL,

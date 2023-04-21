@@ -19,7 +19,6 @@ type DepositMetric struct {
 	Slot                int32     `gorm:"column:slot;not null" json:"slot" db:"slot"`
 	Time                time.Time `gorm:"column:time;not null" json:"time" db:"time"`
 	Vault               string    `gorm:"column:vault;not null" json:"vault" db:"vault"`
-	TokenAMint          string    `gorm:"column:token_a_mint;not null" json:"tokenAMint" db:"token_a_mint"`
 	Referrer            *string   `gorm:"column:referrer" json:"referrer" db:"referrer"`
 	TokenADepositAmount uint64    `gorm:"column:token_a_deposit_amount;not null" json:"tokenADepositAmount" db:"token_a_deposit_amount"`
 	TokenAUsdPriceDay   *uint64   `gorm:"column:token_a_usd_price_day" json:"tokenAUsdPriceDay" db:"token_a_usd_price_day"`

@@ -220,6 +220,36 @@ func (mr *MockRepositoryMockRecorder) GetCurrentTVL(ctx interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentTVL", reflect.TypeOf((*MockRepository)(nil).GetCurrentTVL), ctx)
 }
 
+// GetDepositMetricBySignature mocks base method.
+func (m *MockRepository) GetDepositMetricBySignature(ctx context.Context, signature string) (*model.DepositMetric, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDepositMetricBySignature", ctx, signature)
+	ret0, _ := ret[0].(*model.DepositMetric)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDepositMetricBySignature indicates an expected call of GetDepositMetricBySignature.
+func (mr *MockRepositoryMockRecorder) GetDepositMetricBySignature(ctx, signature interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDepositMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetDepositMetricBySignature), ctx, signature)
+}
+
+// GetDripMetricBySignature mocks base method.
+func (m *MockRepository) GetDripMetricBySignature(ctx context.Context, signature string) (*model.DripMetric, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDripMetricBySignature", ctx, signature)
+	ret0, _ := ret[0].(*model.DripMetric)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDripMetricBySignature indicates an expected call of GetDripMetricBySignature.
+func (mr *MockRepositoryMockRecorder) GetDripMetricBySignature(ctx, signature interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDripMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetDripMetricBySignature), ctx, signature)
+}
+
 // GetOrcaWhirlpoolByAddress mocks base method.
 func (m *MockRepository) GetOrcaWhirlpoolByAddress(ctx context.Context, address string) (*model.OrcaWhirlpool, error) {
 	m.ctrl.T.Helper()
@@ -575,6 +605,21 @@ func (mr *MockRepositoryMockRecorder) GetVaultsWithFilter(arg0, arg1, arg2, arg3
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVaultsWithFilter", reflect.TypeOf((*MockRepository)(nil).GetVaultsWithFilter), arg0, arg1, arg2, arg3)
 }
 
+// GetWithdrawalMetricBySignature mocks base method.
+func (m *MockRepository) GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWithdrawalMetricBySignature", ctx, signature)
+	ret0, _ := ret[0].(*model.WithdrawalMetric)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWithdrawalMetricBySignature indicates an expected call of GetWithdrawalMetricBySignature.
+func (mr *MockRepositoryMockRecorder) GetWithdrawalMetricBySignature(ctx, signature interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWithdrawalMetricBySignature", reflect.TypeOf((*MockRepository)(nil).GetWithdrawalMetricBySignature), ctx, signature)
+}
+
 // InsertTokenPairs mocks base method.
 func (m *MockRepository) InsertTokenPairs(arg0 context.Context, arg1 ...*model.TokenPair) error {
 	m.ctrl.T.Helper()
@@ -592,6 +637,44 @@ func (mr *MockRepositoryMockRecorder) InsertTokenPairs(arg0 interface{}, arg1 ..
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0}, arg1...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertTokenPairs", reflect.TypeOf((*MockRepository)(nil).InsertTokenPairs), varargs...)
+}
+
+// UpsertDepositMetric mocks base method.
+func (m *MockRepository) UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range metrics {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertDepositMetric", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertDepositMetric indicates an expected call of UpsertDepositMetric.
+func (mr *MockRepositoryMockRecorder) UpsertDepositMetric(ctx interface{}, metrics ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, metrics...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertDepositMetric", reflect.TypeOf((*MockRepository)(nil).UpsertDepositMetric), varargs...)
+}
+
+// UpsertDripMetric mocks base method.
+func (m *MockRepository) UpsertDripMetric(ctx context.Context, metrics ...*model.DripMetric) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range metrics {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertDripMetric", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpsertDripMetric indicates an expected call of UpsertDripMetric.
+func (mr *MockRepositoryMockRecorder) UpsertDripMetric(ctx interface{}, metrics ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, metrics...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertDripMetric", reflect.TypeOf((*MockRepository)(nil).UpsertDripMetric), varargs...)
 }
 
 // UpsertOrcaWhirlpoolDeltaBQuotes mocks base method.
@@ -784,83 +867,21 @@ func (mr *MockRepositoryMockRecorder) UpsertVaults(arg0 interface{}, arg1 ...int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertVaults", reflect.TypeOf((*MockRepository)(nil).UpsertVaults), varargs...)
 }
 
-// MockAccountUpdateQueue is a mock of AccountUpdateQueue interface.
-type MockAccountUpdateQueue struct {
-	ctrl     *gomock.Controller
-	recorder *MockAccountUpdateQueueMockRecorder
-}
-
-// MockAccountUpdateQueueMockRecorder is the mock recorder for MockAccountUpdateQueue.
-type MockAccountUpdateQueueMockRecorder struct {
-	mock *MockAccountUpdateQueue
-}
-
-// NewMockAccountUpdateQueue creates a new mock instance.
-func NewMockAccountUpdateQueue(ctrl *gomock.Controller) *MockAccountUpdateQueue {
-	mock := &MockAccountUpdateQueue{ctrl: ctrl}
-	mock.recorder = &MockAccountUpdateQueueMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAccountUpdateQueue) EXPECT() *MockAccountUpdateQueueMockRecorder {
-	return m.recorder
-}
-
-// AddItem mocks base method.
-func (m *MockAccountUpdateQueue) AddItem(ctx context.Context, item *model.AccountUpdateQueueItem) error {
+// UpsertWithdrawMetric mocks base method.
+func (m *MockRepository) UpsertWithdrawMetric(ctx context.Context, metrics ...*model.WithdrawalMetric) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddItem", ctx, item)
+	varargs := []interface{}{ctx}
+	for _, a := range metrics {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpsertWithdrawMetric", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AddItem indicates an expected call of AddItem.
-func (mr *MockAccountUpdateQueueMockRecorder) AddItem(ctx, item interface{}) *gomock.Call {
+// UpsertWithdrawMetric indicates an expected call of UpsertWithdrawMetric.
+func (mr *MockRepositoryMockRecorder) UpsertWithdrawMetric(ctx interface{}, metrics ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddItem", reflect.TypeOf((*MockAccountUpdateQueue)(nil).AddItem), ctx, item)
-}
-
-// Depth mocks base method.
-func (m *MockAccountUpdateQueue) Depth(ctx context.Context) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Depth", ctx)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Depth indicates an expected call of Depth.
-func (mr *MockAccountUpdateQueueMockRecorder) Depth(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Depth", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Depth), ctx)
-}
-
-// Pop mocks base method.
-func (m *MockAccountUpdateQueue) Pop(ctx context.Context) (*model.AccountUpdateQueueItem, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Pop", ctx)
-	ret0, _ := ret[0].(*model.AccountUpdateQueueItem)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Pop indicates an expected call of Pop.
-func (mr *MockAccountUpdateQueueMockRecorder) Pop(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Pop", reflect.TypeOf((*MockAccountUpdateQueue)(nil).Pop), ctx)
-}
-
-// ReQueue mocks base method.
-func (m *MockAccountUpdateQueue) ReQueue(ctx context.Context, item *model.AccountUpdateQueueItem) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReQueue", ctx, item)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ReQueue indicates an expected call of ReQueue.
-func (mr *MockAccountUpdateQueueMockRecorder) ReQueue(ctx, item interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReQueue", reflect.TypeOf((*MockAccountUpdateQueue)(nil).ReQueue), ctx, item)
+	varargs := append([]interface{}{ctx}, metrics...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertWithdrawMetric", reflect.TypeOf((*MockRepository)(nil).UpsertWithdrawMetric), varargs...)
 }

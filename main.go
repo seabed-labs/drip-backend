@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 
+	"github.com/dcaf-labs/drip/pkg/service/ixparser"
+
+	"github.com/dcaf-labs/drip/pkg/producer"
+
 	api2 "github.com/dcaf-labs/solana-go-retryable-http-client"
 
 	"github.com/dcaf-labs/drip/pkg/api"
-	"github.com/dcaf-labs/drip/pkg/event"
+	"github.com/dcaf-labs/drip/pkg/consumer"
 	"github.com/dcaf-labs/drip/pkg/job/token"
 	"github.com/dcaf-labs/drip/pkg/job/tokenaccount"
 
@@ -48,6 +52,8 @@ func getDependencies() []fx.Option {
 			database.NewGORMDatabase,
 			query.Use,
 			repository.NewRepository,
+			repository.NewTransactionProcessingCheckpointRepository,
+			repository.NewTransactionUpdateQueue,
 			repository.NewAccountUpdateQueue,
 			api2.GetDefaultClientProvider,
 			solana.NewSolanaClient,
@@ -59,10 +65,12 @@ func getDependencies() []fx.Option {
 			base.NewBase,
 			middleware.NewHandler,
 			controller.NewHandler,
+			ixparser.NewIxParser,
 		),
 		fx.Invoke(
 			database.RunMigrations,
-			event.Server,
+			producer.Server,
+			consumer.Server,
 			api.StartServer,
 			token.NewTokenJob,
 			tokenaccount.NewTokenAccountJob,

@@ -332,3 +332,27 @@ func (d repositoryImpl) GetAdminPositions(
 	}
 	return stmt.Find()
 }
+
+func (d repositoryImpl) GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error) {
+	return d.repo.
+		WithdrawalMetric.
+		WithContext(ctx).
+		Where(d.repo.WithdrawalMetric.Signature.Eq(signature)).
+		First()
+}
+
+func (d repositoryImpl) GetDepositMetricBySignature(ctx context.Context, signature string) (*model.DepositMetric, error) {
+	return d.repo.
+		DepositMetric.
+		WithContext(ctx).
+		Where(d.repo.DepositMetric.Signature.Eq(signature)).
+		First()
+}
+
+func (d repositoryImpl) GetDripMetricBySignature(ctx context.Context, signature string) (*model.DripMetric, error) {
+	return d.repo.
+		DripMetric.
+		WithContext(ctx).
+		Where(d.repo.DripMetric.Signature.Eq(signature)).
+		First()
+}

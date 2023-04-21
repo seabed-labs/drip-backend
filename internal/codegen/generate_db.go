@@ -106,5 +106,9 @@ func GenerateModels(
 		gen.FieldType("ui_market_price_usd", "*float64"),
 	).AddMethod(ModelUtil{})
 
+	g.GenerateModel("transaction_processing_checkpoint",
+		gen.FieldType("slot", "uint64"),
+	).AddMethod(ModelUtil{})
+
 	g.Execute()
 }

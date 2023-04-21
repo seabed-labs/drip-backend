@@ -4,6 +4,7 @@ module github.com/dcaf-labs/drip
 go 1.18
 
 require (
+	github.com/AlekSi/pointer v1.1.0
 	github.com/dcaf-labs/drip-client/drip-extension-go v0.0.0-20221001224830-925650c045bb
 	github.com/dcaf-labs/solana-drip-go v0.0.0-20230416112801-7d7e880135eb
 	github.com/dcaf-labs/solana-go-clients v0.0.0-20221202190210-4fa06790e51a

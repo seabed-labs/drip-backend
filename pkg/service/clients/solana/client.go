@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/AlekSi/pointer"
 
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 
@@ -43,6 +46,10 @@ type Solana interface {
 	getWalletPrivKey() solana.PrivateKey
 	GetVersion(context.Context) (*rpc.GetVersionResult, error)
 	GetNetwork() config.Network
+
+	GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error)
+	GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error)
+	GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error)
 }
 
 func NewSolanaClient(
@@ -56,6 +63,31 @@ type impl struct {
 	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
+}
+
+func (s impl) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
+	return s.client.GetSignaturesForAddressWithOpts(ctx, solana.MustPublicKeyFromBase58(pubkey), &rpc.GetSignaturesForAddressOpts{
+		Until:          until,
+		Commitment:     rpc.CommitmentFinalized,
+		MinContextSlot: minSlot,
+	})
+}
+
+func (s impl) GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error) {
+	return s.client.GetTransaction(ctx,
+		solana.MustSignatureFromBase58(signature), &rpc.GetTransactionOpts{
+			Encoding:                       solana.EncodingBase58,
+			Commitment:                     rpc.CommitmentFinalized,
+			MaxSupportedTransactionVersion: pointer.ToUint64(0),
+		})
+}
+
+func (s impl) GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error) {
+	return s.client.GetBlockWithOpts(ctx, slot, &rpc.GetBlockOpts{
+		TransactionDetails:             rpc.TransactionDetailsFull,
+		Commitment:                     rpc.CommitmentFinalized,
+		MaxSupportedTransactionVersion: pointer.ToUint64(0),
+	})
 }
 
 func (s impl) GetNetwork() config.Network {
@@ -155,7 +187,7 @@ func (s impl) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (
 		solana.MustPublicKeyFromBase58(tokenMetadataAddress),
 		&rpc.GetAccountInfoOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 			DataSlice:  nil,
 		})
 	if err != nil {
@@ -180,7 +212,7 @@ func (s impl) GetAccount(ctx context.Context, address string, v interface{}) err
 		solana.MustPublicKeyFromBase58(address),
 		&rpc.GetAccountInfoOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 		})
 	if err != nil {
 		logrus.
@@ -221,7 +253,7 @@ func (s impl) GetProgramAccounts(ctx context.Context, address string) ([]string,
 		solana.MustPublicKeyFromBase58(address),
 		&rpc.GetProgramAccountsOpts{
 			Encoding:   solana.EncodingBase64,
-			Commitment: "confirmed",
+			Commitment: rpc.CommitmentFinalized,
 			DataSlice: &rpc.DataSlice{
 				Offset: &offset,
 				Length: &length,
@@ -255,7 +287,7 @@ func (s impl) GetUserBalances(ctx context.Context, wallet string) (*rpc.GetToken
 			ProgramId: &solana.TokenProgramID,
 		},
 		&rpc.GetTokenAccountsOpts{
-			Commitment: rpc.CommitmentMax,
+			Commitment: rpc.CommitmentFinalized,
 			Encoding:   solana.EncodingJSONParsed,
 		})
 }
@@ -304,7 +336,7 @@ func (s impl) ProgramSubscribe(
 	}
 	sub, err := client.ProgramSubscribeWithOpts(
 		solana.MustPublicKeyFromBase58(program),
-		rpc.CommitmentRecent,
+		rpc.CommitmentFinalized,
 		solana.EncodingBase64Zstd,
 		nil,
 	)
@@ -320,22 +352,25 @@ func (s impl) ProgramSubscribe(
 				logrus.
 					WithError(err).
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Error("failed to get next msg from event ws")
-				// TODO(Mocha): need to handle the case where this fails
-				client, err = ws.Connect(ctx, url)
-				if err != nil {
-					logrus.
-						WithError(err).
-						WithFields(logrus.Fields{
-							"event": program,
-						}).
-						Error("failed to get new ws client")
+					Error("failed to get next msg from consumer ws")
+				client = nil
+				for client == nil {
+					client, err = ws.Connect(ctx, url)
+					if err != nil {
+						logrus.
+							WithError(err).
+							WithFields(logrus.Fields{
+								"consumer": program,
+							}).
+							Error("failed to get new ws client")
+						time.Sleep(1000)
+					}
 				}
 				sub, err = client.ProgramSubscribeWithOpts(
 					solana.MustPublicKeyFromBase58(program),
-					rpc.CommitmentRecent,
+					rpc.CommitmentFinalized,
 					solana.EncodingBase64Zstd,
 					nil,
 				)
@@ -343,7 +378,7 @@ func (s impl) ProgramSubscribe(
 					logrus.
 						WithError(err).
 						WithFields(logrus.Fields{
-							"event": program,
+							"consumer": program,
 						}).
 						Error("failed to get new program websocket subscription")
 				}
@@ -352,18 +387,18 @@ func (s impl) ProgramSubscribe(
 			if msg == nil || msg.Value.Account == nil || msg.Value.Account.Data == nil {
 				logrus.
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Warning("event ws msg account or account data is nil")
+					Warning("consumer ws msg account or account data is nil")
 				continue
 			}
 			decodedBinary := msg.Value.Account.Data.GetBinary()
 			if decodedBinary == nil {
 				logrus.
 					WithFields(logrus.Fields{
-						"event": program,
+						"consumer": program,
 					}).
-					Warning("event ws msg decoded binary is nil")
+					Warning("consumer ws msg decoded binary is nil")
 				continue
 			}
 			_ = onReceive(msg.Value.Pubkey.String(), decodedBinary)
@@ -477,8 +512,8 @@ func GetURLWithRateLimit(env config.Network) (string, float64) {
 func getWSURL(env config.Network) string {
 	switch env {
 	case config.MainnetNetwork:
-		return rpc.MainNetBeta_WS
-		//return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
+		//return rpc.MainNetBeta_WS
+		return "wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/"
 	case config.DevnetNetwork:
 		return rpc.DevNet_WS
 		//return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
