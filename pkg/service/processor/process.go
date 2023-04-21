@@ -3,8 +3,6 @@ package processor
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go/rpc"
-
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
 	"github.com/dcaf-labs/drip/pkg/service/clients/orcawhirlpool"
@@ -12,8 +10,7 @@ import (
 	"github.com/dcaf-labs/drip/pkg/service/clients/tokenregistry"
 	"github.com/dcaf-labs/drip/pkg/service/ixparser"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
-	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
-	"github.com/gagliardetto/solana-go/programs/token"
+	"github.com/gagliardetto/solana-go/rpc"
 )
 
 const processConcurrency = 10
@@ -26,18 +23,11 @@ type Processor interface {
 	UpsertTokenSwapByAddress(context.Context, string) error
 	UpsertWhirlpoolByAddress(context.Context, string) error
 	UpsertTokenByAddress(ctx context.Context, mintAddress string) error
-
 	UpsertTokensByAddresses(ctx context.Context, addresses ...string) error
 	UpsertTokenAccountsByAddresses(ctx context.Context, addresses ...string) error
 
-	UpsertPosition(context.Context, string, drip.Position) error
-	UpsertTokenPair(context.Context, string, string) error
-	UpsertTokenAccount(context.Context, string, token.Account) error
-
 	ProcessAccountUpdateQueue(ctx context.Context)
-	ProcessDripEvent(address string, data []byte) error
-	ProcessTokenSwapEvent(address string, data []byte) error
-	ProcessWhirlpoolEvent(address string, data []byte) error
+	ProcessAccount(ctx context.Context, pubkey string, programId string) error
 
 	ProcessTransactionUpdateQueue(ctx context.Context)
 	ProcessTransaction(ctx context.Context, txRaw rpc.GetTransactionResult) error

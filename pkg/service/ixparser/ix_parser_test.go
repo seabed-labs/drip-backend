@@ -16,7 +16,6 @@ import (
 )
 
 func TestIxParser(t *testing.T) {
-
 	url := "https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388"
 	recorderProvider, recorderTeardown := unittest.GetHTTPRecorderClientProvider("./fixtures/drip_1")
 	defer recorderTeardown()

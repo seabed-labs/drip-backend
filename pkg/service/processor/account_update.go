@@ -11,7 +11,7 @@ import (
 	"github.com/dcaf-labs/solana-go-clients/pkg/tokenswap"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	bin "github.com/gagliardetto/binary"
-	solana2 "github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -42,11 +42,6 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 				logrus.WithError(err).Error("failed to get next queue item")
 				continue
 			}
-			//if depth, err := p.accountUpdateQueue.AccountUpdateQueueItemDepth(ctx); err != nil {
-			//	logrus.WithError(err).Error("failed to get queue depth")
-			//} else {
-			//	logrus.WithField("depth", depth).Infof("queue depth")
-			//}
 			ch <- queueItem
 		}
 	}
@@ -60,41 +55,37 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string
 			logrus.Info("exiting processAccountUpdateQueueItemWorker")
 			return
 		case queueItem := <-queueCh:
-			p.processAccountUpdateQueueItem(ctx, id, queueItem)
+			if err := p.ProcessAccount(ctx, queueItem.Pubkey, queueItem.ProgramID); err != nil {
+				if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
+					logrus.WithField("pubkey", queueItem.Pubkey).WithError(requeueErr).Error("failed to add item to queue")
+				}
+			}
 		}
 	}
 }
 
-func (p impl) processAccountUpdateQueueItem(ctx context.Context, id string, queueItem *model.AccountUpdateQueueItem) {
-	log := logrus.WithField("id", id).WithField("pubkey", queueItem.Pubkey).WithField("programId", queueItem.ProgramID)
-	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, queueItem.Pubkey)
+func (p impl) ProcessAccount(ctx context.Context, pubkey string, programId string) error {
+	log := logrus.WithField("pubkey", pubkey).WithField("programId", programId)
+	accountInfo, err := p.solanaClient.GetAccountInfo(ctx, pubkey)
 	if err != nil || accountInfo == nil || accountInfo.Value == nil || accountInfo.Value.Data == nil {
 		log.WithError(err).Error("error or invalid account")
-		if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
-			log.WithError(requeueErr).Error("failed to add item to queue")
-		}
-		return
+		return err
 	}
-	switch queueItem.ProgramID {
+	switch programId {
 	case drip.ProgramID.String():
-		err = p.ProcessDripEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.processDripEvent(pubkey, accountInfo.Value.Data.GetBinary())
 	case whirlpool.ProgramID.String():
-		err = p.ProcessWhirlpoolEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.processWhirlpoolEvent(pubkey, accountInfo.Value.Data.GetBinary())
 	case tokenswap.ProgramID.String():
-		err = p.ProcessTokenSwapEvent(queueItem.Pubkey, accountInfo.Value.Data.GetBinary())
+		err = p.processTokenSwapEvent(pubkey, accountInfo.Value.Data.GetBinary())
 	default:
 		log.Error("invalid programID")
 	}
-	if err != nil {
-		log.WithError(err).Error("failed to process update")
-		if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
-			log.WithError(requeueErr).Error("failed to add item to queue")
-		}
-	}
+	return err
 }
 
-func (p impl) ProcessDripEvent(address string, data []byte) error {
-	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+func (p impl) processDripEvent(address string, data []byte) error {
+	if pubkey, err := solana.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
 		return nil
 	}
@@ -147,8 +138,8 @@ func (p impl) ProcessDripEvent(address string, data []byte) error {
 	return nil
 }
 
-func (p impl) ProcessTokenSwapEvent(address string, data []byte) error {
-	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+func (p impl) processTokenSwapEvent(address string, data []byte) error {
+	if pubkey, err := solana.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
 		return nil
 	}
@@ -172,8 +163,8 @@ func (p impl) ProcessTokenSwapEvent(address string, data []byte) error {
 	// log.WithError(err).Errorf("failed to decode token swap account")
 }
 
-func (p impl) ProcessWhirlpoolEvent(address string, data []byte) error {
-	if pubkey, err := solana2.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
+func (p impl) processWhirlpoolEvent(address string, data []byte) error {
+	if pubkey, err := solana.PublicKeyFromBase58(address); err != nil || pubkey.IsZero() {
 		logrus.WithField("address", address).Info("skipping zero/invalid address")
 		return nil
 	}
