@@ -45,24 +45,24 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Sun, 16 Apr 2023 12:38:28 GMT
+                - Fri, 21 Apr 2023 15:48:17 GMT
             Vary:
                 - Accept-Encoding
             X-Host-Id:
-                - 98a37769
+                - fba34890
             X-Node-Id:
                 - 08777362-575c-4584-aa42-4f09eb19af92
             X-Ratelimit-Limit:
                 - "1000000"
             X-Ratelimit-Remaining:
-                - "892072"
+                - "843111"
             X-Ratelimit-Reset:
-                - "1681675555"
+                - "1682107738"
             X-Request-Id:
-                - b0b92ef5-b0f7-4d4b-951c-bfb125d9ff94
+                - e54ecdc2-6367-407f-baaf-6911e07af9b0
         status: 200 OK
         code: 200
-        duration: 141.422292ms
+        duration: 149.642917ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -74,7 +74,7 @@ interactions:
         host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
         remote_addr: ""
         request_uri: ""
-        body: '{"method":"getAccountInfo","params":["BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK",{"commitment":"confirmed","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
+        body: '{"method":"getAccountInfo","params":["BxEimfWJshFBXSuqttnjdabud98h3BTnmvbzCQkZXWZK",{"commitment":"finalized","encoding":"base64"}],"id":0,"jsonrpc":"2.0"}'
         form: {}
         headers:
             Accept:
@@ -92,7 +92,7 @@ interactions:
         content_length: 472
         uncompressed: false
         body: |
-            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.6","slot":188750781},"value":{"data":["rRYkpb4DjscQDgAAAAAAACMABQAFAP9tBDqGIt+SnOOhZfekoHFeSBsbkIxe/E6RT8t877OcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","base64"],"executable":false,"lamports":2171520,"owner":"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk","rentEpoch":0}},"id":0}
+            {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.13.6","slot":189688216},"value":{"data":["rRYkpb4DjscQDgAAAAAAACMABQAFAP9tBDqGIt+SnOOhZfekoHFeSBsbkIxe/E6RT8t877OcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","base64"],"executable":false,"lamports":2171520,"owner":"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk","rentEpoch":0}},"id":0}
         headers:
             Access-Control-Allow-Credentials:
                 - "true"
@@ -107,21 +107,21 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Sun, 16 Apr 2023 12:38:28 GMT
+                - Fri, 21 Apr 2023 15:48:17 GMT
             Vary:
                 - Accept-Encoding
             X-Host-Id:
-                - 7e7a0d52
+                - 3232d9d5
             X-Node-Id:
                 - 08777362-575c-4584-aa42-4f09eb19af92
             X-Ratelimit-Limit:
                 - "1000000"
             X-Ratelimit-Remaining:
-                - "892071"
+                - "843110"
             X-Ratelimit-Reset:
-                - "1681675555"
+                - "1682107738"
             X-Request-Id:
-                - 110b0b28-4163-4c5c-9691-7ca58f3fd9a9
+                - c2990cbd-bd20-4028-a60f-8bc58a140b3b
         status: 200 OK
         code: 200
-        duration: 25.553041ms
+        duration: 26.759ms
