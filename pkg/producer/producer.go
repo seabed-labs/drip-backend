@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/samber/lo"
+
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
@@ -23,7 +25,7 @@ import (
 )
 
 // TXPOLLFREQUENCY how often to foll for transactions
-const TXPOLLFREQUENCY = 30 * time.Minute
+const TXPOLLFREQUENCY = 10 * time.Minute
 const backfillEvery = time.Hour * 12
 
 type DripProgramProducer struct {
@@ -192,7 +194,7 @@ func (d *DripProgramProducer) backfillCheckpointSlot(ctx context.Context) error 
 	}
 	log.WithField("len(txSignatures)", len(txSignatures))
 	log.Info("got signatures")
-	for i := range txSignatures {
+	for i := range lo.Reverse(txSignatures) {
 		txSignature := txSignatures[i]
 		tx, err := d.client.GetTransaction(ctx, txSignature.Signature.String())
 		if err != nil {
