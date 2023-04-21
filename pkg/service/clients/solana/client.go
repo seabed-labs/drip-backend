@@ -48,6 +48,7 @@ type Solana interface {
 	GetNetwork() config.Network
 
 	GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error)
+	GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error)
 	GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error)
 }
 
@@ -62,6 +63,14 @@ type impl struct {
 	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
+}
+
+func (s impl) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
+	return s.client.GetSignaturesForAddressWithOpts(ctx, solana.MustPublicKeyFromBase58(pubkey), &rpc.GetSignaturesForAddressOpts{
+		Until:          until,
+		Commitment:     rpc.CommitmentFinalized,
+		MinContextSlot: minSlot,
+	})
 }
 
 func (s impl) GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error) {
@@ -503,8 +512,8 @@ func GetURLWithRateLimit(env config.Network) (string, float64) {
 func getWSURL(env config.Network) string {
 	switch env {
 	case config.MainnetNetwork:
-		return rpc.MainNetBeta_WS
-		//return "wss://dimensional-young-cloud.solana-mainnet.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d"
+		//return rpc.MainNetBeta_WS
+		return "wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/"
 	case config.DevnetNetwork:
 		return rpc.DevNet_WS
 		//return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"

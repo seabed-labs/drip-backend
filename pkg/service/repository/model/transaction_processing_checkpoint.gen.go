@@ -10,9 +10,8 @@ const TableNameTransactionProcessingCheckpoint = "transaction_processing_checkpo
 
 // TransactionProcessingCheckpoint mapped from table <transaction_processing_checkpoint>
 type TransactionProcessingCheckpoint struct {
-	ID        int32  `gorm:"column:id;primaryKey" json:"id" db:"id"`
-	Signature string `gorm:"column:signature;not null" json:"signature" db:"signature"`
-	Slot      uint64 `gorm:"column:slot;not null" json:"slot" db:"slot"`
+	Signature string `gorm:"column:signature;primaryKey" json:"signature" db:"signature"`
+	Slot      uint64 `gorm:"column:slot;primaryKey" json:"slot" db:"slot"`
 }
 
 // TableName TransactionProcessingCheckpoint's table name

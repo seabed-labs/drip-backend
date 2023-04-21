@@ -508,7 +508,7 @@ func (p impl) getDepositMetric(
 
 func (p impl) handleTransactionUpdateErr(ctx context.Context, queueItem *model.TransactionUpdateQueueItem, err error) {
 	logrus.WithError(err).Error("failed to process update")
-	if requeueErr := p.transactionUpdateQueue.ReQueueTransactionUpdateItem(ctx, queueItem); requeueErr != nil {
+	if requeueErr := p.transactionUpdateQueue.ReQueueTransactionUpdateItem(ctx, queueItem, err.Error()); requeueErr != nil {
 		logrus.WithError(requeueErr).Error("failed to add item to queue")
 	}
 }

@@ -56,7 +56,7 @@ func (p impl) processAccountUpdateQueueItemWorker(ctx context.Context, id string
 			return
 		case queueItem := <-queueCh:
 			if err := p.ProcessAccount(ctx, queueItem.Pubkey, queueItem.ProgramID); err != nil {
-				if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem); requeueErr != nil {
+				if requeueErr := p.accountUpdateQueue.ReQueueAccountUpdateQueueItem(ctx, queueItem, err.Error()); requeueErr != nil {
 					logrus.WithField("pubkey", queueItem.Pubkey).WithError(requeueErr).Error("failed to add item to queue")
 				}
 			}

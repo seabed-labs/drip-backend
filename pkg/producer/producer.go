@@ -3,38 +3,31 @@ package producer
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"math"
 	"math/rand"
 	"runtime/debug"
 	"strconv"
 	"time"
 
-	"github.com/dcaf-labs/drip/pkg/service/clients/solana"
+	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
-	solana2 "github.com/gagliardetto/solana-go"
+	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
-	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
 
-// Defined
-const DEFAULTMAXRETRY = 3
-
-var ExceededMaxRetries = errors.New("exceeded max retries")
-
+// TXPOLLFREQUENCY how often to foll for transactions
+const TXPOLLFREQUENCY = 30 * time.Minute
 const backfillEvery = time.Hour * 12
 
 type DripProgramProducer struct {
-	client                     solana.Solana
+	client                     solanaClient.Solana
 	txProcessingCheckpointRepo repository.TransactionProcessingCheckpointRepository
 	accountUpdateQueue         repository.AccountUpdateQueue
 	transactionUpdateQueue     repository.TransactionUpdateQueue
@@ -45,7 +38,7 @@ type DripProgramProducer struct {
 
 func Server(
 	lifecycle fx.Lifecycle,
-	client solana.Solana,
+	client solanaClient.Solana,
 	txProcessingCheckpointRepo repository.TransactionProcessingCheckpointRepository,
 	accountUpdateQueue repository.AccountUpdateQueue,
 	transactionUpdateQueue repository.TransactionUpdateQueue,
@@ -96,7 +89,6 @@ func (d *DripProgramProducer) start(ctx context.Context) error {
 			return err
 		}
 	}
-
 	go d.backfillAccounts(ctx)
 	go d.pollTransactions(ctx)
 	return nil
@@ -163,164 +155,67 @@ func (d *DripProgramProducer) BackfillProgramOwnedAccounts(ctx context.Context, 
 }
 
 func (d *DripProgramProducer) pollTransactions(ctx context.Context) {
-	slot, err := d.backfillCheckpointSlot(ctx)
-	if err != nil {
-		logrus.WithError(err).Error("failed to fetch transaction checkpoint, starting at checkpoint slot +1")
-		slot = slot + 1
-	}
-
+	logrus.Info("polling transactions")
+	ticker := time.NewTicker(TXPOLLFREQUENCY)
 	for {
+		if err := d.backfillCheckpointSlot(ctx); err != nil {
+			logrus.WithError(err).Error("failed to produce block with retry, skipping...")
+		}
 		select {
-		case <-time.After(100 * time.Millisecond):
-			if err := d.processSlotWithRetry(ctx, slot, 0, DEFAULTMAXRETRY); err != nil {
-				logrus.WithError(err).Error("failed to produce block with retry, skipping...")
-			}
-			slot = slot + 1
+		case <-ticker.C:
+			continue
 		case <-ctx.Done():
+			ticker.Stop()
 			logrus.Info("context ended, exiting...")
+			return
 		}
 	}
 }
 
-func (d *DripProgramProducer) backfillCheckpointSlot(ctx context.Context) (uint64, error) {
-	slot, skipTillTxSignature := func() (uint64, string) {
-		checkpoint := d.txProcessingCheckpointRepo.GetLatestTransactionCheckpoint(ctx)
-		if checkpoint != nil {
-			return checkpoint.Slot, checkpoint.Signature
-		}
-		return d.txBackfillStartSlot, ""
+func (d *DripProgramProducer) backfillCheckpointSlot(ctx context.Context) error {
+	checkpoint := d.txProcessingCheckpointRepo.GetLatestTransactionCheckpoint(ctx)
+	var untilSignature solana.Signature
+	minSlot := uint64(0)
+	if checkpoint != nil {
+		untilSignature = solana.MustSignatureFromBase58(checkpoint.Signature)
+		minSlot = checkpoint.Slot
+	}
+	log := logrus.WithField("minSlot", minSlot).WithField("untilSignature", untilSignature.String())
+	log.Info("starting backfill")
+	defer func() {
+		log.Info("done backfill")
 	}()
-	log := logrus.WithField("slot", slot).WithField("skipTillTxSignature", skipTillTxSignature)
-	if skipTillTxSignature == "" {
-		log.Info("nothing to producer")
-		return slot, nil
-	}
-
-	block, err := d.client.GetBlock(ctx, slot)
+	txSignatures, err := d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), untilSignature, &minSlot)
 	if err != nil {
-		log.WithError(err).Error("failed to get last checkpoint slot block")
-		return 0, err
-	}
-	if block == nil {
-		log.Info("block is nil (not confirmed), nothing to producer")
-		return slot, nil
-	}
-
-	// skip all transactions until we find a transaction with the same signature as skipTillTxSignature
-	shouldSkip := true
-	transactions := lo.Filter(block.Transactions, func(tx rpc.TransactionWithMeta, idx int) bool {
-		if !shouldSkip {
-			return true
-		}
-		if tx.MustGetTransaction().Signatures[0].String() == skipTillTxSignature {
-			shouldSkip = false
-		}
-		return false
-	})
-	if err := d.pushTransactionsToQueue(ctx, transactions, logrus.WithField("slot", slot), slot); err != nil {
-		log.WithError(err).Error("failed to producer checkpoint slot")
-		return 0, err
-	}
-	return slot + 1, nil
-}
-
-func (p DripProgramProducer) processSlotWithRetry(
-	ctx context.Context,
-	slot uint64,
-	try int16,
-	maxTry int16,
-) error {
-	log := logrus.WithField("slot", slot).WithField("try", try).WithField("maxTry", maxTry)
-	if try > 0 && try < maxTry {
-		sleepDuration := time.Duration(math.Pow(2, float64(try)) * float64(time.Second))
-		log.WithField("sleepDuration", sleepDuration).Warning("sleeping before retry...")
-		time.Sleep(sleepDuration)
-		log.WithField("sleepDuration", sleepDuration).Warning("woke up and retrying...")
-	}
-	if try > maxTry {
-		log.WithError(ExceededMaxRetries).Errorf("failed to processSlotWithRetry")
-		return ExceededMaxRetries
-	}
-	log.Info("fetching block")
-	block, err := p.client.GetBlock(ctx, slot)
-	if err != nil {
-		switch t := err.(type) {
-		case *jsonrpc.RPCError:
-			switch t.Code {
-			case -32009:
-				fallthrough
-			case -32007:
-				log.WithError(err).Error("skipping slot without retry...")
-				return nil
-			default:
-				log.WithError(err).Warning("unhandled JSONRPCError, retrying...")
-				return p.processSlotWithRetry(ctx, slot, try+1, maxTry)
-			}
-		default:
-			log.WithError(err).Error("failed to get block, retrying...")
-		}
-	}
-	if block == nil {
-		log.Info("block is nil (not confirmed), retrying...")
-		return p.processSlotWithRetry(ctx, slot, try+1, maxTry)
-	}
-	if err := p.pushTransactionsToQueue(ctx, block.Transactions, log, slot); err != nil {
+		log.WithError(err).Error("failed to GetSignaturesForAddress")
 		return err
 	}
-	log.Info("processed slot")
-	return nil
-}
-
-func (d DripProgramProducer) pushTransactionsToQueue(
-	ctx context.Context,
-	transactions []rpc.TransactionWithMeta,
-	log *logrus.Entry,
-	slot uint64,
-) error {
-	txPushCount := 0
-	// Filter out all tx's with errors
-	transactions = lo.Filter(transactions, func(tx rpc.TransactionWithMeta, index int) bool {
-		return tx.Meta.Err == nil
-	})
-	for i, tx := range transactions {
-		// we need to populate the slot as it's not provided via the rpc api for get block
-		tx.Slot = slot
-		parsedTx := tx.MustGetTransaction()
-		if len(parsedTx.Signatures) == 0 {
-			log.WithField("txIndex", i).Warning("no signatures for transaction, skipping...")
-			continue
+	log.WithField("len(txSignatures)", len(txSignatures))
+	log.Info("got signatures")
+	for i := range txSignatures {
+		txSignature := txSignatures[i]
+		tx, err := d.client.GetTransaction(ctx, txSignature.Signature.String())
+		if err != nil {
+			log.WithError(err).Error("failed to GetTransaction")
+			return err
 		}
-		// we should only push transactions into the Q if at least 1 ix contains a program defined in the config
-		shouldPushTx := lo.SomeBy(parsedTx.Message.Instructions, func(ix solana2.CompiledInstruction) bool {
-			programId, _ := parsedTx.Message.Account(ix.ProgramIDIndex)
-			return drip.ProgramID.String() == programId.String()
-		})
-		txSignature := parsedTx.Signatures[0].String()
-		if shouldPushTx {
-			log.WithField("transactionSignature", txSignature).Info("pushing tx to queue...")
-			rpcTx, err := d.client.GetTransaction(ctx, txSignature)
-			if err != nil {
-				log.WithError(err).Error("failed to get tx by signature")
-				return err
-			}
-			if err := d.AddItemToTransactionUpdate(ctx, txSignature, *rpcTx); err != nil {
-				log.WithError(err).Error("failed to insert data into queue...")
-				return err
-			} else {
-				log.WithField("transactionSignature", txSignature).Info("pushed tx to queue...")
-				txPushCount = txPushCount + 1
-			}
+		log.WithField("transactionSignature", txSignature.Signature.String()).Info("pushing tx to queue...")
+		if err := d.AddItemToTransactionUpdate(ctx, txSignature.Signature.String(), *tx); err != nil {
+			log.WithError(err).Error("failed to insert data into queue...")
+			return err
+		} else {
+			log.WithField("transactionSignature", txSignature).Info("pushed tx to queue...")
 		}
-		if err := d.txProcessingCheckpointRepo.UpsertTransactionProcessingCheckpoint(ctx, slot, txSignature); err != nil {
+		log.Info("updating checkpoint...")
+		if err := d.txProcessingCheckpointRepo.UpsertTransactionProcessingCheckpoint(ctx, txSignature.Slot, txSignature.Signature.String()); err != nil {
 			log.WithError(err).Error("failed to insert metadata...")
 			return err
 		}
 	}
-	log.WithField("txPushCount", txPushCount).Info("finished pushing transactions")
 	return nil
 }
 
-func (d DripProgramProducer) AddItemToAccountUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error {
+func (d *DripProgramProducer) AddItemToAccountUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error {
 	return func(account string, data []byte) error {
 		priority := int32(3)
 		if programId == drip.ProgramID.String() {
@@ -346,7 +241,7 @@ func (d DripProgramProducer) AddItemToAccountUpdateQueueCallback(ctx context.Con
 	}
 }
 
-func (d DripProgramProducer) AddItemToTransactionUpdate(ctx context.Context, signature string, tx rpc.GetTransactionResult) error {
+func (d *DripProgramProducer) AddItemToTransactionUpdate(ctx context.Context, signature string, tx rpc.GetTransactionResult) error {
 	bytes, err := json.Marshal(tx)
 	if err != nil {
 		logrus.WithError(err).Error("failed to marshal tx")

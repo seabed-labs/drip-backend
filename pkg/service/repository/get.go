@@ -3,8 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 )
 
@@ -333,16 +331,6 @@ func (d repositoryImpl) GetAdminPositions(
 		stmt = stmt.Offset(*params.Offset)
 	}
 	return stmt.Find()
-}
-
-func (d repositoryImpl) GetLatestTransactionCheckpoint(ctx context.Context) *model.TransactionProcessingCheckpoint {
-	checkpoint, err := d.repo.TransactionProcessingCheckpoint.WithContext(ctx).First()
-	if err != nil && err.Error() == ErrRecordNotFound {
-		return nil
-	} else if err != nil {
-		logrus.WithError(err).Error("failed to get checkpoint")
-	}
-	return checkpoint
 }
 
 func (d repositoryImpl) GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error) {

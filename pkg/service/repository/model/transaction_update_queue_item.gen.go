@@ -19,6 +19,7 @@ type TransactionUpdateQueueItem struct {
 	Try       int32      `gorm:"column:try;not null" json:"try" db:"try"`
 	MaxTry    *int32     `gorm:"column:max_try;not null;default:3" json:"maxTry" db:"max_try"`
 	RetryTime *time.Time `gorm:"column:retry_time" json:"retryTime" db:"retry_time"`
+	Reason    *string    `gorm:"column:reason;not null;default:default" json:"reason" db:"reason"`
 }
 
 // TableName TransactionUpdateQueueItem's table name

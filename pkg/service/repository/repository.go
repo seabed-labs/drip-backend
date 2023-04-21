@@ -78,58 +78,9 @@ type Repository interface {
 	GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error)
 }
 
-type AccountUpdateQueue interface {
-	AddAccountUpdateQueueItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	ReQueueAccountUpdateQueueItem(ctx context.Context, item *model.AccountUpdateQueueItem) error
-	AccountUpdateQueueItemDepth(ctx context.Context) (int64, error)
-	PopAccountUpdateQueueItem(ctx context.Context) (*model.AccountUpdateQueueItem, error)
-}
-
-type TransactionUpdateQueue interface {
-	AddTransactionUpdateQueueItem(ctx context.Context, item *model.TransactionUpdateQueueItem) error
-	ReQueueTransactionUpdateItem(ctx context.Context, item *model.TransactionUpdateQueueItem) error
-	TransactionUpdateQueueItemDepth(ctx context.Context) (int64, error)
-	PopTransactionUpdateQueueItem(ctx context.Context) (*model.TransactionUpdateQueueItem, error)
-}
-
-type TransactionProcessingCheckpointRepository interface {
-	GetLatestTransactionCheckpoint(ctx context.Context) *model.TransactionProcessingCheckpoint
-	UpsertTransactionProcessingCheckpoint(ctx context.Context, slot uint64, signature string) error
-}
-
 type repositoryImpl struct {
 	repo *query.Query
 	db   *sqlx.DB
-}
-
-func NewAccountUpdateQueue(
-	repo *query.Query,
-	db *sqlx.DB,
-) AccountUpdateQueue {
-	return repositoryImpl{
-		repo: repo,
-		db:   db,
-	}
-}
-
-func NewTransactionUpdateQueue(
-	repo *query.Query,
-	db *sqlx.DB,
-) TransactionUpdateQueue {
-	return repositoryImpl{
-		repo: repo,
-		db:   db,
-	}
-}
-
-func NewTransactionProcessingCheckpointRepository(
-	repo *query.Query,
-	db *sqlx.DB,
-) TransactionProcessingCheckpointRepository {
-	return repositoryImpl{
-		repo: repo,
-		db:   db,
-	}
 }
 
 func NewRepository(

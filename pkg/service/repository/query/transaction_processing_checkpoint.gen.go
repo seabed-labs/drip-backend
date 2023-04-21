@@ -27,7 +27,6 @@ func newTransactionProcessingCheckpoint(db *gorm.DB) transactionProcessingCheckp
 
 	tableName := _transactionProcessingCheckpoint.transactionProcessingCheckpointDo.TableName()
 	_transactionProcessingCheckpoint.ALL = field.NewField(tableName, "*")
-	_transactionProcessingCheckpoint.ID = field.NewInt32(tableName, "id")
 	_transactionProcessingCheckpoint.Signature = field.NewString(tableName, "signature")
 	_transactionProcessingCheckpoint.Slot = field.NewUint64(tableName, "slot")
 
@@ -40,7 +39,6 @@ type transactionProcessingCheckpoint struct {
 	transactionProcessingCheckpointDo transactionProcessingCheckpointDo
 
 	ALL       field.Field
-	ID        field.Int32
 	Signature field.String
 	Slot      field.Uint64
 
@@ -59,7 +57,6 @@ func (t transactionProcessingCheckpoint) As(alias string) *transactionProcessing
 
 func (t *transactionProcessingCheckpoint) updateTableName(table string) *transactionProcessingCheckpoint {
 	t.ALL = field.NewField(table, "*")
-	t.ID = field.NewInt32(table, "id")
 	t.Signature = field.NewString(table, "signature")
 	t.Slot = field.NewUint64(table, "slot")
 
@@ -90,8 +87,7 @@ func (t *transactionProcessingCheckpoint) GetFieldByName(fieldName string) (fiel
 }
 
 func (t *transactionProcessingCheckpoint) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 3)
-	t.fieldMap["id"] = t.ID
+	t.fieldMap = make(map[string]field.Expr, 2)
 	t.fieldMap["signature"] = t.Signature
 	t.fieldMap["slot"] = t.Slot
 }

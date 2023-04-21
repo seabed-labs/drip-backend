@@ -34,6 +34,7 @@ func newTransactionUpdateQueueItem(db *gorm.DB) transactionUpdateQueueItem {
 	_transactionUpdateQueueItem.Try = field.NewInt32(tableName, "try")
 	_transactionUpdateQueueItem.MaxTry = field.NewInt32(tableName, "max_try")
 	_transactionUpdateQueueItem.RetryTime = field.NewTime(tableName, "retry_time")
+	_transactionUpdateQueueItem.Reason = field.NewString(tableName, "reason")
 
 	_transactionUpdateQueueItem.fillFieldMap()
 
@@ -51,6 +52,7 @@ type transactionUpdateQueueItem struct {
 	Try       field.Int32
 	MaxTry    field.Int32
 	RetryTime field.Time
+	Reason    field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -74,6 +76,7 @@ func (t *transactionUpdateQueueItem) updateTableName(table string) *transactionU
 	t.Try = field.NewInt32(table, "try")
 	t.MaxTry = field.NewInt32(table, "max_try")
 	t.RetryTime = field.NewTime(table, "retry_time")
+	t.Reason = field.NewString(table, "reason")
 
 	t.fillFieldMap()
 
@@ -100,7 +103,7 @@ func (t *transactionUpdateQueueItem) GetFieldByName(fieldName string) (field.Ord
 }
 
 func (t *transactionUpdateQueueItem) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 7)
+	t.fieldMap = make(map[string]field.Expr, 8)
 	t.fieldMap["signature"] = t.Signature
 	t.fieldMap["tx_json"] = t.TxJSON
 	t.fieldMap["time"] = t.Time
@@ -108,6 +111,7 @@ func (t *transactionUpdateQueueItem) fillFieldMap() {
 	t.fieldMap["try"] = t.Try
 	t.fieldMap["max_try"] = t.MaxTry
 	t.fieldMap["retry_time"] = t.RetryTime
+	t.fieldMap["reason"] = t.Reason
 }
 
 func (t transactionUpdateQueueItem) clone(db *gorm.DB) transactionUpdateQueueItem {

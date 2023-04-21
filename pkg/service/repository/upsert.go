@@ -105,17 +105,6 @@ func (d repositoryImpl) UpsertPositions(ctx context.Context, positions ...*model
 	return d.repo.Position.WithContext(ctx).Clauses(clause.OnConflict{UpdateAll: true}).Create(positions...)
 }
 
-func (d repositoryImpl) UpsertTransactionProcessingCheckpoint(ctx context.Context, slot uint64, signature string) error {
-	return d.repo.TransactionProcessingCheckpoint.
-		WithContext(ctx).
-		Clauses(clause.OnConflict{UpdateAll: true}).
-		Create(&model.TransactionProcessingCheckpoint{
-			ID:        1,
-			Signature: signature,
-			Slot:      slot,
-		})
-}
-
 func (d repositoryImpl) UpsertDepositMetric(ctx context.Context, metrics ...*model.DepositMetric) error {
 	return d.repo.DepositMetric.
 		WithContext(ctx).

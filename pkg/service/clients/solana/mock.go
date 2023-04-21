@@ -141,6 +141,21 @@ func (mr *MockSolanaMockRecorder) GetProgramAccounts(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProgramAccounts", reflect.TypeOf((*MockSolana)(nil).GetProgramAccounts), arg0, arg1)
 }
 
+// GetSignaturesForAddress mocks base method.
+func (m *MockSolana) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSignaturesForAddress", ctx, pubkey, until, minSlot)
+	ret0, _ := ret[0].([]*rpc.TransactionSignature)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSignaturesForAddress indicates an expected call of GetSignaturesForAddress.
+func (mr *MockSolanaMockRecorder) GetSignaturesForAddress(ctx, pubkey, until, minSlot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSignaturesForAddress", reflect.TypeOf((*MockSolana)(nil).GetSignaturesForAddress), ctx, pubkey, until, minSlot)
+}
+
 // GetTokenMetadataAccount mocks base method.
 func (m *MockSolana) GetTokenMetadataAccount(ctx context.Context, mintAddress string) (token_metadata.Metadata, error) {
 	m.ctrl.T.Helper()
