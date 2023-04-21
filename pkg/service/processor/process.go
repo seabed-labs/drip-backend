@@ -50,7 +50,7 @@ type impl struct {
 	tokenRegistryClient    tokenregistry.TokenRegistry
 	orcaWhirlpoolClient    orcawhirlpool.OrcaWhirlpoolClient
 	solanaClient           solana.Solana
-	dripIxParser           ixparser.IxParser
+	ixParser               ixparser.IxParser
 	alertService           alert.Service
 	coinGeckoClient        coingecko.CoinGeckoClient
 }
@@ -62,7 +62,7 @@ func NewProcessor(
 	client solana.Solana,
 	tokenRegistryClient tokenregistry.TokenRegistry,
 	orcaWhirlpoolClient orcawhirlpool.OrcaWhirlpoolClient,
-	dripIxParser ixparser.IxParser,
+	ixParser ixparser.IxParser,
 	alertService alert.Service,
 	coinGeckoClient coingecko.CoinGeckoClient,
 ) Processor {
@@ -73,7 +73,7 @@ func NewProcessor(
 		solanaClient:           client,
 		tokenRegistryClient:    tokenRegistryClient,
 		orcaWhirlpoolClient:    orcaWhirlpoolClient,
-		dripIxParser:           dripIxParser,
+		ixParser:               ixParser,
 		alertService:           alertService,
 		coinGeckoClient:        coinGeckoClient,
 	}

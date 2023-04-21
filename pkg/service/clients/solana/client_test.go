@@ -42,29 +42,6 @@ func TestSolanaClient(t *testing.T) {
 		assert.NotEmpty(t, versionResponse.FeatureSet)
 	})
 
-	//t.Run("mintToWallet should mint when wallet doesn't have a token account", func(t *testing.T) {
-	//	destWallet := solana.NewWallet()
-	//	txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-	//	assert.NoError(t, err)
-	//	assert.NotEmpty(t, txHash)
-	//})
-
-	//t.Run("mintToWallet should mint when wallet has a token account", func(t *testing.T) {
-	//	destWallet := solana.NewWallet()
-	//	_, err = client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-	//	assert.NoError(t, err)
-	//	txHash, err := client.MintToWallet(context.Background(), mint, destWallet.PublicKey().String(), 100)
-	//	assert.NoError(t, err)
-	//	assert.NotEmpty(t, txHash)
-	//})
-
-	//t.Run("getURL should return correct RPC url", func(t *testing.T) {
-	//assert.Equal(t, Get(config.NilNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(config.LocalNetwork, true), rpc.LocalNet_RPC)
-	//assert.Equal(t, GetURL(config.DevnetNetwork, true), rpc.DevNet_RPC)
-	//assert.Equal(t, GetURL(config.MainnetNetwork, true), "https://dimensional-young-cloud.solana-mainnet.discover.quiknode.pro/a5a0fb3cfa38ab740ed634239fd502a99dbf028d/")
-	//})
-
 	t.Run("ProgramSubscribe should subscribe to consumer", func(t *testing.T) {
 		timeout := time.Second * 5
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)

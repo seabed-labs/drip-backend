@@ -1,0 +1,125 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 46
+        transfer_encoding: []
+        trailer: {}
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 84
+        uncompressed: false
+        body: |
+            {"jsonrpc":"2.0","result":{"feature-set":1775889670,"solana-core":"1.13.6"},"id":0}
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Length:
+                - "84"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 21 Apr 2023 13:32:18 GMT
+            Vary:
+                - Accept-Encoding
+            X-Host-Id:
+                - 29d1f0be
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "879099"
+            X-Ratelimit-Reset:
+                - "1682107738"
+            X-Request-Id:
+                - 1cc4e2c1-bf99-4fba-993f-8e1187fc98e9
+        status: 200 OK
+        code: 200
+        duration: 120.418ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 234
+        transfer_encoding: []
+        trailer: {}
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getTransaction","params":["5AA9RecspxtdsXVPPcj43ZnkuGQCwFBF3iDz76hKPfNvFXy5sJPGtFrFhco5f2oo4bb5WAVnutuk8JcnNB3hdNHG",{"commitment":"finalized","encoding":"base58","maxSupportedTransactionVersion":0}],"id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {"jsonrpc":"2.0","result":{"blockTime":1660976178,"meta":{"err":null,"fee":5000,"innerInstructions":[{"index":0,"instructions":[{"accounts":[17],"data":"84eT","programIdIndex":19},{"accounts":[0,4],"data":"11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL","programIdIndex":11},{"accounts":[4],"data":"P","programIdIndex":19},{"accounts":[4,17],"data":"6QrJ6BmcYQWLcVSg6Gm1ThNyZ7F6ChYc8u12RhG8KpPPA","programIdIndex":19}]},{"index":2,"instructions":[{"accounts":[5,6,1],"data":"3axL5qdEKYoR","programIdIndex":19},{"accounts":[7,9,1],"data":"6uisGWzpevBq","programIdIndex":19}]}],"loadedAddresses":{"readonly":[],"writable":[]},"logMessages":["Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL invoke [1]","Program log: Create","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: GetAccountDataSize","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 1569 of 789986 compute units","Program return: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA pQAAAAAAAAA=","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program 11111111111111111111111111111111 invoke [2]","Program 11111111111111111111111111111111 success","Program log: Initialize the associated token account","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: InitializeImmutableOwner","Program log: Please upgrade to SPL Token 2022 for immutable owner support","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 1405 of 783549 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: InitializeAccount3","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 3158 of 779667 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL consumed 23808 of 800000 compute units","Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]","Program log: Instruction: Approve","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 2902 of 776192 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk invoke [1]","Program log: Instruction: ClosePosition","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: Transfer","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4645 of 735471 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: Burn","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4743 of 727615 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk consumed 54899 of 773290 compute units","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]","Program log: Instruction: CloseAccount","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 2915 of 718391 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success"],"postBalances":[1674295574,3619200,24502112,1781760,0,2039280,2039280,2039280,1743547466,1461600,1503360,1,1280640,1503360,731913600,1141440,146540070945,152643141111,1009200,934087680],"postTokenBalances":[{"accountIndex":2,"mint":"So11111111111111111111111111111111111111112","owner":"JC5NuYudj4Dd8vFDS8re1spg3PZEZ3PZyBRef852vz5R","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"22462832","decimals":9,"uiAmount":0.022462832,"uiAmountString":"0.022462832"}},{"accountIndex":5,"mint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","owner":"2dqTZ6Q3UDQTez6HviDjXFg9BNNvCpE9mEcV92peRacj","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"102000018","decimals":6,"uiAmount":102.000018,"uiAmountString":"102.000018"}},{"accountIndex":6,"mint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","owner":"4ibRFa5k7f4nDxaaBbp8DQYAcMWPHoLSC5raCgSWXExC","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"10331908","decimals":6,"uiAmount":10.331908,"uiAmountString":"10.331908"}},{"accountIndex":7,"mint":"H94WdD3EkTadUu8HVx8YKBzs5rPVGock8jDM8wmqUmpo","owner":"4ibRFa5k7f4nDxaaBbp8DQYAcMWPHoLSC5raCgSWXExC","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"0","decimals":0,"uiAmount":null,"uiAmountString":"0"}},{"accountIndex":8,"mint":"So11111111111111111111111111111111111111112","owner":"2dqTZ6Q3UDQTez6HviDjXFg9BNNvCpE9mEcV92peRacj","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"1741508186","decimals":9,"uiAmount":1.741508186,"uiAmountString":"1.741508186"}}],"preBalances":[1674300574,3619200,24502112,1781760,0,2039280,2039280,2039280,1743547466,1461600,1503360,1,1280640,1503360,731913600,1141440,146540070945,152643141111,1009200,934087680],"preTokenBalances":[{"accountIndex":2,"mint":"So11111111111111111111111111111111111111112","owner":"JC5NuYudj4Dd8vFDS8re1spg3PZEZ3PZyBRef852vz5R","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"22462832","decimals":9,"uiAmount":0.022462832,"uiAmountString":"0.022462832"}},{"accountIndex":5,"mint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","owner":"2dqTZ6Q3UDQTez6HviDjXFg9BNNvCpE9mEcV92peRacj","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"104000018","decimals":6,"uiAmount":104.000018,"uiAmountString":"104.000018"}},{"accountIndex":6,"mint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","owner":"4ibRFa5k7f4nDxaaBbp8DQYAcMWPHoLSC5raCgSWXExC","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"8331908","decimals":6,"uiAmount":8.331908,"uiAmountString":"8.331908"}},{"accountIndex":7,"mint":"H94WdD3EkTadUu8HVx8YKBzs5rPVGock8jDM8wmqUmpo","owner":"4ibRFa5k7f4nDxaaBbp8DQYAcMWPHoLSC5raCgSWXExC","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"1","decimals":0,"uiAmount":1.0,"uiAmountString":"1"}},{"accountIndex":8,"mint":"So11111111111111111111111111111111111111112","owner":"2dqTZ6Q3UDQTez6HviDjXFg9BNNvCpE9mEcV92peRacj","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"1741508186","decimals":9,"uiAmount":1.741508186,"uiAmountString":"1.741508186"}}],"rewards":[],"status":{"Ok":null}},"slot":146791839,"transaction":["6AZ31TJnpyox1uaJzA5MTXFgcKYUYLh3D48EBhpHVFJm4hGyAhRDt7tkb7VAKgxhPKDat9dJDBkctGyZTBBXMdijjD1HmcqgifDYhvrdkFHbD3a8645jveAuqKb9ejcXXwt2n1fexAViNN2KLLSufzAn6AceDNod1GkLMradNRVECgd7TryTaxVLFs4EoAqDnqNamuCAmHyx3T7CbUBpdaqrXSb4RMFAAhbPqLbx1K3wQi8htKZjyLodErBVwSTx9PMpcRCDnnPdb8zds2TKd14ysHbKh1ctDaVmdiERpmBkhGThN8bNnHUXhjYKL2UAkJEu8DuErSC13FiABWrpgusw81fd6bptDapB8GHGSAijYhgDR7EKWUD1qRUTNEQ4U1XMiLD5PAfb4XkvAwB7McDPdXhyVeQvySGjhpvWLyNhCdaJgY6zG6rSGKYsYFAnpZGmLAtix6T5NCUFWYekb8LMCMEsdyHZhQoFAV6P2e28hFbuKJQmtAByFr8zSYZUUvxeHkMEg2HvVEFbWmH78jUUxrsgri8UvdthyB8snsu3tWpcSkuGz3PN1ZCnfWacs3rZqGHYxAd1qg6WnLvjb9zQqhAp42bCkiTJWpCuej7T8tGo5n6dTdJ2SoezE1fEUiiriQVNABceaQw7Ak4LJMrE6tXmpvAeeQZCr9oA6yJSq2AXp3ZdKBjQJStV3nANqfsGQ1tFh657wiJfRweUgbb1HC2QAPKdWv3F9yyqkgq4nv8ayTpcRy1wSZSzLifGpc2jEJoaTctYt1v2NdjZwTX4N9K5dazUnVFQPfw4eFxfhqcwZycZsdLtZPVm4Xh3DPF2DyHzs6tXyJ2hMGSYb5d4Knvx7ACYeJbzT74Wvs9Sqt7PKnbxzXTBTJTarfZeoc4HztFvX9n6Tp3Rv6rp5tDGd75HGx4Z1PF9X5WJdNGGvjPdhnGiQVt3jHyoPuVT45CCSTmtr3PrVf6Pz2tswrJHiCcrDNUsMVy8yXtzZKbrafeg5WXLyVYcb84ZuFZewjSSJoDBdLYEpQ46TFUCGTqq5DWHecCsG63gyzxnWoz2Ho6rr5qhP5aiNe3Q9m3NMPeSqwfe","base58"],"version":"legacy"},"id":0}
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 21 Apr 2023 13:32:19 GMT
+            Vary:
+                - Accept-Encoding
+            X-Host-Id:
+                - 2fdee4d8
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "879098"
+            X-Ratelimit-Reset:
+                - "1682107738"
+            X-Request-Id:
+                - e5347205-855e-4fbb-a8a0-df3dfa99bcc6
+        status: 200 OK
+        code: 200
+        duration: 46.523375ms

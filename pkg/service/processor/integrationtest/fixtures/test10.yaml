@@ -1,0 +1,125 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 46
+        transfer_encoding: []
+        trailer: {}
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getVersion","id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: 84
+        uncompressed: false
+        body: |
+            {"jsonrpc":"2.0","result":{"feature-set":1775889670,"solana-core":"1.13.6"},"id":0}
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Length:
+                - "84"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 21 Apr 2023 13:34:12 GMT
+            Vary:
+                - Accept-Encoding
+            X-Host-Id:
+                - fba34890
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "879085"
+            X-Ratelimit-Reset:
+                - "1682107738"
+            X-Request-Id:
+                - fa6e0279-2f61-4422-80e0-f61a18562671
+        status: 200 OK
+        code: 200
+        duration: 145.317417ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 234
+        transfer_encoding: []
+        trailer: {}
+        host: palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro
+        remote_addr: ""
+        request_uri: ""
+        body: '{"method":"getTransaction","params":["4TjArAvd9ESBubQV3Z1bDXahX2uu1J8a4wYTFhomB1i8Xxskzer8KpsXaJJ238edDTyKp1z8LabtxTfHeiWE2vyH",{"commitment":"finalized","encoding":"base58","maxSupportedTransactionVersion":0}],"id":0,"jsonrpc":"2.0"}'
+        form: {}
+        headers:
+            Accept:
+                - application/json
+            Content-Type:
+                - application/json
+        url: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388
+        method: POST
+      response:
+        proto: HTTP/2.0
+        proto_major: 2
+        proto_minor: 0
+        transfer_encoding: []
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: |
+            {"jsonrpc":"2.0","result":{"blockTime":1660884165,"meta":{"err":null,"fee":5000,"innerInstructions":[{"index":0,"instructions":[{"accounts":[8],"data":"84eT","programIdIndex":16},{"accounts":[0,2],"data":"11119os1e9qSs2u7TsThXqkBSRVFxhmYaFKFZ1waB2X7armDmvK3p5GmLdUxYdg3h7QSrL","programIdIndex":5},{"accounts":[2],"data":"P","programIdIndex":16},{"accounts":[2,8],"data":"6WTSdKSbqxpyNtykF4qckDdKRuiMmW4Uz42oLb9f7sgJT","programIdIndex":16}]},{"index":1,"instructions":[{"accounts":[4,2,12],"data":"3tvoqQMVLFPM","programIdIndex":16},{"accounts":[4,3,12],"data":"3RWS1zeofRo5","programIdIndex":16}]}],"loadedAddresses":{"readonly":[],"writable":[]},"logMessages":["Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL invoke [1]","Program log: Create","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: GetAccountDataSize","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 1595 of 394486 compute units","Program return: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA pQAAAAAAAAA=","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program 11111111111111111111111111111111 invoke [2]","Program 11111111111111111111111111111111 success","Program log: Initialize the associated token account","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: InitializeImmutableOwner","Program log: Please upgrade to SPL Token 2022 for immutable owner support","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 1405 of 388023 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: InitializeAccount3","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4214 of 384141 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL consumed 20390 of 400000 compute units","Program ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL success","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk invoke [1]","Program log: Instruction: WithdrawB","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: Transfer","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4645 of 349083 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]","Program log: Instruction: Transfer","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 4645 of 341227 compute units","Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk consumed 45045 of 379610 compute units","Program dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk success"],"postBalances":[985543000,1781760,2039280,2039280,2039280,1,1461600,1280640,2561600,1503360,1503360,731913600,3619200,2039280,1141440,1009200,934087680],"postTokenBalances":[{"accountIndex":2,"mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","owner":"AKjxPF53fyhYdVeiygRQjet3Qpmx6KDHM7dV6ZyJaXsV","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"6748651","decimals":8,"uiAmount":0.06748651,"uiAmountString":"0.06748651"}},{"accountIndex":3,"mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","owner":"JC5NuYudj4Dd8vFDS8re1spg3PZEZ3PZyBRef852vz5R","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"86627","decimals":8,"uiAmount":0.00086627,"uiAmountString":"0.00086627"}},{"accountIndex":4,"mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","owner":"BrkNC3vpj17h8hwDoqyYrCvEF1BqV6wNQLxP4DfhBiLb","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"11220396","decimals":8,"uiAmount":0.11220396,"uiAmountString":"0.11220396"}},{"accountIndex":13,"mint":"3iuyTA8MtGEP4aJyF266pK7Ysnye4JqFD31NBzCAgF1x","owner":"AKjxPF53fyhYdVeiygRQjet3Qpmx6KDHM7dV6ZyJaXsV","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"1","decimals":0,"uiAmount":1.0,"uiAmountString":"1"}}],"preBalances":[987587280,1781760,0,2039280,2039280,1,1461600,1280640,2561600,1503360,1503360,731913600,3619200,2039280,1141440,1009200,934087680],"preTokenBalances":[{"accountIndex":3,"mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","owner":"JC5NuYudj4Dd8vFDS8re1spg3PZEZ3PZyBRef852vz5R","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"18459","decimals":8,"uiAmount":0.00018459,"uiAmountString":"0.00018459"}},{"accountIndex":4,"mint":"7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs","owner":"BrkNC3vpj17h8hwDoqyYrCvEF1BqV6wNQLxP4DfhBiLb","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"18037215","decimals":8,"uiAmount":0.18037215,"uiAmountString":"0.18037215"}},{"accountIndex":13,"mint":"3iuyTA8MtGEP4aJyF266pK7Ysnye4JqFD31NBzCAgF1x","owner":"AKjxPF53fyhYdVeiygRQjet3Qpmx6KDHM7dV6ZyJaXsV","programId":"TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA","uiTokenAmount":{"amount":"1","decimals":0,"uiAmount":1.0,"uiAmountString":"1"}}],"rewards":[],"status":{"Ok":null}},"slot":146634888,"transaction":["QFAoNcZAPzXnuUp2z6etN4HmqaQ2rK8EWDbh8iRAjZ3AHJkSNGsdnm6KiAtPbqmnU2aAWu9JN5EyCSjXwhFhcPk2dZuusSqY35oBeXTN5WvvCXgcVfs4GrNteqBGGJKGzquscNnrQ84buxvYXt5gcHTGgxt9AiGdYCBaugQoZ2FLUYRKKqp3ZKsBDpKm6H7mUefV95HNUz1NFBDyqhHBwcnnmBW4rPtdXdcsakMdmpkcjNz8tMxiu6na7S7tYLzFs6Pco2TAM3BLhJPCH2m1KRjb8HeWRUnXcWundSuyCN468Z9U3CthrSx1vMwRYDqrmosYxWoX22FoYNx7upeZnb9WFTEBU8g4k8qWametim1YwwcKKT75e2BuGktwwiSEzVye5N7Jq46Ej6jpnowaxEZbxwdEq56xvdpQiQBCAo1Co17ZMFjuMGc1PBLUGqpXoNSEgjbwhH7AYk68yCuQSNErkuDdejQhrtxv6nmAx27ptsuKWgWftP8ZBHnQ53y2tb7AZuwbGZr6xkEovGBGSFJ2t58tCd8kPPPfXKev3NvtdDHyvaU75DybcUuw1QyvRdQcuXpYV4LHmbBMSpUzAvKcJiwxqdjppehhPffMgyRsNfivYSssaScMDsojBBXHyp49Jk4KAt9d6RKigRKzftJLz3X8CZjhm7xugVL8jwZTBvTJNsPMxatgkp6dnptAJ7ea5TP4HtfvAFMzLummkCY8wjH6Trk9RGURBpuoz7JpDGoHWk1TfC8zukS9hCnBgCmQaQPc8FeXAVSQi1coaGeKRydZXnUSnDWXnbcRPoMmnQGyytWey5VBjrRBSGrJ9Z5vqow1gvEn94FwfQmyvktxSJZGR3Sq6apcqFR2DysX9Shdf37Ja2ymXdy1Fi3RRiMxJqy6fr1jNHApAkMTJVfDQ3bwebNDA","base58"],"version":"legacy"},"id":0}
+        headers:
+            Access-Control-Allow-Credentials:
+                - "true"
+            Access-Control-Allow-Headers:
+                - Content-Type,Authorization,User-Agent,solana-client
+            Access-Control-Allow-Methods:
+                - GET, POST, OPTIONS
+            Access-Control-Allow-Origin:
+                - ""
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 21 Apr 2023 13:34:12 GMT
+            Vary:
+                - Accept-Encoding
+            X-Host-Id:
+                - b700821c
+            X-Node-Id:
+                - 08777362-575c-4584-aa42-4f09eb19af92
+            X-Ratelimit-Limit:
+                - "1000000"
+            X-Ratelimit-Remaining:
+                - "879084"
+            X-Ratelimit-Reset:
+                - "1682107738"
+            X-Request-Id:
+                - db5b866d-c9b4-4790-8fcb-b641b1a12481
+        status: 200 OK
+        code: 200
+        duration: 47.061ms

@@ -43,10 +43,9 @@ func TestIxParser(t *testing.T) {
 		ix := tx.Message.Instructions[1]
 		accounts, err := ix.ResolveInstructionAccounts(&tx.Message)
 		assert.NoError(t, err)
-		parsedIx, ixName, err := parser.MaybeParseV1DripOrcaWhirlpool(accounts, ix.Data)
+		parsedIx, err := parser.ParseV1DripOrcaWhirlpool(accounts, ix.Data)
 		assert.NoError(t, err)
 		assert.NotNil(t, parsedIx)
-		assert.Equal(t, ixName, "DripOrcaWhirlpool")
 		assert.Equal(t, parsedIx.GetDripOrcaWhirlpoolAccounts().Common.Vault.String(), "6PnzoW2Bcs6WGqYvecfSxN9C2EeDmQCjUCeFA7JDDfZG")
 		assert.Equal(t, parsedIx.GetDripOrcaWhirlpoolAccounts().Whirlpool.String(), "HJPjoWUrhoZzkNfRpHuieeFk9WcZWjwy6PBjZ81ngndJ")
 	})
@@ -68,10 +67,9 @@ func TestIxParser(t *testing.T) {
 		innerIx := innerInstructions[0].Instructions[0]
 		accounts, err := innerIx.ResolveInstructionAccounts(&tx.Message)
 		assert.NoError(t, err)
-		parsedIx, ixName, err := parser.ParseTokenTransfer(accounts, innerIx.Data)
+		parsedIx, err := parser.ParseTokenTransfer(accounts, innerIx.Data)
 		assert.NoError(t, err)
 		assert.NotNil(t, parsedIx)
-		assert.Equal(t, ixName, "Transfer")
 		assert.Equal(t, *parsedIx.Amount, uint64(0xe34))
 	})
 }
