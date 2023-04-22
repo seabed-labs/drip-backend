@@ -38,6 +38,8 @@ func GetMockMainnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConf
 	mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
 	mockConfig.EXPECT().GetDripProgramID().Return("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk").AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig.EXPECT().GetSolanaRPCURL().AnyTimes().Return("https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/")
+	mockConfig.EXPECT().GetSolanaWSURL().AnyTimes().Return("wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/")
 	return mockConfig
 }
 func GetMockDevnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConfig {
@@ -49,6 +51,8 @@ func GetMockDevnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConfi
 	mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
 	mockConfig.EXPECT().GetDripProgramID().Return("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk").AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig.EXPECT().GetSolanaRPCURL().AnyTimes().Return("https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/")
+	mockConfig.EXPECT().GetSolanaWSURL().AnyTimes().Return("wss://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/")
 	return mockConfig
 }
 
@@ -61,6 +65,9 @@ func GetMockDevnetStagingConfig(ctrl *gomock.Controller) *config.MockAppConfig {
 	mockConfig.EXPECT().GetEnvironment().Return(config.StagingEnv).AnyTimes()
 	mockConfig.EXPECT().GetDripProgramID().Return("F1NyoZsUhJzcpGyoEqpDNbUMKVvCnSXcCki1nN3ycAeo").AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
+	mockConfig.EXPECT().GetSolanaRPCURL().AnyTimes().Return("https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/")
+	mockConfig.EXPECT().GetSolanaWSURL().AnyTimes().Return("wss://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/")
+
 	return mockConfig
 }
 
