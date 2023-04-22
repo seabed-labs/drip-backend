@@ -22,6 +22,7 @@ type DepositMetric struct {
 	Referrer            *string   `gorm:"column:referrer" json:"referrer" db:"referrer"`
 	TokenADepositAmount uint64    `gorm:"column:token_a_deposit_amount;not null" json:"tokenADepositAmount" db:"token_a_deposit_amount"`
 	TokenAUsdPriceDay   *uint64   `gorm:"column:token_a_usd_price_day" json:"tokenAUsdPriceDay" db:"token_a_usd_price_day"`
+	Depositor           *string   `gorm:"column:depositor" json:"depositor" db:"depositor"`
 }
 
 // TableName DepositMetric's table name

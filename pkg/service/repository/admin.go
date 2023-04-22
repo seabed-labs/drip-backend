@@ -34,6 +34,44 @@ func (d repositoryImpl) AdminGetVaultsByTokenPairID(ctx context.Context, tokenPa
 		Find()
 }
 
+func (d repositoryImpl) GetAdminPositions(
+	ctx context.Context, isVaultEnabled *bool,
+	positionFilterParams PositionFilterParams,
+	params PaginationParams,
+) ([]*model.Position, error) {
+	stmt := d.repo.Position.WithContext(ctx)
+
+	// Apply Joins
+	if isVaultEnabled != nil {
+		stmt = stmt.Join(d.repo.Vault, d.repo.Vault.Pubkey.EqCol(d.repo.Position.Vault))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Join(d.repo.TokenAccount, d.repo.TokenAccount.Mint.EqCol(d.repo.Position.Authority))
+	}
+
+	// Apply Filters
+	if isVaultEnabled != nil {
+		stmt = stmt.Where(d.repo.Vault.Enabled.Is(*isVaultEnabled))
+	}
+	if positionFilterParams.Wallet != nil {
+		stmt = stmt.
+			Where(
+				d.repo.TokenAccount.Owner.Eq(*positionFilterParams.Wallet),
+				d.repo.TokenAccount.Amount.Gt(0))
+	}
+	if positionFilterParams.IsClosed != nil {
+		stmt = stmt.Where(d.repo.Position.IsClosed.Is(*positionFilterParams.IsClosed))
+	}
+	if params.Limit != nil {
+		stmt = stmt.Limit(*params.Limit)
+	}
+	if params.Offset != nil {
+		stmt = stmt.Offset(*params.Offset)
+	}
+	return stmt.Find()
+}
+
 func (d repositoryImpl) AdminSetVaultEnabled(ctx context.Context, vaultPubkey string, enabled bool) (*model.Vault, error) {
 	var res model.Vault
 	_, err := d.repo.Vault.

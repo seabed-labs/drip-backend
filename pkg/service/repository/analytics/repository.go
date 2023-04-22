@@ -14,6 +14,7 @@ type AnalyticsRepository interface {
 	GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error)
 
 	GetCurrentTVL(ctx context.Context) (*model.CurrentTVL, error)
+	GetUniqueDepositorCount(ctx context.Context) (int64, error)
 	GetLifeTimeDepositNormalizedToCurrentPrice(ctx context.Context) (*model.LifeTimeDeposit, error)
 	GetLifeTimeVolumeNormalizedToCurrentPrice(ctx context.Context) (*model.LifeTimeVolume, error)
 	GetLifeTimeWithdrawalNormalizedToCurrentPrice(ctx context.Context) (*model.LifeTimeWithdrawal, error)
@@ -32,6 +33,15 @@ func NewAnalyticsRepository(
 		repo: repo,
 		db:   db,
 	}
+}
+
+func (d analyticsRepositoryImpl) GetUniqueDepositorCount(ctx context.Context) (int64, error) {
+	return d.repo.
+		DepositMetric.
+		WithContext(ctx).
+		Distinct(d.repo.DepositMetric.Depositor).
+		Where(d.repo.DepositMetric.Depositor.IsNotNull()).
+		Count()
 }
 
 const tvlQuery = "select sum(token_usd_value) as total_usd_value from (select token.pubkey as token_mint, (sum(amount)*token.ui_market_price_usd)/power(10, token.decimals) as token_usd_value from vault join token_account on vault.token_a_account = token_account.pubkey join token on token_account.mint = token.pubkey where amount != 0 group by token.pubkey\nunion \nselect token.pubkey as token_mint, (sum(amount)*token.ui_market_price_usd)/power(10, token.decimals) as token_usd_value from vault join token_account on vault.token_b_account = token_account.pubkey join token on token_account.mint = token.pubkey where amount != 0 group by token.pubkey) as q1;"

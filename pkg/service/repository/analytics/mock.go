@@ -125,6 +125,21 @@ func (mr *MockAnalyticsRepositoryMockRecorder) GetLifeTimeWithdrawalNormalizedTo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLifeTimeWithdrawalNormalizedToCurrentPrice", reflect.TypeOf((*MockAnalyticsRepository)(nil).GetLifeTimeWithdrawalNormalizedToCurrentPrice), ctx)
 }
 
+// GetUniqueDepositorCount mocks base method.
+func (m *MockAnalyticsRepository) GetUniqueDepositorCount(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUniqueDepositorCount", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUniqueDepositorCount indicates an expected call of GetUniqueDepositorCount.
+func (mr *MockAnalyticsRepositoryMockRecorder) GetUniqueDepositorCount(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUniqueDepositorCount", reflect.TypeOf((*MockAnalyticsRepository)(nil).GetUniqueDepositorCount), ctx)
+}
+
 // GetWithdrawalMetricBySignature mocks base method.
 func (m *MockAnalyticsRepository) GetWithdrawalMetricBySignature(ctx context.Context, signature string) (*model.WithdrawalMetric, error) {
 	m.ctrl.T.Helper()

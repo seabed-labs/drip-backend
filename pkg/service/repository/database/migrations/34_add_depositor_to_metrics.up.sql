@@ -1,0 +1,1 @@
+ALTER TABLE deposit_metric ADD COLUMN depositor VARCHAR(255) NULL;

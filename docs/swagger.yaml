@@ -759,6 +759,8 @@ components:
         - lifeTimeUsdDeposit
         - lifeTimeUsdWithdrawal
         - lifeTimeUsdVolume
+        - activeWallets
+        - uniqueDepositors
       properties:
         usdTvl:
           type: string
@@ -772,6 +774,12 @@ components:
         lifeTimeUsdVolume:
           type: string
           description: A float 64 string for life time volume (normalized to the current usd price of assets).
+        activeWallets:
+          type: number
+          description: Number of wallets with active postions.
+        uniqueDepositors:
+          type: number
+          description: Total number of unique depositors.
 
 
     #    DATA MODELS

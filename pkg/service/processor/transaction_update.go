@@ -425,6 +425,7 @@ func (p impl) getDepositWithMetadataMetric(
 ) (*model.DepositMetric, error) {
 	var (
 		vault               string
+		depositor           string
 		referrer            *string
 		tokenADepositAmount uint64
 	)
@@ -434,6 +435,7 @@ func (p impl) getDepositWithMetadataMetric(
 			vault = parsedAccounts.Common.Vault.String()
 			referrer = pointer.ToString(parsedAccounts.Common.Referrer.String())
 			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+			depositor = parsedAccounts.Common.Depositor.String()
 		} else if err != nil {
 			return nil, err
 		}
@@ -443,6 +445,7 @@ func (p impl) getDepositWithMetadataMetric(
 			vault = parsedAccounts.Vault.String()
 			referrer = nil
 			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+			depositor = parsedAccounts.Depositor.String()
 		} else if err != nil {
 			return nil, err
 		}
@@ -457,6 +460,7 @@ func (p impl) getDepositWithMetadataMetric(
 		Vault:               vault,
 		Referrer:            referrer,
 		TokenADepositAmount: tokenADepositAmount,
+		Depositor:           pointer.ToString(depositor),
 		TokenAUsdPriceDay:   nil,
 	}
 	return metric, nil
@@ -468,6 +472,7 @@ func (p impl) getDepositMetric(
 ) (*model.DepositMetric, error) {
 	var (
 		vault               string
+		depositor           string
 		referrer            *string
 		tokenADepositAmount uint64
 	)
@@ -478,6 +483,7 @@ func (p impl) getDepositMetric(
 			vault = parsedAccounts.Common.Vault.String()
 			referrer = pointer.ToString(parsedAccounts.Common.Referrer.String())
 			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+			depositor = parsedAccounts.Common.Depositor.String()
 		} else if err != nil {
 			return nil, err
 		}
@@ -487,6 +493,7 @@ func (p impl) getDepositMetric(
 			vault = parsedAccounts.Vault.String()
 			referrer = nil
 			tokenADepositAmount = parsedIx.Params.TokenADepositAmount
+			depositor = parsedAccounts.Depositor.String()
 		} else if err != nil {
 			return nil, err
 		}
@@ -501,6 +508,7 @@ func (p impl) getDepositMetric(
 		Vault:               vault,
 		Referrer:            referrer,
 		TokenADepositAmount: tokenADepositAmount,
+		Depositor:           pointer.ToString(depositor),
 		TokenAUsdPriceDay:   nil,
 	}
 	return metric, nil
