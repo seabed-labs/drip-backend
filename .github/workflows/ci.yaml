@@ -53,6 +53,9 @@ jobs:
           skip-go-installation: true
 
   test:
+    env:
+      SOLANARPCURL: https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/
+      SOLANAWSURL: wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/
     name: Test
     runs-on: ubuntu-latest
 
