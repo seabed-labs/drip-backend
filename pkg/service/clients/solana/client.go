@@ -48,7 +48,7 @@ type Solana interface {
 	GetNetwork() config.Network
 
 	GetBlock(ctx context.Context, slot uint64) (*rpc.GetBlockResult, error)
-	GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error)
+	GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, before solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error)
 	GetTransaction(ctx context.Context, signature string) (*rpc.GetTransactionResult, error)
 }
 
@@ -65,9 +65,10 @@ type impl struct {
 	client  *rpc.Client
 }
 
-func (s impl) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
+func (s impl) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, before solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
 	return s.client.GetSignaturesForAddressWithOpts(ctx, solana.MustPublicKeyFromBase58(pubkey), &rpc.GetSignaturesForAddressOpts{
 		Until:          until,
+		Before:         before,
 		Commitment:     rpc.CommitmentFinalized,
 		MinContextSlot: minSlot,
 	})
