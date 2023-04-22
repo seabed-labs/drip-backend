@@ -8,20 +8,18 @@ import (
 	"strconv"
 	"time"
 
-	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
-	transactioncheckpointrepository "github.com/dcaf-labs/drip/pkg/service/repository/transactioncheckpoint"
-
-	"github.com/samber/lo"
-
 	solanaClient "github.com/dcaf-labs/drip/pkg/service/clients/solana"
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
+	queuerepository "github.com/dcaf-labs/drip/pkg/service/repository/queue"
+	transactioncheckpointrepository "github.com/dcaf-labs/drip/pkg/service/repository/transactioncheckpoint"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
 	"github.com/dcaf-labs/solana-go-clients/pkg/whirlpool"
 	"github.com/gagliardetto/solana-go"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 )
@@ -161,9 +159,6 @@ func (d *DripProgramProducer) BackfillProgramOwnedAccounts(ctx context.Context, 
 func (d *DripProgramProducer) pollTransactions(ctx context.Context) {
 	logrus.Info("polling transactions")
 	ticker := time.NewTicker(TXPOLLFREQUENCY)
-	if err := d.backfillTransactions(ctx); err != nil {
-		logrus.WithError(err).Error("failed to backfill")
-	}
 	for {
 		if err := d.processFromLastCheckpointSlot(ctx); err != nil {
 			logrus.WithError(err).Error("failed to produce block with retry, skipping...")
@@ -182,60 +177,23 @@ func (d *DripProgramProducer) pollTransactions(ctx context.Context) {
 func (d *DripProgramProducer) processFromLastCheckpointSlot(ctx context.Context) error {
 	checkpoint := d.txProcessingCheckpointRepo.GetLatestTransactionCheckpoint(ctx)
 	var untilSignature solana.Signature
-	minSlot := uint64(0)
+	var beforeSignature solana.Signature
 	if checkpoint != nil {
 		untilSignature = solana.MustSignatureFromBase58(checkpoint.Signature)
-		minSlot = checkpoint.Slot
 	}
-	log := logrus.WithField("minSlot", minSlot).WithField("untilSignature", untilSignature.String())
+	log := logrus.WithField("untilSignature", untilSignature.String())
 	log.Info("starting processing")
 	defer func() {
 		log.Info("done processing")
 	}()
-	txSignatures, err := d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), untilSignature, solana.Signature{}, &minSlot)
-	if err != nil {
-		log.WithError(err).Error("failed to GetSignaturesForAddress")
-		return err
-	}
-	log.WithField("len(txSignatures)", len(txSignatures))
-	log.Info("got signatures")
-	for i := range lo.Reverse(txSignatures) {
-		txSignature := txSignatures[i]
-		tx, err := d.client.GetTransaction(ctx, txSignature.Signature.String())
+	// do while loop until txSignatures is not empty
+	for {
+		txSignatures, err := d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), untilSignature, beforeSignature, nil)
 		if err != nil {
-			log.WithError(err).Error("failed to GetTransaction")
+			log.WithError(err).Error("failed to GetSignaturesForAddress")
 			return err
 		}
-		log.WithField("transactionSignature", txSignature.Signature.String()).Info("pushing tx to queue...")
-		if err := d.AddItemToTransactionUpdate(ctx, txSignature.Signature.String(), *tx); err != nil {
-			log.WithError(err).Error("failed to insert data into queue...")
-			return err
-		} else {
-			log.WithField("transactionSignature", txSignature).Info("pushed tx to queue...")
-		}
-		log.Info("updating checkpoint...")
-		if err := d.txProcessingCheckpointRepo.UpsertTransactionProcessingCheckpoint(ctx, txSignature.Slot, txSignature.Signature.String()); err != nil {
-			log.WithError(err).Error("failed to insert metadata...")
-			return err
-		}
-	}
-	return nil
-}
-
-func (d *DripProgramProducer) backfillTransactions(ctx context.Context) error {
-	logrus.Info("starting backfill")
-	defer func() {
-		logrus.Info("done backfill")
-	}()
-	before := solana.Signature{}
-	txSignatures, err := d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), solana.Signature{}, before, nil)
-	if err != nil {
-		logrus.WithError(err).Error("failed to GetSignaturesForAddress")
-		return err
-	}
-	for len(txSignatures) > 0 {
-		log := logrus.WithField("before", before.String())
-		log.WithField("len(txSignatures)", len(txSignatures))
+		log = log.WithField("len(txSignatures)", len(txSignatures))
 		log.Info("got signatures")
 		for i := range lo.Reverse(txSignatures) {
 			txSignature := txSignatures[i]
@@ -257,14 +215,13 @@ func (d *DripProgramProducer) backfillTransactions(ctx context.Context) error {
 				return err
 			}
 		}
-		before = txSignatures[0].Signature
-		txSignatures, err = d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), solana.Signature{}, before, nil)
-		if err != nil {
-			log.WithError(err).Error("failed to GetSignaturesForAddress")
-			return err
+		if len(txSignatures) > 0 {
+			beforeSignature = txSignatures[0].Signature
+			untilSignature = txSignatures[len(txSignatures)-1].Signature
+		} else {
+			break
 		}
 	}
-
 	return nil
 }
 
