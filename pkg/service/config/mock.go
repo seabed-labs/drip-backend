@@ -145,6 +145,34 @@ func (mr *MockAppConfigMockRecorder) GetShouldByPassAdminAuth() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShouldByPassAdminAuth", reflect.TypeOf((*MockAppConfig)(nil).GetShouldByPassAdminAuth))
 }
 
+// GetSolanaRPCURL mocks base method.
+func (m *MockAppConfig) GetSolanaRPCURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSolanaRPCURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetSolanaRPCURL indicates an expected call of GetSolanaRPCURL.
+func (mr *MockAppConfigMockRecorder) GetSolanaRPCURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSolanaRPCURL", reflect.TypeOf((*MockAppConfig)(nil).GetSolanaRPCURL))
+}
+
+// GetSolanaWSURL mocks base method.
+func (m *MockAppConfig) GetSolanaWSURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSolanaWSURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetSolanaWSURL indicates an expected call of GetSolanaWSURL.
+func (mr *MockAppConfigMockRecorder) GetSolanaWSURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSolanaWSURL", reflect.TypeOf((*MockAppConfig)(nil).GetSolanaWSURL))
+}
+
 // GetWalletPrivateKey mocks base method.
 func (m *MockAppConfig) GetWalletPrivateKey() string {
 	m.ctrl.T.Helper()

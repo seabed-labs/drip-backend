@@ -26,6 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const CALLSPERSECOND = 10
 const ErrNotFound = "not found"
 
 type Solana interface {
@@ -60,6 +61,8 @@ func NewSolanaClient(
 }
 
 type impl struct {
+	rpcURL  string
+	wsURL   string
 	network config.Network
 	wallet  *solana.Wallet
 	client  *rpc.Client
@@ -96,14 +99,15 @@ func (s impl) GetNetwork() config.Network {
 }
 
 func createClient(appConfig config.AppConfig, retryClientProvider api.RetryableHTTPClientProvider) (impl, error) {
-	url, callsPerSecond := GetURLWithRateLimit(appConfig.GetNetwork())
 	options := api.GetDefaultRateLimitHTTPClientOptions()
-	options.CallsPerSecond = callsPerSecond
+	options.CallsPerSecond = CALLSPERSECOND
 	opts := &jsonrpc.RPCClientOpts{
 		HTTPClient: retryClientProvider(options),
 	}
-	rpcClient := rpc.NewWithCustomRPCClient(jsonrpc.NewClientWithOpts(url, opts))
+	rpcClient := rpc.NewWithCustomRPCClient(jsonrpc.NewClientWithOpts(appConfig.GetSolanaRPCURL(), opts))
 	solanaClient := impl{
+		rpcURL:  appConfig.GetSolanaRPCURL(),
+		wsURL:   appConfig.GetSolanaWSURL(),
 		client:  rpcClient,
 		network: appConfig.GetNetwork(),
 	}
@@ -116,8 +120,8 @@ func createClient(appConfig config.AppConfig, retryClientProvider api.RetryableH
 	logrus.
 		WithFields(logrus.Fields{
 			"version":        resp.SolanaCore,
-			"url":            url,
-			"callsPerSecond": callsPerSecond,
+			"url":            solanaClient.rpcURL,
+			"callsPerSecond": CALLSPERSECOND,
 		}).
 		Info("created solana clients")
 
@@ -330,8 +334,7 @@ func (s impl) MintToWallet(
 func (s impl) ProgramSubscribe(
 	ctx context.Context, program string, onReceive func(string, []byte) error,
 ) error {
-	url := getWSURL(s.network)
-	client, err := ws.Connect(ctx, url)
+	client, err := ws.Connect(ctx, s.wsURL)
 	if err != nil {
 		return err
 	}
@@ -358,7 +361,7 @@ func (s impl) ProgramSubscribe(
 					Error("failed to get next msg from consumer ws")
 				client = nil
 				for client == nil {
-					client, err = ws.Connect(ctx, url)
+					client, err = ws.Connect(ctx, s.wsURL)
 					if err != nil {
 						logrus.
 							WithError(err).
@@ -489,40 +492,4 @@ func (s impl) signAndBroadcast(
 	logFields["txHash"] = txHash
 
 	return txHash.String(), nil
-}
-
-func GetURLWithRateLimit(env config.Network) (string, float64) {
-	switch env {
-	case config.MainnetNetwork:
-		//return rpc.MainNetBeta_RPC, 3
-		// mocha+1@dcaf.so
-		return "https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388", 10
-	case config.DevnetNetwork:
-		//return rpc.DevNet_RPC, 3
-		// mocha+2@dcaf.so
-		return "https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd", 10
-	case config.NilNetwork:
-		fallthrough
-	case config.LocalNetwork:
-		fallthrough
-	default:
-		return rpc.LocalNet_RPC, 5
-	}
-}
-
-func getWSURL(env config.Network) string {
-	switch env {
-	case config.MainnetNetwork:
-		//return rpc.MainNetBeta_WS
-		return "wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/"
-	case config.DevnetNetwork:
-		return rpc.DevNet_WS
-		//return "wss://fabled-bitter-tent.solana-devnet.quiknode.pro/ea2807069cec3658c0e16618bea5a5c9b85e0dd7"
-	case config.NilNetwork:
-		fallthrough
-	case config.LocalNetwork:
-		fallthrough
-	default:
-		return rpc.LocalNet_WS
-	}
 }

@@ -36,6 +36,8 @@ const (
 type AppConfig interface {
 	GetEnvironment() Environment
 	GetNetwork() Network
+	GetSolanaRPCURL() string
+	GetSolanaWSURL() string
 	GetDripProgramID() string
 	GetGoogleClientID() string
 	GetWalletPrivateKey() string
@@ -47,6 +49,8 @@ type AppConfig interface {
 
 type appConfig struct {
 	Environment               Environment `yaml:"environment" env:"ENV" env-default:"STAGING"`
+	SolanaRPCURL              string      `yaml:"solanaRpcUrl" env:"SOLANARPCURL" env-default:"https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
+	SolanaWSURL               string      `yaml:"solanaWsUrl" env:"SOLANAWSURL" env-default:"wss://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
 	Network                   Network     `yaml:"network" env:"NETWORK" env-default:"DEVNET"`
 	DripProgramID             string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
 	GoogleClientID            string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
@@ -63,6 +67,14 @@ func (a appConfig) GetShouldByPassAdminAuth() bool {
 
 func (a appConfig) GetEnvironment() Environment {
 	return a.Environment
+}
+
+func (a appConfig) GetSolanaRPCURL() string {
+	return a.SolanaRPCURL
+}
+
+func (a appConfig) GetSolanaWSURL() string {
+	return a.SolanaWSURL
 }
 
 func (a appConfig) GetNetwork() Network {
