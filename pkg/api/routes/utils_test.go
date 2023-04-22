@@ -337,8 +337,9 @@ func TestUtils(t *testing.T) {
 		assert.Equal(t, orcaWhirlpool.Pubkey, apiModel.Whirlpool)
 		assert.Equal(t, orcaWhirlpool.TokenVaultA, apiModel.TokenVaultA)
 		assert.Equal(t, orcaWhirlpool.TokenVaultB, apiModel.TokenVaultB)
+		assert.Equal(t, orcaWhirlpool.Oracle, apiModel.Oracle)
 		// if the line below needs to be updated, add the field assertion above
-		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 4)
+		assert.Equal(t, reflect.TypeOf(apiModel).NumField(), 5)
 
 		assert.Equal(t, vault.TokenAMint, apiModel.TokenAMint)
 		assert.Equal(t, vault.TokenBMint, apiModel.TokenBMint)

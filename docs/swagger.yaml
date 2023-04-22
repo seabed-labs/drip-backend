@@ -1002,6 +1002,7 @@ components:
             - whirlpool
             - tokenVaultA
             - tokenVaultB
+            - oracle
 
           properties:
             whirlpool:
@@ -1013,6 +1014,9 @@ components:
             tokenVaultB:
               type: string
               example: "2wMQTELEgEcK7V3gwZBH58WvGcRZsyaWNpebqyFugGKe"
+            oracle:
+              type: string
+              example: "HtXk9cvY5isaeVawiaTFUrM6AH31g2Xbrq9qVQRvJVdL"
 
     tokenAccount:
       type: object

@@ -183,6 +183,7 @@ func vaultTokenSwapToAPI(vault *model.Vault, tokenSwap *model.TokenSwap) apispec
 
 func vaultWhirlpoolToAPI(vault *model.Vault, orcaWhirlpool *model.OrcaWhirlpool) apispec.OrcaWhirlpoolConfig {
 	return apispec.OrcaWhirlpoolConfig{
+		Oracle:      orcaWhirlpool.Oracle,
 		TokenVaultA: orcaWhirlpool.TokenVaultA,
 		TokenVaultB: orcaWhirlpool.TokenVaultB,
 		Whirlpool:   orcaWhirlpool.Pubkey,
