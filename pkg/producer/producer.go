@@ -82,17 +82,17 @@ func (d *DripProgramProducer) start(ctx context.Context) error {
 	}
 
 	// In staging, we manually backfill tokenswaps and whirlpools so that we can limit the # of rows in the DB
-	if config.IsProductionEnvironment(d.environment) {
-		// Track token_swap program accounts
-		//if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToAccountUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
-		//	return err
-		//}
+	//if config.IsProductionEnvironment(d.environment) {
+	// Track token_swap program accounts
+	//if err := d.client.ProgramSubscribe(ctx, tokenswap.ProgramID.String(), d.processor.AddItemToAccountUpdateQueueCallback(ctx, tokenswap.ProgramID.String())); err != nil {
+	//	return err
+	//}
 
-		// Track orca_whirlpool program accounts
-		if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.AddItemToAccountUpdateQueueCallback(ctx, whirlpool.ProgramID.String())); err != nil {
-			return err
-		}
-	}
+	// Track orca_whirlpool program accounts
+	//if err := d.client.ProgramSubscribe(ctx, whirlpool.ProgramID.String(), d.AddItemToAccountUpdateQueueCallback(ctx, whirlpool.ProgramID.String())); err != nil {
+	//	return err
+	//}
+	//}
 	if d.shouldBackfillDripAccounts {
 		go d.backfillAccounts(ctx)
 	}

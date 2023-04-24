@@ -99,7 +99,7 @@ func (p impl) ProcessTransaction(ctx context.Context, txRaw rpc.GetTransactionRe
 		if ixName == nil {
 			continue
 		}
-		log = log.WithField("ixName", *ixName)
+		log = log.WithField("ixName", *ixName).WithField("blockTime", blockTime.String()).WithField("slot", txRaw.Slot)
 		log.Info("starting to parse ix")
 
 		switch *ixName {
