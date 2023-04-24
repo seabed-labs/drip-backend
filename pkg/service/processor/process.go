@@ -2,6 +2,7 @@ package processor
 
 import (
 	"context"
+	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/clients/coingecko"
@@ -14,7 +15,8 @@ import (
 	"github.com/gagliardetto/solana-go/rpc"
 )
 
-const processConcurrency = 10
+const processConcurrency = 50
+const POLLFREQUENCY = 100 * time.Millisecond
 
 type Processor interface {
 	UpsertProtoConfigByAddress(context.Context, string) error

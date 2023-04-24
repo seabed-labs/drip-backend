@@ -9,18 +9,16 @@ import (
 
 	"github.com/AlekSi/pointer"
 
-	api "github.com/dcaf-labs/solana-go-retryable-http-client"
-
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
-
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
+	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 	bin "github.com/gagliardetto/binary"
 	token_metadata "github.com/gagliardetto/metaplex-go/clients/token-metadata"
 	"github.com/gagliardetto/solana-go"
 	associatedtokenaccount "github.com/gagliardetto/solana-go/programs/associated-token-account"
 	"github.com/gagliardetto/solana-go/programs/token"
 	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
 	"github.com/gagliardetto/solana-go/rpc/ws"
 	"github.com/mr-tron/base58"
 	"github.com/sirupsen/logrus"
@@ -68,7 +66,13 @@ type impl struct {
 	client  *rpc.Client
 }
 
-func (s impl) GetSignaturesForAddress(ctx context.Context, pubkey string, until solana.Signature, before solana.Signature, minSlot *uint64) ([]*rpc.TransactionSignature, error) {
+func (s impl) GetSignaturesForAddress(
+	ctx context.Context,
+	pubkey string,
+	until solana.Signature,
+	before solana.Signature,
+	minSlot *uint64,
+) ([]*rpc.TransactionSignature, error) {
 	return s.client.GetSignaturesForAddressWithOpts(ctx, solana.MustPublicKeyFromBase58(pubkey), &rpc.GetSignaturesForAddressOpts{
 		Until:          until,
 		Before:         before,

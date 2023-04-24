@@ -31,23 +31,23 @@ func (p impl) ProcessTransactionUpdateQueue(ctx context.Context) {
 		go p.processTransactionUpdateQueueItemWorker(ctx, strconv.FormatInt(int64(i), 10), &wg, ch)
 	}
 
+	ticker := time.NewTicker(POLLFREQUENCY)
+
 	for {
+		queueItem, err := p.transactionUpdateQueue.PopTransactionUpdateQueueItem(ctx)
+		if err != nil && err == gorm.ErrRecordNotFound {
+		} else if err != nil {
+			logrus.WithError(err).Error("failed to fetch transaction from queue")
+		} else if queueItem == nil {
+			logrus.WithError(err).Error("failed to get next queue item")
+		} else {
+			ch <- queueItem
+		}
 		select {
+		case <-ticker.C:
+			continue
 		case <-ctx.Done():
 			return
-		default:
-			queueItem, err := p.transactionUpdateQueue.PopTransactionUpdateQueueItem(ctx)
-			if err != nil && err == gorm.ErrRecordNotFound {
-				continue
-			} else if err != nil {
-				logrus.WithError(err).Error("failed to fetch transaction from queue")
-				continue
-			} else if queueItem == nil {
-				logrus.WithError(err).Error("failed to get next queue item")
-				continue
-			} else {
-				ch <- queueItem
-			}
 		}
 	}
 }
@@ -99,7 +99,7 @@ func (p impl) ProcessTransaction(ctx context.Context, txRaw rpc.GetTransactionRe
 		if ixName == nil {
 			continue
 		}
-		log = log.WithField("ixName", *ixName)
+		log = log.WithField("ixName", *ixName).WithField("blockTime", blockTime.String()).WithField("slot", txRaw.Slot)
 		log.Info("starting to parse ix")
 
 		switch *ixName {

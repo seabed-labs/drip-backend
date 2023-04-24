@@ -45,20 +45,22 @@ type AppConfig interface {
 	GetDiscordWebhookID() string
 	GetDiscordWebhookAccessToken() string
 	GetShouldByPassAdminAuth() bool
+	GetShouldBackfillDripAccounts() bool
 }
 
 type appConfig struct {
-	Environment               Environment `yaml:"environment" env:"ENV" env-default:"STAGING"`
-	SolanaRPCURL              string      `yaml:"solanaRpcUrl" env:"SOLANARPCURL" env-default:"https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
-	SolanaWSURL               string      `yaml:"solanaWsUrl" env:"SOLANAWSURL" env-default:"wss://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
-	Network                   Network     `yaml:"network" env:"NETWORK" env-default:"DEVNET"`
-	DripProgramID             string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
-	GoogleClientID            string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
-	Wallet                    string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
-	Port                      int         `yaml:"port"        env:"PORT"`
-	DiscordWebhookID          string      `yaml:"discordWebhookID" env:"DISCORD_WEBHOOK_ID"`
-	DiscordWebhookAccessToken string      `yaml:"discordWebhookAccessToken" env:"DISCORD_ACCESS_TOKEN"`
-	ShouldByPassAdminAuth     bool        `yaml:"shouldBypassAdminAuth" env:"SHOULD_BYPASS_ADMIN_AUTH" env-default:"false"`
+	Environment                Environment `yaml:"environment" env:"ENV" env-default:"STAGING"`
+	SolanaRPCURL               string      `yaml:"solanaRpcUrl" env:"SOLANARPCURL" env-default:"https://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
+	SolanaWSURL                string      `yaml:"solanaWsUrl" env:"SOLANAWSURL" env-default:"wss://wiser-icy-bush.solana-devnet.discover.quiknode.pro/7288cc56d980336f6fc0508eb1aa73e44fd2efcd/"`
+	Network                    Network     `yaml:"network" env:"NETWORK" env-default:"DEVNET"`
+	DripProgramID              string      `yaml:"dripProgramID" env:"DRIP_PROGRAM_ID"  env-default:"dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk"`
+	GoogleClientID             string      `yaml:"googleClientID" env:"GOOGLE_CLIENT_ID"  env-default:"540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"`
+	Wallet                     string      `yaml:"wallet"      env:"DRIP_BACKEND_WALLET"`
+	Port                       int         `yaml:"port"        env:"PORT"`
+	DiscordWebhookID           string      `yaml:"discordWebhookID" env:"DISCORD_WEBHOOK_ID"`
+	DiscordWebhookAccessToken  string      `yaml:"discordWebhookAccessToken" env:"DISCORD_ACCESS_TOKEN"`
+	ShouldByPassAdminAuth      bool        `yaml:"shouldBypassAdminAuth" env:"SHOULD_BYPASS_ADMIN_AUTH" env-default:"false"`
+	ShouldBackfillDripAccounts bool        `yaml:"shouldBackfillDripAccounts" env:"SHOULD_BACKFILL_DRIP_ACCOUNTS" env-default:"true"`
 }
 
 func (a appConfig) GetShouldByPassAdminAuth() bool {
@@ -67,6 +69,10 @@ func (a appConfig) GetShouldByPassAdminAuth() bool {
 
 func (a appConfig) GetEnvironment() Environment {
 	return a.Environment
+}
+
+func (a appConfig) GetShouldBackfillDripAccounts() bool {
+	return a.ShouldBackfillDripAccounts
 }
 
 func (a appConfig) GetSolanaRPCURL() string {
@@ -182,6 +188,7 @@ func NewAppConfig() (AppConfig, error) {
 	log.
 		WithField("programID", config.DripProgramID).
 		WithField("ShouldByPassAdminAuth", config.ShouldByPassAdminAuth).
+		WithField("shouldBackfillDripAccounts", config.ShouldBackfillDripAccounts).
 		Info("set programID")
 	return config, nil
 }
