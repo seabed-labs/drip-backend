@@ -25,7 +25,7 @@ import (
 )
 
 // TXPOLLFREQUENCY how often to foll for transactions
-const TXPOLLFREQUENCY = 10 * time.Minute
+const TXPOLLFREQUENCY = 30 * time.Minute
 const backfillEvery = time.Hour * 12
 
 type DripProgramProducer struct {
@@ -36,6 +36,7 @@ type DripProgramProducer struct {
 	cancel                     context.CancelFunc
 	environment                config.Environment
 	txBackfillStartSlot        uint64
+	shouldBackfillDripAccounts bool
 }
 
 func Server(
@@ -55,6 +56,7 @@ func Server(
 		cancel:                     cancel,
 		environment:                appConfig.GetEnvironment(),
 		txBackfillStartSlot:        145626971,
+		shouldBackfillDripAccounts: appConfig.GetShouldBackfillDripAccounts(),
 	}
 	lifecycle.Append(fx.Hook{
 		OnStart: func(_ context.Context) error {
@@ -91,7 +93,9 @@ func (d *DripProgramProducer) start(ctx context.Context) error {
 			return err
 		}
 	}
-	go d.backfillAccounts(ctx)
+	if d.shouldBackfillDripAccounts {
+		go d.backfillAccounts(ctx)
+	}
 	go d.pollTransactions(ctx)
 	return nil
 }
@@ -161,7 +165,7 @@ func (d *DripProgramProducer) pollTransactions(ctx context.Context) {
 	ticker := time.NewTicker(TXPOLLFREQUENCY)
 	for {
 		if err := d.processFromLastCheckpointSlot(ctx); err != nil {
-			logrus.WithError(err).Error("failed to produce block with retry, skipping...")
+			logrus.WithError(err).Error("failed to processFromLastCheckpointSlot, retrying in the next tick...")
 		}
 		select {
 		case <-ticker.C:
@@ -182,47 +186,48 @@ func (d *DripProgramProducer) processFromLastCheckpointSlot(ctx context.Context)
 		untilSignature = solana.MustSignatureFromBase58(checkpoint.Signature)
 	}
 	log := logrus.WithField("untilSignature", untilSignature.String())
-	log.Info("starting processing")
+	log.WithField("programId", drip.ProgramID.String()).Info("starting processing")
 	defer func() {
 		log.Info("done processing")
 	}()
 	// do while loop until txSignatures is not empty
+	total := 0
 	for {
+		log = log.WithField("beforeSignature", beforeSignature.String())
 		txSignatures, err := d.client.GetSignaturesForAddress(ctx, drip.ProgramID.String(), untilSignature, beforeSignature, nil)
 		if err != nil {
 			log.WithError(err).Error("failed to GetSignaturesForAddress")
 			return err
 		}
+		total += len(txSignatures)
 		log = log.WithField("len(txSignatures)", len(txSignatures))
 		log.Info("got signatures")
-		for i := range lo.Reverse(txSignatures) {
+		// insert oldest to newest
+		txSignatures = lo.Reverse(txSignatures)
+		for i := range txSignatures {
 			txSignature := txSignatures[i]
+			txPushLog := log.WithField("transactionSignature", txSignature.Signature.String())
 			tx, err := d.client.GetTransaction(ctx, txSignature.Signature.String())
 			if err != nil {
-				log.WithError(err).Error("failed to GetTransaction")
+				txPushLog.WithError(err).Error("failed to GetTransaction")
 				return err
 			}
-			log.WithField("transactionSignature", txSignature.Signature.String()).Info("pushing tx to queue...")
 			if err := d.AddItemToTransactionUpdate(ctx, txSignature.Signature.String(), *tx); err != nil {
-				log.WithError(err).Error("failed to insert data into queue...")
+				txPushLog.WithError(err).Error("failed to insert data into queue...")
 				return err
-			} else {
-				log.WithField("transactionSignature", txSignature).Info("pushed tx to queue...")
 			}
-			log.Info("updating checkpoint...")
 			if err := d.txProcessingCheckpointRepo.UpsertTransactionProcessingCheckpoint(ctx, txSignature.Slot, txSignature.Signature.String()); err != nil {
-				log.WithError(err).Error("failed to insert metadata...")
+				txPushLog.WithError(err).Error("failed to insert metadata...")
 				return err
 			}
 		}
 		if len(txSignatures) > 0 {
 			beforeSignature = txSignatures[0].Signature
-			untilSignature = txSignatures[len(txSignatures)-1].Signature
 		} else {
-			break
+			log = log.WithField("totalSignatures", total)
+			return nil
 		}
 	}
-	return nil
 }
 
 func (d *DripProgramProducer) AddItemToAccountUpdateQueueCallback(ctx context.Context, programId string) func(string, []byte) error {

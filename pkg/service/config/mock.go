@@ -131,6 +131,20 @@ func (mr *MockAppConfigMockRecorder) GetServerPort() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetServerPort", reflect.TypeOf((*MockAppConfig)(nil).GetServerPort))
 }
 
+// GetShouldBackfillDripAccounts mocks base method.
+func (m *MockAppConfig) GetShouldBackfillDripAccounts() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetShouldBackfillDripAccounts")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// GetShouldBackfillDripAccounts indicates an expected call of GetShouldBackfillDripAccounts.
+func (mr *MockAppConfigMockRecorder) GetShouldBackfillDripAccounts() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShouldBackfillDripAccounts", reflect.TypeOf((*MockAppConfig)(nil).GetShouldBackfillDripAccounts))
+}
+
 // GetShouldByPassAdminAuth mocks base method.
 func (m *MockAppConfig) GetShouldByPassAdminAuth() bool {
 	m.ctrl.T.Helper()

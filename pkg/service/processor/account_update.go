@@ -5,6 +5,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
 	drip "github.com/dcaf-labs/solana-drip-go/pkg/v1"
@@ -30,19 +31,22 @@ func (p impl) ProcessAccountUpdateQueue(ctx context.Context) {
 		go p.processAccountUpdateQueueItemWorker(ctx, strconv.FormatInt(int64(i), 10), &wg, ch)
 	}
 
+	ticker := time.NewTicker(POLLFREQUENCY)
 	for {
+		queueItem, err := p.accountUpdateQueue.PopAccountUpdateQueueItem(ctx)
+		if err != nil && err == gorm.ErrRecordNotFound {
+		} else if err != nil {
+			logrus.WithError(err).Error("failed to fetch account from queue")
+		} else if queueItem == nil {
+			logrus.WithError(err).Error("failed to get next queue item")
+		} else {
+			ch <- queueItem
+		}
 		select {
+		case <-ticker.C:
+			continue
 		case <-ctx.Done():
 			return
-		default:
-			queueItem, err := p.accountUpdateQueue.PopAccountUpdateQueueItem(ctx)
-			if err != nil && err == gorm.ErrRecordNotFound {
-				continue
-			} else if queueItem == nil {
-				logrus.WithError(err).Error("failed to get next queue item")
-				continue
-			}
-			ch <- queueItem
 		}
 	}
 }
