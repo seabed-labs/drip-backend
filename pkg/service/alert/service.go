@@ -7,10 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/disgoorg/disgo/rest"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	"github.com/dcaf-labs/drip/pkg/service/utils"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/disgo/webhook"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/sirupsen/logrus"
@@ -29,16 +30,14 @@ func NewAlertService(
 	service := serviceImpl{}
 	if appConfig.GetDiscordWebhookID() != "" && appConfig.GetDiscordWebhookAccessToken() != "" {
 		service = serviceImpl{
-			network:                   appConfig.GetNetwork(),
-			enabled:                   true,
-			discordWebhookID:          appConfig.GetDiscordWebhookID(),
-			discordWebhookAccessToken: appConfig.GetDiscordWebhookAccessToken(),
+			network: appConfig.GetNetwork(),
+			enabled: true,
 		}
-		webhookID, err := strconv.ParseInt(service.discordWebhookID, 10, 64)
+		webhookID, err := strconv.ParseInt(appConfig.GetDiscordWebhookID(), 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		client := webhook.New(snowflake.ID(webhookID), service.discordWebhookAccessToken,
+		client := webhook.New(snowflake.ID(webhookID), appConfig.GetDiscordWebhookAccessToken(),
 			webhook.WithLogger(logrus.New()),
 			webhook.WithDefaultAllowedMentions(discord.AllowedMentions{
 				RepliedUser: false,
@@ -53,11 +52,9 @@ func NewAlertService(
 }
 
 type serviceImpl struct {
-	network                   config.Network
-	enabled                   bool
-	client                    webhook.Client
-	discordWebhookAccessToken string
-	discordWebhookID          string
+	network config.Network
+	enabled bool
+	client  webhook.Client
 }
 
 func (a serviceImpl) SendError(ctx context.Context, err error) error {
@@ -97,6 +94,7 @@ type NewPositionAlert struct {
 	NumberOfSwaps             uint64
 	Owner                     string
 	Position                  string
+	USDValue                  *float64
 }
 
 func (a serviceImpl) SendNewPositionAlert(
@@ -110,24 +108,11 @@ func (a serviceImpl) SendNewPositionAlert(
 	}
 	log.Info("attempting to send notification")
 
-	granularityStr := strconv.FormatUint(alertParams.Granularity, 10)
-	if alertParams.Granularity == 60 {
-		granularityStr = "Minutely"
-	} else if alertParams.Granularity == 3600 {
-		granularityStr = "Hourly"
-	} else if alertParams.Granularity == 86400 {
-		granularityStr = "Daily"
-	}
+	granularityStr := getGranularityString(alertParams.Granularity)
+	tokenA := utils.GetWithDefault(alertParams.TokenASymbol, alertParams.TokenAMint)
+	tokenB := utils.GetWithDefault(alertParams.TokenBSymbol, alertParams.TokenBMint)
+	usdValue := utils.GetWithDefault(alertParams.USDValue, 0)
 
-	tokenA := alertParams.TokenAMint
-	if alertParams.TokenASymbol != nil && *alertParams.TokenASymbol != "" {
-		tokenA = *alertParams.TokenASymbol
-	}
-
-	tokenB := alertParams.TokenBMint
-	if alertParams.TokenBSymbol != nil && *alertParams.TokenBSymbol != "" {
-		tokenB = *alertParams.TokenBSymbol
-	}
 	inLineTrue := utils.GetBoolPtr(true)
 	embed := discord.NewEmbedBuilder().
 		SetTitle("New Position!").
@@ -140,44 +125,46 @@ func (a serviceImpl) SendNewPositionAlert(
 			discord.EmbedField{Name: "Granularity", Value: granularityStr, Inline: inLineTrue},
 			discord.EmbedField{Name: "Drip Amount", Value: strconv.FormatFloat(alertParams.ScaledDripAmount, 'f', -1, 32), Inline: inLineTrue},
 			discord.EmbedField{Name: "Number of swaps", Value: strconv.FormatUint(alertParams.NumberOfSwaps, 10), Inline: inLineTrue},
+			discord.EmbedField{Name: "USD Value", Value: strconv.FormatFloat(usdValue, 'f', -1, 32)},
 			discord.EmbedField{Name: "Owner", Value: alertParams.Owner},
 		).
 		Build()
 	embeds := []discord.Embed{embed}
-	if alertParams.TokenAIconURL != nil && *alertParams.TokenAIconURL != "" && alertParams.TokenASymbol != nil && *alertParams.TokenASymbol != "" {
-		tokenAEmbed := discord.NewEmbedBuilder().
-			SetTitle("TokenA").
-			SetColor(int(SuccessColor)).
-			SetURL(a.getExplorerURL(alertParams.TokenAMint)).
-			SetFields(
-				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenASymbol},
-			).
-			SetEmbedFooter(&discord.EmbedFooter{
-				Text:         alertParams.TokenAMint,
-				IconURL:      *alertParams.TokenAIconURL,
-				ProxyIconURL: "",
-			}).
-			Build()
 
-		embeds = append(embeds, tokenAEmbed)
-	}
-	if alertParams.TokenBIconURL != nil && *alertParams.TokenBIconURL != "" && alertParams.TokenBSymbol != nil && *alertParams.TokenBSymbol != "" {
-		tokenBEmbed := discord.NewEmbedBuilder().
-			SetTitle("TokenB").
-			SetColor(int(SuccessColor)).
-			SetURL(a.getExplorerURL(alertParams.TokenBMint)).
-			SetFields(
-				discord.EmbedField{Name: "Symbol", Value: *alertParams.TokenBSymbol},
-			).
-			SetEmbedFooter(&discord.EmbedFooter{
-				Text:         alertParams.TokenBMint,
-				IconURL:      *alertParams.TokenBIconURL,
-				ProxyIconURL: "",
-			}).
-			Build()
-		embeds = append(embeds, tokenBEmbed)
-	}
+	tokenAEmbed := discord.NewEmbedBuilder().
+		SetURL(a.getExplorerURL(alertParams.Position)).
+		SetImage(utils.GetWithDefault(alertParams.TokenAIconURL, "https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg")).
+		Build()
+	embeds = append(embeds, tokenAEmbed)
+
+	tokenBEmbed := discord.NewEmbedBuilder().
+		SetTitle("TokenB").
+		SetColor(int(SuccessColor)).
+		SetURL(a.getExplorerURL(alertParams.Position)).
+		SetImage(utils.GetWithDefault(alertParams.TokenBIconURL, "https://pbs.twimg.com/profile_images/1512938686702403603/DDObiFjj_400x400.jpg")).
+		Build()
+	embeds = append(embeds, tokenBEmbed)
+
 	return a.send(ctx, embeds...)
+}
+func getGranularityString(granularity uint64) (granularityStr string) {
+	minuteInS := uint64(time.Minute.Seconds())
+	hourInS := uint64(time.Hour.Seconds())
+	dayInS := uint64((time.Hour * 24).Seconds())
+	if uint64(granularity/minuteInS) <= 1 {
+		granularityStr = "Every Minute"
+	} else if granularity > minuteInS && granularity < hourInS {
+		granularityStr = fmt.Sprintf("Every %d Minutes", uint64(granularity/minuteInS))
+	} else if uint64(granularity/hourInS) <= 1 {
+		granularityStr = "Every Hour"
+	} else if granularity > hourInS && granularity < dayInS {
+		granularityStr = fmt.Sprintf("Every %d Hours", uint64(granularity/hourInS))
+	} else if uint64(granularity/dayInS) <= 1 {
+		granularityStr = "Every Day"
+	} else {
+		granularityStr = fmt.Sprintf("Every %d Days", uint64(granularity/dayInS))
+	}
+	return granularityStr
 }
 
 func (a serviceImpl) send(ctx context.Context, embeds ...discord.Embed) error {
