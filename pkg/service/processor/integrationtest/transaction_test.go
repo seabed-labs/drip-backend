@@ -54,6 +54,7 @@ func Test_ProcessTransaction(t *testing.T) {
 					Time:                time.Unix(1680117259, 0),
 					Vault:               "BmJs2b1PnepHwBaiWqzuX8LywBLkbBymqj7Cpjz5WjuY",
 					Referrer:            pointer.ToString("9d1wBhpKd24y1XwqawL3WWUjw14H7JqB9jcqkrhB3eHW"),
+					Depositor:           pointer.ToString("9sH27VRjiheq9JDH3UNLkUxLjdPSms2irg7UN9H6itxG"),
 					TokenADepositAmount: uint64(200000000000),
 					TokenAUsdPriceDay:   nil,
 				})
@@ -208,6 +209,7 @@ func Test_ProcessTransaction(t *testing.T) {
 					Referrer:            nil,
 					TokenADepositAmount: uint64(100000000),
 					TokenAUsdPriceDay:   nil,
+					Depositor:           pointer.ToString("4ibRFa5k7f4nDxaaBbp8DQYAcMWPHoLSC5raCgSWXExC"),
 				})
 			})
 	})

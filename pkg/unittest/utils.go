@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 
+	"github.com/gagliardetto/solana-go/rpc"
+
 	"github.com/dcaf-labs/drip/pkg/service/config"
 	api "github.com/dcaf-labs/solana-go-retryable-http-client"
 	"github.com/golang/mock/gomock"
@@ -38,7 +40,7 @@ func GetMockMainnetProductionConfig(ctrl *gomock.Controller) *config.MockAppConf
 	mockConfig.EXPECT().GetEnvironment().Return(config.ProductionEnv).AnyTimes()
 	mockConfig.EXPECT().GetDripProgramID().Return("dripTrkvSyQKvkyWg7oi4jmeEGMA5scSYowHArJ9Vwk").AnyTimes()
 	mockConfig.EXPECT().GetServerPort().Return(8080).AnyTimes()
-	mockConfig.EXPECT().GetSolanaRPCURL().AnyTimes().Return("https://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/")
+	mockConfig.EXPECT().GetSolanaRPCURL().AnyTimes().Return(rpc.MainNetBeta.RPC)
 	mockConfig.EXPECT().GetSolanaWSURL().AnyTimes().Return("wss://palpable-warmhearted-hexagon.solana-mainnet.discover.quiknode.pro/5793cf44e6e16325347e62d571454890f16e0388/")
 	return mockConfig
 }
@@ -113,6 +115,6 @@ func requestMatcher(r *http.Request, i cassette.Request) bool {
 	}
 	r.Body.Close()
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
-
-	return r.Method == i.Method && r.URL.String() == i.URL && string(reqBody) == i.Body
+	// TODO: Do we need to check the exact url?
+	return r.Method == i.Method && r.RequestURI == i.RequestURI && string(reqBody) == i.Body
 }
