@@ -6,6 +6,8 @@ import (
 	"math"
 	"time"
 
+	"github.com/AlekSi/pointer"
+
 	"github.com/dcaf-labs/drip/pkg/service/alert"
 	"github.com/dcaf-labs/drip/pkg/service/repository"
 	"github.com/dcaf-labs/drip/pkg/service/repository/model"
@@ -128,6 +130,17 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 	scaledTokenADepositAmount := float64(position.DepositedTokenAAmount) / math.Pow(10, float64(tokenA.Decimals))
 	scaledPeriodicDripAmount := float64(position.PeriodicDripAmount) / math.Pow(10, float64(tokenA.Decimals))
 
+	usdValue := 0.0
+	if tokenA.CoinGeckoID != nil {
+		prices, err := p.coinGeckoClient.GetMarketPriceForTokens(ctx, *tokenA.CoinGeckoID)
+		if err != nil {
+			logrus.WithError(err).WithField("position", position.Pubkey).Error("failed to get position pricing")
+		}
+		if len(prices) == 1 {
+			usdValue = prices[0].CurrentPrice * scaledTokenADepositAmount
+		}
+	}
+
 	newPositionAlert := alert.NewPositionAlert{
 		TokenASymbol:              tokenA.Symbol,
 		TokenAIconURL:             tokenA.IconURL,
@@ -141,6 +154,7 @@ func (p impl) sendNewPositionAlert(ctx context.Context, positionAddr string) err
 		NumberOfSwaps:             position.NumberOfSwaps,
 		Owner:                     owner,
 		Position:                  positionAddr,
+		USDValue:                  pointer.ToFloat64(usdValue),
 	}
 
 	return p.alertService.SendNewPositionAlert(ctx, newPositionAlert)
