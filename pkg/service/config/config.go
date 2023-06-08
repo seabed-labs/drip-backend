@@ -44,6 +44,7 @@ type AppConfig interface {
 	GetServerPort() int
 	GetDiscordWebhookID() string
 	GetDiscordWebhookAccessToken() string
+	GetSlackWebhookURL() string
 	GetShouldByPassAdminAuth() bool
 	GetShouldBackfillDripAccounts() bool
 }
@@ -59,8 +60,13 @@ type appConfig struct {
 	Port                       int         `yaml:"port"        env:"PORT"`
 	DiscordWebhookID           string      `yaml:"discordWebhookID" env:"DISCORD_WEBHOOK_ID"`
 	DiscordWebhookAccessToken  string      `yaml:"discordWebhookAccessToken" env:"DISCORD_ACCESS_TOKEN"`
+	SlackWebhookURL            string      `yaml:"slackWebhookURL" env:"SLACK_WEBHOOK_URL"`
 	ShouldByPassAdminAuth      bool        `yaml:"shouldBypassAdminAuth" env:"SHOULD_BYPASS_ADMIN_AUTH" env-default:"false"`
 	ShouldBackfillDripAccounts bool        `yaml:"shouldBackfillDripAccounts" env:"SHOULD_BACKFILL_DRIP_ACCOUNTS" env-default:"true"`
+}
+
+func (a appConfig) GetSlackWebhookURL() string {
+	return a.SlackWebhookURL
 }
 
 func (a appConfig) GetShouldByPassAdminAuth() bool {

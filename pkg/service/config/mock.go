@@ -159,6 +159,20 @@ func (mr *MockAppConfigMockRecorder) GetShouldByPassAdminAuth() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShouldByPassAdminAuth", reflect.TypeOf((*MockAppConfig)(nil).GetShouldByPassAdminAuth))
 }
 
+// GetSlackWebhookURL mocks base method.
+func (m *MockAppConfig) GetSlackWebhookURL() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSlackWebhookURL")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetSlackWebhookURL indicates an expected call of GetSlackWebhookURL.
+func (mr *MockAppConfigMockRecorder) GetSlackWebhookURL() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSlackWebhookURL", reflect.TypeOf((*MockAppConfig)(nil).GetSlackWebhookURL))
+}
+
 // GetSolanaRPCURL mocks base method.
 func (m *MockAppConfig) GetSolanaRPCURL() string {
 	m.ctrl.T.Helper()

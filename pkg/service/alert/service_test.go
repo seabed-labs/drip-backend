@@ -20,29 +20,34 @@ func Test_SendNewPositionAlert(t *testing.T) {
 
 	config.LoadEnv()
 
-	t.Run("should send position alert", func(t *testing.T) {
-		webhookID, err := strconv.ParseInt(os.Getenv("DISCORD_WEBHOOK_ID"), 10, 64)
+	t.Run("should sendDiscord position alert", func(t *testing.T) {
+		discordWebhookID, err := strconv.ParseInt(os.Getenv("DISCORD_WEBHOOK_ID"), 10, 64)
 		assert.NoError(t, err)
-		accessToken := os.Getenv("DISCORD_ACCESS_TOKEN")
-		client := webhook.New(snowflake.ID(webhookID), accessToken,
+		discordAccessToken := os.Getenv("DISCORD_ACCESS_TOKEN")
+		discordClient := webhook.New(snowflake.ID(discordWebhookID), discordAccessToken,
 			webhook.WithLogger(logrus.New()),
 			webhook.WithDefaultAllowedMentions(discord.AllowedMentions{
 				RepliedUser: false,
 			}),
 		)
+
+		slackWebhookURL := os.Getenv("SLACK_WEBHOOK_URL")
+
 		newAlertService := serviceImpl{
-			network: config.MainnetNetwork,
-			enabled: true,
-			client:  client,
+			network:         config.MainnetNetwork,
+			discordClient:   &discordClient,
+			slackWebhookURL: &slackWebhookURL,
 		}
 		ctx := context.Background()
+		assert.NoError(t, newAlertService.SendInfo(ctx, "TEST", "MSG"))
+
 		assert.NoError(t,
 			newAlertService.SendNewPositionAlert(ctx, NewPositionAlert{
-				TokenASymbol:  pointer.ToString("SAMO"),
-				TokenAIconURL: pointer.ToString("https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU/logo.png"),
-				TokenAMint:    "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-				TokenBSymbol:  pointer.ToString("USDC"),
-				TokenBIconURL: pointer.ToString("https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png	"),
+				TokenASymbol:              pointer.ToString("SAMO"),
+				TokenAIconURL:             pointer.ToString("https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU/logo.png"),
+				TokenAMint:                "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+				TokenBSymbol:              pointer.ToString("USDC"),
+				TokenBIconURL:             pointer.ToString("https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png"),
 				TokenBMint:                "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
 				ScaledTokenADepositAmount: 10000,
 				ScaledDripAmount:          10,
@@ -61,43 +66,43 @@ func Test_SendNewPositionAlert(t *testing.T) {
 		}{
 			{
 				input:  10,
-				output: "Every Minute",
+				output: "every Minute",
 			},
 			{
 				input:  60,
-				output: "Every Minute",
+				output: "every Minute",
 			},
 			{
 				input:  90,
-				output: "Every Minute",
+				output: "every Minute",
 			},
 			{
 				input:  110,
-				output: "Every Minute",
+				output: "every Minute",
 			},
 			{
 				input:  120,
-				output: "Every 2 Minutes",
+				output: "every 2 Minutes",
 			},
 			{
 				input:  3600,
-				output: "Every Hour",
+				output: "every Hour",
 			},
 			{
 				input:  4000,
-				output: "Every Hour",
+				output: "every Hour",
 			},
 			{
 				input:  86400,
-				output: "Every Day",
+				output: "every Day",
 			},
 			{
 				input:  120400,
-				output: "Every Day",
+				output: "every Day",
 			},
 			{
 				input:  172800,
-				output: "Every 2 Days",
+				output: "every 2 Days",
 			},
 		}
 
