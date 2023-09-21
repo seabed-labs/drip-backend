@@ -6,7 +6,7 @@
 
 | 	            | Devnet                                                                                                                                      	 | Mainnet                                                                                                                                 	 |
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| Staging    	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/isy8.svg)](https://betteruptime.com/?utm_source=status_badge)     	 | n/a                                                                                                                                     	 |
+| Staging    	 | n/a     	                                                                                                                                     | n/a                                                                                                                                     	 |
 | Production 	 | [ ![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg) ]( https://betteruptime.com/?utm_source=status_badge ) 	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge) 	 |
 
 ## Deploy Process 
@@ -113,8 +113,8 @@ go run cmd/codegen/main.go
     PSQL_HOST="localhost"
     PSQL_SSLMODE=disable
     OUTPUT=./internal/pkg/repository/models
-    GOOGLE_KEY="540992596258-sa2h4lmtelo44tonpu9htsauk5uabdon.apps.googleusercontent.com"
-    GOOGLE_SECRET="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"
+    GOOGLE_KEY=""
+    GOOGLE_SECRET=""
     ```
 [^6]: Start the database via `docker-compose`
     `docker-compose --file ./build/docker-compose.yaml  --env-file ./.env up`
