@@ -6,7 +6,7 @@
 
 | 	            | Devnet                                                                                                                                      	 | Mainnet                                                                                                                                 	 |
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| Staging    	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/isy8.svg)](https://betteruptime.com/?utm_source=status_badge)     	 | n/a                                                                                                                                     	 |
+| Staging    	 | n/a     	                                                                                                                                     | n/a                                                                                                                                     	 |
 | Production 	 | [ ![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/g7cf.svg) ]( https://betteruptime.com/?utm_source=status_badge ) 	 | [![Better Uptime Badge](https://betteruptime.com/status-badges/v1/monitor/goyh.svg)](https://betteruptime.com/?utm_source=status_badge) 	 |
 
 ## Deploy Process 
